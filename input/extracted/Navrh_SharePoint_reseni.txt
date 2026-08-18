@@ -1,0 +1,119 @@
+Návrh SharePointového řešení pro projekt mapování procesů MPSV
+Kontext a účel
+V rámci projektu**„Úprava Organizačního řádu MPSV s využitím metod procesního řízení“** probíhá od roku 2025 mapování agend, procesů, dílčích procesů a aktivit napříč MPSV. Cílem projektu je vytvořit jednotný procesní rámec ministerstva a současně vytvořit podklady pro průběžnou revizi a budoucí úpravy Organizačního řádu MPSV. Součástí metodiky je také předpoklad vzniku elektronického centrálního rejstříku agend a procesů. [Metodika_p...y_verze1.0 | Word]
+Projekt je aktuálně realizován prostřednictvím evidenčních karet na úrovni odborů a centrálního rejstříku. Postupně dochází k mapování dalších útvarů ministerstva. Doba realizace projektu je plánována do června 2028. [Metodika_p...y_verze1.0 | Word], [Rejstřík_M...e 7.8.2026 | Excel]
+Proč vzniká digitální řešení
+Současný stav je založen převážně na:
+Excelových evidenčních kartách jednotlivých útvarů,
+centrálním rejstříku,
+ručním zpracování a konsolidaci dat.
+Počet evidovaných agend, procesů a dílčích procesů bude postupně narůstat na úroveň celého ministerstva. Současný způsob evidence bude dlouhodobě obtížně udržitelný z hlediska:
+aktualizace dat,
+vyhledávání vazeb,
+řízení změn,
+využití výstupů při úpravách organizačního řádu,
+identifikace duplicit a překryvů mezi útvary. [Metodika_p...y_verze1.0 | Word], [Rejstřík_M...e 7.8.2026 | Excel]
+Proto navrhujeme postupný přechod na centrální řešení v prostředí Microsoft 365.
+Důvody pro volbu SharePointu
+Byly zvažovány dvě hlavní varianty:
+Varianta A – Dataverse + Power Platform
+Výhody:
+robustní datový model,
+pokročilé workflow,
+auditní stopy,
+vysoká škálovatelnost.
+Nevýhody:
+dodatečné licence,
+vyšší náklady,
+složitější správa,
+vyšší nároky na uživatele.
+Varianta B – SharePoint Online
+Výhody:
+okamžitá dostupnost v prostředí M365,
+bez nutnosti dodatečných licencí,
+jednoduché ovládání,
+možnost zachovat prostředí podobné současným evidenčním kartám v Excelu,
+snadná integrace s Power Apps, Power Automate a Power BI.
+Pro aktuální fázi projektu byla vyhodnocena jako vhodnější varianta SharePoint Online, která umožní rychlé zavedení, minimální licenční náklady a vyšší míru přijetí ze strany útvarů.
+Návrh řešení
+Hlavní princip
+Uživatelé by měli nadále pracovat s rozhraním podobným stávajícím evidenčním kartám.
+Cílem není vytvářet složitou databázovou aplikaci, ale přehledný centrální rejstřík.
+Každý řádek představuje jednu aktivitu a její vazbu na:
+agendu,
+proces,
+dílčí proces,
+vykonávající útvar.
+Navrhovaná struktura seznamu
+--- TABULKA ---
+Pole | Obsah
+Agenda | Název agendy
+Vlastník agendy | Sekce
+Proces | Název procesu
+Vlastník procesu | Odbor
+Dílčí proces | Název dílčího procesu
+Vlastník dílčího procesu | Odbor
+Aktivita | Název aktivity
+Vykonává útvar | Oddělení
+Spolupracuje | spolupracující útvary
+Vnitřní předpis | vazba na interní předpis
+Text pro OŘ | budoucí generování OŘ
+Datum aktualizace | evidence změn
+Stav | pracovní / schváleno
+--- /TABULKA ---
+Požadované funkcionality
+Filtrování
+Možnost filtrovat například podle:
+sekce,
+odboru,
+oddělení,
+agendy,
+procesu,
+dílčího procesu.
+Export dat
+export do Excelu,
+export vybraných dat.
+Vyhledávání
+Vyhledávání nad:
+agendami,
+procesy,
+dílčími procesy,
+aktivitami.
+Verze
+Požadujeme zapnout standardní SharePoint verzování.
+Budoucí rozvoj
+Řešení má být od začátku navrženo tak, aby bylo možné v budoucnu bez zásadních změn přejít na robustnější datový model.
+Směr po dokončení mapování
+Po dokončení mapování procesů celého ministerstva (předpoklad 06/2028) plánujeme zvážit:
+1. Automatizovanou tvorbu podkladů pro Organizační řád
+Aktivity představují nejnižší úroveň procesního modelu a současně odpovídají činnostem uváděným v organizačním řádu. Metodika přímo předpokládá využití výstupů mapování při úpravách OŘ. [Metodika_p...y_verze1.0 | Word]
+2. Power Apps
+Vytvoření uživatelské aplikace pro:
+správu dat,
+schvalování změn,
+práci sekčních správců procesního rámce.
+3. Power Automate
+Automatizace:
+schvalování změn,
+notifikací,
+generování výstupů.
+4. Power BI
+Vizualizace:
+procesních map,
+vazeb mezi útvary,
+přehledů agend,
+identifikace duplicit.
+5. Copilot / AI
+Do budoucna využití Copilot funkcionalit nad rejstříkem, např.:
+vyhledávání odpovědností útvarů,
+vyhledávání procesů,
+návrhy změn OŘ,
+analýza překryvů kompetencí.
+Požadavek na návrh
+Prosíme o návrh SharePointového řešení, které:
+bude pro uživatele co nejvíce připomínat současnou práci s evidenčními kartami,
+umožní postupné doplňování dat do roku 2028,
+nebude vyžadovat dodatečné licence,
+umožní následné napojení na Power Apps, Power Automate a Power BI,
+bude možné v budoucnu podle potřeby migrovat do Dataverse bez ztráty dat a logiky evidence.
+Takové řešení vnímáme jako vhodný mezikrok mezi současnou evidencí v Excelu a budoucím centrálním katalogem agend, procesů a působností MPSV.

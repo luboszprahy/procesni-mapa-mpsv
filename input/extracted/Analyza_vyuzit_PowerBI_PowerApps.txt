@@ -1,0 +1,56 @@
+Udělala jsem si na sharepoint seznam agendy procesy dílčí procesy a aktivity a chtěla bych aby mi nějaký nástroj pomohl z toho třeba automaticky vytvořit mapu procesu ale tak abych si to pořád nemusela generovat ale aby jsem to měla stále před očima někde a když změním něco v tom sharepointu tak aby se mi to propsalo
+To, co popisujete, je skvělý způsob řízení procesů. Aby se mapa procesu generovala sama a byla stále na očích bez ručního přegenerovávání, existují v prostředí Microsoft 365 dvě nejrozšířenější a nejsnadnější cesty.
+Obě možnosti fungují tak, že si diagram nebo strom vložíte přímo na SharePoint stránku (přes tzv. Web Part / Webovou část). Kdykoliv vy nebo někdo jiný změní data v seznamu, mapa se při načtení stránky automaticky aktualizuje.
+Možnost 1: Power BI – Vizuál „Strom rozkladu“ (Doporučeno)
+Pokud máte strukturu Agenda $\rightarrow$ Proces $\rightarrow$ Dílčí proces $\rightarrow$ Aktivita, nejjednodušší a nejefektivnější cesta je vytvořit z vaší SharePoint složky sestavu v Power BI a tu vložit na SharePoint stránku.
+Jak to funguje:
+Propojení: V Power BI Desktop se připojíte k vašemu SharePoint seznamu jako k datovému zdroji.
+Vizuál: Použijete vestavěný vizuál Strom rozkladu (Decomposition Tree) nebo vizuál Matice / Hierarchie. Do pole rozkladu postupně přetáhnete sloupce: Agenda, Proces, Dílčí proces, Aktivita.
+Publikace: Sestavu publikujete do Power BI Service a nastavíte plánované plánované obnovování dat (případně se data obnoví při načtení).
+Zobrazení na SharePointu: Na stránku SharePointu přidáte webovou část Power BI a vložíte odkaz na tuto sestavu.
+Výhody:
+Interaktivita: Uživatelé si mohou strom dynamicky rozklikávat a sbalovat podle toho, co je právě zajímá.
+Není potřeba speciální grafika: Strom rozkladu se vykresluje a rovná zcela sám na základě dat v tabulce.
+Žádné ruční kreslení: Přibude-li nový proces nebo aktivita, prostě se objeví ve stromu.
+Možnost 2: Microsoft Visio s propojením na data (Data Linking)
+Pokud chcete mít procesní mapu zobrazenou jako klasický vývojový diagram (s krabičkami a šipkami), můžete použít propojení Microsoft Visio se SharePoint seznamem.
+Jak to funguje:
+Propojení dat ve Visio: Ve Visio (vyžaduje licenci Visio Plan 2) vytvoříte nový diagram a pomocí funkce Data $\rightarrow$ Propojit data s obrazci vybrané krabičky napojíte na řádky ze SharePoint seznamu.
+Uložení na SharePoint: Soubor Visio uložíte do knihovny dokumentů na stejném SharePointu.
+Zobrazení na SharePointu: Na hlavní stránku SharePointu přidáte webovou část Prohlížeč Visio (Visio Viewer) a nastavíte ji tak, aby zobrazovala váš uložený diagram.
+Výhody a nevýhody:
+Výhoda: Vypadá jako klasický grafický vývojový diagram.
+Nevýhoda: Pokud přidáte úplně nový procesní krok, musíte ve Visio přidat novou krabičku a napojit ji. Data v existujících krabičkách (názvy, stavy, odpovědné osoby) se ale aktualizují automaticky podle SharePointu.
+Možnost 3: Power Apps (Canvas App vnořená do stránky)
+Pokud chcete čistě vnitrofiremní aplikaci bez Power BI nebo Visia, můžete z vašeho SharePoint seznamu jedním kliknutím vytvořit Power Apps aplikaci:
+V aplikaci použijete prvek typu Gallery (Galerie) zanořený do sebe nebo prvek Tree View (stromové zobrazení).
+Aplikaci následně vložíte pomocí webové části Power Apps přímo na SharePoint stránku.
+Výhoda: Změny v SharePoint seznamu se propisují v reálném čase (okamžitě bez prodlevy na obnovení dat).
+Shrnutí a doporučení
+--- TABULKA ---
+Nástroj | Nejlepší pro... | Automatické přirovnání nových kroků | Náročnost na přípravu
+Power BI (Strom rozkladu) | Rychlé, přehledné a interaktivní stromové rozbalování | Ano (zcela automaticky) | Nízká
+Microsoft Visio | Vizuální grafické schémata (vývojové diagramy) | Částečně (připojuje se na existující tvary) | Střední
+Power Apps | Zobrazení v reálném čase i s možností editace | Ano (podle nastavení galerií) | Střední až vyšší
+--- /TABULKA ---
+Doporučený postup: Zkuste nejprve Power BI se Stromem rozkladu. Je to nejrychlejší cesta, jak mít strukturu Agenda $\rightarrow$ Proces $\rightarrow$ Dílčí proces $\rightarrow$ Aktivita okamžitě viditelnou přímo na SharePointu bez nutnosti kreslit jakékoliv grafické prsymboly.
+A mohu si udělat nejdřív to power bi a pak i tu powerappku
+Ano, určitě můžete – a v praxi je to dokonce častý a velmi efektivní postup! Oba nástroje se navíc skvěle doplňují.
+Největší výhoda spočívá v tom, že zdrojem dat zůstává váš SharePoint seznam. Nemusíte tedy nic předělávat ani data nikam stěhovat.
+Jak tento postup funguje v praxi?
+1. Krok: Začnete s Power BI (Sestava pro prohlížení)
+Připojíte Power BI k vašemu SharePoint seznamu.
+Vytvoříte si přehledný Strom rozkladu (nebo jiný vizuál) a vložíte ho na SharePoint stránku.
+Výsledek: Všichni na SharePointu hned vidí aktuální strukturu agend a procesů v přehledném stromu.
+2. Krok: Přidáte Power Apps (Aplikace pro zadávání a úpravy)
+Až budete mít čas nebo potřebu procesy snadněji upravovat, vytvoříte nad stejným SharePoint seznamem Power Apps aplikaci.
+Místo toho, aby lidé upravovali přímo SharePoint tabulku (což bývá nepřehledné a náchylné k chybám), budou data zadávat přes přehledný formulář v Power Apps.
+V aplikaci můžete nastavit např. rozevírací seznamy (aby se nechybovalo v názvech agend), povinná pole nebo schvalování.
+Super-trik: Propojení obou nástrojů do jednoho celku
+Tyto dva nástroje můžete na SharePointu využít třemi způsoby:
+Vedle sebe na SharePoint stránce: Na horní část stránky dáte webovou část Power BI (pro rychlý vizuální přehled) a pod ni webovou část Power Apps (pro přidání nového procesu nebo úpravu stávajícího).
+Power Apps přímo UVNITŘ Power BI: Do sestavy v Power BI lze vložit speciální vizuál Power Apps. Když pak v Power BI kliknete na konkrétní proces ve stromu, vnořená Power Appka se automaticky vyfiltruje na tento proces a umožní vám ho rovnou upravit.
+Power BI UVNITŘ Power Apps: Nebo naopak – vytvoříte kompletní aplikaci v Power Apps a do jedné z jejích záložek vnoříte Power BI graf.
+Jak vypadá tok dat:
+[ Uživatel upraví proces v Power Apps ] ──> [ Zapíše se do SharePoint seznamu ] ──> [ Načte se v Power BI stromu ]
+Doporučuji tedy začít s Power BI, kde budete mít funkční stromovou mapu hotovou za chvíli, a až budete chtít procesy i pohodlně spravovat, přidat k tomu Power Apps.

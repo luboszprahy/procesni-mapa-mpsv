@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+
+# Office dočasné soubory
+~$*
+
+# Lokální / dočasné
+*.log
+.venv/

@@ -1,0 +1,128 @@
+METODIKA PRO PRÁCI S PROCESY
+Projekt: Úprava Organizačního řádu MPSV s využitím metod procesního řízení
+Identifikační údaje dokumentu
+--- TABULKA ---
+Název organizace | Ministerstvo práce a sociálních věcí
+Odpovědný útvar | Sekce státního tajemníka /3/ ve spolupráci s odborem interního auditu a kontroly /12
+Autor dokumentu | Ing. Tereza Schörnichová
+Název dokumentu | Metodika pro práci s procesy
+Projekt | Úprava Organizačního řádu MPSV s využitím metod procesního řízení
+Verze dokumentu | 1.0
+Počet stran | 7
+Datum vytvoření finální verze | 09. 10. 2025
+Datum účinnosti od | 09. 10. 2025
+--- /TABULKA ---
+1. Úvod a účel metodiky
+Tato metodika slouží jako praktický nástroj pro projektový a realizační tým projektu k zavedení jednotného přístupu v rámci řízení procesů v Ministerstva práce a sociálních věcí (dále jen MPSV, bez podřízených organizací). Jejím cílem je vytvořit systémový, jednotný a efektivní rámec pro řízení činností ministerstva optikou procesního řízení. Metodika stanovuje jednotný jazyk a strukturu pro popis a evidenci agend, procesů, dílčích procesů a aktivit, čímž umožňuje jejich přehledné zmapování, identifikaci případných duplicit a poskytuje podklady pro revizi a úpravu Organizačního řádu MPSV (dále také OŘ). Výstupem metodiky je návrh postupu práce s procesy v jednotné struktuře, která je přenositelná a podporovaná aplikačním nástrojem. Metodika zároveň vytváří předpoklady pro dlouhodobý přínos v podobě optimalizace a pravidelného přezkoumávání nastavených agend a procesů.
+Tato metodika bude doplňována na základě zkušeností útvarů, požadavků z projektového řízení a vývoje nástrojů pro digitální podporu procesního řízení.
+2. Definice základních pojmů
+Agenda
+Je oblast činnosti stanovená zákonem nebo vnitřním předpisem úřadu. Na úrovni ministerstva představuje klíčové oblasti, které útvar spravuje a za které nese odpovědnost. Agenda zpravidla zahrnuje více procesů, které zajišťují její výkon.
+Proces
+Je klíčový tok činností v rámci agendy, který má jasně definovaný vstup a výstup, má jednoznačně vymezený počátek a konec a je zaměřen na dosažení konkrétního výsledku. Proces má určitou strukturu, může zahrnovat více dílčích procesů a je popsán ve standardizované podobě včetně právního rámce. V prostředí MPSV proces může propojit více odborů nebo útvarů. Každý proces je přiřazen ke konkrétní agendě.
+Dílčí proces
+Je konkrétní popsaný úsek v rámci procesu, který realizuje část výkonu agendy. Má vlastní specifické vstupy a výstupy a často i odlišný postup nebo odpovědnost. Umožňuje detailnější zachycení struktury hlavního procesu a jeho řízení. Dílčí procesy podporují systematické mapování, umožňují lepší porozumění jednotlivým částem procesu a napomáhají efektivnímu rozdělení kompetencí a usnadňují revize.
+Aktivita
+Detailní popis jednotlivých činností v rámci dílčího procesu a je uvedena v popisu působností jednotlivých útvarů ministerstva v organizačním řádu. Jedná se o konkrétní úkony operativní úrovně, které jsou součástí běžného chodu procesu/dílčího procesu.   Aktivity tvoří nejnižší úroveň popisu a slouží pro vnitřní potřebu při tvorbě šablon, standardizaci a interní metodickou podporu a zároveň pro popis náplně útvarů v organizačním řádu. Přesná identifikace aktivit napomáhá zajištění jednotného postupu a přehlednosti. Aktivita může být součástí jednoho nebo více dílčích procesů, v závislosti na struktuře agendy.
+Vlastník agendy
+Je útvar, který odpovídá za celkový výkon agendy, její správnost, aktuálnost a výsledky. Koordinuje procesy a dílčí procesy v rámci agendy a zajišťuje jejich správné přiřazení i vazby v rámci organizační struktury.
+Vlastník procesu
+Je útvar, který odpovídá za řízení a správnost daného procesu v rámci agendy. Zajišťuje, aby proces dosahoval stanovených cílů, byl v souladu s právním rámcem a byl pravidelně aktualizován. Koordinuje činnosti mezi zapojenými útvary a nese odpovědnost za celkový výsledek procesu.
+Vlastník dílčího procesu
+Je odpovědný útvar, který zajišťuje správnost a efektivní provádění konkrétní části procesu. Sleduje průběh dílčího procesu, dohlíží na kvalitu a správné přiřazení aktivit a poskytuje vstupy pro aktualizaci procesních popisů a evidenčních karet. Vlastník dílčího procesu je podřízen vlastníku procesu.
+Aktivity – vykonává útvar
+Aktivita je konkrétní činnost prováděná na operativní úrovni. Za její realizaci vždy odpovídá konkrétní útvar, který ji má uvedenou v organizačním řádu. Útvar zajišťuje, aby aktivita byla prováděna jednotným způsobem, v souladu s legislativními a interními předpisy a v návaznosti na odpovědný proces nebo dílčí proces.
+Správce procesního rámce
+Zajišťuje jednotné uplatňování této metodiky v rámci ministerstva, koordinuje její aktualizaci a dohlíží na správnost a úplnost procesních popisů napříč útvary. Zabezpečuje metodické vedení, podporu pro zapojené útvary a propojuje obsahovou správu procesů s nástroji určenými k jejich evidenci.
+Správce procesního rámce:
+zajišťuje jednotné uplatnění metodiky napříč útvary,
+je kontaktní osobou pro metodickou podporu,
+koordinuje revize procesních popisů a udržuje jejich konzistenci,
+spolupracuje s útvary při aktualizaci rejstříku,
+vykonává roli hlavního metodického garanta nástroje pro evidenci agend a procesů a určuje pravidla jeho používání v praxi.
+Tato role odpovídá v jiných sektorech roli „manažera designu organizace“.
+Sekční správce procesního rámce
+Sekční správce procesního rámce je kontaktní osobou pro procesní řízení v rámci jedné sekce ministerstva:
+zajišťuje, aby útvary sekce uplatňovaly metodiku jednotným způsobem,
+koordinuje realizační týmy útvarů v sekci a propojuje jejich výstupy s projektovým týmem,
+odpovídá za to, že údaje o agendách, procesech, dílčích procesech a aktivitách jsou včas a správně zaneseny do evidenčních karet,
+sleduje návaznost procesů mezi útvary v rámci sekce a upozorňuje na duplicity či nesoulady,
+poskytuje metodickou podporu realizačním týmům a je jejich prvním kontaktním místem pro dotazy,
+spolupracuje s hlavním správcem procesního rámce při revizi údajů, schvalování výstupů a aktualizaci metodického rámce.
+Tato role vytváří meziúroveň mezi hlavním správcem procesního rámce a vlastníky agend, procesů, dílčích procesů a aktivit v jednotlivých útvarech.
+Evidenční karta
+Slouží k jednotnému a přehlednému zaznamenání klíčových informací o agendách, procesech, dílčích procesech a aktivitách nastavených na úrovni odboru. Karta slouží jako nástroj pro řízenou evidenci a revizi procesů, podporuje přehlednost, odhalení duplicit a optimalizaci výkonu agend ministerstva s využitím metod procesního řízení.
+Základní hierarchie je následující:
+Agenda je nejvyšší jednotkou, která představuje věcně vymezenou oblast odpovědnosti útvaru.
+Proces tuto agendu realizuje jako celek prostřednictvím jasně definovaného sledu činností.
+Dílčí procesy pak představují konkrétní části procesu s vlastním průběhem, výstupy a odpovědnostmi.
+Aktivity tvoří nejnižší úroveň, představují konkrétní činnosti vykonávané útvarem, jak jsou uvedeny v organizačním řádu. Jsou přiřazeny k dílčím procesům a zajišťují jejich praktickou realizaci.
+Identifikační kód
+Slouží k jednoznačnému označení agendy, procesu, dílčího procesu a aktivity a představuje jejich unikátní identifikátor v rámci evidence. Jeho účelem je zajistit přehlednost, konzistenci a snadnou správu všech evidovaných prvků v rejstříku. Každá část kódu je samostatně definována. Vlastník není součástí samotného kódu, ale je evidován samostatně, aby bylo možné tento údaj flexibilně upravovat při organizačních změnách. Technické provedení systému kódování bude přizpůsobeno možnostem softwarové aplikace používané pro evidenci agend a procesů.
+Rejstřík agend a procesů
+Je elektronický centrální nástroj pro evidenci všech schválených agend, procesů, dílčích procesů a aktivit.
+3. Jednotný postup prací
+Sestavení realizačního týmu útvaru
+Vypracování plánu práce útvaru
+Identifikace agend, procesů, dílčích procesů a aktivit
+Zmapování klíčových agend, procesů, dílčích procesů a aktivit
+Určení vlastníků agend, procesů, dílčích procesů a útvarů vykonávajících aktivity
+Vyplnění evidenčních karet
+Přidělení identifikačních kódů
+Zanesení údajů do rejstříku agend a procesů
+Úprava příslušné části organizačního řádu útvaru
+4. Jak navrhnout proces?
+Pro návrh nového nebo revizi stávajícího procesu doporučujeme využít následující čtyř krokový rámec:
+Potřeba – Jaké potřeby nebo požadavky vyplývají z legislativy, úkolů vlády, vedení úřadu, zaměstnanců nebo veřejnosti? Jaké jsou očekávané dopady nebo cíle?
+Výsledek / služba – Jaký konkrétní výstup, rozhodnutí, činnost nebo službu má ministerstvo dodat, aby naplnilo uvedené potřeby? Jaký je účel?
+Proces – Jakým způsobem bude výstup zajištěn? Jaké kroky, odpovědnosti a vazby mezi útvary jsou potřebné?
+Zdroje – Co všechno je k zajištění procesu potřeba (lidé, systémy, podklady, čas, finance)? Jaké jsou limity a dostupné kapacity?
+5. Struktura evidenční karty
+Evidenční karta představuje přehled agend, procesů, dílčích procesů a aktivit na úrovni odboru. Zachycuje logiku a strukturu činností odboru ve vazbě na agendy, procesy a dílčí procesy.
+Struktura je následující:
+Název agendy – jednoznačný, výstižný
+Vlastník agendy – odpovědný útvar
+Název procesu – jednoznačný, výstižný
+Vlastník procesu – odpovědný útvar
+Název dílčího procesu – který je podřazen procesu
+Vlastník dílčího procesu – odpovědný útvar
+Název aktivity – která je podřazena dílčímu procesu
+Vykonává útvar – identifikace útvaru, který aktivitu vykonává – odpovědný útvar
+Spolupracuje – útvary, které se podílejí na realizaci činností nebo poskytují součinnost.
+Vnitřní předpisy – konkrétní interní normy a dokumenty MPSV, které upravují výkon agendy, procesů, dílčích procesů či aktivit.
+6. Práce s rejstříkem agend a procesů
+Rejstřík agend a procesů je elektronický centrální nástroj pro evidenci všech schválených agend, procesů, dílčích procesů a aktivit. Obsahuje základní údaje jako název, kód, úroveň, vlastníka, vykonávající útvar, datum poslední aktualizace a vazby na organizační řád.
+Práce s rejstříkem zahrnuje:
+Založení nového záznamu na základě schválené evidenční karty
+Pravidelnou aktualizaci údajů
+Schvalování verzí a sledování historie změn
+Využívání rejstříku jako podkladu pro revize OŘ
+7. Identifikační kód
+Kódování bude rozděleno podle následující struktury AA-BB-CCC-DDDD:
+AA – kód agendy
+BB – kód procesu v rámci agendy
+CCC – kód dílčího procesu v rámci procesu
+DDDD – kód aktivity v rámci dílčího procesu
+Každý z těchto prvků bude mít samostatnou identifikaci. Konkrétní útvar (vlastník) nebude součástí kódu, ale bude veden samostatně v evidenci, aby bylo možné tento údaj flexibilně revidovat při organizačních změnách. Přesné technické provedení bude záviset na možnostech softwarové aplikace, která bude k evidenci procesů a agend využita.
+8. Pravidla evidence
+Evidence agend, procesů, dílčích procesů a aktivit musí být prováděna jednotným způsobem v souladu s touto metodikou. Slouží k zajištění konzistence, přehlednosti a aktualizovatelnosti všech údajů, které tvoří základ pro revize organizačního řádu a další optimalizaci výkonu činností.Každá agenda, proces, dílčí proces a aktivita musí být evidována v centrálním rejstříku agend a procesů. Evidence podléhá pravidlům číslování, schvalování a verzování. Využívá se k tomu jednotná struktura evidenční karty a digitální nástroj, jehož správa je svěřena Správci procesního rámce.
+Každá agenda, proces, dílčí proces a aktivita musí být evidovány v rejstříku agend a procesů, a to ve schválené podobě.
+Rejstřík je doplňován průběžně v souladu s postupem mapování, revizí nebo návrhem nového procesu.
+Každý záznam obsahuje minimálně tyto údaje: název, kód, úroveň (agenda/proces/dílčí proces/aktivita), vlastník/vykonává útvar, datum aktualizace a vazbu na organizační strukturu.
+Změny v evidovaných procesech musí být verzovány a schvalovány odpovědnou osobou podle stanovených kompetencí.
+Pro každý nový záznam se využívá evidenční karta, která slouží jako vstupní podklad pro zanesení do rejstříku.
+Při zápisu se používá jednotný systém číslování a označování, popsaný v kapitole Identifikační kód.
+Za správnost údajů odpovídá útvar – Sekční správce procesního rámce, ve spolupráci se Správcem procesního rámce.
+9. Postup pro zanášení informací do organizačního řádu (aktivity)
+Výstupem z procesního mapování je návrh na úpravu organizačního řádu.
+Postup:
+Popis agend, procesů, dílčích procesů a aktivit ve schválených šablonách
+Validace výstupů projektovým týmem
+Doplnění údajů do návrhu změn OŘ
+Zařazení do revize OŘ podle pravidel úřadu
+10. Doporučení k implementaci
+Zaškolení týmů a metodiků
+Využití pilotních výstupů jako vzorů
+Digitalizace šablon a správa rejstříku v IS
+Pravidelné revize procesů (1× ročně)
+Propojení s nástroji kvality a interní kontrolou
