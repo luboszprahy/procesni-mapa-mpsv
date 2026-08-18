@@ -63,13 +63,44 @@ viz/              grafické výstupy (HTML mapy, obrázky)
 
 ## Příkazy
 
-Extrakce textu z podkladů (Windows, PowerShell — nutné UTF-8 na stdout):
+Windows / PowerShell — před spuštěním nastav UTF-8 na stdout:
 
 ```powershell
 $env:PYTHONIOENCODING = "utf-8"
+
+# 1) podklady -> normalizovaný model + report kvality dat
+python src
+ormalize.py                      # -> runs
+ormalize\ (*.csv, model.json, report.md)
+
+# 2) model -> interaktivní HTML mapa (šablona + zapečená data)
+python srcuild_mapa.py                     # -> viz\mapa_prototyp.html
+
+# 3) anonymizace pro vývoj v cizím tenantu (PPF)
+python srcnonymize.py                      # -> runsnonympython srcuild_mapa.py --model runsnonym\model.json --out viz\mapa_dev_anonym.html
+
+# pomocné: výpis obsahu podkladů
 python src\dump_docx.py "input\Metodika_pro_praci_s_procesy_verze1.0.docx"
 python src\dump_xlsx.py "input\VZOR_Evidenční karta _ S 3_varianta 17.7.2026.xlsx" 200
 ```
+
+Prohlédnutí HTML v prohlížeči: `file://` bývá blokované, spusť
+`python -m http.server 8765 --bind 127.0.0.1` a otevři
+`http://127.0.0.1:8765/viz/mapa_prototyp.html`.
+
+## Datový model (implementovaný)
+
+| Tabulka | Klíč | Obsah |
+|---|---|---|
+| `agendy` | `AA` | 7 agend z rejstříku |
+| `procesy` | `AA-BB` | 46 procesů, vazba na agendu |
+| `dilci_procesy` | `AA-BB-CCC` | 250 dílčích procesů, stav využitý/nevyužitý z barvy v rejstříku |
+| `aktivity` | `AA-BB-CCC-DDDD` | aktivity z evidenčních karet, vykonává útvar, spolupracuje, předpis |
+| `aktivita_dilciproces` | — | **vazební tabulka M:N** (aktivita může patřit do více dílčích procesů) |
+
+Číselník agend/procesů/dílčích procesů pochází z **rejstříku**, aktivity z **evidenčních
+karet**. Karta sekce 3 se s rejstříkem shodla na 45 ze 46 dílčích procesů — parsování
+obou zdrojů se tím navzájem ověřuje.
 
 Skripty se spouštějí **z kořene projektu**, cesty k `input/`, `runs/`, `viz/`
 jsou relativní. Závislosti: Python 3.14, `openpyxl` (docx se parsuje přes

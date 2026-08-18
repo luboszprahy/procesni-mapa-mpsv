@@ -1,0 +1,45 @@
+{
+ "utvary": {
+  "3": "7",
+  "33": "71",
+  "331": "711",
+  "332": "712",
+  "11": "72",
+  "111": "721",
+  "113": "723",
+  "12": "73",
+  "6": "74",
+  "4": "75"
+ },
+ "predpisy": {
+  "SP 10/2021": "VP 01/2015",
+  "SP 13/2025": "VP 02/2016",
+  "SP 7/2019": "VP 03/2017",
+  "SP 2/2024": "VP 04/2018",
+  "SP 7/2021": "VP 05/2019",
+  "PM 52/2019": "VP 06/2020",
+  "MP ST 2/2022": "VP 07/2021",
+  "PM 13/2023": "VP 08/2022",
+  "SP 5/2023": "VP 09/2023",
+  "PM 42/2016": "VP 10/2024",
+  "PM 20/2018": "VP 11/2015",
+  "PM 4/2021": "VP 12/2016"
+ },
+ "tokeny": {
+  "\\bMPSV\\b": "XÚ",
+  "\\bÚP ČR\\b": "KAG",
+  "\\bSÚIP\\b": "INSP",
+  "\\bISoSS\\b": "ISX",
+  "\\bOSYS\\b": "MODA",
+  "\\bOPZ\\+": "OPX+",
+  "\\bOPZ\\b": "OPX",
+  "\\bESF\\b": "EUF",
+  "\\bEHP\\b": "EHF",
+  "\\bLRV\\b": "PORV",
+  "\\bEKLEP\\b": "EDOC",
+  "\\bVOS\\b": "VOZ",
+  "Generali pojišťovna a\\.s\\.": "Pojišťovna A a.s.",
+  "Kooperativa pojišťovna, a\\.s\\., Vienna Insurance Group": "Pojišťovna B a.s.",
+  "Ing\\. Tomáš Kroutil": "Ing. Jan Novák"
+ }
+}
