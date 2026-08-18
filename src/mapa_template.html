@@ -53,6 +53,11 @@
   .badge{flex:0 0 auto;font-size:11px;border-radius:9px;padding:1px 7px;background:var(--chip);
          color:var(--muted);margin-top:2px;white-space:nowrap}
   .badge.no{background:#fdecea;color:#a3352a}
+  .badge.jinde{background:#fff4e0;color:#8a5a12}
+  .node.unmapped > .row > .nm{opacity:.62;font-style:italic}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:8px 20px 0}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+  .legend .g1{background:#3f8f6f}.legend .g2{background:#e0a33c}.legend .g3{background:#c9503f}
   .badge.ut{background:#e8f0f7;color:var(--p)}
   mark{background:var(--hit);padding:0 1px}
   .empty{padding:20px;color:var(--muted);text-align:center}
@@ -69,9 +74,19 @@
 <div class="bar">
   <input type="search" id="q" placeholder="Hledat v agendách, procesech, dílčích procesech a aktivitách…" autocomplete="off">
   <select id="fUtvar"><option value="">Vykonává útvar: vše</option></select>
-  <label><input type="checkbox" id="onlyAkt" checked> jen větve s aktivitami</label>
+  <select id="fStav">
+    <option value="akt">Zobrazit: jen zmapované</option>
+    <option value="vse">Zobrazit: celý rejstřík</option>
+    <option value="ne">Zobrazit: jen nezmapované</option>
+  </select>
   <button id="bExp">Rozbalit vše</button>
   <button id="bCol">Sbalit vše</button>
+</div>
+
+<div class="legend">
+  <span><i class="g1"></i>zmapováno — aktivity jsou v evidenci</span>
+  <span><i class="g2"></i>zmapováno jiným útvarem — rejstřík je vede jako využité, aktivity zatím nemáme</span>
+  <span><i class="g3"></i>nezmapováno — v rejstříku existuje, aktivity zatím nikdo nepopsal</span>
 </div>
 
 <main>
@@ -120,7 +135,7 @@ const elTree = document.getElementById("tree");
 function render(){
   const q = norm(document.getElementById("q").value.trim());
   const ut = document.getElementById("fUtvar").value;
-  const onlyAkt = document.getElementById("onlyAkt").checked;
+  const stav = document.getElementById("fStav").value;
   elTree.textContent = "";
 
   const mk = (n, depth, forced) => {
@@ -128,9 +143,8 @@ function render(){
     const selfUt = n.lvl !== "k" || !ut || (n.utvar||"").split(/,\s*/).includes(ut);
     // shoda na uzlu zpristupni celou jeho podstrukturu
     const kids = n.kids.map(c => mk(c, depth+1, forced || (!!q && n.hay.includes(q)))).filter(Boolean);
-    const keepSelf = n.lvl === "k"
-      ? hit && selfUt
-      : hit && !ut && (!onlyAkt || n.aktCount > 0);
+    const stavOk = stav === "vse" ? true : stav === "akt" ? n.aktCount > 0 : n.aktCount === 0;
+    const keepSelf = n.lvl === "k" ? hit && selfUt && stavOk : hit && !ut && stavOk;
     if (!kids.length && !keepSelf) return null;
 
     const node = document.createElement("div");
@@ -154,9 +168,11 @@ function render(){
       row.appendChild(b);
     } else if (n.lvl !== "k"){
       const b = document.createElement("span");
-      b.className = "badge" + (n.aktCount ? "" : " no");
-      b.textContent = n.aktCount ? n.aktCount + " akt." : "bez aktivit";
+      const jinde = !n.aktCount && (n.rec.stav_mapovani || "").startsWith("zmapováno jiným");
+      b.className = "badge" + (n.aktCount ? "" : jinde ? " jinde" : " no");
+      b.textContent = n.aktCount ? n.aktCount + " akt." : jinde ? "jiný útvar" : "nezmapováno";
       row.appendChild(b);
+      if (!n.aktCount) node.classList.add("unmapped");
     }
     if (n.lvl === "k") row.addEventListener("click", () => detail(n));
 
@@ -233,7 +249,7 @@ const utvary = [...new Set(DATA.aktivity.flatMap(a => (a.vykonava||"").split(/,\
 const sel = document.getElementById("fUtvar");
 utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
 
-["q","fUtvar","onlyAkt"].forEach(id => document.getElementById(id)
+["q","fUtvar","fStav"].forEach(id => document.getElementById(id)
   .addEventListener(id === "q" ? "input" : "change", render));
 document.getElementById("bExp").addEventListener("click", () => {
   elTree.querySelectorAll(".kids").forEach(b => b.classList.remove("hide"));

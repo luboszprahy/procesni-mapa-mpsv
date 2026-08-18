@@ -1,47 +1,47 @@
-﻿kod;nazev;agenda_kod;vlastnik;zdroj
-01-01;Strategie a koncepce XÚ;01;72;rejstrik
-01-02;Operativní řízení útvarů XÚ a resortních organizací;01;71;rejstrik
-01-03;Správa rozpočtové kapitoly;01;;rejstrik
-01-04;Programové financování XÚ a resortu;01;;rejstrik
-01-05;Boj proti korupci, oznamování;01;71;rejstrik
-01-06;Výzkum a vývoj;01;;rejstrik
-01-07;Audit;01;;rejstrik
-01-08;Kontrola;01;;rejstrik
-01-09;Řízení rizik;01;;rejstrik
-01-10;Krizové řízení;01;;rejstrik
-02-01;Sociální politika;02;;rejstrik
-02-02;Odškodňování;02;;rejstrik
-02-03;Rodinná politika;02;;rejstrik
-02-04;Rovné příležitosti;02;;rejstrik
-02-05;Sociálně právní ochrana dětí;02;;rejstrik
-02-06;Posudková služba;02;;rejstrik
-02-07;Sociální služby;02;;rejstrik
-03-01;Příjmová politika;03;;rejstrik
-03-02;Pracovní úrazové pojištění;03;;rejstrik
-03-03;Soukromé důchodové pojištění;03;;rejstrik
-03-04;Důchodové pojištění;03;;rejstrik
-03-05;Pojistné na sociální zabezpečení;03;;rejstrik
-03-06;Nemocenské pojištění;03;;rejstrik
-04-01;Politika zaměstnanosti;04;;rejstrik
-04-02;Aktivní politika maněstnanosti;04;;rejstrik
-04-03;Analýzy trhu práce a politik zaměstnanosti;04;;rejstrik
-04-04;Mezinárodní pracovní mobilita a integrace cizinců;04;;rejstrik
-04-05;Služby trhu práce a dalšího vzdělávání;04;;rejstrik
-04-06;Zaměstnávání OZP a sociální podnikání;04;;rejstrik
-05-01;Pracovněprávní legislativa a kolektivní vyjednávání;05;;rejstrik
-05-02;Mzdová politika;05;;rejstrik
-05-03;Bezpečnost práce a pracovní prostředí;05;;rejstrik
-06-01;Řízení pomoci z fondů EU a EHF;06;;rejstrik
-06-02;Mezinárodní vztahy;06;;rejstrik
-07-01;Vnější komunikace;07;71;rejstrik
-07-02;Parlamentní agenda;07;;rejstrik
-07-03;Vládní agenda;07;;rejstrik
-07-04;Právní podpora;07;71;rejstrik
-07-05;Finance;07;;rejstrik
-07-06;Statistika;07;;rejstrik
-07-07;Správa majetku;07;;rejstrik
-07-08;Řízení lidských zdrojů;07;72;rejstrik
-07-09;Odborná podpora;07;;rejstrik
-07-10;Administrativní podpora;07;;rejstrik
-07-11;Náhrada škody;07;71;rejstrik
-07-12;ICT a digitalizace;07;;rejstrik
+﻿kod;nazev;agenda_kod;vlastnik;pocet_aktivit;stav_mapovani;zdroj
+01-01;Strategie a koncepce XÚ;01;72;6;zmapováno;rejstrik
+01-02;Operativní řízení útvarů XÚ a resortních organizací;01;71;1;zmapováno;rejstrik
+01-03;Správa rozpočtové kapitoly;01;;0;nezmapováno;rejstrik
+01-04;Programové financování XÚ a resortu;01;;0;nezmapováno;rejstrik
+01-05;Boj proti korupci, oznamování;01;71;3;zmapováno;rejstrik
+01-06;Výzkum a vývoj;01;;0;nezmapováno;rejstrik
+01-07;Audit;01;;0;nezmapováno;rejstrik
+01-08;Kontrola;01;;0;nezmapováno;rejstrik
+01-09;Řízení rizik;01;;0;nezmapováno;rejstrik
+01-10;Krizové řízení;01;;0;nezmapováno;rejstrik
+02-01;Sociální politika;02;;0;nezmapováno;rejstrik
+02-02;Odškodňování;02;;0;nezmapováno;rejstrik
+02-03;Rodinná politika;02;;0;nezmapováno;rejstrik
+02-04;Rovné příležitosti;02;;0;nezmapováno;rejstrik
+02-05;Sociálně právní ochrana dětí;02;;0;nezmapováno;rejstrik
+02-06;Posudková služba;02;;0;nezmapováno;rejstrik
+02-07;Sociální služby;02;;0;nezmapováno;rejstrik
+03-01;Příjmová politika;03;;0;nezmapováno;rejstrik
+03-02;Pracovní úrazové pojištění;03;;0;nezmapováno;rejstrik
+03-03;Soukromé důchodové pojištění;03;;0;nezmapováno;rejstrik
+03-04;Důchodové pojištění;03;;0;nezmapováno;rejstrik
+03-05;Pojistné na sociální zabezpečení;03;;0;nezmapováno;rejstrik
+03-06;Nemocenské pojištění;03;;0;nezmapováno;rejstrik
+04-01;Politika zaměstnanosti;04;;0;nezmapováno;rejstrik
+04-02;Aktivní politika maněstnanosti;04;;0;nezmapováno;rejstrik
+04-03;Analýzy trhu práce a politik zaměstnanosti;04;;0;nezmapováno;rejstrik
+04-04;Mezinárodní pracovní mobilita a integrace cizinců;04;;0;nezmapováno;rejstrik
+04-05;Služby trhu práce a dalšího vzdělávání;04;;0;nezmapováno;rejstrik
+04-06;Zaměstnávání OZP a sociální podnikání;04;;0;nezmapováno;rejstrik
+05-01;Pracovněprávní legislativa a kolektivní vyjednávání;05;;0;nezmapováno;rejstrik
+05-02;Mzdová politika;05;;0;nezmapováno;rejstrik
+05-03;Bezpečnost práce a pracovní prostředí;05;;0;nezmapováno;rejstrik
+06-01;Řízení pomoci z fondů EU a EHF;06;;0;nezmapováno;rejstrik
+06-02;Mezinárodní vztahy;06;;0;nezmapováno;rejstrik
+07-01;Vnější komunikace;07;71;3;zmapováno;rejstrik
+07-02;Parlamentní agenda;07;;0;nezmapováno;rejstrik
+07-03;Vládní agenda;07;;0;nezmapováno;rejstrik
+07-04;Právní podpora;07;71;8;zmapováno;rejstrik
+07-05;Finance;07;;0;nezmapováno;rejstrik
+07-06;Statistika;07;;0;nezmapováno;rejstrik
+07-07;Správa majetku;07;;0;nezmapováno;rejstrik
+07-08;Řízení lidských zdrojů;07;72;22;zmapováno;rejstrik
+07-09;Odborná podpora;07;;0;nezmapováno;rejstrik
+07-10;Administrativní podpora;07;;0;nezmapováno;rejstrik
+07-11;Náhrada škody;07;71;3;zmapováno;rejstrik
+07-12;ICT a digitalizace;07;;0;nezmapováno;rejstrik

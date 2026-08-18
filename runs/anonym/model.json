@@ -10,42 +10,56 @@
    "kod": "01",
    "nazev": "Organizace a řízení XÚ a resortu",
    "vlastnik": "7",
+   "pocet_aktivit": 10,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
    "kod": "02",
    "nazev": "Sociální záležitosti",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
    "kod": "03",
    "nazev": "Příjmová politika a sociální pojištění",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
    "kod": "04",
    "nazev": "Zaměstnanost",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
    "kod": "05",
    "nazev": "Pracovněprávní záležitosti",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
    "kod": "06",
    "nazev": "EU a mezinárodní vztahy",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
    "kod": "07",
    "nazev": "Zajištění chodu XÚ a resortu",
    "vlastnik": "7",
+   "pocet_aktivit": 36,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   }
  ],
@@ -55,6 +69,8 @@
    "nazev": "Strategie a koncepce XÚ",
    "agenda_kod": "01",
    "vlastnik": "72",
+   "pocet_aktivit": 6,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -62,6 +78,8 @@
    "nazev": "Operativní řízení útvarů XÚ a resortních organizací",
    "agenda_kod": "01",
    "vlastnik": "71",
+   "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -69,6 +87,8 @@
    "nazev": "Správa rozpočtové kapitoly",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -76,6 +96,8 @@
    "nazev": "Programové financování XÚ a resortu",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -83,6 +105,8 @@
    "nazev": "Boj proti korupci, oznamování",
    "agenda_kod": "01",
    "vlastnik": "71",
+   "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -90,6 +114,8 @@
    "nazev": "Výzkum a vývoj",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -97,6 +123,8 @@
    "nazev": "Audit",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -104,6 +132,8 @@
    "nazev": "Kontrola",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -111,6 +141,8 @@
    "nazev": "Řízení rizik",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -118,6 +150,8 @@
    "nazev": "Krizové řízení",
    "agenda_kod": "01",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -125,6 +159,8 @@
    "nazev": "Sociální politika",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -132,6 +168,8 @@
    "nazev": "Odškodňování",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -139,6 +177,8 @@
    "nazev": "Rodinná politika",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -146,6 +186,8 @@
    "nazev": "Rovné příležitosti",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -153,6 +195,8 @@
    "nazev": "Sociálně právní ochrana dětí",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -160,6 +204,8 @@
    "nazev": "Posudková služba",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -167,6 +213,8 @@
    "nazev": "Sociální služby",
    "agenda_kod": "02",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -174,6 +222,8 @@
    "nazev": "Příjmová politika",
    "agenda_kod": "03",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -181,6 +231,8 @@
    "nazev": "Pracovní úrazové pojištění",
    "agenda_kod": "03",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -188,6 +240,8 @@
    "nazev": "Soukromé důchodové pojištění",
    "agenda_kod": "03",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -195,6 +249,8 @@
    "nazev": "Důchodové pojištění",
    "agenda_kod": "03",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -202,6 +258,8 @@
    "nazev": "Pojistné na sociální zabezpečení",
    "agenda_kod": "03",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -209,6 +267,8 @@
    "nazev": "Nemocenské pojištění",
    "agenda_kod": "03",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -216,6 +276,8 @@
    "nazev": "Politika zaměstnanosti",
    "agenda_kod": "04",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -223,6 +285,8 @@
    "nazev": "Aktivní politika maněstnanosti",
    "agenda_kod": "04",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -230,6 +294,8 @@
    "nazev": "Analýzy trhu práce a politik zaměstnanosti",
    "agenda_kod": "04",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -237,6 +303,8 @@
    "nazev": "Mezinárodní pracovní mobilita a integrace cizinců",
    "agenda_kod": "04",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -244,6 +312,8 @@
    "nazev": "Služby trhu práce a dalšího vzdělávání",
    "agenda_kod": "04",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -251,6 +321,8 @@
    "nazev": "Zaměstnávání OZP a sociální podnikání",
    "agenda_kod": "04",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -258,6 +330,8 @@
    "nazev": "Pracovněprávní legislativa a kolektivní vyjednávání",
    "agenda_kod": "05",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -265,6 +339,8 @@
    "nazev": "Mzdová politika",
    "agenda_kod": "05",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -272,6 +348,8 @@
    "nazev": "Bezpečnost práce a pracovní prostředí",
    "agenda_kod": "05",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -279,6 +357,8 @@
    "nazev": "Řízení pomoci z fondů EU a EHF",
    "agenda_kod": "06",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -286,6 +366,8 @@
    "nazev": "Mezinárodní vztahy",
    "agenda_kod": "06",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -293,6 +375,8 @@
    "nazev": "Vnější komunikace",
    "agenda_kod": "07",
    "vlastnik": "71",
+   "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -300,6 +384,8 @@
    "nazev": "Parlamentní agenda",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -307,6 +393,8 @@
    "nazev": "Vládní agenda",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -314,6 +402,8 @@
    "nazev": "Právní podpora",
    "agenda_kod": "07",
    "vlastnik": "71",
+   "pocet_aktivit": 8,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -321,6 +411,8 @@
    "nazev": "Finance",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -328,6 +420,8 @@
    "nazev": "Statistika",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -335,6 +429,8 @@
    "nazev": "Správa majetku",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -342,6 +438,8 @@
    "nazev": "Řízení lidských zdrojů",
    "agenda_kod": "07",
    "vlastnik": "72",
+   "pocet_aktivit": 22,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -349,6 +447,8 @@
    "nazev": "Odborná podpora",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -356,6 +456,8 @@
    "nazev": "Administrativní podpora",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -363,6 +465,8 @@
    "nazev": "Náhrada škody",
    "agenda_kod": "07",
    "vlastnik": "71",
+   "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -370,6 +474,8 @@
    "nazev": "ICT a digitalizace",
    "agenda_kod": "07",
    "vlastnik": "",
+   "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   }
  ],
@@ -379,8 +485,9 @@
    "nazev": "Řízení strategie XÚ",
    "proces_kod": "01-01",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 2,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -388,8 +495,9 @@
    "nazev": "Řízení koncepce XÚ",
    "proces_kod": "01-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -397,8 +505,9 @@
    "nazev": "Politika lidských zdrojů",
    "proces_kod": "01-01",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -406,8 +515,9 @@
    "nazev": "Plánování lidských zdrojů",
    "proces_kod": "01-01",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -415,8 +525,9 @@
    "nazev": "Organizace a řízení projektů",
    "proces_kod": "01-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -424,8 +535,9 @@
    "nazev": "Řízení resortních organizací XÚ",
    "proces_kod": "01-02",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -433,8 +545,9 @@
    "nazev": "Tvorba a připomínkování metodik a interních řídících dokumentů XÚ",
    "proces_kod": "01-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -442,8 +555,9 @@
    "nazev": "Analytická, statistická a prognostická činnost",
    "proces_kod": "01-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -451,8 +565,9 @@
    "nazev": "Správa rozpočtu XÚ",
    "proces_kod": "01-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -460,8 +575,9 @@
    "nazev": "Správa rozpočtu podřízených organizací XÚ",
    "proces_kod": "01-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -469,8 +585,9 @@
    "nazev": "Správa rozpočtu KAG",
    "proces_kod": "01-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -478,8 +595,9 @@
    "nazev": "Finanční kontrola podřízených organizací",
    "proces_kod": "01-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -487,8 +605,9 @@
    "nazev": "Metodické řízení v oblasti programového financování XÚ a resortu.",
    "proces_kod": "01-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -496,8 +615,9 @@
    "nazev": "Nastavení a kontrola podmínek realizace akcí a jejich evidence v ISPROFIN",
    "proces_kod": "01-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -505,8 +625,9 @@
    "nazev": "Finanční řízení jednotlivých akcí.",
    "proces_kod": "01-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -514,8 +635,9 @@
    "nazev": "Řízení a koordinace zpracování dokumentací programů kapitoly.",
    "proces_kod": "01-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -523,8 +645,9 @@
    "nazev": "Správa programu dotací do sociální oblasti.",
    "proces_kod": "01-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -532,8 +655,9 @@
    "nazev": "Zpracování dokumentace programu a řízení realizace akcí KAG.",
    "proces_kod": "01-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -541,8 +665,9 @@
    "nazev": "Boj proti korupci",
    "proces_kod": "01-05",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -550,8 +675,9 @@
    "nazev": "Oznamování protiprávního jednání",
    "proces_kod": "01-05",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -559,8 +685,9 @@
    "nazev": "Lobbování",
    "proces_kod": "01-05",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -568,8 +695,9 @@
    "nazev": "Tvorba koncepcí a strategií v oblasti výzkumu a vývoje",
    "proces_kod": "01-06",
    "vlastnik": "",
-   "stav": "využitý-S4",
+   "stav_rejstrik": "využitý-S4",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -577,8 +705,9 @@
    "nazev": "Koordinační a organizační činnosti v oblasti výzkumu a vývoje a odborná podpora",
    "proces_kod": "01-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -586,8 +715,9 @@
    "nazev": "Poskytování finanční podpory v oblasti výzkumu a vývoje",
    "proces_kod": "01-06",
    "vlastnik": "",
-   "stav": "využitý-S4",
+   "stav_rejstrik": "využitý-S4",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -595,8 +725,9 @@
    "nazev": "Organizace a řízení navazujících nevýzkumných potřeb v další činnosti resortní výzkumné organizace",
    "proces_kod": "01-06",
    "vlastnik": "",
-   "stav": "využitý-S4",
+   "stav_rejstrik": "využitý-S4",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -604,8 +735,9 @@
    "nazev": "Plánování auditu",
    "proces_kod": "01-07",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -613,8 +745,9 @@
    "nazev": "Výkon auditu",
    "proces_kod": "01-07",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -622,8 +755,9 @@
    "nazev": "Reporting auditu",
    "proces_kod": "01-07",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -631,8 +765,9 @@
    "nazev": "Plánování kontrol",
    "proces_kod": "01-08",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -640,8 +775,9 @@
    "nazev": "Výkon finanční kontroly",
    "proces_kod": "01-08",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -649,8 +785,9 @@
    "nazev": "Výkon kontroly státní správy",
    "proces_kod": "01-08",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -658,8 +795,9 @@
    "nazev": "Výkon ostatních kontrol",
    "proces_kod": "01-08",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -667,8 +805,9 @@
    "nazev": "Výkon státní správy v oblasti kontrol",
    "proces_kod": "01-08",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -676,8 +815,9 @@
    "nazev": "Reporting kontrol",
    "proces_kod": "01-08",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -685,8 +825,9 @@
    "nazev": "Tvorba koncepce a metodiky systému rizik XÚ",
    "proces_kod": "01-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -694,8 +835,9 @@
    "nazev": "Metodické řízení v oblasti řídících a kontrolních mechanismů",
    "proces_kod": "01-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -703,8 +845,9 @@
    "nazev": "Koordinace, správa a vedení systému řízení rizik",
    "proces_kod": "01-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -712,8 +855,9 @@
    "nazev": "Realizace krizového řízení resortu práce a sociálních věcí",
    "proces_kod": "01-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -721,8 +865,9 @@
    "nazev": "Zajištění ochrany utajovaných informací",
    "proces_kod": "01-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -730,8 +875,9 @@
    "nazev": "Zajištění BOZP a PO XÚ",
    "proces_kod": "01-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -739,8 +885,9 @@
    "nazev": "Zajištění ochrany a ostrahy objektu XÚ",
    "proces_kod": "01-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -748,8 +895,9 @@
    "nazev": "Tvorba koncepce v oblasti sociální politiky včetně reformy veřejných financí",
    "proces_kod": "02-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -757,8 +905,9 @@
    "nazev": "Tvorba právních předpisů v oblasti sociální politiky",
    "proces_kod": "02-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -766,8 +915,9 @@
    "nazev": "Metodické řízení a koordinace v oblasti sociální politiky",
    "proces_kod": "02-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -775,8 +925,9 @@
    "nazev": "Výkon státní správy v oblasti sociální politiky",
    "proces_kod": "02-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -784,8 +935,9 @@
    "nazev": "Zpracování analýz a prognóz v oblasti sociální politiky",
    "proces_kod": "02-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -793,8 +945,9 @@
    "nazev": "Zpracování statistik, analýz a prognóz v oblasti politiky sociálního začleňování",
    "proces_kod": "02-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -802,8 +955,9 @@
    "nazev": "Tvorba koncepce v oblasti odškodňování",
    "proces_kod": "02-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -811,8 +965,9 @@
    "nazev": "Tvorba právních předpisů v oblasti odškodňování",
    "proces_kod": "02-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -820,8 +975,9 @@
    "nazev": "Metodické řízení v oblasti odškodňování",
    "proces_kod": "02-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -829,8 +985,9 @@
    "nazev": "Výkon státní správy v oblasti odškodňování",
    "proces_kod": "02-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -838,8 +995,9 @@
    "nazev": "Zpracování statistik, analýz a prognóz v oblasti odškodňování",
    "proces_kod": "02-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -847,8 +1005,9 @@
    "nazev": "Tvorba koncepce v oblasti rodinné politiky",
    "proces_kod": "02-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -856,8 +1015,9 @@
    "nazev": "Tvorba právních předpisů v oblasti rodinné politiky",
    "proces_kod": "02-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -865,8 +1025,9 @@
    "nazev": "Metodické řízení v oblasti rodinné politiky",
    "proces_kod": "02-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -874,8 +1035,9 @@
    "nazev": "Výkon státní správy v oblasti rodinné politiky",
    "proces_kod": "02-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -883,8 +1045,9 @@
    "nazev": "Tvorba koncepce v oblasti rovných příležitostí",
    "proces_kod": "02-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -892,8 +1055,9 @@
    "nazev": "Metodické řízení v oblasti rovných příležitostí",
    "proces_kod": "02-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -901,8 +1065,9 @@
    "nazev": "Tvorba právních předpisů v oblasti rovných příležitostí",
    "proces_kod": "02-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -910,8 +1075,9 @@
    "nazev": "Výkon státní správy v oblasti rovných příležitostí",
    "proces_kod": "02-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -919,8 +1085,9 @@
    "nazev": "Tvorba koncepce v oblasti sociálně právní ochrany dětí",
    "proces_kod": "02-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -928,8 +1095,9 @@
    "nazev": "Tvorba právních předpisů v oblasti sociálně právní ochrany dětí",
    "proces_kod": "02-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -937,8 +1105,9 @@
    "nazev": "Metodické řízení v oblasti sociálně právní ochrany dětí",
    "proces_kod": "02-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -946,8 +1115,9 @@
    "nazev": "Výkon státní správy v oblasti sociálně právní ochrany dětí",
    "proces_kod": "02-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -955,8 +1125,9 @@
    "nazev": "Zpracování analýz v oblasti sociálně právní ochrany dětí",
    "proces_kod": "02-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -964,8 +1135,9 @@
    "nazev": "Tvorba koncepce v oblasti posudkových kritérií a v oblasti organizace a řízení posudkové služby",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -973,8 +1145,9 @@
    "nazev": "Tvorba právních předpisů v oblasti posudkové služby",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -982,8 +1155,9 @@
    "nazev": "Metodické řízení v oblasti posudkové služby a v oblasti organizace a řízení posudkové služby",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -991,8 +1165,9 @@
    "nazev": "Organizace a řízení posudkové služby",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1000,8 +1175,9 @@
    "nazev": "Zpracování analýz v oblasti posudkové služby",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1009,8 +1185,9 @@
    "nazev": "Výkon státní správy v oblasti posudkové služby a v oblasti organizace a řízení posudkové služby",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1018,8 +1195,9 @@
    "nazev": "Výkon činnosti posudkových komisí",
    "proces_kod": "02-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1027,8 +1205,9 @@
    "nazev": "Tvorba koncepce v oblasti sociálních služeb a politiky sociálního začleňování",
    "proces_kod": "02-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1036,8 +1215,9 @@
    "nazev": "Metodické řízení v oblasti sociálních služeb a dalších systémů v oblasti sociálního začleňování",
    "proces_kod": "02-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1045,8 +1225,9 @@
    "nazev": "Tvorba právních předpisů v oblasti sociálních služeb a dalších systémů v oblasti sociálního začleňování",
    "proces_kod": "02-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1054,8 +1235,9 @@
    "nazev": "Výkon a koordinace veřejné správy v oblasti sociálních služeb a dalších systémů sociálního začleňování",
    "proces_kod": "02-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1063,8 +1245,9 @@
    "nazev": "Zpracování statistik, analýz a prognóz v oblasti politiky sociálního začleňování",
    "proces_kod": "02-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1072,8 +1255,9 @@
    "nazev": "Tvorba koncepce v oblasti příjmové politiky",
    "proces_kod": "03-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1081,8 +1265,9 @@
    "nazev": "Tvorba právních předpisů v oblasti příjmové politiky",
    "proces_kod": "03-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1090,8 +1275,9 @@
    "nazev": "Expertní, analytické a prognostické činnosti v oblasti příjmové politiky",
    "proces_kod": "03-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1099,8 +1285,9 @@
    "nazev": "Tvorba koncepce v oblasti úrazového pojištění",
    "proces_kod": "03-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1108,8 +1295,9 @@
    "nazev": "Tvorba právních předpisů v oblasti úrazového pojištění",
    "proces_kod": "03-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1117,8 +1305,9 @@
    "nazev": "Zpracování analýz v oblasti úrazového pojištění",
    "proces_kod": "03-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1126,8 +1315,9 @@
    "nazev": "Zabezpečení pojistně-matematických činností v oblasti úrazového pojištění",
    "proces_kod": "03-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1135,8 +1325,9 @@
    "nazev": "Tvorba koncepce v oblasti soukromého důchodového pojištění",
    "proces_kod": "03-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1144,8 +1335,9 @@
    "nazev": "Tvorba právních předpisů v oblasti soukromého důchodového pojištění",
    "proces_kod": "03-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1153,8 +1345,9 @@
    "nazev": "Metodické řízení v oblasti soukromého důchodového pojištění",
    "proces_kod": "03-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1162,8 +1355,9 @@
    "nazev": "Výkon státní správy v oblasti soukromého důchodového pojištění",
    "proces_kod": "03-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1171,8 +1365,9 @@
    "nazev": "Zpracování analýz v oblasti soukromého důchodového pojištění",
    "proces_kod": "03-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1180,8 +1375,9 @@
    "nazev": "Zabezpečení pojistně-matematických činností v oblasti soukromého důchodového pojištění",
    "proces_kod": "03-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1189,8 +1385,9 @@
    "nazev": "Tvorba koncepce v oblasti důchodového pojištění",
    "proces_kod": "03-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1198,8 +1395,9 @@
    "nazev": "Tvorba právních předpisů v oblasti důchodového pojištění",
    "proces_kod": "03-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1207,8 +1405,9 @@
    "nazev": "Metodické řízení v oblasti důchodového pojištění",
    "proces_kod": "03-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1216,8 +1415,9 @@
    "nazev": "Výkon státní správy v oblasti důchodového pojištění",
    "proces_kod": "03-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1225,8 +1425,9 @@
    "nazev": "Zpracování analýz v oblasti důchodového pojištění",
    "proces_kod": "03-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1234,8 +1435,9 @@
    "nazev": "Zabezpečení pojistně-matematických činností v oblasti důchodového pojištění",
    "proces_kod": "03-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1243,8 +1445,9 @@
    "nazev": "Tvorba koncepce v oblasti pojistného na sociální zabezpečení",
    "proces_kod": "03-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1252,8 +1455,9 @@
    "nazev": "Tvorba právních předpisů v oblasti pojistného na sociální zabezpečení",
    "proces_kod": "03-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1261,8 +1465,9 @@
    "nazev": "Metodické řízení v oblasti pojistného na sociální zabezpečení",
    "proces_kod": "03-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1270,8 +1475,9 @@
    "nazev": "Výkon státní správy v oblasti pojistného na sociální zabezpečení",
    "proces_kod": "03-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1279,8 +1485,9 @@
    "nazev": "Zpracování analýz v oblasti pojistného na sociální zabezpečení",
    "proces_kod": "03-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1288,8 +1495,9 @@
    "nazev": "Zabezpečení pojistně-matematických činností v oblasti pojistného na sociální zabezpečení",
    "proces_kod": "03-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1297,8 +1505,9 @@
    "nazev": "Tvorba koncepce v oblasti nemocenského pojištění",
    "proces_kod": "03-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1306,8 +1515,9 @@
    "nazev": "Tvorba právních předpisů v oblasti nemocenského pojištění",
    "proces_kod": "03-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1315,8 +1525,9 @@
    "nazev": "Metodické řízení v oblasti nemocenského pojištění",
    "proces_kod": "03-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1324,8 +1535,9 @@
    "nazev": "Výkon státní správy v oblasti nemocenského pojištění",
    "proces_kod": "03-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1333,8 +1545,9 @@
    "nazev": "Zpracování analýz v oblasti nemocenského pojištění",
    "proces_kod": "03-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1342,8 +1555,9 @@
    "nazev": "Zabezpečení pojistně-matematických činností v oblasti nemocenského pojištění",
    "proces_kod": "03-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1351,8 +1565,9 @@
    "nazev": "Tvorba koncepcí a strategií v oblasti politiky zaměstnanosti a inspekce práce",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1360,8 +1575,9 @@
    "nazev": "Tvorba právních předpisů v oblasti politiky zaměstnanosti a inspekce práce",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1369,8 +1585,9 @@
    "nazev": "Metodické řízení v oblasti politiky zaměstnanosti a inspekce práce",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1378,8 +1595,9 @@
    "nazev": "Metodické řízení KAG a INSP v oblasti politiky zaměstnanosti",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1387,8 +1605,9 @@
    "nazev": "Výkon státní správy v oblasti politiky zaměstnanosti a inspekce práce",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1396,8 +1615,9 @@
    "nazev": "Zpracování statistik, analýz a prognóz v oblasti politiky zaměstnanosti",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1405,8 +1625,9 @@
    "nazev": "Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti politiky zaměstnanosti",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1414,8 +1635,9 @@
    "nazev": "Věcná koordinace projektů v oblasti zaměstnanosti",
    "proces_kod": "04-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1423,8 +1645,9 @@
    "nazev": "Tvorba koncepcí a stragií v oblasti aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1432,8 +1655,9 @@
    "nazev": "Tvorba nástrojů aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1441,8 +1665,9 @@
    "nazev": "Tvorba právních předpisů v oblasti aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1450,8 +1675,9 @@
    "nazev": "Metodické řízení KAG v oblasti aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1459,8 +1685,9 @@
    "nazev": "Výkon státní správy v oblasti aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1468,8 +1695,9 @@
    "nazev": "Zpracování podkladů a vytváření stanovisek v oblasti aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1477,8 +1705,9 @@
    "nazev": "Tvorba věcných podkladů pro digitalizaci v oblasti aktivní politiky zaměstnanosti",
    "proces_kod": "04-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1486,8 +1715,9 @@
    "nazev": "Zpracování statistik, analýz trhu práce a politik zaměstnanosti",
    "proces_kod": "04-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1495,8 +1725,9 @@
    "nazev": "Rozvoj datové základny trhu práce a politik zaměstnanosti",
    "proces_kod": "04-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1504,8 +1735,9 @@
    "nazev": "Rozvoj modelové platformy trhu práce a politik zaměstnanosti",
    "proces_kod": "04-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1513,8 +1745,9 @@
    "nazev": "Rozvoj platformy pro vizualizaci dat trhu práce a politik zaměstnanosti",
    "proces_kod": "04-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1522,8 +1755,9 @@
    "nazev": "Tvorba koncepcí a stragií v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1531,8 +1765,9 @@
    "nazev": "Tvroba právních předpisů v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1540,8 +1775,9 @@
    "nazev": "Metodické řízení KAG v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1549,8 +1785,9 @@
    "nazev": "Výkon státní správy v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1558,8 +1795,9 @@
    "nazev": "Zpracování statistik, analýz a prognóz v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1567,8 +1805,9 @@
    "nazev": "Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1576,8 +1815,9 @@
    "nazev": "Tvorba věcných podkladů pro digitalizaci v oblasti mezinárodní pracovní mobility a integrace cizinců",
    "proces_kod": "04-04",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1585,8 +1825,9 @@
    "nazev": "Tvorba koncepcí a strategií v oblasti služeb trhu práce a dalšího vzdělávání",
    "proces_kod": "04-05",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1594,8 +1835,9 @@
    "nazev": "Tvorba právních předpisů v oblasti služeb trhu práce a dalšího vzdělávání",
    "proces_kod": "04-05",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1603,8 +1845,9 @@
    "nazev": "Metodické řízení KAG v oblasti služeb trhu práce a dalšího vzdělávání",
    "proces_kod": "04-05",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1612,8 +1855,9 @@
    "nazev": "Výkon státní správy v oblasti služeb trhu práce a dalšího vzdělávání",
    "proces_kod": "04-05",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1621,8 +1865,9 @@
    "nazev": "Tvorba věcných podkladů pro digitalizaci v oblasti služeb trhu práce a dalšího vzdělávání",
    "proces_kod": "04-05",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1630,8 +1875,9 @@
    "nazev": "Tvorba koncepcí a stragií v oblasti zaměstnávání OZP a sociálního podnikání",
    "proces_kod": "04-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1639,8 +1885,9 @@
    "nazev": "Tvorba právních předpisů v oblasti zaměstnávání OZP a sociálního podnikání",
    "proces_kod": "04-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1648,8 +1895,9 @@
    "nazev": "Metodické řízení KAG v oblasti zaměstnávání OZP a sociálního podnikání",
    "proces_kod": "04-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1657,8 +1905,9 @@
    "nazev": "Výkon státní správy v oblasti zaměstnávání OZP a sociálního podnikání",
    "proces_kod": "04-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1666,8 +1915,9 @@
    "nazev": "Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti zaměstnávání OZP a sociálního podnikání",
    "proces_kod": "04-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1675,8 +1925,9 @@
    "nazev": "Tvorba věcných podkladů pro digitalizaci v oblasti zaměstnávání OZP a sociálního podnikání",
    "proces_kod": "04-06",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1684,8 +1935,9 @@
    "nazev": "Tvorba koncepcí v oblasti pracovněprávních vztahů a kolektivního vyjednávání",
    "proces_kod": "05-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1693,8 +1945,9 @@
    "nazev": "Tvorba právních předpisů v oblasti pracovněprávní legislativy a kolektivního vyjednávání",
    "proces_kod": "05-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1702,8 +1955,9 @@
    "nazev": "Příprava podkladů a stanovisek v oblasti pracovněprávních otázek, kolektivních smluv a kolektivního vyjednávání pro mezinárodní orgány, správní orgány a jiné subjekty",
    "proces_kod": "05-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1711,8 +1965,9 @@
    "nazev": "Řízení agendy kolektivních smluv, kolektivního vyjednávání a vedení seznamu mediátorů",
    "proces_kod": "05-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1720,8 +1975,9 @@
    "nazev": "Výkon státní správy v oblasti pracovněprávní legislativy a kolektivního vyjednávání",
    "proces_kod": "05-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1729,8 +1985,9 @@
    "nazev": "Tvorba koncepcí v oblasti odměňování a cestovních náhrad",
    "proces_kod": "05-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1738,8 +1995,9 @@
    "nazev": "Tvorba právních předpisů v oblasti odměňování a cestovních náhrad",
    "proces_kod": "05-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1747,8 +2005,9 @@
    "nazev": "Metodické řízení v oblasti mzdové politiky",
    "proces_kod": "05-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1756,8 +2015,9 @@
    "nazev": "Výkon a správa agendy hodnocení práce",
    "proces_kod": "05-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1765,8 +2025,9 @@
    "nazev": "Zpracování podkladů a stanovisek pro provádění mzdové politiky a vyhodnocení vývoje mezd",
    "proces_kod": "05-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1774,8 +2035,9 @@
    "nazev": "Zpracování zdrojových informací pro státní rozpočet ČR",
    "proces_kod": "05-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1783,8 +2045,9 @@
    "nazev": "Tvorba koncepcí a strategií v oblasti bezpečnosti práce a pracovního prostředí",
    "proces_kod": "05-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1792,8 +2055,9 @@
    "nazev": "Tvorba právních předpisů v oblasti BOZP",
    "proces_kod": "05-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1801,8 +2065,9 @@
    "nazev": "Metodické řízení a koordinace činností podřízených organizací v oblasti inspekce práce a výzkumu bezpečnosti práce",
    "proces_kod": "05-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1810,8 +2075,9 @@
    "nazev": "Příprava podkladů a účast na jednání v národních orgánech a v mezinárodních organizacích k problematice BOZP",
    "proces_kod": "05-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1819,8 +2085,9 @@
    "nazev": "Správa agendy vydávání akreditací podle zákona č. 309/2006 Sb.",
    "proces_kod": "05-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1828,8 +2095,9 @@
    "nazev": "Výkon státní správy v oblasti bezpečnosti práce a pracovního prostředí",
    "proces_kod": "05-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1837,8 +2105,9 @@
    "nazev": "Tvorba koncepcí v oblasti řízení a realizace programů, opatření a projektů z EUF",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1846,8 +2115,9 @@
    "nazev": "Institucionální zajištění implementace programů z EUF včetně pracovních skupin",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1855,8 +2125,9 @@
    "nazev": "Řízení a implementace programů z EUF včetně technické asistence",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1864,8 +2135,9 @@
    "nazev": "Řízení a implementace projektů",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1873,8 +2145,9 @@
    "nazev": "Negociace a plnění informační povinnosti",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1882,8 +2155,9 @@
    "nazev": "Finanční řízení pomoci z EUF",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1891,8 +2165,9 @@
    "nazev": "Příprava podkladů a stanovisek v oblasti řízení a realizace projektů pro mezinárodní organizace, správní orgány a jiné subjekty",
    "proces_kod": "06-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1900,8 +2175,9 @@
    "nazev": "Tvorba koncepcí v oblasti mezinárodních vztahů",
    "proces_kod": "06-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1909,8 +2185,9 @@
    "nazev": "Příprava, koordinace a účast na projednávání mezinárodních dokumentů a národních pozic",
    "proces_kod": "06-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1918,8 +2195,9 @@
    "nazev": "Multilaterální a bilaterální spolupráce s členskými a nečlenskými zeměmi EU",
    "proces_kod": "06-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1927,8 +2205,9 @@
    "nazev": "Účast na mezinárodních jednáních v orgánech EU a v mezinárodních organizacích",
    "proces_kod": "06-02",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -1936,8 +2215,9 @@
    "nazev": "Řízení a implementace programů a projektů",
    "proces_kod": "06-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1945,8 +2225,9 @@
    "nazev": "Výkon státní správy v oblasti mezinárodních vztahů",
    "proces_kod": "06-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1954,8 +2235,9 @@
    "nazev": "Zajišťování vztahů s médii",
    "proces_kod": "07-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1963,8 +2245,9 @@
    "nazev": "Příprava tiskových konferencí, tiskových zpráv a dalších podkladů",
    "proces_kod": "07-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1972,8 +2255,9 @@
    "nazev": "Poskytování informací veřejnosti, včetně vyřizování stížností, podnětů a oznámení",
    "proces_kod": "07-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1981,8 +2265,9 @@
    "nazev": "Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.",
    "proces_kod": "07-01",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1990,8 +2275,9 @@
    "nazev": "Tvorba a aktualizace webových stránek XÚ",
    "proces_kod": "07-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -1999,8 +2285,9 @@
    "nazev": "Monitoring vybraného tisku",
    "proces_kod": "07-01",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2008,8 +2295,9 @@
    "nazev": "Příprava podkladů pro jednání ministra",
    "proces_kod": "07-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2017,8 +2305,9 @@
    "nazev": "Zajišťování účasti na jednání výborů a podvýborů PS a Senátu",
    "proces_kod": "07-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2026,8 +2315,9 @@
    "nazev": "Zajišťování odpovědí na interpelace",
    "proces_kod": "07-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2035,8 +2325,9 @@
    "nazev": "Sledování programu orgánů Parlamentu",
    "proces_kod": "07-02",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2044,8 +2335,9 @@
    "nazev": "Příprava a zpracování podkladů pro jednání ministra",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2053,8 +2345,9 @@
    "nazev": "Zajišťování účasti na jednání výborů a komisí PORV, vlády",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2062,8 +2355,9 @@
    "nazev": "Koordinace a plnění úkolů z vládních usnesení a kontrola jejich plnění",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -2071,8 +2365,9 @@
    "nazev": "Plán legislativních prací a nelegislativních úkolů vlády",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2080,8 +2375,9 @@
    "nazev": "Zajištění a práce s EDOC",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2089,8 +2385,9 @@
    "nazev": "Zajištění činností v rámci projektu „Cíle vlády ČR“",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2098,8 +2395,9 @@
    "nazev": "Zajištění činnosti rozkladové komise, včetně účasti a zpracování podkladů",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2107,8 +2405,9 @@
    "nazev": "Meziresortní připomínková řízení",
    "proces_kod": "07-03",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2116,8 +2415,9 @@
    "nazev": "Připomínkování návrhů smluv",
    "proces_kod": "07-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2125,8 +2425,9 @@
    "nazev": "Zastupování XÚ a resortu před soudy, popř. jinými institucemi",
    "proces_kod": "07-04",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2134,8 +2435,9 @@
    "nazev": "Právní servis (vyřizování právních a majetkových záležitostí)",
    "proces_kod": "07-04",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2143,8 +2445,9 @@
    "nazev": "Stížnosti a petice",
    "proces_kod": "07-04",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2152,8 +2455,9 @@
    "nazev": "Právní konzultace",
    "proces_kod": "07-04",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2161,8 +2465,9 @@
    "nazev": "Tvorba koncepce financování resortu XÚ",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2170,8 +2475,9 @@
    "nazev": "Metodika financování a účetnictví",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2179,8 +2485,9 @@
    "nazev": "Účetní a finanční výkaznictví",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2188,8 +2495,9 @@
    "nazev": "Finanční řízení včetně realizace finančních operací",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2197,8 +2505,9 @@
    "nazev": "Vedení účetnictví a oběh účetních dokladů",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2206,8 +2515,9 @@
    "nazev": "Zpracování a kontrola vybraných rozpočtových položek",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2215,8 +2525,9 @@
    "nazev": "Evidence a inventarizace majetku",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2224,8 +2535,9 @@
    "nazev": "Platební styk",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2233,8 +2545,9 @@
    "nazev": "Výkon pokladní agendy",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2242,8 +2555,9 @@
    "nazev": "Správa pohledávek a závazků",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2251,8 +2565,9 @@
    "nazev": "Správa kaucí a poplatků",
    "proces_kod": "07-05",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -2260,8 +2575,9 @@
    "nazev": "Zpracování statistik za kapitolu 313 a statistik v působnosti resortu XÚ",
    "proces_kod": "07-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2269,8 +2585,9 @@
    "nazev": "Zpracování statistik pro externí statistické systémy",
    "proces_kod": "07-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2278,8 +2595,9 @@
    "nazev": "Metodické řízení a konzultační činnost v oblasti statistických informací",
    "proces_kod": "07-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2287,8 +2605,9 @@
    "nazev": "Zpracování analýz statistických informací",
    "proces_kod": "07-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2296,8 +2615,9 @@
    "nazev": "Statistická zjišťování",
    "proces_kod": "07-06",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2305,8 +2625,9 @@
    "nazev": "Správa a údržba majetku",
    "proces_kod": "07-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2314,8 +2635,9 @@
    "nazev": "Obnova majetku - investice XÚ",
    "proces_kod": "07-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2323,8 +2645,9 @@
    "nazev": "Nákup",
    "proces_kod": "07-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2332,8 +2655,9 @@
    "nazev": "Autoprovoz",
    "proces_kod": "07-07",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2341,8 +2665,9 @@
    "nazev": "Personální správa",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 9,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2350,8 +2675,9 @@
    "nazev": "Personální controlling",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2359,8 +2685,9 @@
    "nazev": "Finanční řízení v oblasti lidských zdrojů",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2368,8 +2695,9 @@
    "nazev": "Odměňování",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 2,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2377,8 +2705,9 @@
    "nazev": "Péče o zaměstnance",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 2,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2386,8 +2715,9 @@
    "nazev": "Hodnocení zaměstnanců",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2395,8 +2725,9 @@
    "nazev": "Úřednické zkoušky",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 2,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2404,8 +2735,9 @@
    "nazev": "Vzdělávání a rozvoj zaměstnanců",
    "proces_kod": "07-08",
    "vlastnik": "72",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2413,8 +2745,9 @@
    "nazev": "Organizační vztahy a systemizace",
    "proces_kod": "07-08",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 3,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2422,8 +2755,9 @@
    "nazev": "Analytické a expertní činnosti, které nejsou předmětem hlavní činnosti",
    "proces_kod": "07-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2431,8 +2765,9 @@
    "nazev": "Činnost v meziresortních a resortních pracovních skupinách a komisích",
    "proces_kod": "07-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2440,8 +2775,9 @@
    "nazev": "Vnitřní připomínková řízení - zpracování podkladů a stanovisek",
    "proces_kod": "07-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2449,8 +2785,9 @@
    "nazev": "Organizačně - technický servis pro jednání orgánů RHSD",
    "proces_kod": "07-09",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2458,8 +2795,9 @@
    "nazev": "Administrativní podpora - aktivity sekretariátu",
    "proces_kod": "07-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2467,8 +2805,9 @@
    "nazev": "Administrativní podpora - výroba prezentačního materiálu, tisk, zajišťování kancelářských potřeb, apod.",
    "proces_kod": "07-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2476,8 +2815,9 @@
    "nazev": "Organizace pracovních cest, návštěv a akcí, protokolární služby",
    "proces_kod": "07-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2485,8 +2825,9 @@
    "nazev": "Spisová služba",
    "proces_kod": "07-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2494,8 +2835,9 @@
    "nazev": "Správa archivu",
    "proces_kod": "07-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2503,8 +2845,9 @@
    "nazev": "Zajištění provozu podatelny",
    "proces_kod": "07-10",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2512,8 +2855,9 @@
    "nazev": "Náhrada škody podle zákona č. 82/1998 Sb.",
    "proces_kod": "07-11",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2521,8 +2865,9 @@
    "nazev": "Náhrada škody podle zákona č. 262/2006 Sb.",
    "proces_kod": "07-11",
    "vlastnik": "71",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 2,
+   "stav_mapovani": "zmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2530,8 +2875,9 @@
    "nazev": "Koncepční činnost v oblasti ICT včetně podřízených organizací",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2539,8 +2885,9 @@
    "nazev": "Provoz a rozvoj infrastruktury resortu, včetně napojení na externí prostředí",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2548,8 +2895,9 @@
    "nazev": "Provoz, údržba a rozvoj výpočetní techniky XÚ",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2557,8 +2905,9 @@
    "nazev": "Provoz, údržba a rozvoj výpočetní techniky KAG",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2566,8 +2915,9 @@
    "nazev": "Provoz, údržba a rozvoj výpočetní techniky obcí vykonávajících agendu hmotné nouze a sociálních služeb",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2575,8 +2925,9 @@
    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází XÚ",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "využitý",
+   "stav_rejstrik": "využitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "zmapováno jiným útvarem",
    "zdroj": "rejstrik"
   },
   {
@@ -2584,8 +2935,9 @@
    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází KAG",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2593,8 +2945,9 @@
    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází obcí vykonávajících agendu hmotné nouze a sociálních služeb",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2602,8 +2955,9 @@
    "nazev": "Finanční a smluvní zajištění výstavby a správy informačních systémů",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2611,8 +2965,9 @@
    "nazev": "Provoz, údržba a rozvoj komunikační infrastruktury resortu",
    "proces_kod": "07-12",
    "vlastnik": "",
-   "stav": "nevyužitý",
+   "stav_rejstrik": "nevyužitý",
    "pocet_aktivit": 0,
+   "stav_mapovani": "nezmapováno",
    "zdroj": "rejstrik"
   },
   {
@@ -2620,8 +2975,9 @@
    "nazev": "Podezření ze spáchání protiprávního jednání",
    "proces_kod": "07-04",
    "vlastnik": "71",
-   "stav": "",
+   "stav_rejstrik": "",
    "pocet_aktivit": 1,
+   "stav_mapovani": "zmapováno",
    "zdroj": "karta"
   }
  ],

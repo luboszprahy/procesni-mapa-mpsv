@@ -11,6 +11,12 @@ Sekce: 3 | Sekční správce: Ing. Tomáš Kroutil
 - aktivity: 46
 - vazby aktivita-dílčí proces: 46
 
+## Stav zmapování
+
+- agendy: nezmapováno 5, zmapováno 2
+- procesy: nezmapováno 39, zmapováno 7
+- dílčí procesy: nezmapováno 165, zmapováno jiným útvarem 62, zmapováno 23
+
 ## Nálezy
 
 ### očištěné buňky (46)

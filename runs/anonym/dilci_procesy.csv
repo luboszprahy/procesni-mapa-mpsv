@@ -1,251 +1,251 @@
-﻿kod;nazev;proces_kod;vlastnik;stav;pocet_aktivit;zdroj
-01-01-001;Řízení strategie XÚ;01-01;71;využitý;2;rejstrik
-01-01-002;Řízení koncepce XÚ;01-01;;nevyužitý;0;rejstrik
-01-01-003;Politika lidských zdrojů;01-01;72;využitý;3;rejstrik
-01-01-004;Plánování lidských zdrojů;01-01;72;využitý;1;rejstrik
-01-02-001;Organizace a řízení projektů;01-02;;nevyužitý;0;rejstrik
-01-02-002;Řízení resortních organizací XÚ;01-02;71;využitý;1;rejstrik
-01-02-003;Tvorba a připomínkování metodik a interních řídících dokumentů XÚ;01-02;;využitý;0;rejstrik
-01-02-004;Analytická, statistická a prognostická činnost;01-02;;nevyužitý;0;rejstrik
-01-03-001;Správa rozpočtu XÚ;01-03;;nevyužitý;0;rejstrik
-01-03-002;Správa rozpočtu podřízených organizací XÚ;01-03;;nevyužitý;0;rejstrik
-01-03-003;Správa rozpočtu KAG;01-03;;nevyužitý;0;rejstrik
-01-03-004;Finanční kontrola podřízených organizací;01-03;;nevyužitý;0;rejstrik
-01-04-001;Metodické řízení v oblasti programového financování XÚ a resortu.;01-04;;nevyužitý;0;rejstrik
-01-04-002;Nastavení a kontrola podmínek realizace akcí a jejich evidence v ISPROFIN;01-04;;nevyužitý;0;rejstrik
-01-04-003;Finanční řízení jednotlivých akcí.;01-04;;nevyužitý;0;rejstrik
-01-04-004;Řízení a koordinace zpracování dokumentací programů kapitoly.;01-04;;nevyužitý;0;rejstrik
-01-04-005;Správa programu dotací do sociální oblasti.;01-04;;nevyužitý;0;rejstrik
-01-04-006;Zpracování dokumentace programu a řízení realizace akcí KAG.;01-04;;nevyužitý;0;rejstrik
-01-05-001;Boj proti korupci;01-05;71;využitý;1;rejstrik
-01-05-002;Oznamování protiprávního jednání;01-05;71;využitý;1;rejstrik
-01-05-003;Lobbování;01-05;71;využitý;1;rejstrik
-01-06-001;Tvorba koncepcí a strategií v oblasti výzkumu a vývoje;01-06;;využitý-S4;0;rejstrik
-01-06-002;Koordinační a organizační činnosti v oblasti výzkumu a vývoje a odborná podpora;01-06;;využitý;0;rejstrik
-01-06-003;Poskytování finanční podpory v oblasti výzkumu a vývoje;01-06;;využitý-S4;0;rejstrik
-01-06-004;Organizace a řízení navazujících nevýzkumných potřeb v další činnosti resortní výzkumné organizace;01-06;;využitý-S4;0;rejstrik
-01-07-001;Plánování auditu;01-07;;využitý;0;rejstrik
-01-07-002;Výkon auditu;01-07;;využitý;0;rejstrik
-01-07-003;Reporting auditu;01-07;;využitý;0;rejstrik
-01-08-001;Plánování kontrol;01-08;;využitý;0;rejstrik
-01-08-002;Výkon finanční kontroly;01-08;;využitý;0;rejstrik
-01-08-003;Výkon kontroly státní správy;01-08;;využitý;0;rejstrik
-01-08-004;Výkon ostatních kontrol;01-08;;využitý;0;rejstrik
-01-08-005;Výkon státní správy v oblasti kontrol;01-08;;využitý;0;rejstrik
-01-08-006;Reporting kontrol;01-08;;využitý;0;rejstrik
-01-09-001;Tvorba koncepce a metodiky systému rizik XÚ;01-09;;nevyužitý;0;rejstrik
-01-09-002;Metodické řízení v oblasti řídících a kontrolních mechanismů;01-09;;nevyužitý;0;rejstrik
-01-09-003;Koordinace, správa a vedení systému řízení rizik;01-09;;nevyužitý;0;rejstrik
-01-10-001;Realizace krizového řízení resortu práce a sociálních věcí;01-10;;nevyužitý;0;rejstrik
-01-10-002;Zajištění ochrany utajovaných informací;01-10;;nevyužitý;0;rejstrik
-01-10-003;Zajištění BOZP a PO XÚ;01-10;;nevyužitý;0;rejstrik
-01-10-004;Zajištění ochrany a ostrahy objektu XÚ;01-10;;nevyužitý;0;rejstrik
-02-01-001;Tvorba koncepce v oblasti sociální politiky včetně reformy veřejných financí;02-01;;nevyužitý;0;rejstrik
-02-01-002;Tvorba právních předpisů v oblasti sociální politiky;02-01;;nevyužitý;0;rejstrik
-02-01-003;Metodické řízení a koordinace v oblasti sociální politiky;02-01;;nevyužitý;0;rejstrik
-02-01-004;Výkon státní správy v oblasti sociální politiky;02-01;;nevyužitý;0;rejstrik
-02-01-005;Zpracování analýz a prognóz v oblasti sociální politiky;02-01;;nevyužitý;0;rejstrik
-02-01-006;Zpracování statistik, analýz a prognóz v oblasti politiky sociálního začleňování;02-01;;nevyužitý;0;rejstrik
-02-02-001;Tvorba koncepce v oblasti odškodňování;02-02;;nevyužitý;0;rejstrik
-02-02-002;Tvorba právních předpisů v oblasti odškodňování;02-02;;nevyužitý;0;rejstrik
-02-02-003;Metodické řízení v oblasti odškodňování;02-02;;nevyužitý;0;rejstrik
-02-02-004;Výkon státní správy v oblasti odškodňování;02-02;;nevyužitý;0;rejstrik
-02-02-005;Zpracování statistik, analýz a prognóz v oblasti odškodňování;02-02;;nevyužitý;0;rejstrik
-02-03-001;Tvorba koncepce v oblasti rodinné politiky;02-03;;nevyužitý;0;rejstrik
-02-03-002;Tvorba právních předpisů v oblasti rodinné politiky;02-03;;nevyužitý;0;rejstrik
-02-03-003;Metodické řízení v oblasti rodinné politiky;02-03;;nevyužitý;0;rejstrik
-02-03-004;Výkon státní správy v oblasti rodinné politiky;02-03;;nevyužitý;0;rejstrik
-02-04-001;Tvorba koncepce v oblasti rovných příležitostí;02-04;;nevyužitý;0;rejstrik
-02-04-002;Metodické řízení v oblasti rovných příležitostí;02-04;;nevyužitý;0;rejstrik
-02-04-003;Tvorba právních předpisů v oblasti rovných příležitostí;02-04;;nevyužitý;0;rejstrik
-02-04-004;Výkon státní správy v oblasti rovných příležitostí;02-04;;nevyužitý;0;rejstrik
-02-05-001;Tvorba koncepce v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;rejstrik
-02-05-002;Tvorba právních předpisů v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;rejstrik
-02-05-003;Metodické řízení v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;rejstrik
-02-05-004;Výkon státní správy v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;rejstrik
-02-05-005;Zpracování analýz v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;rejstrik
-02-06-001;Tvorba koncepce v oblasti posudkových kritérií a v oblasti organizace a řízení posudkové služby;02-06;;nevyužitý;0;rejstrik
-02-06-002;Tvorba právních předpisů v oblasti posudkové služby;02-06;;nevyužitý;0;rejstrik
-02-06-003;Metodické řízení v oblasti posudkové služby a v oblasti organizace a řízení posudkové služby;02-06;;nevyužitý;0;rejstrik
-02-06-004;Organizace a řízení posudkové služby;02-06;;nevyužitý;0;rejstrik
-02-06-005;Zpracování analýz v oblasti posudkové služby;02-06;;nevyužitý;0;rejstrik
-02-06-006;Výkon státní správy v oblasti posudkové služby a v oblasti organizace a řízení posudkové služby;02-06;;nevyužitý;0;rejstrik
-02-06-007;Výkon činnosti posudkových komisí;02-06;;nevyužitý;0;rejstrik
-02-07-001;Tvorba koncepce v oblasti sociálních služeb a politiky sociálního začleňování;02-07;;nevyužitý;0;rejstrik
-02-07-002;Metodické řízení v oblasti sociálních služeb a dalších systémů v oblasti sociálního začleňování;02-07;;nevyužitý;0;rejstrik
-02-07-003;Tvorba právních předpisů v oblasti sociálních služeb a dalších systémů v oblasti sociálního začleňování;02-07;;nevyužitý;0;rejstrik
-02-07-004;Výkon a koordinace veřejné správy v oblasti sociálních služeb a dalších systémů sociálního začleňování;02-07;;nevyužitý;0;rejstrik
-02-07-005;Zpracování statistik, analýz a prognóz v oblasti politiky sociálního začleňování;02-07;;nevyužitý;0;rejstrik
-03-01-001;Tvorba koncepce v oblasti příjmové politiky;03-01;;nevyužitý;0;rejstrik
-03-01-002;Tvorba právních předpisů v oblasti příjmové politiky;03-01;;nevyužitý;0;rejstrik
-03-01-003;Expertní, analytické a prognostické činnosti v oblasti příjmové politiky;03-01;;nevyužitý;0;rejstrik
-03-02-001;Tvorba koncepce v oblasti úrazového pojištění;03-02;;nevyužitý;0;rejstrik
-03-02-002;Tvorba právních předpisů v oblasti úrazového pojištění;03-02;;nevyužitý;0;rejstrik
-03-02-003;Zpracování analýz v oblasti úrazového pojištění;03-02;;nevyužitý;0;rejstrik
-03-02-004;Zabezpečení pojistně-matematických činností v oblasti úrazového pojištění;03-02;;nevyužitý;0;rejstrik
-03-03-001;Tvorba koncepce v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;rejstrik
-03-03-002;Tvorba právních předpisů v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;rejstrik
-03-03-003;Metodické řízení v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;rejstrik
-03-03-004;Výkon státní správy v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;rejstrik
-03-03-005;Zpracování analýz v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;rejstrik
-03-03-006;Zabezpečení pojistně-matematických činností v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;rejstrik
-03-04-001;Tvorba koncepce v oblasti důchodového pojištění;03-04;;nevyužitý;0;rejstrik
-03-04-002;Tvorba právních předpisů v oblasti důchodového pojištění;03-04;;nevyužitý;0;rejstrik
-03-04-003;Metodické řízení v oblasti důchodového pojištění;03-04;;nevyužitý;0;rejstrik
-03-04-004;Výkon státní správy v oblasti důchodového pojištění;03-04;;nevyužitý;0;rejstrik
-03-04-005;Zpracování analýz v oblasti důchodového pojištění;03-04;;nevyužitý;0;rejstrik
-03-04-006;Zabezpečení pojistně-matematických činností v oblasti důchodového pojištění;03-04;;nevyužitý;0;rejstrik
-03-05-001;Tvorba koncepce v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;rejstrik
-03-05-002;Tvorba právních předpisů v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;rejstrik
-03-05-003;Metodické řízení v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;rejstrik
-03-05-004;Výkon státní správy v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;rejstrik
-03-05-005;Zpracování analýz v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;rejstrik
-03-05-006;Zabezpečení pojistně-matematických činností v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;rejstrik
-03-06-001;Tvorba koncepce v oblasti nemocenského pojištění;03-06;;nevyužitý;0;rejstrik
-03-06-002;Tvorba právních předpisů v oblasti nemocenského pojištění;03-06;;nevyužitý;0;rejstrik
-03-06-003;Metodické řízení v oblasti nemocenského pojištění;03-06;;nevyužitý;0;rejstrik
-03-06-004;Výkon státní správy v oblasti nemocenského pojištění;03-06;;nevyužitý;0;rejstrik
-03-06-005;Zpracování analýz v oblasti nemocenského pojištění;03-06;;nevyužitý;0;rejstrik
-03-06-006;Zabezpečení pojistně-matematických činností v oblasti nemocenského pojištění;03-06;;nevyužitý;0;rejstrik
-04-01-001;Tvorba koncepcí a strategií v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;rejstrik
-04-01-002;Tvorba právních předpisů v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;rejstrik
-04-01-003;Metodické řízení v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;rejstrik
-04-01-004;Metodické řízení KAG a INSP v oblasti politiky zaměstnanosti;04-01;;využitý;0;rejstrik
-04-01-005;Výkon státní správy v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;rejstrik
-04-01-006;Zpracování statistik, analýz a prognóz v oblasti politiky zaměstnanosti;04-01;;využitý;0;rejstrik
-04-01-007;Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti politiky zaměstnanosti;04-01;;využitý;0;rejstrik
-04-01-008;Věcná koordinace projektů v oblasti zaměstnanosti;04-01;;využitý;0;rejstrik
-04-02-001;Tvorba koncepcí a stragií v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;rejstrik
-04-02-002;Tvorba nástrojů aktivní politiky zaměstnanosti;04-02;;využitý;0;rejstrik
-04-02-003;Tvorba právních předpisů v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;rejstrik
-04-02-004;Metodické řízení KAG v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;rejstrik
-04-02-005;Výkon státní správy v oblasti aktivní politiky zaměstnanosti;04-02;;nevyužitý;0;rejstrik
-04-02-006;Zpracování podkladů a vytváření stanovisek v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;rejstrik
-04-02-007;Tvorba věcných podkladů pro digitalizaci v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;rejstrik
-04-03-001;Zpracování statistik, analýz trhu práce a politik zaměstnanosti;04-03;;využitý;0;rejstrik
-04-03-002;Rozvoj datové základny trhu práce a politik zaměstnanosti;04-03;;využitý;0;rejstrik
-04-03-003;Rozvoj modelové platformy trhu práce a politik zaměstnanosti;04-03;;využitý;0;rejstrik
-04-03-004;Rozvoj platformy pro vizualizaci dat trhu práce a politik zaměstnanosti;04-03;;využitý;0;rejstrik
-04-04-001;Tvorba koncepcí a stragií v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-04-002;Tvroba právních předpisů v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-04-003;Metodické řízení KAG v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-04-004;Výkon státní správy v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-04-005;Zpracování statistik, analýz a prognóz v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-04-006;Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-04-007;Tvorba věcných podkladů pro digitalizaci v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;rejstrik
-04-05-001;Tvorba koncepcí a strategií v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;rejstrik
-04-05-002;Tvorba právních předpisů v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;rejstrik
-04-05-003;Metodické řízení KAG v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;rejstrik
-04-05-004;Výkon státní správy v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;rejstrik
-04-05-005;Tvorba věcných podkladů pro digitalizaci v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;rejstrik
-04-06-001;Tvorba koncepcí a stragií v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;rejstrik
-04-06-002;Tvorba právních předpisů v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;rejstrik
-04-06-003;Metodické řízení KAG v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;rejstrik
-04-06-004;Výkon státní správy v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;rejstrik
-04-06-005;Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;rejstrik
-04-06-006;Tvorba věcných podkladů pro digitalizaci v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;rejstrik
-05-01-001;Tvorba koncepcí v oblasti pracovněprávních vztahů a kolektivního vyjednávání;05-01;;nevyužitý;0;rejstrik
-05-01-002;Tvorba právních předpisů v oblasti pracovněprávní legislativy a kolektivního vyjednávání;05-01;;nevyužitý;0;rejstrik
-05-01-003;Příprava podkladů a stanovisek v oblasti pracovněprávních otázek, kolektivních smluv a kolektivního vyjednávání pro mezinárodní orgány, správní orgány a jiné subjekty;05-01;;nevyužitý;0;rejstrik
-05-01-004;Řízení agendy kolektivních smluv, kolektivního vyjednávání a vedení seznamu mediátorů;05-01;;nevyužitý;0;rejstrik
-05-01-005;Výkon státní správy v oblasti pracovněprávní legislativy a kolektivního vyjednávání;05-01;;nevyužitý;0;rejstrik
-05-02-001;Tvorba koncepcí v oblasti odměňování a cestovních náhrad;05-02;;nevyužitý;0;rejstrik
-05-02-002;Tvorba právních předpisů v oblasti odměňování a cestovních náhrad;05-02;;nevyužitý;0;rejstrik
-05-02-003;Metodické řízení v oblasti mzdové politiky;05-02;;nevyužitý;0;rejstrik
-05-02-004;Výkon a správa agendy hodnocení práce;05-02;;nevyužitý;0;rejstrik
-05-02-005;Zpracování podkladů a stanovisek pro provádění mzdové politiky a vyhodnocení vývoje mezd;05-02;;nevyužitý;0;rejstrik
-05-02-006;Zpracování zdrojových informací pro státní rozpočet ČR;05-02;;nevyužitý;0;rejstrik
-05-03-001;Tvorba koncepcí a strategií v oblasti bezpečnosti práce a pracovního prostředí;05-03;;využitý;0;rejstrik
-05-03-002;Tvorba právních předpisů v oblasti BOZP;05-03;;využitý;0;rejstrik
-05-03-003;Metodické řízení a koordinace činností podřízených organizací v oblasti inspekce práce a výzkumu bezpečnosti práce;05-03;;využitý;0;rejstrik
-05-03-004;Příprava podkladů a účast na jednání v národních orgánech a v mezinárodních organizacích k problematice BOZP;05-03;;využitý;0;rejstrik
-05-03-005;Správa agendy vydávání akreditací podle zákona č. 309/2006 Sb.;05-03;;využitý;0;rejstrik
-05-03-006;Výkon státní správy v oblasti bezpečnosti práce a pracovního prostředí;05-03;;využitý;0;rejstrik
-06-01-001;Tvorba koncepcí v oblasti řízení a realizace programů, opatření a projektů z EUF;06-01;;nevyužitý;0;rejstrik
-06-01-002;Institucionální zajištění implementace programů z EUF včetně pracovních skupin;06-01;;nevyužitý;0;rejstrik
-06-01-003;Řízení a implementace programů z EUF včetně technické asistence;06-01;;nevyužitý;0;rejstrik
-06-01-004;Řízení a implementace projektů;06-01;;využitý;0;rejstrik
-06-01-005;Negociace a plnění informační povinnosti;06-01;;nevyužitý;0;rejstrik
-06-01-006;Finanční řízení pomoci z EUF;06-01;;nevyužitý;0;rejstrik
-06-01-007;Příprava podkladů a stanovisek v oblasti řízení a realizace projektů pro mezinárodní organizace, správní orgány a jiné subjekty;06-01;;nevyužitý;0;rejstrik
-06-02-001;Tvorba koncepcí v oblasti mezinárodních vztahů;06-02;;nevyužitý;0;rejstrik
-06-02-002;Příprava, koordinace a účast na projednávání mezinárodních dokumentů a národních pozic;06-02;;nevyužitý;0;rejstrik
-06-02-003;Multilaterální a bilaterální spolupráce s členskými a nečlenskými zeměmi EU;06-02;;využitý;0;rejstrik
-06-02-004;Účast na mezinárodních jednáních v orgánech EU a v mezinárodních organizacích;06-02;;využitý;0;rejstrik
-06-02-005;Řízení a implementace programů a projektů;06-02;;nevyužitý;0;rejstrik
-06-02-006;Výkon státní správy v oblasti mezinárodních vztahů;06-02;;nevyužitý;0;rejstrik
-07-01-001;Zajišťování vztahů s médii;07-01;;nevyužitý;0;rejstrik
-07-01-002;Příprava tiskových konferencí, tiskových zpráv a dalších podkladů;07-01;;nevyužitý;0;rejstrik
-07-01-003;Poskytování informací veřejnosti, včetně vyřizování stížností, podnětů a oznámení;07-01;;nevyužitý;0;rejstrik
-07-01-004;Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.;07-01;71;využitý;3;rejstrik
-07-01-005;Tvorba a aktualizace webových stránek XÚ;07-01;;nevyužitý;0;rejstrik
-07-01-006;Monitoring vybraného tisku;07-01;;nevyužitý;0;rejstrik
-07-02-001;Příprava podkladů pro jednání ministra;07-02;;nevyužitý;0;rejstrik
-07-02-002;Zajišťování účasti na jednání výborů a podvýborů PS a Senátu;07-02;;nevyužitý;0;rejstrik
-07-02-003;Zajišťování odpovědí na interpelace;07-02;;nevyužitý;0;rejstrik
-07-02-004;Sledování programu orgánů Parlamentu;07-02;;nevyužitý;0;rejstrik
-07-03-001;Příprava a zpracování podkladů pro jednání ministra;07-03;;nevyužitý;0;rejstrik
-07-03-002;Zajišťování účasti na jednání výborů a komisí PORV, vlády;07-03;;nevyužitý;0;rejstrik
-07-03-003;Koordinace a plnění úkolů z vládních usnesení a kontrola jejich plnění;07-03;;využitý;0;rejstrik
-07-03-004;Plán legislativních prací a nelegislativních úkolů vlády;07-03;;nevyužitý;0;rejstrik
-07-03-005;Zajištění a práce s EDOC;07-03;;nevyužitý;0;rejstrik
-07-03-006;Zajištění činností v rámci projektu „Cíle vlády ČR“;07-03;;nevyužitý;0;rejstrik
-07-03-007;Zajištění činnosti rozkladové komise, včetně účasti a zpracování podkladů;07-03;;nevyužitý;0;rejstrik
-07-03-008;Meziresortní připomínková řízení;07-03;;nevyužitý;0;rejstrik
-07-04-001;Připomínkování návrhů smluv;07-04;;nevyužitý;0;rejstrik
-07-04-002;Zastupování XÚ a resortu před soudy, popř. jinými institucemi;07-04;71;využitý;3;rejstrik
-07-04-003;Právní servis (vyřizování právních a majetkových záležitostí);07-04;;nevyužitý;0;rejstrik
-07-04-004;Stížnosti a petice;07-04;71;využitý;3;rejstrik
-07-04-005;Právní konzultace;07-04;71;využitý;1;rejstrik
-07-05-001;Tvorba koncepce financování resortu XÚ;07-05;;nevyužitý;0;rejstrik
-07-05-002;Metodika financování a účetnictví;07-05;;nevyužitý;0;rejstrik
-07-05-003;Účetní a finanční výkaznictví;07-05;;nevyužitý;0;rejstrik
-07-05-004;Finanční řízení včetně realizace finančních operací;07-05;;nevyužitý;0;rejstrik
-07-05-005;Vedení účetnictví a oběh účetních dokladů;07-05;;nevyužitý;0;rejstrik
-07-05-006;Zpracování a kontrola vybraných rozpočtových položek;07-05;;nevyužitý;0;rejstrik
-07-05-007;Evidence a inventarizace majetku;07-05;;nevyužitý;0;rejstrik
-07-05-008;Platební styk;07-05;;nevyužitý;0;rejstrik
-07-05-009;Výkon pokladní agendy;07-05;;nevyužitý;0;rejstrik
-07-05-010;Správa pohledávek a závazků;07-05;;nevyužitý;0;rejstrik
-07-05-011;Správa kaucí a poplatků;07-05;;využitý;0;rejstrik
-07-06-001;Zpracování statistik za kapitolu 313 a statistik v působnosti resortu XÚ;07-06;;nevyužitý;0;rejstrik
-07-06-002;Zpracování statistik pro externí statistické systémy;07-06;;nevyužitý;0;rejstrik
-07-06-003;Metodické řízení a konzultační činnost v oblasti statistických informací;07-06;;nevyužitý;0;rejstrik
-07-06-004;Zpracování analýz statistických informací;07-06;;nevyužitý;0;rejstrik
-07-06-005;Statistická zjišťování;07-06;;nevyužitý;0;rejstrik
-07-07-001;Správa a údržba majetku;07-07;;nevyužitý;0;rejstrik
-07-07-002;Obnova majetku - investice XÚ;07-07;;nevyužitý;0;rejstrik
-07-07-003;Nákup;07-07;;nevyužitý;0;rejstrik
-07-07-004;Autoprovoz;07-07;;nevyužitý;0;rejstrik
-07-08-001;Personální správa;07-08;72;využitý;9;rejstrik
-07-08-002;Personální controlling;07-08;72;využitý;1;rejstrik
-07-08-003;Finanční řízení v oblasti lidských zdrojů;07-08;72;využitý;1;rejstrik
-07-08-004;Odměňování;07-08;72;využitý;2;rejstrik
-07-08-005;Péče o zaměstnance;07-08;72;využitý;2;rejstrik
-07-08-006;Hodnocení zaměstnanců;07-08;72;využitý;1;rejstrik
-07-08-007;Úřednické zkoušky;07-08;72;využitý;2;rejstrik
-07-08-008;Vzdělávání a rozvoj zaměstnanců;07-08;72;využitý;1;rejstrik
-07-08-009;Organizační vztahy a systemizace;07-08;71;využitý;3;rejstrik
-07-09-001;Analytické a expertní činnosti, které nejsou předmětem hlavní činnosti;07-09;;nevyužitý;0;rejstrik
-07-09-002;Činnost v meziresortních a resortních pracovních skupinách a komisích;07-09;;nevyužitý;0;rejstrik
-07-09-003;Vnitřní připomínková řízení - zpracování podkladů a stanovisek;07-09;;nevyužitý;0;rejstrik
-07-09-004;Organizačně - technický servis pro jednání orgánů RHSD;07-09;;nevyužitý;0;rejstrik
-07-10-001;Administrativní podpora - aktivity sekretariátu;07-10;;nevyužitý;0;rejstrik
-07-10-002;Administrativní podpora - výroba prezentačního materiálu, tisk, zajišťování kancelářských potřeb, apod.;07-10;;nevyužitý;0;rejstrik
-07-10-003;Organizace pracovních cest, návštěv a akcí, protokolární služby;07-10;;nevyužitý;0;rejstrik
-07-10-004;Spisová služba;07-10;;nevyužitý;0;rejstrik
-07-10-005;Správa archivu;07-10;;nevyužitý;0;rejstrik
-07-10-006;Zajištění provozu podatelny;07-10;;nevyužitý;0;rejstrik
-07-11-001;Náhrada škody podle zákona č. 82/1998 Sb.;07-11;71;využitý;1;rejstrik
-07-11-002;Náhrada škody podle zákona č. 262/2006 Sb.;07-11;71;využitý;2;rejstrik
-07-12-001;Koncepční činnost v oblasti ICT včetně podřízených organizací;07-12;;nevyužitý;0;rejstrik
-07-12-002;Provoz a rozvoj infrastruktury resortu, včetně napojení na externí prostředí;07-12;;nevyužitý;0;rejstrik
-07-12-003;Provoz, údržba a rozvoj výpočetní techniky XÚ;07-12;;nevyužitý;0;rejstrik
-07-12-004;Provoz, údržba a rozvoj výpočetní techniky KAG;07-12;;nevyužitý;0;rejstrik
-07-12-005;Provoz, údržba a rozvoj výpočetní techniky obcí vykonávajících agendu hmotné nouze a sociálních služeb;07-12;;nevyužitý;0;rejstrik
-07-12-006;Provoz, údržba a rozvoj informačních systémů, agend a databází XÚ;07-12;;využitý;0;rejstrik
-07-12-007;Provoz, údržba a rozvoj informačních systémů, agend a databází KAG;07-12;;nevyužitý;0;rejstrik
-07-12-008;Provoz, údržba a rozvoj informačních systémů, agend a databází obcí vykonávajících agendu hmotné nouze a sociálních služeb;07-12;;nevyužitý;0;rejstrik
-07-12-009;Finanční a smluvní zajištění výstavby a správy informačních systémů;07-12;;nevyužitý;0;rejstrik
-07-12-010;Provoz, údržba a rozvoj komunikační infrastruktury resortu;07-12;;nevyužitý;0;rejstrik
-07-04-006;Podezření ze spáchání protiprávního jednání;07-04;71;;1;karta
+﻿kod;nazev;proces_kod;vlastnik;stav_rejstrik;pocet_aktivit;stav_mapovani;zdroj
+01-01-001;Řízení strategie XÚ;01-01;71;využitý;2;zmapováno;rejstrik
+01-01-002;Řízení koncepce XÚ;01-01;;nevyužitý;0;nezmapováno;rejstrik
+01-01-003;Politika lidských zdrojů;01-01;72;využitý;3;zmapováno;rejstrik
+01-01-004;Plánování lidských zdrojů;01-01;72;využitý;1;zmapováno;rejstrik
+01-02-001;Organizace a řízení projektů;01-02;;nevyužitý;0;nezmapováno;rejstrik
+01-02-002;Řízení resortních organizací XÚ;01-02;71;využitý;1;zmapováno;rejstrik
+01-02-003;Tvorba a připomínkování metodik a interních řídících dokumentů XÚ;01-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-02-004;Analytická, statistická a prognostická činnost;01-02;;nevyužitý;0;nezmapováno;rejstrik
+01-03-001;Správa rozpočtu XÚ;01-03;;nevyužitý;0;nezmapováno;rejstrik
+01-03-002;Správa rozpočtu podřízených organizací XÚ;01-03;;nevyužitý;0;nezmapováno;rejstrik
+01-03-003;Správa rozpočtu KAG;01-03;;nevyužitý;0;nezmapováno;rejstrik
+01-03-004;Finanční kontrola podřízených organizací;01-03;;nevyužitý;0;nezmapováno;rejstrik
+01-04-001;Metodické řízení v oblasti programového financování XÚ a resortu.;01-04;;nevyužitý;0;nezmapováno;rejstrik
+01-04-002;Nastavení a kontrola podmínek realizace akcí a jejich evidence v ISPROFIN;01-04;;nevyužitý;0;nezmapováno;rejstrik
+01-04-003;Finanční řízení jednotlivých akcí.;01-04;;nevyužitý;0;nezmapováno;rejstrik
+01-04-004;Řízení a koordinace zpracování dokumentací programů kapitoly.;01-04;;nevyužitý;0;nezmapováno;rejstrik
+01-04-005;Správa programu dotací do sociální oblasti.;01-04;;nevyužitý;0;nezmapováno;rejstrik
+01-04-006;Zpracování dokumentace programu a řízení realizace akcí KAG.;01-04;;nevyužitý;0;nezmapováno;rejstrik
+01-05-001;Boj proti korupci;01-05;71;využitý;1;zmapováno;rejstrik
+01-05-002;Oznamování protiprávního jednání;01-05;71;využitý;1;zmapováno;rejstrik
+01-05-003;Lobbování;01-05;71;využitý;1;zmapováno;rejstrik
+01-06-001;Tvorba koncepcí a strategií v oblasti výzkumu a vývoje;01-06;;využitý-S4;0;zmapováno jiným útvarem;rejstrik
+01-06-002;Koordinační a organizační činnosti v oblasti výzkumu a vývoje a odborná podpora;01-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-06-003;Poskytování finanční podpory v oblasti výzkumu a vývoje;01-06;;využitý-S4;0;zmapováno jiným útvarem;rejstrik
+01-06-004;Organizace a řízení navazujících nevýzkumných potřeb v další činnosti resortní výzkumné organizace;01-06;;využitý-S4;0;zmapováno jiným útvarem;rejstrik
+01-07-001;Plánování auditu;01-07;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-07-002;Výkon auditu;01-07;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-07-003;Reporting auditu;01-07;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-08-001;Plánování kontrol;01-08;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-08-002;Výkon finanční kontroly;01-08;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-08-003;Výkon kontroly státní správy;01-08;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-08-004;Výkon ostatních kontrol;01-08;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-08-005;Výkon státní správy v oblasti kontrol;01-08;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-08-006;Reporting kontrol;01-08;;využitý;0;zmapováno jiným útvarem;rejstrik
+01-09-001;Tvorba koncepce a metodiky systému rizik XÚ;01-09;;nevyužitý;0;nezmapováno;rejstrik
+01-09-002;Metodické řízení v oblasti řídících a kontrolních mechanismů;01-09;;nevyužitý;0;nezmapováno;rejstrik
+01-09-003;Koordinace, správa a vedení systému řízení rizik;01-09;;nevyužitý;0;nezmapováno;rejstrik
+01-10-001;Realizace krizového řízení resortu práce a sociálních věcí;01-10;;nevyužitý;0;nezmapováno;rejstrik
+01-10-002;Zajištění ochrany utajovaných informací;01-10;;nevyužitý;0;nezmapováno;rejstrik
+01-10-003;Zajištění BOZP a PO XÚ;01-10;;nevyužitý;0;nezmapováno;rejstrik
+01-10-004;Zajištění ochrany a ostrahy objektu XÚ;01-10;;nevyužitý;0;nezmapováno;rejstrik
+02-01-001;Tvorba koncepce v oblasti sociální politiky včetně reformy veřejných financí;02-01;;nevyužitý;0;nezmapováno;rejstrik
+02-01-002;Tvorba právních předpisů v oblasti sociální politiky;02-01;;nevyužitý;0;nezmapováno;rejstrik
+02-01-003;Metodické řízení a koordinace v oblasti sociální politiky;02-01;;nevyužitý;0;nezmapováno;rejstrik
+02-01-004;Výkon státní správy v oblasti sociální politiky;02-01;;nevyužitý;0;nezmapováno;rejstrik
+02-01-005;Zpracování analýz a prognóz v oblasti sociální politiky;02-01;;nevyužitý;0;nezmapováno;rejstrik
+02-01-006;Zpracování statistik, analýz a prognóz v oblasti politiky sociálního začleňování;02-01;;nevyužitý;0;nezmapováno;rejstrik
+02-02-001;Tvorba koncepce v oblasti odškodňování;02-02;;nevyužitý;0;nezmapováno;rejstrik
+02-02-002;Tvorba právních předpisů v oblasti odškodňování;02-02;;nevyužitý;0;nezmapováno;rejstrik
+02-02-003;Metodické řízení v oblasti odškodňování;02-02;;nevyužitý;0;nezmapováno;rejstrik
+02-02-004;Výkon státní správy v oblasti odškodňování;02-02;;nevyužitý;0;nezmapováno;rejstrik
+02-02-005;Zpracování statistik, analýz a prognóz v oblasti odškodňování;02-02;;nevyužitý;0;nezmapováno;rejstrik
+02-03-001;Tvorba koncepce v oblasti rodinné politiky;02-03;;nevyužitý;0;nezmapováno;rejstrik
+02-03-002;Tvorba právních předpisů v oblasti rodinné politiky;02-03;;nevyužitý;0;nezmapováno;rejstrik
+02-03-003;Metodické řízení v oblasti rodinné politiky;02-03;;nevyužitý;0;nezmapováno;rejstrik
+02-03-004;Výkon státní správy v oblasti rodinné politiky;02-03;;nevyužitý;0;nezmapováno;rejstrik
+02-04-001;Tvorba koncepce v oblasti rovných příležitostí;02-04;;nevyužitý;0;nezmapováno;rejstrik
+02-04-002;Metodické řízení v oblasti rovných příležitostí;02-04;;nevyužitý;0;nezmapováno;rejstrik
+02-04-003;Tvorba právních předpisů v oblasti rovných příležitostí;02-04;;nevyužitý;0;nezmapováno;rejstrik
+02-04-004;Výkon státní správy v oblasti rovných příležitostí;02-04;;nevyužitý;0;nezmapováno;rejstrik
+02-05-001;Tvorba koncepce v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;nezmapováno;rejstrik
+02-05-002;Tvorba právních předpisů v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;nezmapováno;rejstrik
+02-05-003;Metodické řízení v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;nezmapováno;rejstrik
+02-05-004;Výkon státní správy v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;nezmapováno;rejstrik
+02-05-005;Zpracování analýz v oblasti sociálně právní ochrany dětí;02-05;;nevyužitý;0;nezmapováno;rejstrik
+02-06-001;Tvorba koncepce v oblasti posudkových kritérií a v oblasti organizace a řízení posudkové služby;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-06-002;Tvorba právních předpisů v oblasti posudkové služby;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-06-003;Metodické řízení v oblasti posudkové služby a v oblasti organizace a řízení posudkové služby;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-06-004;Organizace a řízení posudkové služby;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-06-005;Zpracování analýz v oblasti posudkové služby;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-06-006;Výkon státní správy v oblasti posudkové služby a v oblasti organizace a řízení posudkové služby;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-06-007;Výkon činnosti posudkových komisí;02-06;;nevyužitý;0;nezmapováno;rejstrik
+02-07-001;Tvorba koncepce v oblasti sociálních služeb a politiky sociálního začleňování;02-07;;nevyužitý;0;nezmapováno;rejstrik
+02-07-002;Metodické řízení v oblasti sociálních služeb a dalších systémů v oblasti sociálního začleňování;02-07;;nevyužitý;0;nezmapováno;rejstrik
+02-07-003;Tvorba právních předpisů v oblasti sociálních služeb a dalších systémů v oblasti sociálního začleňování;02-07;;nevyužitý;0;nezmapováno;rejstrik
+02-07-004;Výkon a koordinace veřejné správy v oblasti sociálních služeb a dalších systémů sociálního začleňování;02-07;;nevyužitý;0;nezmapováno;rejstrik
+02-07-005;Zpracování statistik, analýz a prognóz v oblasti politiky sociálního začleňování;02-07;;nevyužitý;0;nezmapováno;rejstrik
+03-01-001;Tvorba koncepce v oblasti příjmové politiky;03-01;;nevyužitý;0;nezmapováno;rejstrik
+03-01-002;Tvorba právních předpisů v oblasti příjmové politiky;03-01;;nevyužitý;0;nezmapováno;rejstrik
+03-01-003;Expertní, analytické a prognostické činnosti v oblasti příjmové politiky;03-01;;nevyužitý;0;nezmapováno;rejstrik
+03-02-001;Tvorba koncepce v oblasti úrazového pojištění;03-02;;nevyužitý;0;nezmapováno;rejstrik
+03-02-002;Tvorba právních předpisů v oblasti úrazového pojištění;03-02;;nevyužitý;0;nezmapováno;rejstrik
+03-02-003;Zpracování analýz v oblasti úrazového pojištění;03-02;;nevyužitý;0;nezmapováno;rejstrik
+03-02-004;Zabezpečení pojistně-matematických činností v oblasti úrazového pojištění;03-02;;nevyužitý;0;nezmapováno;rejstrik
+03-03-001;Tvorba koncepce v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;nezmapováno;rejstrik
+03-03-002;Tvorba právních předpisů v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;nezmapováno;rejstrik
+03-03-003;Metodické řízení v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;nezmapováno;rejstrik
+03-03-004;Výkon státní správy v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;nezmapováno;rejstrik
+03-03-005;Zpracování analýz v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;nezmapováno;rejstrik
+03-03-006;Zabezpečení pojistně-matematických činností v oblasti soukromého důchodového pojištění;03-03;;nevyužitý;0;nezmapováno;rejstrik
+03-04-001;Tvorba koncepce v oblasti důchodového pojištění;03-04;;nevyužitý;0;nezmapováno;rejstrik
+03-04-002;Tvorba právních předpisů v oblasti důchodového pojištění;03-04;;nevyužitý;0;nezmapováno;rejstrik
+03-04-003;Metodické řízení v oblasti důchodového pojištění;03-04;;nevyužitý;0;nezmapováno;rejstrik
+03-04-004;Výkon státní správy v oblasti důchodového pojištění;03-04;;nevyužitý;0;nezmapováno;rejstrik
+03-04-005;Zpracování analýz v oblasti důchodového pojištění;03-04;;nevyužitý;0;nezmapováno;rejstrik
+03-04-006;Zabezpečení pojistně-matematických činností v oblasti důchodového pojištění;03-04;;nevyužitý;0;nezmapováno;rejstrik
+03-05-001;Tvorba koncepce v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;nezmapováno;rejstrik
+03-05-002;Tvorba právních předpisů v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;nezmapováno;rejstrik
+03-05-003;Metodické řízení v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;nezmapováno;rejstrik
+03-05-004;Výkon státní správy v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;nezmapováno;rejstrik
+03-05-005;Zpracování analýz v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;nezmapováno;rejstrik
+03-05-006;Zabezpečení pojistně-matematických činností v oblasti pojistného na sociální zabezpečení;03-05;;nevyužitý;0;nezmapováno;rejstrik
+03-06-001;Tvorba koncepce v oblasti nemocenského pojištění;03-06;;nevyužitý;0;nezmapováno;rejstrik
+03-06-002;Tvorba právních předpisů v oblasti nemocenského pojištění;03-06;;nevyužitý;0;nezmapováno;rejstrik
+03-06-003;Metodické řízení v oblasti nemocenského pojištění;03-06;;nevyužitý;0;nezmapováno;rejstrik
+03-06-004;Výkon státní správy v oblasti nemocenského pojištění;03-06;;nevyužitý;0;nezmapováno;rejstrik
+03-06-005;Zpracování analýz v oblasti nemocenského pojištění;03-06;;nevyužitý;0;nezmapováno;rejstrik
+03-06-006;Zabezpečení pojistně-matematických činností v oblasti nemocenského pojištění;03-06;;nevyužitý;0;nezmapováno;rejstrik
+04-01-001;Tvorba koncepcí a strategií v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-002;Tvorba právních předpisů v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-003;Metodické řízení v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-004;Metodické řízení KAG a INSP v oblasti politiky zaměstnanosti;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-005;Výkon státní správy v oblasti politiky zaměstnanosti a inspekce práce;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-006;Zpracování statistik, analýz a prognóz v oblasti politiky zaměstnanosti;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-007;Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti politiky zaměstnanosti;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-01-008;Věcná koordinace projektů v oblasti zaměstnanosti;04-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-02-001;Tvorba koncepcí a stragií v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-02-002;Tvorba nástrojů aktivní politiky zaměstnanosti;04-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-02-003;Tvorba právních předpisů v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-02-004;Metodické řízení KAG v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-02-005;Výkon státní správy v oblasti aktivní politiky zaměstnanosti;04-02;;nevyužitý;0;nezmapováno;rejstrik
+04-02-006;Zpracování podkladů a vytváření stanovisek v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-02-007;Tvorba věcných podkladů pro digitalizaci v oblasti aktivní politiky zaměstnanosti;04-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-03-001;Zpracování statistik, analýz trhu práce a politik zaměstnanosti;04-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-03-002;Rozvoj datové základny trhu práce a politik zaměstnanosti;04-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-03-003;Rozvoj modelové platformy trhu práce a politik zaměstnanosti;04-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-03-004;Rozvoj platformy pro vizualizaci dat trhu práce a politik zaměstnanosti;04-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-001;Tvorba koncepcí a stragií v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-002;Tvroba právních předpisů v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-003;Metodické řízení KAG v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-004;Výkon státní správy v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-005;Zpracování statistik, analýz a prognóz v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-006;Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-04-007;Tvorba věcných podkladů pro digitalizaci v oblasti mezinárodní pracovní mobility a integrace cizinců;04-04;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-05-001;Tvorba koncepcí a strategií v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-05-002;Tvorba právních předpisů v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-05-003;Metodické řízení KAG v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-05-004;Výkon státní správy v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-05-005;Tvorba věcných podkladů pro digitalizaci v oblasti služeb trhu práce a dalšího vzdělávání;04-05;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-06-001;Tvorba koncepcí a stragií v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-06-002;Tvorba právních předpisů v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-06-003;Metodické řízení KAG v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-06-004;Výkon státní správy v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-06-005;Zpracování podkladů a vytváření stanovisek pro mezinárodní a vnitrostátní orgány v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+04-06-006;Tvorba věcných podkladů pro digitalizaci v oblasti zaměstnávání OZP a sociálního podnikání;04-06;;využitý;0;zmapováno jiným útvarem;rejstrik
+05-01-001;Tvorba koncepcí v oblasti pracovněprávních vztahů a kolektivního vyjednávání;05-01;;nevyužitý;0;nezmapováno;rejstrik
+05-01-002;Tvorba právních předpisů v oblasti pracovněprávní legislativy a kolektivního vyjednávání;05-01;;nevyužitý;0;nezmapováno;rejstrik
+05-01-003;Příprava podkladů a stanovisek v oblasti pracovněprávních otázek, kolektivních smluv a kolektivního vyjednávání pro mezinárodní orgány, správní orgány a jiné subjekty;05-01;;nevyužitý;0;nezmapováno;rejstrik
+05-01-004;Řízení agendy kolektivních smluv, kolektivního vyjednávání a vedení seznamu mediátorů;05-01;;nevyužitý;0;nezmapováno;rejstrik
+05-01-005;Výkon státní správy v oblasti pracovněprávní legislativy a kolektivního vyjednávání;05-01;;nevyužitý;0;nezmapováno;rejstrik
+05-02-001;Tvorba koncepcí v oblasti odměňování a cestovních náhrad;05-02;;nevyužitý;0;nezmapováno;rejstrik
+05-02-002;Tvorba právních předpisů v oblasti odměňování a cestovních náhrad;05-02;;nevyužitý;0;nezmapováno;rejstrik
+05-02-003;Metodické řízení v oblasti mzdové politiky;05-02;;nevyužitý;0;nezmapováno;rejstrik
+05-02-004;Výkon a správa agendy hodnocení práce;05-02;;nevyužitý;0;nezmapováno;rejstrik
+05-02-005;Zpracování podkladů a stanovisek pro provádění mzdové politiky a vyhodnocení vývoje mezd;05-02;;nevyužitý;0;nezmapováno;rejstrik
+05-02-006;Zpracování zdrojových informací pro státní rozpočet ČR;05-02;;nevyužitý;0;nezmapováno;rejstrik
+05-03-001;Tvorba koncepcí a strategií v oblasti bezpečnosti práce a pracovního prostředí;05-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+05-03-002;Tvorba právních předpisů v oblasti BOZP;05-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+05-03-003;Metodické řízení a koordinace činností podřízených organizací v oblasti inspekce práce a výzkumu bezpečnosti práce;05-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+05-03-004;Příprava podkladů a účast na jednání v národních orgánech a v mezinárodních organizacích k problematice BOZP;05-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+05-03-005;Správa agendy vydávání akreditací podle zákona č. 309/2006 Sb.;05-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+05-03-006;Výkon státní správy v oblasti bezpečnosti práce a pracovního prostředí;05-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+06-01-001;Tvorba koncepcí v oblasti řízení a realizace programů, opatření a projektů z EUF;06-01;;nevyužitý;0;nezmapováno;rejstrik
+06-01-002;Institucionální zajištění implementace programů z EUF včetně pracovních skupin;06-01;;nevyužitý;0;nezmapováno;rejstrik
+06-01-003;Řízení a implementace programů z EUF včetně technické asistence;06-01;;nevyužitý;0;nezmapováno;rejstrik
+06-01-004;Řízení a implementace projektů;06-01;;využitý;0;zmapováno jiným útvarem;rejstrik
+06-01-005;Negociace a plnění informační povinnosti;06-01;;nevyužitý;0;nezmapováno;rejstrik
+06-01-006;Finanční řízení pomoci z EUF;06-01;;nevyužitý;0;nezmapováno;rejstrik
+06-01-007;Příprava podkladů a stanovisek v oblasti řízení a realizace projektů pro mezinárodní organizace, správní orgány a jiné subjekty;06-01;;nevyužitý;0;nezmapováno;rejstrik
+06-02-001;Tvorba koncepcí v oblasti mezinárodních vztahů;06-02;;nevyužitý;0;nezmapováno;rejstrik
+06-02-002;Příprava, koordinace a účast na projednávání mezinárodních dokumentů a národních pozic;06-02;;nevyužitý;0;nezmapováno;rejstrik
+06-02-003;Multilaterální a bilaterální spolupráce s členskými a nečlenskými zeměmi EU;06-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+06-02-004;Účast na mezinárodních jednáních v orgánech EU a v mezinárodních organizacích;06-02;;využitý;0;zmapováno jiným útvarem;rejstrik
+06-02-005;Řízení a implementace programů a projektů;06-02;;nevyužitý;0;nezmapováno;rejstrik
+06-02-006;Výkon státní správy v oblasti mezinárodních vztahů;06-02;;nevyužitý;0;nezmapováno;rejstrik
+07-01-001;Zajišťování vztahů s médii;07-01;;nevyužitý;0;nezmapováno;rejstrik
+07-01-002;Příprava tiskových konferencí, tiskových zpráv a dalších podkladů;07-01;;nevyužitý;0;nezmapováno;rejstrik
+07-01-003;Poskytování informací veřejnosti, včetně vyřizování stížností, podnětů a oznámení;07-01;;nevyužitý;0;nezmapováno;rejstrik
+07-01-004;Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.;07-01;71;využitý;3;zmapováno;rejstrik
+07-01-005;Tvorba a aktualizace webových stránek XÚ;07-01;;nevyužitý;0;nezmapováno;rejstrik
+07-01-006;Monitoring vybraného tisku;07-01;;nevyužitý;0;nezmapováno;rejstrik
+07-02-001;Příprava podkladů pro jednání ministra;07-02;;nevyužitý;0;nezmapováno;rejstrik
+07-02-002;Zajišťování účasti na jednání výborů a podvýborů PS a Senátu;07-02;;nevyužitý;0;nezmapováno;rejstrik
+07-02-003;Zajišťování odpovědí na interpelace;07-02;;nevyužitý;0;nezmapováno;rejstrik
+07-02-004;Sledování programu orgánů Parlamentu;07-02;;nevyužitý;0;nezmapováno;rejstrik
+07-03-001;Příprava a zpracování podkladů pro jednání ministra;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-03-002;Zajišťování účasti na jednání výborů a komisí PORV, vlády;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-03-003;Koordinace a plnění úkolů z vládních usnesení a kontrola jejich plnění;07-03;;využitý;0;zmapováno jiným útvarem;rejstrik
+07-03-004;Plán legislativních prací a nelegislativních úkolů vlády;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-03-005;Zajištění a práce s EDOC;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-03-006;Zajištění činností v rámci projektu „Cíle vlády ČR“;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-03-007;Zajištění činnosti rozkladové komise, včetně účasti a zpracování podkladů;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-03-008;Meziresortní připomínková řízení;07-03;;nevyužitý;0;nezmapováno;rejstrik
+07-04-001;Připomínkování návrhů smluv;07-04;;nevyužitý;0;nezmapováno;rejstrik
+07-04-002;Zastupování XÚ a resortu před soudy, popř. jinými institucemi;07-04;71;využitý;3;zmapováno;rejstrik
+07-04-003;Právní servis (vyřizování právních a majetkových záležitostí);07-04;;nevyužitý;0;nezmapováno;rejstrik
+07-04-004;Stížnosti a petice;07-04;71;využitý;3;zmapováno;rejstrik
+07-04-005;Právní konzultace;07-04;71;využitý;1;zmapováno;rejstrik
+07-05-001;Tvorba koncepce financování resortu XÚ;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-002;Metodika financování a účetnictví;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-003;Účetní a finanční výkaznictví;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-004;Finanční řízení včetně realizace finančních operací;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-005;Vedení účetnictví a oběh účetních dokladů;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-006;Zpracování a kontrola vybraných rozpočtových položek;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-007;Evidence a inventarizace majetku;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-008;Platební styk;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-009;Výkon pokladní agendy;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-010;Správa pohledávek a závazků;07-05;;nevyužitý;0;nezmapováno;rejstrik
+07-05-011;Správa kaucí a poplatků;07-05;;využitý;0;zmapováno jiným útvarem;rejstrik
+07-06-001;Zpracování statistik za kapitolu 313 a statistik v působnosti resortu XÚ;07-06;;nevyužitý;0;nezmapováno;rejstrik
+07-06-002;Zpracování statistik pro externí statistické systémy;07-06;;nevyužitý;0;nezmapováno;rejstrik
+07-06-003;Metodické řízení a konzultační činnost v oblasti statistických informací;07-06;;nevyužitý;0;nezmapováno;rejstrik
+07-06-004;Zpracování analýz statistických informací;07-06;;nevyužitý;0;nezmapováno;rejstrik
+07-06-005;Statistická zjišťování;07-06;;nevyužitý;0;nezmapováno;rejstrik
+07-07-001;Správa a údržba majetku;07-07;;nevyužitý;0;nezmapováno;rejstrik
+07-07-002;Obnova majetku - investice XÚ;07-07;;nevyužitý;0;nezmapováno;rejstrik
+07-07-003;Nákup;07-07;;nevyužitý;0;nezmapováno;rejstrik
+07-07-004;Autoprovoz;07-07;;nevyužitý;0;nezmapováno;rejstrik
+07-08-001;Personální správa;07-08;72;využitý;9;zmapováno;rejstrik
+07-08-002;Personální controlling;07-08;72;využitý;1;zmapováno;rejstrik
+07-08-003;Finanční řízení v oblasti lidských zdrojů;07-08;72;využitý;1;zmapováno;rejstrik
+07-08-004;Odměňování;07-08;72;využitý;2;zmapováno;rejstrik
+07-08-005;Péče o zaměstnance;07-08;72;využitý;2;zmapováno;rejstrik
+07-08-006;Hodnocení zaměstnanců;07-08;72;využitý;1;zmapováno;rejstrik
+07-08-007;Úřednické zkoušky;07-08;72;využitý;2;zmapováno;rejstrik
+07-08-008;Vzdělávání a rozvoj zaměstnanců;07-08;72;využitý;1;zmapováno;rejstrik
+07-08-009;Organizační vztahy a systemizace;07-08;71;využitý;3;zmapováno;rejstrik
+07-09-001;Analytické a expertní činnosti, které nejsou předmětem hlavní činnosti;07-09;;nevyužitý;0;nezmapováno;rejstrik
+07-09-002;Činnost v meziresortních a resortních pracovních skupinách a komisích;07-09;;nevyužitý;0;nezmapováno;rejstrik
+07-09-003;Vnitřní připomínková řízení - zpracování podkladů a stanovisek;07-09;;nevyužitý;0;nezmapováno;rejstrik
+07-09-004;Organizačně - technický servis pro jednání orgánů RHSD;07-09;;nevyužitý;0;nezmapováno;rejstrik
+07-10-001;Administrativní podpora - aktivity sekretariátu;07-10;;nevyužitý;0;nezmapováno;rejstrik
+07-10-002;Administrativní podpora - výroba prezentačního materiálu, tisk, zajišťování kancelářských potřeb, apod.;07-10;;nevyužitý;0;nezmapováno;rejstrik
+07-10-003;Organizace pracovních cest, návštěv a akcí, protokolární služby;07-10;;nevyužitý;0;nezmapováno;rejstrik
+07-10-004;Spisová služba;07-10;;nevyužitý;0;nezmapováno;rejstrik
+07-10-005;Správa archivu;07-10;;nevyužitý;0;nezmapováno;rejstrik
+07-10-006;Zajištění provozu podatelny;07-10;;nevyužitý;0;nezmapováno;rejstrik
+07-11-001;Náhrada škody podle zákona č. 82/1998 Sb.;07-11;71;využitý;1;zmapováno;rejstrik
+07-11-002;Náhrada škody podle zákona č. 262/2006 Sb.;07-11;71;využitý;2;zmapováno;rejstrik
+07-12-001;Koncepční činnost v oblasti ICT včetně podřízených organizací;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-002;Provoz a rozvoj infrastruktury resortu, včetně napojení na externí prostředí;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-003;Provoz, údržba a rozvoj výpočetní techniky XÚ;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-004;Provoz, údržba a rozvoj výpočetní techniky KAG;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-005;Provoz, údržba a rozvoj výpočetní techniky obcí vykonávajících agendu hmotné nouze a sociálních služeb;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-006;Provoz, údržba a rozvoj informačních systémů, agend a databází XÚ;07-12;;využitý;0;zmapováno jiným útvarem;rejstrik
+07-12-007;Provoz, údržba a rozvoj informačních systémů, agend a databází KAG;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-008;Provoz, údržba a rozvoj informačních systémů, agend a databází obcí vykonávajících agendu hmotné nouze a sociálních služeb;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-009;Finanční a smluvní zajištění výstavby a správy informačních systémů;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-12-010;Provoz, údržba a rozvoj komunikační infrastruktury resortu;07-12;;nevyužitý;0;nezmapováno;rejstrik
+07-04-006;Podezření ze spáchání protiprávního jednání;07-04;71;;1;zmapováno;karta

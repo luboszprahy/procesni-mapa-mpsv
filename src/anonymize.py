@@ -90,7 +90,8 @@ def main():
 
     # kody a technicka pole zustavaji, textova se anonymizuji
     KEEP = {"kod", "agenda_kod", "proces_kod", "dilci_proces_kod", "aktivita_kod",
-            "primarni", "pocet_aktivit", "zdroj", "zdroj_radek", "stav"}
+            "primarni", "pocet_aktivit", "zdroj", "zdroj_radek",
+            "stav_rejstrik", "stav_mapovani"}
     out_model = {"meta": {k: anon(v) for k, v in model["meta"].items()}}
     for tab in ("agendy", "procesy", "dilci_procesy", "aktivity", "vazby"):
         out_model[tab] = [{k: (v if k in KEEP else anon(v)) for k, v in row.items()}
@@ -98,11 +99,13 @@ def main():
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    write_csv(out / "agendy.csv", out_model["agendy"], ["kod", "nazev", "vlastnik", "zdroj"])
+    write_csv(out / "agendy.csv", out_model["agendy"],
+              ["kod", "nazev", "vlastnik", "pocet_aktivit", "stav_mapovani", "zdroj"])
     write_csv(out / "procesy.csv", out_model["procesy"],
-              ["kod", "nazev", "agenda_kod", "vlastnik", "zdroj"])
+              ["kod", "nazev", "agenda_kod", "vlastnik", "pocet_aktivit", "stav_mapovani", "zdroj"])
     write_csv(out / "dilci_procesy.csv", out_model["dilci_procesy"],
-              ["kod", "nazev", "proces_kod", "vlastnik", "stav", "pocet_aktivit", "zdroj"])
+              ["kod", "nazev", "proces_kod", "vlastnik", "stav_rejstrik", "pocet_aktivit",
+               "stav_mapovani", "zdroj"])
     write_csv(out / "aktivity.csv", out_model["aktivity"],
               ["kod", "nazev", "dilci_proces_kod", "vykonava", "spolupracuje",
                "vnitrni_predpis", "sekce", "zdroj_radek"])
