@@ -10,6 +10,8 @@ Aktualizováno: 2026-08-18
 - Pořizování dat = **Power Apps canvas app od začátku** (kaskádové číselníky
   agenda→proces→dílčí proces SharePoint formulář neumí).
 - Vazba aktivita ↔ dílčí proces je **M:N přes vazební tabulku**.
+- Do SharePointu jdou **všechna data rejstříku**; položky bez aktivit se označují
+  příznakem `stav_mapovani`.
 - Prezentace: canvas app ve stylu MessageCenterDashboard + HTML se zapečenými daty
   (FloorPlan pattern).
 
@@ -27,6 +29,19 @@ Aktualizováno: 2026-08-18
   žádný identifikující token. Mapování v `runs/anonym/mapovani.json`.
 - Ověřeno v prohlížeči: strom, fulltext, filtr útvaru, detail aktivity, počty aktivit
   po větvích (10+36=46, filtr útvaru 331 → 11 aktivit = shoda s CSV).
+
+## Stav zmapování (příznak `stav_mapovani` na všech úrovních)
+
+| úroveň | zmapováno | zmapováno jiným útvarem | nezmapováno |
+|---|---|---|---|
+| agendy | 2 | — | 5 |
+| procesy | 7 | — | 39 |
+| dílčí procesy | 23 | 62 | 165 |
+
+„Zmapováno jiným útvarem" = rejstřík položku barevně vede jako využitou, ale aktivity
+k ní zatím nemáme, protože máme kartu jen ze sekce 3. Tento stav je nutné odlišit —
+až přibudou karty dalších sekcí, překlopí se na „zmapováno". V mapě jsou nezmapované
+větve ztlumené kurzívou a mají vlastní filtr (zmapované / celý rejstřík / nezmapované).
 
 ## Nálezy k rozhodnutí (report `runs/normalize/report.md`)
 
