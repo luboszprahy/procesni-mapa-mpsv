@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-18
+Aktualizováno: 2026-08-18 (konec dne, pokračování 19.08.2026)
 
 ## Dohodnutá východiska
 
@@ -14,6 +14,10 @@ Aktualizováno: 2026-08-18
   příznakem `stav_mapovani`.
 - Prezentace: canvas app ve stylu MessageCenterDashboard + HTML se zapečenými daty
   (FloorPlan pattern).
+- **Vývojové prostředí = tenant PPF** (rozhodnuto 18.08.2026). Lokální SharePoint doma
+  se zamítá: bezplatná edice neexistuje a Power Platform nemá lokální runtime, takže
+  by appku ani flow stejně nešlo vyvíjet. Případná záloha do budoucna = vlastní
+  M365 Business Basic (~150 Kč/uživatel/měsíc).
 
 ## Hotovo
 
@@ -61,7 +65,18 @@ větve ztlumené kurzívou a mají vlastní filtr (zmapované / celý rejstřík
 - Publikační flow: model → HTML do Site Assets.
 - Generování textu OŘ z aktivit (fáze 2).
 
-## Next step
+## Next step (19.08.2026)
 
-Ukázat `viz/mapa_prototyp.html` zadavatelce, posbírat připomínky k obsahu i vzhledu,
-teprve pak zmrazit datový model a psát PRD.
+1. **Ukázat `viz/mapa_prototyp.html` zadavatelce** a posbírat připomínky k obsahu
+   i vzhledu — teprve pak zmrazit datový model.
+2. Souběžně lze začít s **návrhem SharePoint listů** (nezávisí na připomínkách k mapě):
+   číselníky `Agendy`, `Procesy`, `DilciProcesy`, list `Aktivity` a vazební list
+   `AktivitaDilciProces`; interní názvy sloupců bez diakritiky, `stav_mapovani`
+   jako volba, kódy `AA-BB-CCC-DDDD` jako textový přirozený klíč (ne lookup ID,
+   kvůli přenositelnosti mezi tenanty).
+3. K tomu **provisioning skript** (PnP PowerShell) + import anonymizovaných dat
+   z `runs/anonym/*.csv` do PPF prostředí.
+4. Otevřené otázky na zadavatelku: konflikty vlastnictví (3 položky), dílčí proces
+   navíc proti rejstříku, dvě dvojice podobných aktivit — viz Nálezy výše.
+
+Stav: prototyp hotový a ověřený, čeká se na zpětnou vazbu. Nic nerozpracovaného.
