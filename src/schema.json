@@ -1,0 +1,385 @@
+{
+  "verze": "1.0",
+  "poznamka": "Jediny zdroj pravdy o strukture SharePoint listu. Cte ho check_schema.py (validace dat + generovani deploy/sharepoint_schema.md), make_setup.py (provisioning) a make_import.py (import dat). Nikde jinde strukturu nedeklaruj.",
+  "prefix": "mpsv_",
+  "publisher": "mpsv",
+  "lists": [
+    {
+      "name": "Agendy",
+      "csv": "agendy.csv",
+      "popis": "Ciselnik agend (uroven AA). Zdroj: centralni rejstrik.",
+      "ignoruj_csv": {
+        "pocet_aktivit": "odvozeny udaj - pocita se az v mape z vazebni tabulky, neuklada se"
+      },
+      "columns": [
+        {
+          "name": "Title",
+          "display": "Kód",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "kod",
+          "popis": "Identifikacni kod AA. Prirozeny klic."
+        },
+        {
+          "name": "nazev",
+          "display": "Název",
+          "type": "Text",
+          "maxlen": 255,
+          "required": true,
+          "csv": "nazev"
+        },
+        {
+          "name": "vlastnik",
+          "display": "Vlastník agendy",
+          "type": "Text",
+          "maxlen": 255,
+          "csv": "vlastnik",
+          "popis": "Sekce. Vice vlastniku je pripustny stav - oddelovac '; '."
+        },
+        {
+          "name": "stav_mapovani",
+          "display": "Stav mapování",
+          "type": "Choice",
+          "indexed": true,
+          "csv": "stav_mapovani",
+          "choices": [
+            "zmapováno",
+            "zmapováno jiným útvarem",
+            "nezmapováno"
+          ]
+        },
+        {
+          "name": "zdroj",
+          "display": "Zdroj",
+          "type": "Choice",
+          "csv": "zdroj",
+          "choices": [
+            "rejstrik",
+            "karta"
+          ],
+          "popis": "Odkud polozka prisla - rejstrik nebo evidencni karta utvaru."
+        }
+      ],
+      "display": "Agendy"
+    },
+    {
+      "name": "Procesy",
+      "csv": "procesy.csv",
+      "popis": "Ciselnik procesu (uroven AA-BB).",
+      "ignoruj_csv": {
+        "pocet_aktivit": "odvozeny udaj - pocita se az v mape"
+      },
+      "columns": [
+        {
+          "name": "Title",
+          "display": "Kód",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "kod",
+          "popis": "Identifikacni kod AA-BB."
+        },
+        {
+          "name": "nazev",
+          "display": "Název",
+          "type": "Text",
+          "maxlen": 255,
+          "required": true,
+          "csv": "nazev"
+        },
+        {
+          "name": "agenda_kod",
+          "display": "Agenda (kód)",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "agenda_kod",
+          "ref": "Agendy",
+          "popis": "Textovy odkaz na Agendy.Title - ne lookup ID (prenositelnost mezi tenanty)."
+        },
+        {
+          "name": "vlastnik",
+          "display": "Vlastník procesu",
+          "type": "Text",
+          "maxlen": 255,
+          "csv": "vlastnik",
+          "popis": "Odbor. Vice vlastniku pripustne - oddelovac '; '."
+        },
+        {
+          "name": "stav_mapovani",
+          "display": "Stav mapování",
+          "type": "Choice",
+          "indexed": true,
+          "csv": "stav_mapovani",
+          "choices": [
+            "zmapováno",
+            "zmapováno jiným útvarem",
+            "nezmapováno"
+          ]
+        },
+        {
+          "name": "zdroj",
+          "display": "Zdroj",
+          "type": "Choice",
+          "csv": "zdroj",
+          "choices": [
+            "rejstrik",
+            "karta"
+          ]
+        }
+      ],
+      "display": "Procesy"
+    },
+    {
+      "name": "DilciProcesy",
+      "csv": "dilci_procesy.csv",
+      "popis": "Ciselnik dilcich procesu (uroven AA-BB-CCC).",
+      "ignoruj_csv": {
+        "pocet_aktivit": "odvozeny udaj - pocita se az v mape"
+      },
+      "columns": [
+        {
+          "name": "Title",
+          "display": "Kód",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "kod",
+          "popis": "Identifikacni kod AA-BB-CCC."
+        },
+        {
+          "name": "nazev",
+          "display": "Název",
+          "type": "Text",
+          "maxlen": 255,
+          "required": true,
+          "csv": "nazev",
+          "popis": "Nejdelsi namereny nazev 166 znaku - rezerva do 255 je mala, ale sloupec musi zustat Text kvuli razeni a indexaci."
+        },
+        {
+          "name": "proces_kod",
+          "display": "Proces (kód)",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "proces_kod",
+          "ref": "Procesy"
+        },
+        {
+          "name": "vlastnik",
+          "display": "Vlastník dílčího procesu",
+          "type": "Text",
+          "maxlen": 255,
+          "csv": "vlastnik",
+          "popis": "Odbor. Vice vlastniku pripustne - oddelovac '; '."
+        },
+        {
+          "name": "stav_rejstrik",
+          "display": "Stav v rejstříku",
+          "type": "Choice",
+          "csv": "stav_rejstrik",
+          "choices": [
+            "využitý",
+            "využitý-S4",
+            "nevyužitý"
+          ],
+          "popis": "Barevne odliseni v puvodnim rejstriku."
+        },
+        {
+          "name": "stav_mapovani",
+          "display": "Stav mapování",
+          "type": "Choice",
+          "indexed": true,
+          "csv": "stav_mapovani",
+          "choices": [
+            "zmapováno",
+            "zmapováno jiným útvarem",
+            "nezmapováno"
+          ]
+        },
+        {
+          "name": "zdroj",
+          "display": "Zdroj",
+          "type": "Choice",
+          "csv": "zdroj",
+          "choices": [
+            "rejstrik",
+            "karta"
+          ]
+        }
+      ],
+      "display": "Dílčí procesy"
+    },
+    {
+      "name": "Aktivity",
+      "csv": "aktivity.csv",
+      "popis": "Aktivity (uroven AA-BB-CCC-DDDD). Jeden radek evidence = jedna aktivita.",
+      "default_sort": {
+        "column": "nazev_kratky",
+        "vzestupne": true,
+        "pak": "Title"
+      },
+      "ignoruj_csv": {
+        "zdroj_radek": "cislo radku ve zdrojove evidencni karte - artefakt importu, do rejstriku nepatri"
+      },
+      "columns": [
+        {
+          "name": "Title",
+          "display": "Kód",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "kod",
+          "popis": "Identifikacni kod AA-BB-CCC-DDDD."
+        },
+        {
+          "name": "nazev",
+          "display": "Název aktivity (úplný)",
+          "type": "Note",
+          "required": true,
+          "csv": "nazev",
+          "popis": "Uplny nazev. Note (vice radku, prosty text) - namereno 220 znaku, hranice 255 je blizko. Note nejde indexovat ani radit, proto vedle nej stoji nazev_kratky."
+        },
+        {
+          "name": "nazev_kratky",
+          "display": "Název",
+          "type": "Text",
+          "maxlen": 255,
+          "indexed": true,
+          "csv": null,
+          "derive_truncate": {
+            "from": "nazev",
+            "maxlen": 150
+          },
+          "popis": "Odvozeny ze sloupce nazev - useknuty na hranici slova na 150 znaku, s vypustkou. Slouzi k razeni a indexaci ve view, ktere Note neumi. Udrzuje ho import a porizovaci appka pri kazde zmene nazvu."
+        },
+        {
+          "name": "dilci_proces_kod",
+          "display": "Primární dílčí proces (kód)",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "dilci_proces_kod",
+          "ref": "DilciProcesy",
+          "popis": "Primarni zarazeni. Vsechna zarazeni vc. tohoto drzi list AktivitaDilciProces."
+        },
+        {
+          "name": "vykonava",
+          "display": "Vykonává útvar",
+          "type": "Text",
+          "maxlen": 255,
+          "indexed": true,
+          "csv": "vykonava",
+          "popis": "Oddeleni."
+        },
+        {
+          "name": "spolupracuje",
+          "display": "Spolupracuje",
+          "type": "Note",
+          "csv": "spolupracuje"
+        },
+        {
+          "name": "vnitrni_predpis",
+          "display": "Vnitřní předpis",
+          "type": "Note",
+          "csv": "vnitrni_predpis",
+          "popis": "Vice predpisu oddeleno '; '. Namereno 293 znaku - proto Note."
+        },
+        {
+          "name": "text_pro_or",
+          "display": "Text pro OŘ",
+          "type": "Note",
+          "csv": null,
+          "popis": "V evidencni karte neexistuje - zaklada se prazdny, plni se rucne pro budouci generovani organizacniho radu."
+        },
+        {
+          "name": "sekce",
+          "display": "Sekce",
+          "type": "Text",
+          "maxlen": 20,
+          "indexed": true,
+          "csv": "sekce"
+        },
+        {
+          "name": "stav",
+          "display": "Stav",
+          "type": "Choice",
+          "indexed": true,
+          "csv": null,
+          "choices": [
+            "pracovní",
+            "schváleno"
+          ],
+          "default": "pracovní",
+          "popis": "V evidencni karte neexistuje - pri importu se plni hodnotou 'pracovní'."
+        },
+        {
+          "name": "datum_aktualizace",
+          "display": "Datum aktualizace",
+          "type": "DateTime",
+          "csv": null,
+          "popis": "V evidencni karte neexistuje - pri importu se plni datem importu, dal ji udrzuje porizovaci appka."
+        }
+      ],
+      "display": "Aktivity"
+    },
+    {
+      "name": "AktivitaDilciProces",
+      "csv": "aktivita_dilciproces.csv",
+      "popis": "Vazebni tabulka M:N - aktivita muze patrit do vice dilcich procesu.",
+      "ignoruj_csv": {},
+      "columns": [
+        {
+          "name": "Title",
+          "display": "Klíč",
+          "type": "Text",
+          "maxlen": 40,
+          "required": true,
+          "indexed": true,
+          "csv": null,
+          "derive": "{aktivita_kod}__{dilci_proces_kod}",
+          "popis": "Odvozeny klic - zajistuje idempotenci importu a brani duplicitni vazbe."
+        },
+        {
+          "name": "aktivita_kod",
+          "display": "Aktivita (kód)",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "aktivita_kod",
+          "ref": "Aktivity"
+        },
+        {
+          "name": "dilci_proces_kod",
+          "display": "Dílčí proces (kód)",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "dilci_proces_kod",
+          "ref": "DilciProcesy"
+        },
+        {
+          "name": "primarni",
+          "display": "Primární",
+          "type": "Choice",
+          "csv": "primarni",
+          "choices": [
+            "ano",
+            "ne"
+          ]
+        }
+      ],
+      "display": "Vazba aktivita–dílčí proces"
+    }
+  ]
+}
