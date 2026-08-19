@@ -1,0 +1,237 @@
+# Obrazovka 3 — přiřazení aktivity do dalších dílčích procesů (M:N).
+# Vlevo existující vazby (delegovaný dotaz podle indexovaného aktivita_kod),
+# vpravo výběr z číselníku dílčích procesů (kolekce, hledání tedy delegaci neřeší).
+Screens:
+  scr_Vazby:
+    Properties:
+      Fill: =RGBA(248, 249, 250, 1)
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+    Children:
+      - rec_HlavickaV:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 18, 107, 1)
+            Height: =72
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - ico_ZpetV:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =40
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Navigate(scr_Detail, ScreenTransition.UnCover)
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =40
+            X: =24
+            Y: =16
+      - lbl_NadpisV:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =40
+            Size: =16
+            Text: |-
+              ="Dílčí procesy aktivity " & varAktivita.Title
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =900
+            X: =76
+            Y: =16
+      - lbl_l_Prirazene:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =24
+            Size: =13
+            Text: ="Přiřazeno"
+            Width: =620
+            X: =40
+            Y: =96
+      - gal_Vazby:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+          Properties:
+            Height: =Parent.Height - Self.Y - 40
+            Items: |-
+              =Filter('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title)
+            TemplateSize: =64
+            Width: =620
+            X: =40
+            Y: =128
+          Children:
+            - lbl_VazbaKod:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(0, 18, 107, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =20
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.dilci_proces_kod
+                  Width: =140
+                  X: =16
+                  Y: =10
+            - lbl_VazbaNazev:
+                Control: Label@2.5.1
+                Properties:
+                  Font: =Font.'Open Sans'
+                  Height: =36
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: |-
+                    =LookUp(colDilci, Title = ThisItem.dilci_proces_kod).nazev
+                  Width: =Parent.TemplateWidth - 240
+                  X: =16
+                  Y: =28
+            - lbl_VazbaPrimarni:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(16, 124, 16, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =20
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: |-
+                    =If(ThisItem.primarni.Value = "ano", "primární", "")
+                  Width: =100
+                  X: =Parent.TemplateWidth - 220
+                  Y: =22
+            - ico_Odebrat:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =RGBA(168, 0, 0, 1)
+                  Height: =36
+                  Icon: =Icon.Trash
+                  OnSelect: |-
+                    =IfError(
+                        Remove('Vazba aktivita–dílčí proces', ThisItem);
+                        Notify("Vazba odebrána.", NotificationType.Success),
+                        Notify("Odebrání selhalo: " & FirstError.Message, NotificationType.Error)
+                    )
+                  PaddingBottom: =10
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  PaddingTop: =10
+                  Tooltip: ="Odebrat vazbu"
+                  Visible: =ThisItem.primarni.Value <> "ano"
+                  Width: =36
+                  X: =Parent.TemplateWidth - Self.Width - 12
+                  Y: =14
+            - sep_Vazba:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(237, 235, 233, 1)
+                  Height: =1
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  Y: =Parent.TemplateHeight - 1
+      - lbl_l_Nabidka:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =24
+            Size: =13
+            Text: ="Přidat další dílčí proces"
+            Width: =620
+            X: =700
+            Y: =96
+      - txt_HledatDp:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Font: =Font.'Open Sans'
+            Height: =40
+            HintText: ="Hledat v názvu nebo kódu"
+            Size: =13
+            Width: =620
+            X: =700
+            Y: =128
+      - gal_Nabidka:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+          Properties:
+            Height: =Parent.Height - Self.Y - 40
+            Items: |-
+              =If(
+                  IsBlank(txt_HledatDp.Text),
+                  colDilci,
+                  Search(colDilci, txt_HledatDp.Text, "Title", "nazev")
+              )
+            TemplateSize: =64
+            Width: =620
+            X: =700
+            Y: =180
+          Children:
+            - lbl_DpKod:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(0, 18, 107, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =20
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Title
+                  Width: =140
+                  X: =16
+                  Y: =10
+            - lbl_DpNazev:
+                Control: Label@2.5.1
+                Properties:
+                  Font: =Font.'Open Sans'
+                  Height: =36
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.nazev
+                  Width: =Parent.TemplateWidth - 120
+                  X: =16
+                  Y: =28
+            - ico_Pridat:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =RGBA(0, 120, 212, 1)
+                  Height: =36
+                  Icon: =Icon.Add
+                  OnSelect: |-
+                    =If(
+                        !IsBlank(LookUp('Vazba aktivita–dílčí proces', Title = varAktivita.Title & "__" & ThisItem.Title)),
+                        Notify("Aktivita už v tomto dílčím procesu je.", NotificationType.Warning),
+                        IfError(
+                            Patch(
+                                'Vazba aktivita–dílčí proces',
+                                Defaults('Vazba aktivita–dílčí proces'),
+                                {
+                                    Title: varAktivita.Title & "__" & ThisItem.Title,
+                                    aktivita_kod: varAktivita.Title,
+                                    dilci_proces_kod: ThisItem.Title,
+                                    primarni: { Value: "ne" }
+                                }
+                            );
+                            Notify("Přidáno do " & ThisItem.Title & ".", NotificationType.Success),
+                            Notify("Přidání selhalo: " & FirstError.Message, NotificationType.Error)
+                        )
+                    )
+                  PaddingBottom: =10
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  PaddingTop: =10
+                  Tooltip: ="Přidat vazbu"
+                  Width: =36
+                  X: =Parent.TemplateWidth - Self.Width - 12
+                  Y: =14
+            - sep_Dp:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(237, 235, 233, 1)
+                  Height: =1
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  Y: =Parent.TemplateHeight - 1

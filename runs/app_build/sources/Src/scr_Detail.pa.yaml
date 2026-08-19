@@ -1,0 +1,459 @@
+# Obrazovka 2 — detail/editace aktivity.
+# Kaskáda běží nad kolekcemi z App.OnStart (delegace se jich netýká).
+# Přidělení kódu je naopak dotaz nad zdrojem, delegovaný přes StartsWith(Title, prefix).
+Screens:
+  scr_Detail:
+    Properties:
+      Fill: =RGBA(248, 249, 250, 1)
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
+        Reset(drp_Agenda);
+        Reset(drp_Proces);
+        Reset(drp_Dilci)
+    Children:
+      - rec_Hlavicka:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 18, 107, 1)
+            Height: =72
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - ico_Zpet:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =40
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Navigate(scr_Seznam, ScreenTransition.UnCover)
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =40
+            X: =24
+            Y: =16
+      - lbl_Kod:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =40
+            Size: =16
+            Text: |-
+              =If(varNova, "Nová aktivita — kód se přidělí při uložení", varAktivita.Title)
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =800
+            X: =76
+            Y: =16
+      - lbl_l_Agenda:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Agenda"
+            Width: =620
+            X: =40
+            Y: =96
+      - drp_Agenda:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: =LookUp(colAgendy, Title = Left(varDpKod, 2)).nazev
+            Font: =Font.'Open Sans'
+            Height: =40
+            Items: =colAgendy
+            OnChange: |-
+              =Reset(drp_Proces);
+              Reset(drp_Dilci)
+            Size: =13
+            Value: ="nazev"
+            Width: =620
+            X: =40
+            Y: =120
+      - lbl_l_Proces:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Proces"
+            Width: =620
+            X: =40
+            Y: =172
+      - drp_Proces:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: =LookUp(colProcesy, Title = Left(varDpKod, 5)).nazev
+            Font: =Font.'Open Sans'
+            Height: =40
+            Items: =Filter(colProcesy, agenda_kod = drp_Agenda.Selected.Title)
+            OnChange: =Reset(drp_Dilci)
+            Size: =13
+            Value: ="nazev"
+            Width: =620
+            X: =40
+            Y: =196
+      - lbl_l_Dilci:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Dílčí proces"
+            Width: =620
+            X: =40
+            Y: =248
+      - drp_Dilci:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: =LookUp(colDilci, Title = varDpKod).nazev
+            Font: =Font.'Open Sans'
+            Height: =40
+            Items: =Filter(colDilci, proces_kod = drp_Proces.Selected.Title)
+            Size: =13
+            Value: ="nazev"
+            Width: =620
+            X: =40
+            Y: =272
+      - lbl_l_Nazev:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Aktivita — znění pro organizační řád"
+            Width: =620
+            X: =40
+            Y: =324
+      - txt_Nazev:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =If(varNova, "", varAktivita.nazev)
+            Font: =Font.'Open Sans'
+            Height: =88
+            Mode: =TextMode.MultiLine
+            Size: =13
+            Width: =620
+            X: =40
+            Y: =348
+      - lbl_l_Spolupracuje:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Spolupracuje"
+            Width: =620
+            X: =40
+            Y: =448
+      - txt_Spolupracuje:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =If(varNova, "", varAktivita.spolupracuje)
+            Font: =Font.'Open Sans'
+            Height: =64
+            Mode: =TextMode.MultiLine
+            Size: =13
+            Width: =620
+            X: =40
+            Y: =472
+      - lbl_l_TextOR:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Text pro OŘ"
+            Width: =620
+            X: =40
+            Y: =548
+      - txt_TextOR:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =If(varNova, "", varAktivita.text_pro_or)
+            Font: =Font.'Open Sans'
+            Height: =64
+            Mode: =TextMode.MultiLine
+            Size: =13
+            Width: =620
+            X: =40
+            Y: =572
+      - lbl_l_VlastnikAgendy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Vlastník agendy (z číselníku)"
+            Width: =620
+            X: =700
+            Y: =96
+      - lbl_VlastnikAgendy:
+          Control: Label@2.5.1
+          Properties:
+            Fill: =RGBA(237, 235, 233, 1)
+            Font: =Font.'Open Sans'
+            Height: =40
+            PaddingLeft: =12
+            Size: =13
+            Text: =drp_Agenda.Selected.vlastnik
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =620
+            X: =700
+            Y: =120
+      - lbl_l_VlastnikProcesu:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Vlastník procesu (z číselníku)"
+            Width: =620
+            X: =700
+            Y: =172
+      - lbl_VlastnikProcesu:
+          Control: Label@2.5.1
+          Properties:
+            Fill: =RGBA(237, 235, 233, 1)
+            Font: =Font.'Open Sans'
+            Height: =40
+            PaddingLeft: =12
+            Size: =13
+            Text: =drp_Proces.Selected.vlastnik
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =620
+            X: =700
+            Y: =196
+      - lbl_l_VlastnikDilci:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Vlastník dílčího procesu (z číselníku)"
+            Width: =620
+            X: =700
+            Y: =248
+      - lbl_VlastnikDilci:
+          Control: Label@2.5.1
+          Properties:
+            Fill: =RGBA(237, 235, 233, 1)
+            Font: =Font.'Open Sans'
+            Height: =40
+            PaddingLeft: =12
+            Size: =13
+            Text: =drp_Dilci.Selected.vlastnik
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =620
+            X: =700
+            Y: =272
+      - lbl_l_Utvar:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Vykonává útvar"
+            Width: =300
+            X: =700
+            Y: =324
+      - txt_Utvar:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =If(varNova, "", varAktivita.vykonava)
+            Font: =Font.'Open Sans'
+            Height: =40
+            Size: =13
+            Width: =300
+            X: =700
+            Y: =348
+      - lbl_l_Sekce:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Sekce"
+            Width: =300
+            X: =1020
+            Y: =324
+      - txt_Sekce:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =If(varNova, "", varAktivita.sekce)
+            Font: =Font.'Open Sans'
+            Height: =40
+            Size: =13
+            Width: =300
+            X: =1020
+            Y: =348
+      - lbl_l_Predpis:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Vnitřní předpis"
+            Width: =620
+            X: =700
+            Y: =424
+      - txt_Predpis:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =If(varNova, "", varAktivita.vnitrni_predpis)
+            Font: =Font.'Open Sans'
+            Height: =64
+            Mode: =TextMode.MultiLine
+            Size: =13
+            Width: =620
+            X: =700
+            Y: =448
+      - lbl_l_Stav:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Stav"
+            Width: =300
+            X: =700
+            Y: =524
+      - drp_StavDetail:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: =If(varNova, "pracovní", varAktivita.stav.Value)
+            Font: =Font.'Open Sans'
+            Height: =40
+            Items: =["pracovní", "schváleno"]
+            Size: =13
+            Width: =300
+            X: =700
+            Y: =548
+      - btn_Vazby:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Color: =RGBA(0, 18, 107, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            Height: =40
+            OnSelect: =Navigate(scr_Vazby, ScreenTransition.Cover)
+            Size: =13
+            Text: ="Další dílčí procesy…"
+            Visible: =!varNova
+            Width: =240
+            X: =1020
+            Y: =548
+      - btn_Ulozit:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Fill: =RGBA(0, 120, 212, 1)
+            Font: =Font.'Open Sans'
+            Height: =44
+            OnSelect: |-
+              =Set(varChyba, "");
+              If(IsBlank(drp_Dilci.Selected.Title), Set(varChyba, "Vyber dílčí proces."));
+              If(IsBlank(txt_Nazev.Text), Set(varChyba, "Vyplň znění aktivity."));
+              If(
+                  !IsBlank(varChyba),
+                  Notify(varChyba, NotificationType.Warning),
+                  Set(varStaryDp, If(varNova, "", varAktivita.dilci_proces_kod));
+                  Set(varPrefix, drp_Dilci.Selected.Title & "-");
+                  Set(
+                      varNovyKod,
+                      If(
+                          varNova,
+                          varPrefix & Right(
+                              "000" & (Value(
+                                  Right(
+                                      First(Sort(Filter(Aktivity, StartsWith(Title, varPrefix)), Title, Descending)).Title,
+                                      4
+                                  )
+                              ) + 1),
+                              4
+                          ),
+                          varAktivita.Title
+                      )
+                  );
+                  If(
+                      varNova && !IsBlank(LookUp(Aktivity, Title = varNovyKod)),
+                      Notify("Kód " & varNovyKod & " mezitím někdo použil, zkus uložit znovu.", NotificationType.Warning),
+                      IfError(
+                          Patch(
+                              Aktivity,
+                              If(varNova, Defaults(Aktivity), varAktivita),
+                              {
+                                  Title: varNovyKod,
+                                  nazev: txt_Nazev.Text,
+                                  nazev_kratky: Left(txt_Nazev.Text, 150),
+                                  dilci_proces_kod: drp_Dilci.Selected.Title,
+                                  vykonava: txt_Utvar.Text,
+                                  spolupracuje: txt_Spolupracuje.Text,
+                                  vnitrni_predpis: txt_Predpis.Text,
+                                  text_pro_or: txt_TextOR.Text,
+                                  sekce: txt_Sekce.Text,
+                                  stav: { Value: drp_StavDetail.Selected.Value },
+                                  datum_aktualizace: Now()
+                              }
+                          );
+                          If(
+                              varNova || varStaryDp <> drp_Dilci.Selected.Title,
+                              RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varNovyKod, primarni.Value = "ano");
+                              Patch(
+                                  'Vazba aktivita–dílčí proces',
+                                  Defaults('Vazba aktivita–dílčí proces'),
+                                  {
+                                      Title: varNovyKod & "__" & drp_Dilci.Selected.Title,
+                                      aktivita_kod: varNovyKod,
+                                      dilci_proces_kod: drp_Dilci.Selected.Title,
+                                      primarni: { Value: "ano" }
+                                  }
+                              )
+                          );
+                          Notify("Uloženo jako " & varNovyKod & ".", NotificationType.Success);
+                          Navigate(scr_Seznam, ScreenTransition.UnCover),
+                          Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
+                      )
+                  )
+              )
+            Size: =14
+            Text: ="Uložit"
+            Width: =200
+            X: =700
+            Y: =664
+      - btn_Smazat:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Color: =RGBA(168, 0, 0, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            Height: =44
+            OnSelect: |-
+              =IfError(
+                  RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title);
+                  Remove(Aktivity, varAktivita);
+                  Notify("Aktivita " & varAktivita.Title & " smazána i s vazbami.", NotificationType.Success);
+                  Navigate(scr_Seznam, ScreenTransition.UnCover),
+                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
+              )
+            Size: =14
+            Text: ="Smazat"
+            Visible: =!varNova
+            Width: =160
+            X: =920
+            Y: =664

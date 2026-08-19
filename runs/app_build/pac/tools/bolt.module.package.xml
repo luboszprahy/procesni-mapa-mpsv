@@ -1,0 +1,590 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>bolt.module.package</name>
+    </assembly>
+    <members>
+        <member name="T:bolt.module.package.client.IErpPackageClient">
+            <summary>
+            Client for ERP package operations executed through the msprov_fnouploadersolution
+            custom APIs on a linked Dataverse environment. ("Fno" appears in external identifiers
+            only — this client uses "Erp" prefix per product nomenclature.)
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.IsErpIntegrationInstalledAsync(System.Threading.CancellationToken)">
+            <summary>
+            Returns true when the Dataverse environment has the ERP package manager solution
+            (<c>msprov_fnouploadersolution</c>) installed. Absence indicates a Dataverse-only environment
+            where ERP-targeted verbs cannot be used.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.StartDbSyncAsync(bolt.module.package.model.DbSyncMode,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Triggers an ERP database synchronization via msprov_dbsynctofinopsasync.
+            </summary>
+            <param name="mode">DB sync kind. Full=1 requires empty argument; Module=2 and Incremental=3 require valid JSON.</param>
+            <param name="argument">
+            Sync argument string. Ignored server-side when <paramref name="mode"/>=Full; must be DataContractJsonSerializer-compatible JSON
+            matching <c>ModuleSyncParameters</c> (Module) or <c>IncrementalSyncParameters</c> (Incremental).
+            </param>
+            <param name="cancellationToken">Cancels the in-flight request.</param>
+            <returns>The asyncoperation id that can be polled through <see cref="M:bolt.module.package.client.IErpPackageClient.GetOperationStatusAsync(System.Guid,System.Threading.CancellationToken)"/>.</returns>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.GetOperationStatusAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves current status of an asyncoperation started by the ERP custom APIs.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.WaitForCompletionAsync(System.Guid,System.TimeSpan,System.Action{bolt.module.package.model.ErpOperationStatusData},System.Threading.CancellationToken)">
+            <summary>
+            Polls the asyncoperation until it reaches a terminal state.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.CreatePackageRowAsync(System.String,bolt.module.package.model.ErpBuildType,bolt.module.package.model.ErpReleaseType,bolt.module.package.model.DbSyncMode,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Creates an <c>msprov_fnopackage</c> row carrying deploy metadata. The row id is required
+            before uploading the package file and before invoking the deploy action.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.UploadPackageFileAsync(System.Guid,System.IO.Stream,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Uploads the package ZIP to the <c>msprov_packagepayload</c> file column of the given row.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.client.IErpPackageClient.StartPackageDeployAsync(System.Collections.Generic.IReadOnlyList{System.Guid},bolt.module.package.model.ErpBuildType,bolt.module.package.model.ErpReleaseType,System.Threading.CancellationToken)">
+            <summary>
+            Triggers the deploy-to-F&amp;O custom API (msprov_deploypackagetofinopsasync) against a set of
+            already-uploaded <c>msprov_fnopackage</c> rows.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.ArgumentLineBuilder">
+            <summary>
+            Builds a Windows command-line argument string from a list of individual args, following
+            the standard <c>CommandLineToArgvW</c> parsing rules: wraps an arg in double quotes when
+            it contains space/tab/quote, escapes any internal double quote as <c>\"</c>, and doubles
+            every run of backslashes that immediately precedes a double quote (including the closing
+            one). The backslash-doubling step is required: without it, an arg like <c>C:\dir\</c>
+            quotes to <c>"C:\dir\"</c> — the closing <c>"</c> gets consumed as an escape and the
+            next arg silently glues onto this one.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.ArgumentLineBuilder.Quote(System.String)">
+            <summary>
+            Encodes a single arg using <c>CommandLineToArgvW</c> round-trip rules:
+             - 2N backslashes followed by <c>"</c> decode to N backslashes and a literal quote.
+             - Trailing backslashes before the closing quote are similarly doubled.
+             - Backslashes not adjacent to a quote pass through unchanged.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.AuthenticodeVerifier">
+            <summary>
+            SDL BIN-1: per-execution Authenticode verification for the X++ SDK binaries this module
+            invokes (xppc.exe, LabelC.exe, xppbp.exe). The first invocation of a given path in the
+            process performs a full Authenticode check via <c>WinVerifyTrust</c> (signature, chain,
+            revocation) AND a publisher check requiring <c>O=Microsoft Corporation</c> in the signer
+            subject. The result is cached for the lifetime of the process so subsequent invocations
+            of the same path pay no cost. A verification failure throws <see cref="T:System.Security.SecurityException"/>
+            and aborts the spawn — the SDK is considered untrusted and the build cannot continue.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.AuthenticodeVerifier.SafeNativeMethods">
+            <summary>
+            P/Invokes are grouped under a class named <c>SafeNativeMethods</c> per CA1060 / the
+            .NET Framework Design Guidelines. Each P/Invoke pins the search path to System32 via
+            <see cref="T:System.Runtime.InteropServices.DefaultDllImportSearchPathsAttribute"/> per CA5392 to block search-path-based
+            DLL hijacking attacks (e.g. a malicious wintrust.dll dropped into the current directory).
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.IXppBpRunner">
+            <summary>
+            Runs the X++ best-practices analyzer (<c>xppbp.exe</c>) against a previously-compiled model.
+            Step 3 of the three-stage pipeline (labels → xppc → bp). Optional: callers may skip via
+            <c>--skip-bp</c> on <c>pac package compile</c>. Mirrors Visual Studio semantics: any
+            BP-rule violation classified as <see cref="F:bolt.module.package.compile.XppDiagnosticSeverity.Error"/> fails the build;
+            warnings are surfaced but do not fail.
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileOptions.XppcExePath">
+            <summary>Absolute path to xppc.exe from the installed SDK.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileOptions.ReferenceFolder">
+            <summary>Absolute path to the SDK's PackagesLocalDirectory (reference folder).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileOptions.SourceRoot">
+            <summary>Absolute path to the source root containing <c>&lt;Model&gt;/Descriptor/</c> etc.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileOptions.RepoRoot">
+            <summary>Absolute path to the repo root (compile is invoked with this as cwd).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileOptions.ModelName">
+            <summary>Name of the X++ model to compile.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileOptions.Incremental">
+            <summary>When true, passes <c>-incremental</c> to xppc and skips clearing XppMetadata cache.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileResult.ExitCode">
+            <summary>Exit code returned by xppc.exe. Can be 0 even when errors are present in the XML log.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileResult.OutputDirectory">
+            <summary>Absolute path to the output bin directory (contains compiled .dll / .netmodule / .runtime / .md).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileResult.Diagnostics">
+            <summary>All diagnostics parsed from the XML log.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileResult.Success">
+            <summary>True when exit code is 0 AND no Error-severity diagnostics exist.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppCompileResult.TextLogPath">
+            <summary>Path to the text log (useful for display when the compiler crashed without writing XML).</summary>
+        </member>
+        <member name="T:bolt.module.package.compile.IXppLabelCompiler">
+            <summary>
+            Compiles label files for an X++ model using <c>LabelC.exe</c>. Step 1 of the three-stage
+            pipeline (labels → xppc → bp). Mandatory: callers cannot skip this step because labels
+            in the compiled DLL show up as raw <c>@SYS12345</c> tokens at runtime otherwise.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.IXppPackager.Package(bolt.module.package.compile.XppPackageOptions)">
+            <summary>
+            Packages a compiled X++ model into a deployable ZIP that
+            <c>pac package deploy --package-type erp</c> can upload to F&amp;O.
+            Output layout inside the ZIP matches the platform convention:
+            <c>&lt;Model&gt;/&lt;Model&gt;/Ax*/</c> (metadata) + <c>&lt;Model&gt;/bin/</c> (compiled + optional license).
+            </summary>
+            <returns>Absolute path to the produced ZIP.</returns>
+        </member>
+        <member name="P:bolt.module.package.compile.XppPackageOptions.SourceRoot">
+            <summary>Absolute path to the source root (contains <c>&lt;Model&gt;/Descriptor</c> etc.).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppPackageOptions.BinDirectory">
+            <summary>Absolute path to the compiled <c>bin/</c> directory produced by xppc.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppPackageOptions.ModelName">
+            <summary>Name of the X++ model being packaged.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppPackageOptions.OutputDirectory">
+            <summary>Absolute directory the ZIP will be written to.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppPackageOptions.LicenseFilePath">
+            <summary>Optional ISV license file to inject into the ZIP at <c>&lt;Model&gt;/bin/&lt;license-name&gt;</c>.</summary>
+        </member>
+        <member name="T:bolt.module.package.compile.PathSafety">
+            <summary>
+            Path-confinement helpers (SDL IV-3). Resolves user-supplied path components against an
+            allowed root and rejects any path that escapes the root via <c>..</c> traversal, absolute
+            substitution, or symbolic redirection. Use anywhere a path is built from caller-supplied
+            input (e.g. model name on <c>pac package compile --model &lt;Name&gt;</c>) before invoking
+            file-system APIs.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.PathSafety.CombineConfined(System.String,System.String)">
+            <summary>
+            Equivalent of <see cref="M:System.IO.Path.Combine(System.String,System.String)"/> that canonicalizes the result and
+            throws <see cref="T:System.ArgumentException"/> when the combined path resolves outside
+            <paramref name="allowedRoot"/>.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.PipelineStageReporter">
+            <summary>
+            Formats the <c>[N/M]</c> step prefix shown on stage-status lines, computed from the actual
+            set of stages scheduled for this invocation rather than a hardcoded total. Stages that the
+            caller opts out of (e.g. <c>--skip-bp</c>) shrink the denominator; a single-stage invocation
+            suppresses the prefix entirely so users running a narrow operation don't see misleading
+            "1/1" framing.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.XppBpOptions">
+            <summary>Input to <see cref="M:bolt.module.package.compile.IXppBpRunner.RunBpAsync(bolt.module.package.compile.XppBpOptions,System.Threading.CancellationToken)"/>.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpOptions.XppbpExePath">
+            <summary>Absolute path to <c>xppbp.exe</c> from the installed SDK.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpOptions.ReferenceFolder">
+            <summary>Absolute path to the SDK's PackagesLocalDirectory (reference folder).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpOptions.SourceRoot">
+            <summary>Absolute path to the source root containing <c>&lt;Model&gt;/Descriptor/</c> etc.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpOptions.RepoRoot">
+            <summary>Absolute path to the repo root (xppbp is invoked with this as cwd).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpOptions.ModelName">
+            <summary>Name of the X++ model being checked.</summary>
+        </member>
+        <member name="T:bolt.module.package.compile.XppBpResult">
+            <summary>Output from <see cref="M:bolt.module.package.compile.IXppBpRunner.RunBpAsync(bolt.module.package.compile.XppBpOptions,System.Threading.CancellationToken)"/>.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpResult.ErrorCount">
+            <summary>Total Error-severity diagnostics across the run.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpResult.WarningCount">
+            <summary>Total Warning-severity diagnostics across the run.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppBpResult.Success">
+            <summary>True when no Error-severity diagnostics exist (regardless of warnings).</summary>
+        </member>
+        <member name="M:bolt.module.package.compile.XppBpRunner.ParseXmlLog(System.String)">
+            <summary>
+            Parses xppbp's XML log shape, which differs from xppc's: each finding is a
+            <c>&lt;Diagnostic&gt;</c> element with child elements (NOT attributes) for severity,
+            path, message, etc. Layout:
+            <code>
+            &lt;Diagnostics&gt;
+              &lt;Items&gt;
+                &lt;Diagnostic&gt;
+                  &lt;DiagnosticType&gt;BestPractices&lt;/DiagnosticType&gt;
+                  &lt;Severity&gt;Warning&lt;/Severity&gt;
+                  &lt;Path&gt;dynamics://Table/Foo&lt;/Path&gt;
+                  &lt;Message&gt;BPErrorXxx: ...&lt;/Message&gt;
+                  &lt;Line&gt;10&lt;/Line&gt;
+                  &lt;Column&gt;5&lt;/Column&gt;
+                &lt;/Diagnostic&gt;
+            </code>
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.XppLabelCompileOptions">
+            <summary>Input to <see cref="M:bolt.module.package.compile.IXppLabelCompiler.CompileLabelsAsync(bolt.module.package.compile.XppLabelCompileOptions,System.Threading.CancellationToken)"/>.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileOptions.LabelcExePath">
+            <summary>Absolute path to <c>LabelC.exe</c> from the installed SDK.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileOptions.ReferenceFolder">
+            <summary>Absolute path to the SDK's PackagesLocalDirectory (reference folder).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileOptions.SourceRoot">
+            <summary>Absolute path to the source root containing <c>&lt;Model&gt;/Descriptor/</c> etc.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileOptions.RepoRoot">
+            <summary>Absolute path to the repo root (LabelC is invoked with this as cwd).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileOptions.ModelName">
+            <summary>Name of the X++ model whose labels are being compiled.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileOptions.Languages">
+            <summary>
+            Locales to compile labels for (e.g. <c>en-US</c>, <c>fr</c>). When the list is empty
+            (default), LabelC is invoked once without <c>-Language=</c> and builds every locale
+            found in the source — matches Visual Studio's default Build Models behavior. When the
+            list has one or more entries, LabelC is invoked once per locale with
+            <c>-Language=&lt;locale&gt;</c>; xppc + bp + package then run once over the combined output.
+            Short-circuits on the first failing locale.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.XppLabelCompiler.SanitizeLocaleForFilename(System.String)">
+            <summary>
+            Locales pass through to LabelC verbatim (e.g. "en-US", "zh-Hans"). For per-locale log
+            filenames we strip path-hostile characters so the locale slug is always filesystem-safe.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.XppLabelCompiler.ReadErrLogAsDiagnostics(System.String,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            LabelC writes its error stream to <c>-ErrLog</c>. We don't try to parse it line-by-line
+            (no structured shape) — just wrap the whole non-empty contents as a single Error-severity
+            diagnostic so the caller's <c>EmitDiagnostics</c> surfaces it. Empty file means no errors.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.XppLabelCompileResult">
+            <summary>Output from <see cref="M:bolt.module.package.compile.IXppLabelCompiler.CompileLabelsAsync(bolt.module.package.compile.XppLabelCompileOptions,System.Threading.CancellationToken)"/>.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.ExitCode">
+            <summary>Exit code returned by the last <c>LabelC.exe</c> invocation.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.OutputDirectory">
+            <summary>Output directory containing the compiled satellite assemblies.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.Diagnostics">
+            <summary>Per-message diagnostics emitted by LabelC (reuses the xppc diagnostic shape).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.Success">
+            <summary>True when exit code is 0 AND no Error-severity diagnostics exist.</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.TextLogPath">
+            <summary>Path to the text log produced by LabelC (useful for fallback display).</summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.CompiledLocales">
+            <summary>
+            Locales actually invoked (one per <c>LabelC.exe</c> call). Empty list means LabelC was
+            invoked once without an explicit locale (build-all mode).
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.compile.XppLabelCompileResult.FailedLocale">
+            <summary>
+            Locale that triggered a mid-loop failure when <see cref="P:bolt.module.package.compile.XppLabelCompileResult.CompiledLocales"/> contains
+            more than one entry. <c>null</c> on success or on failures in build-all mode.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.XppPackageManifest">
+            <summary>
+            Builds and injects the <c>fnomoduledefinition.json</c> manifest that F&amp;O's
+            <c>apply-online-dev-package</c> sidecar step reads to identify the package and its
+            deployment intent (build type, package type, dbsync mode). Without this manifest the
+            sidecar rejects the upload with <c>FailedDependency</c>. The shape matches the manifest
+            that the VS extension and erp-cli produce so the server treats our packages identically.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.XppPackageManifest.InjectInto(System.String,System.String,bolt.module.package.model.ErpBuildType,bolt.module.package.model.DbSyncMode)">
+            <summary>
+            Add (or replace) <c>fnomoduledefinition.json</c> at the root of the deployable-package ZIP.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.compile.XppPackageManifest.Build(System.String,bolt.module.package.model.ErpBuildType,bolt.module.package.model.DbSyncMode)">
+            <summary>Returns the JSON manifest body without writing anything to disk. Exposed for tests.</summary>
+        </member>
+        <member name="M:bolt.module.package.compile.XppPackageManifest.ComputePackageVersion(System.DateTime)">
+            <summary>
+            Build a 4-part version string from the current Windows FILETIME (100-ns ticks since 1601).
+            Matches erp-cli's <c>getVersionFromDateTime</c> exactly so the server can deduplicate
+            uploads across the two clients.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.compile.XppToolProcess">
+            <summary>
+            Shared process-invocation helper for the X++ SDK command-line tools
+            (labelc.exe, xppc.exe, xppbp.exe). Each tool follows the same fire-and-wait
+            pattern: spawn with redirected stdout/stderr, drain both streams concurrently
+            to avoid pipe-buffer deadlocks on large builds, surface stdout/stderr at Debug
+            (logs of substance are written to disk by the tools themselves), and wire
+            cancellation through to process termination.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.model.DbSyncMode">
+            <summary>
+            F&amp;O database synchronization mode. Values match the integer codes expected by
+            the msprov_fnopackages entity's msprov_dbsyncoptions field.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.model.ErpBuildType">
+            <summary>
+            How F&amp;O applies the deployable package. Values mirror msprov_fnopackage_msprov_buildtypeoptions
+            on the server. The internal <c>DBSync</c> option (value 3) is intentionally not exposed — it is
+            synthesized server-side for DB-sync-only jobs.
+            </summary>
+        </member>
+        <member name="F:bolt.module.package.model.ErpBuildType.Full">
+            <summary>Full deploy — all artifacts in the package are applied fresh.</summary>
+        </member>
+        <member name="F:bolt.module.package.model.ErpBuildType.Incremental">
+            <summary>Incremental deploy — only changed artifacts are layered on top of the existing deployment.</summary>
+        </member>
+        <member name="F:bolt.module.package.model.ErpBuildType.Delete">
+            <summary>Uninstall — remove the package's artifacts from F&amp;O.</summary>
+        </member>
+        <member name="T:bolt.module.package.model.ErpReleaseType">
+            <summary>
+            Classification of a deployable ERP package. Values mirror msprov_fnopackage_msprovpackagetypeoptions
+            on the server. When a package is declared <c>Release</c>, the server forces a full DB sync and routes
+            through a stricter deployment job.
+            </summary>
+        </member>
+        <member name="F:bolt.module.package.model.ErpReleaseType.Dev">
+            <summary>Developer build — suitable for iterative inner-loop deploys.</summary>
+        </member>
+        <member name="F:bolt.module.package.model.ErpReleaseType.Release">
+            <summary>Signed / official release build — server forces DB sync to Full.</summary>
+        </member>
+        <member name="T:bolt.module.package.model.XppDeploymentPlanner">
+            <summary>
+            Computes a deploy order for a multi-model solution. Models that are referenced by other
+            models in the same solution are deployed first; SDK modules (ApplicationPlatform, etc.)
+            declared in <c>ModuleReferences</c> are ignored — they live in the target environment.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.model.XppDeploymentPlanner.PlannedModel">
+            <summary>One entry per model after planning, in dependency-safe order.</summary>
+        </member>
+        <member name="P:bolt.module.package.model.XppDeploymentPlanner.PlannedModel.SolutionDependencies">
+            <summary>Subset of declared <c>ModuleReferences</c> that match other models in this solution.</summary>
+        </member>
+        <member name="M:bolt.module.package.model.XppDeploymentPlanner.Plan(System.Collections.Generic.IReadOnlyList{System.String},System.String,System.String)">
+            <summary>
+            Builds the plan. Each model name resolves to a <c>&lt;repoRoot&gt;/bin/&lt;Model&gt;_*_managed.zip</c>
+            produced by <c>pac package compile</c>. Throws if any model is missing its ZIP or descriptor,
+            or if the dependency graph contains a cycle.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.model.XppDeploymentPlanner.TopologicalSort(System.Collections.Generic.IDictionary{System.String,bolt.module.package.model.XppDeploymentPlanner.PlannedModel})">
+            <summary>
+            Kahn's algorithm — nodes with no remaining in-degree become deployable in the next pass.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.model.XppDescriptor">
+            <summary>
+            Parsed F&amp;O model descriptor (<c>&lt;Model&gt;/Descriptor/&lt;Model&gt;.xml</c>).
+            Surfaces the fields needed to plan multi-model compile and deploy: the model name and the
+            list of referenced modules. Used both by the X++ compiler (to resolve cross-model types via
+            additional <c>-referenceFolder</c> args) and by the deploy verb (to topologically order ZIPs).
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.model.XppDescriptor.GetDescriptorPath(System.String,System.String)">
+            <summary>Conventional descriptor path: <c>&lt;sourceRoot&gt;/&lt;model&gt;/Descriptor/&lt;model&gt;.xml</c>.</summary>
+        </member>
+        <member name="M:bolt.module.package.PackageDeployment.#ctor(Microsoft.Xrm.Tooling.Connector.IOverrideAuthHookWrapper,bolt.system.IOutputWindow,bolt.system.ILocalizedStrings{bolt.system.LocString},Microsoft.Extensions.Logging.ILogger{bolt.module.package.PackageDeployment},bolt.cli.IDataverseClientSettingsProvider,System.String,System.String,System.Boolean,System.String,System.Diagnostics.SourceLevels,System.String)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.PackageDeployment.IsParseOnly">
+            <summary>
+            Parses package without importing into DataFlex instance
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.PackageDeployment.OriginalFileIsZip">
+            <summary>
+            this flag indicate if the original package was packed
+            currently is only used in Clustering orgs.
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.PackageDeployment.OriginalZipFilePath">
+            <summary>
+            if OriginalFileIsZip == true, OriginalZipFile would be set to the file path
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.PackageModule">
+            <summary>
+            The module works with packages
+            More about packages: https://docs.microsoft.com/en-us/power-platform/alm/package-deployer-tool
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.scaffold.ErpScaffoldOptions">
+            <summary>
+            Inputs to the ERP (X++) package scaffolder.
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.scaffold.ErpScaffoldOptions.OutputDirectory">
+            <summary>Absolute path that will become the repo root for the new package.</summary>
+        </member>
+        <member name="P:bolt.module.package.scaffold.ErpScaffoldOptions.ModelName">
+            <summary>Name of the X++ model / module to scaffold.</summary>
+        </member>
+        <member name="P:bolt.module.package.scaffold.ErpScaffoldOptions.SourceRoot">
+            <summary>Path relative to <see cref="P:bolt.module.package.scaffold.ErpScaffoldOptions.OutputDirectory"/> where models live. Defaults to <c>./src</c>.</summary>
+        </member>
+        <member name="P:bolt.module.package.scaffold.ErpScaffoldOptions.Publisher">
+            <summary>Publisher name written into the model descriptor. Defaults to <c>Microsoft</c>.</summary>
+        </member>
+        <member name="P:bolt.module.package.scaffold.ErpScaffoldOptions.Layer">
+            <summary>X++ layer (ISV, USR, CUS, VAR, SL1-3, BUS, HFX, GLS, DIS). Defaults to <c>ISV</c>.</summary>
+        </member>
+        <member name="M:bolt.module.package.scaffold.IErpPackageScaffolder.Scaffold(bolt.module.package.scaffold.ErpScaffoldOptions)">
+            <summary>
+            Scaffolds the on-disk layout for a new X++ package project. Creates <c>.erp/xpp.json</c>,
+            the model descriptor XML, and an empty <c>AxClass/</c> folder. Idempotent — if the model
+            descriptor already exists, the existing scaffold is preserved.
+            </summary>
+            <returns>Result describing what was created / skipped.</returns>
+        </member>
+        <member name="T:bolt.module.package.telemetry.ErpTelemetryConstants">
+            <summary>
+            Event names and property keys for the ERP verbs in this module. Kept in one place so
+            Kusto queries and dashboard owners have a single source of truth.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.AddExternalPackageVerb">
+            <summary>
+            "pac package add-external-package" adds a PdExternalPackage item to an existing PD Package project.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.AddReferenceVerb">
+            <summary>
+            "pac package add-reference" adds reference to cdsproj
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.AddSolutionVerb">
+            <summary>
+            "pac package add-solution" adds a PdSolution item to an existing PD Package project.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.CompileVerb">
+            <summary>
+            <c>pac package compile --package-type erp</c> — compiles X++ models listed in <c>.erp/xpp.json</c>
+            using <c>xppc.exe</c> from the installed SDK (see <c>pac tool xpp install</c>) and packages each
+            compiled model into a deployable ZIP that <c>pac package deploy --package-type erp</c> can upload.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.CompileVerb.PipelineContext">
+            <summary>
+            Carries the per-model pipeline state. Lives only on the stack of <see cref="M:bolt.module.package.verbs.CompileVerb.ExecuteAsync(bolt.cli.Command,System.Threading.CancellationToken)"/>.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.verbs.CompileVerb.RunPipelineForModelAsync(bolt.module.package.verbs.CompileVerb.PipelineContext,System.Threading.CancellationToken)">
+            <summary>
+            Runs the three-stage pipeline for a single model: labels → xppc → bp → package.
+            Labels + xppc are mandatory; bp runs by default (skip with <c>--skip-bp</c>).
+            Short-circuits on the first failing stage so downstream stages aren't run with a broken model.
+            Returns true iff every executed stage succeeded AND the model was packaged.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.verbs.CompileVerb.ParseLanguageList(System.String)">
+            <summary>
+            Parses the <c>--language</c> argument value into a deduplicated, trimmed list of locales.
+            Comma is the canonical separator (matches how <c>--model</c> behaves). Empty / whitespace
+            input returns an empty list, which the label compiler treats as "build all locales found
+            in source" — the today-default behavior.
+            </summary>
+        </member>
+        <member name="M:bolt.module.package.verbs.CompileVerb.ResolveLabelcPath(bolt.cli.XppSdkEntry)">
+            <summary>
+            Older entries in the SDK store may not have <c>LabelcExe</c> persisted (this was added in
+            the three-stage compile-pipeline change). Fall back to deriving the path from the xppc dir
+            so users with previously-installed SDKs don't have to reinstall.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.DbSyncArgumentBuilder">
+            <summary>
+            Builds the <c>dbsyncargument</c> payload for msprov_dbsynctofinopsasync and the <c>msprov_dbsyncvalue</c>
+            column on msprov_fnopackage rows. Shared between <see cref="T:bolt.module.package.verbs.DbSyncVerb"/> and <see cref="T:bolt.module.package.verbs.DeployVerb"/>
+            so the two entry points apply identical validation and serialization rules.
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.verbs.DbSyncVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.DeployVerb">
+            <summary>
+            "pac package deploy" loads the package from either a folder with loose pkg dll and config.xml &amp; sol/data zip files
+            or alternatively, a zip file over a folder of that shape and content. When <c>--package-type dataverse</c> (default),
+            starts the PD state machine using the CoreObjects API in the PD nuget pkg (Windows/.NET Framework only).
+            When <c>--package-type erp</c>, uploads the deployable package to a linked Finance and Operations environment via
+            the msprov_fnouploadersolution custom APIs (cross-platform).
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.verbs.DeployVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.InitVerb">
+            <summary>
+            "pac package init" scaffolds a new package project. With <c>--package-type dataverse</c> (default)
+            a Package Deployer project is generated via the dotnet template engine. With <c>--package-type erp</c>
+            an X++ model project layout is scaffolded (<c>.erp/xpp.json</c>, model descriptor, AxClass folder).
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.PackageVerbArguments">
+            <summary>
+            Arguments shared across package verbs.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.ProjectVerbArguments">
+            <summary>
+            Arguments shared across verbs that modify msbuild projects.
+            </summary>
+        </member>
+        <member name="T:bolt.module.package.verbs.ShowVerb">
+            <summary>
+            "pac package show" loads the package and shows details:
+            long name, short name, description, fullname, location, list of solutions/data.zip in package
+            </summary>
+        </member>
+        <member name="P:bolt.module.package.verbs.ShowVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+    </members>
+</doc>

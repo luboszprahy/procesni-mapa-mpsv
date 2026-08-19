@@ -1,0 +1,320 @@
+2026-08-19 15:57:23.0566 | INF | bolt.Session :: Product Version: 2.9.3+ga17df1d; File Version: 2.9.3
+2026-08-19 15:57:23.0783 | INF | bolt.Session :: Start new session. nonInteractiveMode: False)
+2026-08-19 15:57:23.3472 | INF | bolt.cli.Verb :: Executing verb 'canvas unpack' (activityId 4d97351f-48a0-4e7e-baa1-a58cc638503f) with arguments --msapp,--sources,--layout.
+2026-08-19 15:57:23.3747 | INF | bolt.cli.CommandLine.VerbExecutor :: PerformAuthenticationAsync - Getting auth profile with following options: { AuthKind = , IsRequired = False, ShowProfileMessages = False, VerbDisableAutoOSLogin = False, SkipValidation = True }
+2026-08-19 15:57:23.4210 | INF | bolt.authentication.profiles.FileBasedAuthProfilesManager :: Auth profiles file not found
+2026-08-19 15:57:23.4210 | INF | bolt.authentication.store.AuthTokenStore :: TryCreateAuthProfileFromOperatingSystemAsync: Attempting to create OperatingSystem profile
+2026-08-19 15:57:23.4604 | INF | bolt.authentication.store.AuthTokenStore :: CreateUniversalAuthProfile: Acquiring token for https://service.powerapps.com/ using authority https://login.microsoftonline.com/organizations for Public cloud
+2026-08-19 15:57:23.7325 | WRN | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:23Z] [MSAL:0001]	WARNING	TryEnqueueMsaDeviceCredentialAcquisitionAndContinue:1297	MsaDeviceOperationProvider is not available. Not attempting to register the device.
+2026-08-19 15:57:24.0080 | ERR | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:24Z] [MSAL:0002]	ERROR  	ErrorInternalImpl:134	Created an error: 7rhah, StatusInternal::InteractionRequired, InternalEvent::None, Error Code 3399548929, Context 'Need user interaction to continue.'
+2026-08-19 15:57:24.0181 | ERR | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:24Z] [RuntimeBroker] failed_to_acquire_token_silently_from_broker WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+2026-08-19 15:57:24.0412 | ERR | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:24Z - a7995813-393a-4994-a265-d7fdb90f9f6f] MSAL.Desktop.4.85.2.0.MsalUiRequiredException:
+	ErrorCode: failed_to_acquire_token_silently_from_broker
+Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+	StatusCode: 0 
+	ResponseBody: 
+2026-08-19 15:57:24.0557 | ERR | bolt.authentication.store.AuthTokenStore :: Exception in CreateAuthProfile()|EXCEPTION: MSAL.Desktop.4.85.2.0.MsalUiRequiredException:
+	ErrorCode: failed_to_acquire_token_silently_from_broker
+Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.ApiConfig.Executors.ClientApplicationBaseExecutor.<ExecuteAsync>d__2.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenForPublicClientFlow>d__9.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenAsync>d__8.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+	StatusCode: 0 
+	ResponseBody: 
+2026-08-19 15:57:24.0557 | WRN | bolt.authentication.store.AuthTokenStore :: TryCreateAuthProfileFromOperatingSystemAsync: Failed to create OperatingSystem profile|EXCEPTION: bolt.system.VerbExecutionException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+ ---> Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.ApiConfig.Executors.ClientApplicationBaseExecutor.<ExecuteAsync>d__2.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenForPublicClientFlow>d__9.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenAsync>d__8.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+   --- Konec trasování zásobníku pro vnitřní výjimku ---
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<TryCreateAuthProfileFromOperatingSystemAsync>d__11.MoveNext()
+MSAL.Desktop.4.85.2.0.MsalUiRequiredException:
+	ErrorCode: failed_to_acquire_token_silently_from_broker
+Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.ApiConfig.Executors.ClientApplicationBaseExecutor.<ExecuteAsync>d__2.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenForPublicClientFlow>d__9.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenAsync>d__8.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+	StatusCode: 0 
+	ResponseBody: 
+2026-08-19 15:57:25.2210 | INF | Microsoft.PowerPlatform.PowerApps.Persistence.MsappPacking.MsappPackingService :: Unpack complete. Extracted 3 files to disk. Wrote 11 reference entries to C:\Users\User\data_Lubos\claude_code\procesní mapa\runs\app_build\sources\mpsv_procesnimapa_319bc_DocumentUri.msapr.
+2026-08-19 15:57:25.5064 | INF | bolt.Session :: End session. 
+
+2026-08-19 15:57:25.6628 | INF | Microsoft.PowerPlatform.Tooling.BatchedTelemetry :: BatchedTransmitter`1.StartUploadProcess Started uploader with process id: 74016
+2026-08-19 15:57:27.1419 | INF | bolt.Session :: Product Version: 2.9.3+ga17df1d; File Version: 2.9.3
+2026-08-19 15:57:27.1772 | INF | bolt.Session :: Start new session. nonInteractiveMode: False)
+2026-08-19 15:57:27.4283 | INF | bolt.cli.Verb :: Executing verb 'canvas pack' (activityId e34e2a9d-5e0c-4cf1-8b24-070b86756ae7) with arguments --sources,--msapp.
+2026-08-19 15:57:27.4494 | INF | bolt.cli.CommandLine.VerbExecutor :: PerformAuthenticationAsync - Getting auth profile with following options: { AuthKind = , IsRequired = False, ShowProfileMessages = False, VerbDisableAutoOSLogin = False, SkipValidation = True }
+2026-08-19 15:57:27.4912 | INF | bolt.authentication.profiles.FileBasedAuthProfilesManager :: Auth profiles file not found
+2026-08-19 15:57:27.4989 | INF | bolt.authentication.store.AuthTokenStore :: TryCreateAuthProfileFromOperatingSystemAsync: Attempting to create OperatingSystem profile
+2026-08-19 15:57:27.5163 | INF | bolt.authentication.store.AuthTokenStore :: CreateUniversalAuthProfile: Acquiring token for https://service.powerapps.com/ using authority https://login.microsoftonline.com/organizations for Public cloud
+2026-08-19 15:57:27.7253 | WRN | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:27Z] [MSAL:0001]	WARNING	TryEnqueueMsaDeviceCredentialAcquisitionAndContinue:1297	MsaDeviceOperationProvider is not available. Not attempting to register the device.
+2026-08-19 15:57:27.7881 | ERR | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:27Z] [MSAL:0002]	ERROR  	ErrorInternalImpl:134	Created an error: 7rhah, StatusInternal::InteractionRequired, InternalEvent::None, Error Code 3399548929, Context 'Need user interaction to continue.'
+2026-08-19 15:57:27.8019 | ERR | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:27Z] [RuntimeBroker] failed_to_acquire_token_silently_from_broker WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+2026-08-19 15:57:27.8212 | ERR | Microsoft.Identity.Client.IPublicClientApplication :: True MSAL 4.85.2.0 MSAL.Desktop 4.8 or later Windows 10 Pro [2026-08-19 15:57:27Z - 721fb0ca-ec0a-4f2a-a179-be7e2bc19194] MSAL.Desktop.4.85.2.0.MsalUiRequiredException:
+	ErrorCode: failed_to_acquire_token_silently_from_broker
+Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+	StatusCode: 0 
+	ResponseBody: 
+2026-08-19 15:57:27.8377 | ERR | bolt.authentication.store.AuthTokenStore :: Exception in CreateAuthProfile()|EXCEPTION: MSAL.Desktop.4.85.2.0.MsalUiRequiredException:
+	ErrorCode: failed_to_acquire_token_silently_from_broker
+Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.ApiConfig.Executors.ClientApplicationBaseExecutor.<ExecuteAsync>d__2.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenForPublicClientFlow>d__9.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenAsync>d__8.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+	StatusCode: 0 
+	ResponseBody: 
+2026-08-19 15:57:27.8438 | WRN | bolt.authentication.store.AuthTokenStore :: TryCreateAuthProfileFromOperatingSystemAsync: Failed to create OperatingSystem profile|EXCEPTION: bolt.system.VerbExecutionException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+ ---> Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.ApiConfig.Executors.ClientApplicationBaseExecutor.<ExecuteAsync>d__2.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenForPublicClientFlow>d__9.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenAsync>d__8.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+   --- Konec trasování zásobníku pro vnitřní výjimku ---
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<TryCreateAuthProfileFromOperatingSystemAsync>d__11.MoveNext()
+MSAL.Desktop.4.85.2.0.MsalUiRequiredException:
+	ErrorCode: failed_to_acquire_token_silently_from_broker
+Microsoft.Identity.Client.MsalUiRequiredException: WAM Error  
+ Error Code: 3399548929 
+ Error Message: Need user interaction to continue. 
+ Internal Error Code: 558133255 
+
+   v Microsoft.Identity.Client.Internal.Requests.Silent.SilentRequest.<ExecuteAsync>d__5.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<>c__DisplayClass13_1.<<RunAsync>b__1>d.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Utils.StopwatchService.<MeasureCodeBlockAsync>d__4.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.Internal.Requests.RequestBase.<RunAsync>d__13.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v Microsoft.Identity.Client.ApiConfig.Executors.ClientApplicationBaseExecutor.<ExecuteAsync>d__2.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenForPublicClientFlow>d__9.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStore.<AcquireTokenAsync>d__8.MoveNext()
+--- Konec trasování zásobníku z předchozího místa, ze kterého byla vyvolána výjimka ---
+   v System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   v System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   v bolt.authentication.store.AuthTokenStoreBase.<CreateUniversalAuthProfile>d__12.MoveNext()
+	StatusCode: 0 
+	ResponseBody: 
+2026-08-19 15:57:29.0158 | WRN | Microsoft.PowerPlatform.PowerApps.Persistence.MsappPacking.MsappPackingService :: Pack complete. Copied 11 entries from msapr. Added 5 files from disk. Output: C:\Users\User\data_Lubos\claude_code\procesní mapa\runs\app_build\app.msapp.
+2026-08-19 15:57:29.3053 | INF | bolt.Session :: End session. 
+
+2026-08-19 15:57:29.4461 | INF | Microsoft.PowerPlatform.Tooling.BatchedTelemetry :: BatchedTransmitter`1.StartUploadProcess Started uploader with process id: 72112

@@ -1,0 +1,557 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.PowerApps.CLI</id>
+    <version>2.9.3</version>
+    <title>Microsoft PowerPlatform CLI</title>
+    <authors>Microsoft</authors>
+    <owners>crmsdk,Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="file">LICENSE.md</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <icon>images\PowerApps.128x128.png</icon>
+    <readme>docs\README.md</readme>
+    <projectUrl>https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction</projectUrl>
+    <description>Microsoft PowerPlatform CLI is a simple, single-stop, developer command-line interface (CLI) for developing customizations and extensions for Microsoft PowerPlatform. See project site how to install.</description>
+    <summary>This package contains the Microsoft PowerPlatform CLI.</summary>
+    <releaseNotes>Please make sure to update your Microsoft Power Platform CLI to the latest version and take advantage of all the latest capabilities by following https://aka.ms/PowerPlatformCLI.
+If you are a new user please install the Power Platform CLI directly from here: https://aka.ms/PowerPlatformCLI
+
+2.9.3:
+  pages:
+    - `pac pages list -v` now reports each site's Data Model Version (Standard / Enhanced) from the Power Pages Sitewide API, reflecting the data model the site is currently running
+    - Fixed `pages migrate-datamodel --updateDataModelVersion` reporting a non-recoverable error (System.AggregateException wrapping System.Text.Json.JsonException, "The input does not contain any JSON tokens") when the SetPortalDataModelVersion admin API returns an empty 2xx body, even though the data model version was updated successfully. The empty success response is now handled gracefully instead of crashing.
+    - Fixed `pages migrate-datamodel --mode configurationData` (step 1, metadata) marking the migration tracker as Completed even though the migration is not finished until `--mode configurationDataReferences` (step 2, transactional data) also runs. Step 1 now leaves the migration in-progress so the status is accurate and `--updateDataModelVersion` stays gated until step 2 completes; running step 2 after step 1 now resumes the same tracker instead of being blocked or creating a duplicate tracker record.
+  admin:
+    - New command: `pac admin query` to run Resource Query.
+  tool:
+    - Moved `init-skills` from `pac copilot init-skills` to `pac tool init-skills`.
+  Misc:
+    - Updated Microsoft.Identity.Client to 4.85.2
+    - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.2.26
+
+2.8:
+  Managed Identity:
+    - Improved certificate handling for plugin component: certificate evaluation now happens server-side, eliminating certificate type (self/fully signed) detection bug caused by differences in trusted root certs between client and server
+    - Added support for PluginPackage component type in managed identity commands
+    - Added managed identity version 2 (V2) federated identity credential (FIC) support: V2 uses SHA256-hashed issuer/subject DN segments (i/{hash}/s/{hash}) that are safe for certificates whose CN values would fail ESTS validation on V1 paths (trailing/leading dots, slashes, leading/trailing spaces, non-ASCII characters)
+    - Added `--version` argument to `show-fic`, `configure-fic`, and `verify-fic` to inspect or configure a specific FIC version (defaults to the version stored on the managed identity record)
+    - New `upgrade-version` verb to upgrade a plugin component's managed identity from V0 to V1 to V2. Supports `--target-version` for direct multi-step upgrades (e.g., V0-&gt;V2 in a single operation, no transient V1 state)
+    - Auto-detects plugin certificates with characters incompatible with V1 FIC paths and automatically uses V2 instead: `show-fic` displays the V2 subject + warning, `upgrade-version` upgrades directly to V2 (with `--target-version` override surfaced as a warning if user explicitly chose a lower version)
+    - Cross-tenant managed identity FIC configuration: automatically acquires a Graph token for the managed identity's tenant when it differs from the auth profile tenant. If cross-tenant Graph access is unavailable, falls back gracefully to clear manual FIC instructions with the issuer/subject/audience values inline (instead of crashing)
+    - New "FIC source" line in command output indicates whether the FIC subject was server-generated, client-generated, or hybrid (cert info from server + path built client-side), making it easy to diagnose configuration issues
+    - Fixed tenant ID resolution to handle Guid-typed `tenantid` attribute (previously returned null for cross-tenant managed identities, causing wrong-tenant FIC issuer URLs)
+    - `upgrade-version --revert-version` now safely guards against silent runtime breakage: blocks the revert when the certificate has problematic CN values that would fail on a lower FIC version, and auto-configures the lower-version FIC if it was never registered (e.g., after a direct V0-&gt;V2 upgrade)
+  canvas:
+    - unpack - Experimental layout changes:
+      - Fixed bug in Experimental layout when TestCase is created, but no steps added
+      - Improved error messages to include msapp entry file name
+      - Improved control Rules paths to use name of property in JSON path instead of rule index; makes error messages easier to debug
+      - Improved `DynamicProperties` paths to use name of property in JSON path instead of index; makes error messages easier to debug.
+      - Improved control `Children` paths to use name of control in JSON path instead of index; makes error messages easier to debug. Still detects changed ordering since it's still significant.
+    - pack - Experimental layout changes:
+      - Improved YAML parser error messages when duplicate keys detected to include the key name and file location.
+  Misc:
+    - Updated Microsoft.CrmSdk.SolutionPackagerLib to 9.1.1.215, including SolutionPackager YAML source control format support for packing folders with `solutions/*/solution.yml` manifests.
+    - Updated Microsoft.PowerApps.Checker.Client to 1.0.0.42
+    - Added solution check output for additional messages returned by the Power Apps Checker service
+    - Updated Microsoft.Identity.Client to 4.84.1
+    - Updated Microsoft.Graph to 5.105.0
+
+2.7:
+  canvas:
+    - Enable new SourceCode layout for `unpack` and `pack` commands
+      - Both commands support a new optional argument `--layout` which can be set explicitly to either `SourceCode` or `Experimental`
+      - Existing script automation will still default to the now legacy `Experimental` layout
+    - unpack command
+      - default for `--layout` argument is `Experimental` to not break existing automation
+    - pack command
+      - `--layout` is automatically detected from the contents of the `--sources` folder
+      - Added argument `--disable-load-from-yaml` to disable loading yaml source code by Power Apps Studio; only supported for `SourceCode` layout
+    - create command is now deprecated as internally it uses the legacy 'Experimental' layout
+  copilot:
+    - New `quarantine` command to quarantine/unquarantine a bot.
+  Misc:
+    - Updated Azure.Identity to 1.21.0
+
+2.6:
+  canvas:
+    - validate command is now deprecated.
+
+  admin:
+    - list command now shows environment group name
+
+  Misc:
+    - Updated Azure.Identity to 1.20.0
+    - Updated Microsoft.Identity.Client to 4.83.3
+    - Updated ModelContextProtocol to 1.2.0
+
+2.5:
+  admin:
+    - New `list-roles` command to list all Dataverse security roles
+    - New `self-elevate` command to elevate current user privileges for performing admin operations by calling ApplyAdminRole Power Platform API
+  solution:
+    - online-version now supports getting solution verion to address: https://github.com/microsoft/powerplatform-build-tools/discussions/385
+  Misc:
+    - Updated Microsoft.PowerApps.Checker.Client to 1.0.0.39
+    - Updated MCP SDK to v1.1.0
+
+2.4:
+  admin assign-user:
+    - Now supports passing Business Unit with role assignment
+  pages:
+    - Improved upload reliability
+  Misc:
+    - Updated Microsoft.Agents.ObjectModel to 2026.3.1.1
+    - Updated Azure.Identity to 1.18.0
+    - Updated Microsoft.Graph to 5.103.0
+    - Updated MCP SDK to v1.0.0
+    - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.210
+
+2.3:
+  copilot:
+    - Added new init-skills command to create PAC CLI skills MD files for use with coding agents such as GitHub Copilot CLI or Claude Code.
+  code:
+    - Fixed `code add-data-source` failing on macOS when CLI path contains spaces (thanks @djpetersen2015, https://github.com/microsoft/powerplatform-build-tools/issues/1285)
+  pages:
+    - Added SDM (Standard Data Model) support for Server Logic entity, including file content download
+    - Added support for Shortcut component type in Enhanced Data Model (V2) site downloads
+    - New `--resetMigration` flag for `pages migrate-datamodel` to reset migrations stuck in "Running" state for 24+ hours
+    - Improved stability and reliability for `pages download` command
+    - Bug fixes and improvements
+  Misc:
+    - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.207
+    - Updated Microsoft.Identity.Client to 4.82.1
+    - Updated Microsoft.Graph to 5.102.0
+    - Updated MCP SDK to v0.9.0-preview.1
+
+2.2:
+  modelapp:
+    - New `modelapp` noun for managing model-driven apps.
+        - `list` verb to list all model-driven apps in the environment.
+        - `get` verb to retrieve details of a specific model-driven app.
+  org:
+    - `env select` now supports an interactive environment picker when `--environment` is omitted.
+  auth:
+    - `auth select` now supports an interactive profile picker when no name or index is provided.
+  Misc:
+    - Updated Microsoft.Identity.Client to 4.82.0
+    - Updated MCP SDK to v0.7.0-preview.1
+
+2.1:
+  Misc:
+    - Updated MCP SDK to v0.6.0-preview.1
+    - Updated Microsoft.Graph to 5.101.0
+    - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.206
+
+2.0:
+  Upgraded to .Net 10.0
+  Managed Identity
+   - Improved FIC creation: plugin certificate hashes are emitted in lowercase to match expected subject format, and Graph/ARM errors are surfaced directly in the CLI.
+  Misc:
+    - Updated Microsoft.Identity.Client to 4.81.0
+
+1.52:
+  Misc:
+    - Updated Microsoft.CrmSdk.XrmTooling.CoreAssembly to 9.1.1.80
+    - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.194
+    - Updated Microsoft.Graph to 5.99.0
+    - Updated MCP SDK to v0.5.0-preview.1
+
+1.51:
+  Managed Identity [PREVIEW]
+  - New `managed-identity` noun supports configuring Power Platform Managed Identity (PPMI) for supported components (e.g., plugins, SharePoint, etc.).
+    - Verbs `create`, `update`, `delete`, and `get` support CRUD operations.
+    - Verbs `show-fic`, `configure-fic`, and `verify-fic` configure Federated Identity Credentials for Entra apps and user-assigned managed identities associated with PPMI.
+    - All verbs require the `--component-type` and `--component-id` parameters.
+
+  copilot:
+    - `mcp` command now supports `--run` argument to start a MCP server with new .Net 10 `dnx` command: `dnx Microsoft.PowerApps.CLI.Tool --yes copilot mcp --run`
+
+  Misc:
+  - Updated Microsoft.Identity.Client to 4.78.0
+
+1.50:
+  solution version
+  - Added support for updating solution version inside solution zip file without unpacking and packing again.
+
+  Misc:
+  - Updated Microsoft.PowerPlatform.Formulas.Tools to 0.8.3209.20-preview
+
+1.49:
+  canvas
+  - clarified that the 'pac canvas pack' and 'pac canvas unpack' verbs have been deprecated
+
+  Misc:
+  - Updated Microsoft.Graph to 5.93.0
+  - Updated Azure.Identity to 1.16.0
+  - Updated Microsoft.Identity.Client to 4.77.0
+
+1.48:
+  connection list can now return over 100 connections in a single call
+
+  Misc:
+  - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.2.10
+  - Updated Microsoft.Graph to 5.90.0
+  - Updated Azure.Identity to 1.15.0
+  - Updated Microsoft.Identity.Client to 4.76.0
+
+1.47:
+  Misc:
+  - Updated Microsoft.PowerPlatform.Dataverse.ModelBuilderLib to 2.0.16
+
+1.45:
+  Updated to .Net 9.0
+
+  - Added new `copilot mcp` command to show PAC MCP (Model Context Protocol) server location.
+
+  Misc
+  - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.2.9
+  - Updated icrosoft.Identity.Client to 4.73.0
+  - Updated Microsoft.CrmSdk.XrmTooling.CoreAssembly to 9.1.1.72
+  - Updated Microsoft.CrmSdk.XrmTooling.ConfigurationMigration to 9.1.0.192
+  - Updated Microsoft.CrmSdk.XrmTooling.PackageDeployment to 9.1.0.190
+  - Updated Microsoft.PowerPlatform.Dataverse.ModelBuilderLib to 2.0.15
+  - Updated Microsoft Graph to 5.83
+
+1.44:
+  Misc
+  - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.2.7
+  - Updated Microsoft.PowerFx.Core to 1.3.1 and Microsoft.PowerFx.Dataverse to 1.3.2
+  - Updated Microsoft.Identity.Client to 4.72.1
+  - Updated Azure.Identity to 1.14.0
+
+1.43:
+  admin update-tenant-settings
+  - Added new --setting-name and --setting-value parameters to update individual settings in the tenant settings
+
+  admin list-tenant-settings
+  - Improved the output to show the setting name and value in a more readable format
+
+  solution add-solution-component
+  - Added support for --async add to handle components with large numbers of dependencies
+  - Added support to resolve component names in the --componentType parameter
+
+  pcf init
+  - Update template to use Typescript ^5.8.3
+
+  test
+  - Updated support for MFA and multiple providers in automated test. Refer https://aka.ms/pactests.
+
+  Misc
+  - Updated Dataverse Service Client to 1.2.6
+  - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.185
+  - Updated Microsoft.Identity.Client to 4.71.1
+
+1.42:
+  Misc
+  - Updated Dataverse Service Client to 1.2.5
+  - Updated Power Fx to 1.3.0-build.20250331-1001
+  - Updated Microsoft Graph to 5.75.0
+
+1.41:
+  Misc
+  - Updated Microsoft.Identity.Client to 4.70.0
+  - Updated Microsoft Graph to 5.74.0
+
+1.40:
+  copilot
+  - Updated bot object model
+  - Added Hebrew language support
+  - Fixed an issue with extract-template
+
+  solution check
+  - Fixed --clearCache when it throws error without a path or solutionUrl
+
+  Misc
+  - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.2.3
+  - Updated Microsoft.Identity.Client to 4.68.0
+  - Updated Microsoft Graph to 5.70.0
+
+1.39:
+  pcf init:
+  - Use ESLint v9 package in generated control
+
+  Misc
+  - Updated Dataverse Service Client to 1.2.2
+  - Updated XrmTooling Core to 9.1.1.65
+  - Updated XrmTooling PackageDeployment to 9.1.0.179
+  - Updated Microsoft.Identity.Client to 4.67.1
+  - Updated Microsoft Graph to 5.68.0
+
+1.38:
+  Admin
+  - New list-groups command to list all environment groups in the tenant
+  - New add-group command to add an environment to an environment group
+
+  Misc
+  - Updated Microsoft Graph to 5.63.0
+
+1.36:
+  power-fx:
+  - JSON not available in Power Fx https://github.com/microsoft/Power-Fx/discussions/2734 reported by https://github.com/rajyraman
+
+  data:
+  - Fixed an issue where the updateCompare flag was ignored if the target table exceeded the default prefetch size of 4,000 records.
+
+  Misc
+  - Updated Microsoft Graph to 5.61.0
+  - Updated Azure.Identity to 1.13.1
+  - Updated Microsoft.Identity.Client to 4.66.1
+
+1.35:
+  Misc
+  - Updated Microsoft Graph to 5.58.0
+  - Updated Microsoft.Identity.Client to 4.65.0
+
+1.34:
+  The dotnet tool version of PAC has been upgraded to .NET 8.0; the original MSI installed version of PAC remains on .NET Framework 4.8
+
+  copilot
+  - `merge-translations` fixed overwriting isCustomizable
+  - `extract-template` fixed NotImplemented exception
+
+  solution check
+  - New --clearCache argument to clear the cache as part of the solution check process
+
+  env
+  - list-settings supports --json output format
+
+  Misc
+  - Updated Dataverse Service Client version to 1.1.27
+  - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.180
+  - Updated Microsoft.Identity.Client to 4.63.0
+  - Updated Microsoft.PowerPlatform.Dataverse.Client version to 1.1.32
+
+1.33:
+  Misc
+  - Updated Azure.Identity to 1.12
+  - Updated Microsoft Graph to 5.56.0
+  - Updated Microsoft.Identity.Client to 4.61.3
+  - Updated Dataverse ModelBuilder to 2.0.11
+  - Updated Microsoft Power Fx 1.3.0-build.20240626-1003
+  - Updated Microsoft.PowerPlatform.Formulas.Tools to 0.8.02735.117-preview (resolves https://github.com/microsoft/PowerApps-Tooling/issues/668)
+  - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.178
+
+1.32:
+  solution
+  - `solution sync` now supports `--map` to skip items in the unpack process (https://github.com/microsoft/powerplatform-build-tools/discussions/832)
+  - `solution clone` now supports `--map` to skip items in the unpack process (https://github.com/microsoft/powerplatform-build-tools/discussions/832)
+
+  auth
+  - New `auth who` verb which displays information about current authentication profile
+  - (Preview) New `auth create` Federated login flows for Service Principals or User Assigned Managed Identities
+    - These two new options permit authentication via Federated Credentials set in the Azure Portal
+      instead of needing a Client Secret or Client Certificate on supported build agents.
+    - GitHub Actions Federation via the `--githubFederated` switch
+      Configuration instructions will be found on the next release of https://github.com/microsoft/powerplatform-actions/releases (ie, higher than the current v1.4.0)
+    - Azure DevOps Task Federation via the `--azureDevOpsFederated` switch
+      Configuration instructions will be found on the next release of https://github.com/microsoft/powerplatform-build-tools/releases (ie, higher than the current v2.0.63)
+  - Fixed issue with Service Principal Certificate authentication expiring after 1 hour
+  - Fixed issue with Managed Identities Auth Profile creation when the identity did not have optional BAP permissions.
+
+  catalog
+  - `catalog install` now supports `--target-env` to specify target environment (https://github.com/microsoft/powerplatform-build-tools/issues/872)
+
+  Misc
+  - Updated Microsoft.CrmSdk.SolutionPackagerLib version to 9.1.1.176
+  - Updated Microsoft.PowerPlatform.Dataverse.Client version to 1.1.22
+
+1.31:
+  auth
+  - Fixed `auth create` bug for SPNs on MacOS https://github.com/microsoft/powerplatform-build-tools/issues/716 reported by https://github.com/jjdd12
+  - Fixed `auth create` with Managed Identity
+  - Fixed `auth clear` bug with invalid or expired SPN profile
+
+  solution
+  - Fixed `solution pack/unpack` bug https://github.com/microsoft/powerplatform-build-tools/issues/695 reported by https://github.com/h-karthik12
+  - Fixed `soltuion sync` bug https://github.com/microsoft/powerplatform-build-tools/discussions/772 reported by https://github.com/Zerajima
+
+  copilot
+  - Fixes export-template loading issue
+
+  - Change default module type to 'es2020' to allow for better tree-shaking to reduce bundle size.
+    - NOTE: If the previous behavior is required, add the line `"module": "commonjs"` to the `tsconfig.json` file under section `compilerOptions`.
+  - Change default target type to 'es6'.
+    - NOTE: If the previous behavior is required, add the line `"target": "es5"` to the `tsconfig.json` file under section `compilerOptions`.
+
+  Fixed URL for the GCC/China/DoD PowerApps Checker endpoints
+  Fixed Microsoft Graph endpoints for GCC &amp; GCC High
+
+  Misc
+  - Updated Microsoft.Identity.Client to 4.59.0
+  - Updated Microsoft Graph version to 5.43.0
+  - Updated Microsoft.CrmSdk.XrmTooling.CoreAssembly version to 9.1.1.57
+  - Updated Microsoft Power Fx to 1.3
+  - Updated SolutionPackager version to &gt;9.1.1.171
+
+1.30:
+  Affects all verbs:
+  - The current Universal auth profile will now be selected before falling back on previous logic for the Dataverse and Admin auth profile kinds.
+    This means that old profiles will never be used if there is an existing Universal profile.
+    In the future, these old profiles will no longer be supported. Please create new profiles (which will be Universal) and set the --environment argument or 'pac org select' to set the active Dataverse environment for the profile.
+  - All verbs that interact with Dataverse now support the `--environment` argument.
+    This argument allows the user to explicitly override the active environment for the current profile.
+    For most verbs this argument is optional, as it will fall back to the active environment for the current profile.
+    Only when a verb will potentially corrupt or change security policies will these arguments be required to be specified. (e.g. pac admin copy, pac admin delete)
+
+  auth
+  - Deprecation of all but the Universal auth kinds. The `--kind` argument for `pac auth create` is now officially ignored. All new authentication profiles will use the Universal auth kind.
+  - auth create argument `--url` is now deprecated, replaced with `--environment`. While `--url` supports only a url, the `--environment` argument supports organization id, environment id, and name searches. Other than the kinds of values allowed, these two argument behave the same.
+  - Output of the `auth list` table has been reorganized.
+    - Only Dataverse environment url's are displayed (for some profile kinds and for universal when the tenant doesn't have a default environment a service endpoint was being displayed)
+    - Json result object also updated to use property `ActiveEnvironment` vs `Resource` and `FriendlyName`.
+  - `org select`, `auth update --environment` will now verify the auth profile is able to authenticate with the environment before changing the active environment on the profile. This was causing some profiles to be corrupted.
+  - `org select`, `auth update --environment` will only modify existing Universal and Dataverse environments.
+  - Removed erroneous output "Connected to..." for verbs requiring authentication and supporting an `--environment` argument when the active profile had an active environment selected but the --environment argument on the command line is for a different environment.
+  - Bug fix: Auth profile names should be unique. Existing profiles will get picked on the first in the list, but will not be possible to reuse a profile name.
+
+  admin
+  - set-runtime-state updates the environment administration mode
+  - set-governance-config has 6 new arguments --maker-onboarding-url, --maker-onboarding-markdown, --suppress-validation-emails, --checker-rule-overrides, --cloud-flows-mode, --cloud-flows-limit
+
+  copilot
+  - Command renamed from `copilot` to `copilot model`. Users using e.g. `pac copilot list` need to change their commands to `pac copilot model list`.
+  - Moved commands from `virtual-agent` to `copilot`.
+  - Added alias `virtual-agent` to `copilot`. Users using e.g. `pac virtual-agent list` can continue to do so but are encouraged to changed their commands to `pac copilot list`.
+
+  plugin
+  - updated plugin template for init command
+
+  Misc
+  - Updated Dataverse Service Client version to 1.1.17
+  - Updated SolutionPackager version to 9.1.1.164
+  - Updated PDPackageGenerator version to 1.0.13
+  - Updated Power Apps Checker version 1.0.0.17
+
+1.29:
+  auth
+  - Security improvements to the storage mechanism for the Token Cache
+    - Windows: no effective change; Token Cache is already stored via Windows Data Protection API for encryption at rest
+    - macOS: Token Cache is now stored within Keychain.  This may lead to occasional OS prompts for PAC to access the Keychain
+    - Linux:
+      - For desktop environments with a Secret Service implementation (such as gnome-keyring or ksecretservice), the Token Cache is now stored there via libsecret.
+      - If libsecret or a Secret Service implementation is not installed or not available (such as an SSH session, headless, or without x11), the Token Cache remains in a plaintext file with user-only (chomd 600) permissions.
+
+  canvas download
+  - Added new --extract-to-directory parameter to extract the contents of the downloaded msapp file to a directory
+
+  power-fx
+  - Added pfx alias for power-fx command
+  - Added function list for Power Fx Repl
+
+  pcf push supports target environment
+  - Adds the --solution-unique-name argument (mutually exclusive with --publisher-prefix argument)
+  - The temporary solution (and the temporary publisher) is now deleted after import is successful.
+  - The publisher prefix from the target environment is used
+
+  data import
+  - returns nonzero exit code when import fails
+
+  solution sync
+  - Now supports long path names on Windows
+
+  admin create
+  - Added new --security-group-id parameter to specify the security group id for the environment as suggested by https://github.com/just-marc-stevenson
+  https://github.com/microsoft/powerplatform-build-tools/discussions/535
+
+  package deploy
+  - New --solution argument which adds the ability to pass a solution to pac package deploy, using PD to deploy the solution
+  This will allow for the deployment of solutions using the PD processor to support async, retry, timeout and other features
+  that PD uses to deliver a solution.
+
+  Misc
+  - Updated Microsoft.PowerPlatform.PackageGeneratorLib to 1.0.10
+  - Updated Microsoft.Identity.Client to 4.57.0
+  - Updated Microsoft.Graph to 5.32.0
+
+1.28:
+  power-fx
+  - new repl command for read-eval-print-loop of Power FX expressions
+  - new run command to run Power FX expressions from file
+
+  canvas
+  - Added new list command to list all canvas apps in the environment
+  - Added new download command to download msapp file for a canvas app
+
+  data
+  - Import command has new --connection-count parameter to specify the number of connections to use during import with 5 being the default
+
+  admin
+  - Create command has new --user parameter to specify the owner of the developer environment
+
+  solution
+  - Import command has new --stage-and-upgrade switch to perform a Solution Upgrade in a single command, instead of needing `pac solution import --import-as-holding` followed by a `pac solution upgrade`
+
+  Misc
+  - PAC CLI is outputting in Unicode (UTF16) by default
+  - Improved environment discovery for service principal authentication
+  - Improved service pricnipal access token refresh and exchange flows
+  - Improved asyncronous polling
+  - fixed https://github.com/microsoft/powerplatform-build-tools/issues/516 reported by https://github.com/joje1234
+  - PAC CLI is now long path aware on Windows for file names longer than 260 characters
+  - Updated Microsoft.Graph to 5.28.0
+
+1.27:
+  admin
+  - Added new list-tenant-settings as requested by https://github.com/Laskewitz: https://github.com/microsoft/powerplatform-build-tools/discussions/460
+  - Added new update-tenant-settings as requested by https://github.com/Laskewitz: https://github.com/microsoft/powerplatform-build-tools/discussions/460
+  - Improved list command which now shows environment selected in current auth profile
+
+  connection
+  As requested by https://github.com/jboliveira and based on large number of votes on https://github.com/microsoft/powerplatform-build-tools/discussions/481
+  - (Preview) Added create, update, list and delete verbs for Dataverse connections with Service Principal authentication
+
+  org
+  - Added new alias "env": "pac env list" is equivalent to "pac org list"
+
+  paportal
+  - Added new aliases "powerpages" and "pages"
+
+  auth
+  - create --managedIdentity flow can include regular users, specified by Username + Password Environment Variables
+
+  Misc
+  - Removed support for .NET 5.0
+  - Updated Microsoft.Graph to 5.26.0
+  - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.1.14
+
+1.26:
+  pcf
+  - Added new --incremental flag which only pushes changed files via entity update
+  - project templates now include react and react-dom as devDependencies
+  - Added pcfStartPath option to improve monorepo support
+
+  admin
+  - create-service-principal now has internal retry logic after Entra ID app creation
+  - Most votes got idea from https://github.com/Laskewitz: https://github.com/microsoft/powerplatform-build-tools/discussions/406
+    create-service-principal now has --name and --environment is optional
+  - Added list-service-principal command to list all application service principals in the tenant which have access to Dataverse environments
+  - Added support for managed environments with set-governance-config
+
+  auth
+  - Better detection of Azure Cloud based on environment URL
+  - Operating system auth profile can now have default environment URL (org select)
+
+  copilot
+  - predict now accepts model by name in addition to model id
+  - list shows which models are active or inactive
+
+  test
+  - execution of automated tests for Power Apps with Playwright
+
+  catalog
+  - Add Support for common Packager
+
+  Misc
+  - Updated Microsoft.PowerPlatform.Dataverse.Client to 1.1.12
+  - Updated SolutionPackager to 9.1.1.156
+  - Updated Microsoft.Graph to 5.21.0
+  - Updated Dataverse ModelBuilder to 2.0.6
+  - Updated Microsoft.PowerPlatform.Formulas.Tools to 0.6.4-preview
+  - Added --log-to-console for use with Azure DevOps Build Tools</releaseNotes>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <language>en-US</language>
+    <tags>Dynamics CRM PowerApps PowerPlatform</tags>
+  </metadata>
+</package>

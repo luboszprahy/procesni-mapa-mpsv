@@ -1,0 +1,604 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>bolt.module.copilot</name>
+    </assembly>
+    <members>
+        <member name="T:bolt.module.copilot.CliAgentRichComponents">
+             <summary>
+             Emits the rich solution parts for a CliCopilot layered workspace beyond the root bot shard.
+            
+             A rich CliCopilot agent's solution carries tool botcomponents, knowledge-source
+             botcomponents, file-attachment botcomponents, skill botcomponents, connected-agent
+             botcomponents, connection references, cloud flows, and the link sets between them.
+            
+             Component metadata comes from the typed ObjectModel definition read by Copilot.Sync.
+             Component DATA bodies and file payload paths are resolved through the public
+             Copilot.Sync CliCopilot projection seam so local authored edits are reflected.
+            
+             KNOWN GAPS (clone limitations, not converter limitations):
+              - File-attachment CONTENT is not stored in the clone workspace (only metadata), so the
+                filedata/ payload cannot be reproduced; the botcomponent is emitted metadata-only with
+                a warning.
+              - A connected agent's own bot shard is a cross-agent dependency that does not live in this
+                agent's workspace; it is declared in dependencies.json and must already exist in the
+                target environment (as the export's --AddRequiredComponents otherwise pulls it in).
+             </summary>
+        </member>
+        <member name="M:bolt.module.copilot.CliAgentRichComponents.Emit(System.String,System.String,Microsoft.Agents.ObjectModel.DefinitionBase,System.String,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Emit the rich solution parts into <paramref name="tempDir"/>. Returns the metadata the
+            caller needs to finish solution.xml / customizations.xml / [Content_Types].xml.
+            Returns an empty result (and writes nothing) when the typed definition has no rich content.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.CliAgentRichComponents.ReadComponentData(System.String,Microsoft.Agents.ObjectModel.BotComponentBase,Microsoft.Agents.ObjectModel.DefinitionBase)">
+            <summary>Read the component data body: prefer the projected authored file, else serialize the typed ObjectModel body.</summary>
+        </member>
+        <member name="M:bolt.module.copilot.CliAgentRichComponents.StripLeadingMcsMetadata(System.String)">
+            <summary>
+            Remove a leading top-level <c>mcs.metadata:</c> block (the MCS projection header) from a
+            component body, byte-preserving the remainder. The component DATA part packed into the
+            solution is the authored body only and must not carry the projection metadata.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.CliAgentRichComponents.BuildWorkflowXmlFragment(System.Collections.Generic.Dictionary{System.Object,System.Object},System.String)">
+            <summary>
+            The <c>&lt;Workflow&gt;</c> element that lives inside <c>customizations.xml</c>'s
+            <c>&lt;Workflows&gt;</c> section in the importable solution zip. (SolutionPackager
+            splits this out into a per-flow <c>.json.data.xml</c> on unpack, but the zip itself
+            carries it inline.)
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.CliAgentRichComponents.ConnRef">
+            <summary>A connection reference to emit into customizations.xml (from infrastructure/connections/).</summary>
+        </member>
+        <member name="M:bolt.module.copilot.CliAgentRichComponents.ConnRef.#ctor(System.String,System.String)">
+            <summary>A connection reference to emit into customizations.xml (from infrastructure/connections/).</summary>
+        </member>
+        <member name="T:bolt.module.copilot.CliAgentRichComponents.ConnRefLink">
+            <summary>An McpTool botcomponent ↔ connection reference link (the Assets connectionreferenceset).</summary>
+        </member>
+        <member name="M:bolt.module.copilot.CliAgentRichComponents.ConnRefLink.#ctor(System.String,System.String)">
+            <summary>An McpTool botcomponent ↔ connection reference link (the Assets connectionreferenceset).</summary>
+        </member>
+        <member name="T:bolt.module.copilot.CopilotModule">
+            <summary>
+            Data module
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.FetchXmlCleaner">
+            <summary>
+            https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/query-metadata-web-api
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.FetchXmlCleaner.PrepareModelAsync(bolt.dataverse.model.FetchXmlModel)">
+            <summary>
+            Prepare FetchXML for execution in the current environment
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:bolt.module.copilot.bot_accesscontrolpolicy">
+            <summary>
+            This field configures which users may interact with the agent.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_accesscontrolpolicy.Any">
+            <summary>
+            Any signed in user is allowed to interact with the agent.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_accesscontrolpolicy.Agentreaders">
+            <summary>
+            Authentication mode must be Integrated or Custom Entra ID. User must have at least Read access to the Agent record.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_accesscontrolpolicy.Groupmembership">
+            <summary>
+            Authentication mode must be Integrated or Custom Entra ID. To interact with the agent, users must be member of one of the security groups configured in the Authorized Security Groups field OR have Read access to the Agent.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_accesscontrolpolicy.Any_multitenant">
+            <summary>
+            Anyone from any tenant is allowed to interact with the agent.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot_authenticationmode">
+            <summary>
+            Defines how users should be authenticated with the agent.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationmode.Unspecified">
+            <summary>
+            Agent was created before the introduction of this field. The mode is either 'None' if no authentication was configured, or 'Generic OAuth2' if the agent had an authentication node.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationmode.None">
+            <summary>
+            The agent does not require authentication.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationmode.Integrated">
+            <summary>
+            Authentication uses integrated Entra ID configuration. Supports security group access control. The agent has access to the UserId and UserDisplayName variables and will be able to invoke Flows on behalf of the end user. No additional configuration required.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationmode.CustomEntraID">
+            <summary>
+            Provide a custom Entra ID application. Supports security group access control. The agent has access to the IsLoggedIn, AuthToken, UserId and UserDisplayName variables and will be able to invoke Flows on behalf of the user. Skills can leverage the auth token
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationmode.GenericOAuth2">
+            <summary>
+            A custom OAuth provider is configured. The agent will have access to the IsLoggedIn and AuthToken variables.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot_authenticationtrigger">
+            <summary>
+            Defines at which point authentication for the agent should be triggered. Security can be enforced at the agent entry point, removing the need for explicit authentication nodes in the dialog flow.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationtrigger.AsNeeded">
+            <summary>
+            Sign in happens when the agent reaches an authentication node or when an action requires user authentication.
+            </summary>
+        </member>
+        <member name="F:bolt.module.copilot.bot_authenticationtrigger.Always">
+            <summary>
+            Sign-in happens when the conversation starts and any time a token expires.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot_language">
+            <summary>
+            Language of the bot
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot_statecode">
+            <summary>
+            Status of the Bot
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot_statuscode">
+            <summary>
+            Reason for the status of the Bot
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot">
+            <summary>
+            Represents an agent created in Copilot Studio. https://copilotstudio.microsoft.com/
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.bot.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the bot entity
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.bot.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.accesscontrolpolicy">
+            <summary>
+            Defines which users may interact with the agent.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.applicationmanifestinformation">
+            <summary>
+            Stores information with application manifest data such as Teams application information.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.authenticationconfiguration">
+            <summary>
+            Stores information for the authentication configuration.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.authenticationmode">
+            <summary>
+            Defines how the agent should be authenticated to the user.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.authenticationtrigger">
+            <summary>
+            Defines at which point authentication for the agent should be triggered. Security can be enforced at the agent entry point, removing the need for explicit authentication nodes in the dialog flow.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.authorizedsecuritygroupids">
+            <summary>
+            Contains a comma-delimited list of up to 20 Entra ID Group IDs that are allowed to interact with the agent. This field is ignored if Access Control Policy is not set to Group membership.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.botId">
+            <summary>
+            Unique identifier of the agent.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ComponentIdUnique">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.Configuration">
+            <summary>
+            Used to store content of bot configuration data.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.CreatedOn">
+            <summary>
+            Date and time when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.iconbase64">
+            <summary>
+            Used to visually identify your bot in channels and services. Represented in a base64 encoded string. Must be in PNG format, and no larger than 100KB in size. This value can be changed at any time.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ImportSequenceNumber">
+            <summary>
+            Sequence number of the import that created this record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.IsCustomizable">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.IsManaged">
+            <summary>
+            Indicates whether the solution component is part of a managed solution.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.Language">
+            <summary>
+            The language identifier (LCID) of this Agent.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ModifiedBy">
+            <summary>
+            Unique identifier of the user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ModifiedOn">
+            <summary>
+            Date and time when the record was modified.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.name">
+            <summary>
+            The display name of the agent.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.Origin">
+            <summary>
+            Used to identify the origin used to create the bot.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.OverriddenCreatedOn">
+            <summary>
+            Date and time that the record was migrated.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.OwnerId">
+            <summary>
+            Owner Id
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.OwningBusinessUnit">
+            <summary>
+            Unique identifier for the business unit that owns the record
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.OwningTeam">
+            <summary>
+            Unique identifier for the team that owns the record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.OwningUser">
+            <summary>
+            Unique identifier for the user that owns the record.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.ProviderConnectionReferenceId">
+            <summary>
+            Unique identifier for Connection Reference associated with Agent.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.publishedby">
+            <summary>
+            Unique identifier of the user who last published the bot.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.publishedon">
+            <summary>
+            Date and time when the agent was last published
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.SchemaName">
+            <summary>
+            Unique name identifying the agent.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.statecode">
+            <summary>
+            Status of the agent
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.statuscode">
+            <summary>
+            Reason for the status of the agent
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.SupportedLanguages">
+            <summary>
+            The list of supported languages by this bot
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.SynchronizationStatus">
+            <summary>
+            Used to store information about the synchronization operations of the bot
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.Template">
+            <summary>
+            Used to identify the template and version used for the bot default content
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.TimeZoneRuleVersionNumber">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.UTCConversionTimeZoneCode">
+            <summary>
+            Time zone code that was in use when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.bot.VersionNumber">
+            <summary>
+            Version Number
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.EntityOptionSetEnum.GetEnum(Microsoft.Xrm.Sdk.Entity,System.String)">
+            <summary>
+            Returns the integer version of an OptionSetValue
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.EntityOptionSetEnum.GetMultiEnum``1(Microsoft.Xrm.Sdk.Entity,System.String)">
+            <summary>
+            Returns a collection of integer version's of an Multi-Select OptionSetValue for a given attribute on the passed entity
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.EntityOptionSetEnum.GetMultiEnum``1(Microsoft.Xrm.Sdk.Entity,System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Returns a OptionSetValueCollection based on a list of Multi-Select OptionSetValues
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.componentstate">
+            <summary>
+            The state of this component.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.PredictAction">
+            <summary>
+            https://github.com/MicrosoftDocs/ai-builder/blob/main/ai-builder-docs/predict-action-pwr-automate.md
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.PredictResponse">
+            <summary>
+            https://github.com/MicrosoftDocs/ai-builder/blob/main/ai-builder-docs/predict-action-pwr-automate.md
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.services.AgentManagementUrlResolver">
+            <summary>
+            Derives the agent management URL (Copilot Studio Island endpoint) from the
+            environment's BAP runtime endpoints. The URL is a property of the environment,
+            not a user-provided value.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.AgentManagementUrlResolver.ResolveAsync(bolt.cli.IEnvironmentResolver,bolt.authentication.profiles.AuthProfile,System.Uri,System.Threading.CancellationToken)">
+            <summary>
+            Resolves the agent management URL by querying BAP for the environment's runtime endpoints.
+            </summary>
+            <param name="environmentResolver">The environment resolver to use for the BAP call.</param>
+            <param name="authProfile">The auth profile for the BAP call.</param>
+            <param name="environmentUrl">The Dataverse environment URL to look up in BAP.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>The agent management URL, or null if BAP resolution fails (e.g. user lacks PP admin role).</returns>
+        </member>
+        <member name="M:bolt.module.copilot.services.BotLanguageInformation.Parse(System.String)">
+            <summary>
+            Returns null if not matched.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.BotLanguageInformation.GetLanguageDefaultLocale(Microsoft.Agents.ObjectModel.Language)">
+            <summary>
+            Get a default locale for a language.
+            If not supported, throws <see cref="T:System.ArgumentOutOfRangeException"/>.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.services.FakeSkillResourceContentLoader">
+            <summary>
+            No-op skill-resource content loader. Mirrors the VS Code extension host
+            (MockSkillResourceContentLoader): skill-resource (FileAttachmentComponent)
+            body acquisition is a separate concern and is not loaded during sync.
+            Required so that ContentAuthoringService
+            (Microsoft.Agents.Platform.Content.Internal, ObjectModel 2026.5.3+) can be
+            activated, since it now takes ISkillResourceContentLoader as a dependency.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.IPvaAuthoringContextInitializer.GetAuthoringOperationContextsAsync(bolt.authentication.profiles.AuthProfile,bolt.dataverse.SelectedOrganizationInfo,System.Collections.Immutable.ImmutableArray{bolt.module.copilot.services.BotIdOrSchemaNameValue},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Returns NULL if not found.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.IPvaAuthoringContextInitializer.GetBotComponentCollectionAuthoringOperationContextsAsync(bolt.authentication.profiles.AuthProfile,bolt.dataverse.SelectedOrganizationInfo,System.Collections.Immutable.ImmutableArray{bolt.module.copilot.services.BotIdOrSchemaNameValue},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Returns NULL if not found.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.IPvaAuthoringContextInitializer.GetAuthoringOperationContextAsync(bolt.authentication.profiles.AuthProfile,bolt.dataverse.SelectedOrganizationInfo,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Returns NULL if not found.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.services.PacDataverseHttpClientAccessor">
+             <summary>
+             <see cref="T:Microsoft.Agents.Platform.Content.Abstractions.IDataverseHttpClientAccessor"/> implementation that creates HttpClients
+             with bearer token auth via <see cref="T:Microsoft.CopilotStudio.Sync.ISyncAuthProvider"/>. Replaces the old
+             <c>DataverseHttpClientAccessor</c> that used pac's <c>IAuthenticatedClientFactory</c>
+             directly.
+            
+             Also implements <see cref="T:bolt.module.copilot.services.IPvaDataverseHttpClientContext"/> so that
+             <c>PvaAuthoringContextInitializer</c> works unchanged — its <c>SetConnectionParams</c>
+             and <c>ClearConnectionParams</c> calls are handled here.
+             </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.PacDataverseHttpClientAccessor.SetConnectionParams(bolt.authentication.profiles.AuthProfile,System.Uri)">
+            <summary>
+            Stores both auth and Dataverse URL. This preserves the old contract where
+            <c>PvaAuthoringContextInitializer</c> and non-sync verbs use this call as
+            the auth handoff before Platform.Content operations.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.services.PacSyncAuthProvider">
+            <summary>
+            Bridges pac's <see cref="T:bolt.authentication.store.IAuthTokenStore"/> + <see cref="T:bolt.authentication.profiles.AuthProfile"/> to the shared
+            sync library's <see cref="T:Microsoft.CopilotStudio.Sync.ISyncAuthProvider"/>. Verbs call <see cref="M:bolt.module.copilot.services.PacSyncAuthProvider.SetAuthProfile(bolt.authentication.profiles.AuthProfile)"/>
+            before delegating to the sync library.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.services.PacSyncAuthProvider.SetAuthProfile(bolt.authentication.profiles.AuthProfile)">
+            <summary>
+            Sets the auth profile for the current command execution.
+            Must be called before any sync operations.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.services.PacSyncProgress">
+            <summary>
+            Bridges pac's <see cref="T:bolt.cli.ICommandProgress"/> to the shared sync library's
+            <see cref="T:Microsoft.CopilotStudio.Sync.ISyncProgress"/>.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotCloneVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.verbs.CopilotExtractTemplateVerb.ExtractBotDefinition(Microsoft.Agents.ObjectModel.BotDefinition,System.String)">
+            <summary>
+            Extracts the bot definition from the response and removes the non-content data.
+            It will results in a bot definition that can be used as a template (content.yml).
+            </summary>
+            <param name="botDefinition"></param>
+            <param name="templateId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:bolt.module.copilot.verbs.CopilotExtractTemplateVerb.ExtractManifest(Microsoft.Agents.ObjectModel.BotDefinition,System.Text.Json.Nodes.JsonObject)">
+            <summary>
+            Extracts the manifest from the bot definition and removes the non-content data.
+            It will results in a manifest that can be used as a template (manifest.json).
+            </summary>
+            <param name="botWithNewName"></param>
+            <param name="manifest"></param>
+            <returns></returns>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotInitVerb.OptionalAuthProfile">
+            <summary>
+            The active auth profile for the execution of this verb. May be null if the user doesn't have any auth profiles.<br/>
+            This property is generated by declaring the AuthenticatedAttribute and setting its AuthenticatedAttribute.Optional to `true`.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.verbs.CopilotModelListVerb">
+            <summary>
+            "copilot list" displays a list of AI Builder models in the current environment.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotModelListVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.verbs.CopilotModelPredictVerb">
+            <summary>
+            "copilot predict" calls predict action on selected AI model
+            https://github.com/MicrosoftDocs/ai-builder/blob/main/ai-builder-docs/predict-action-pwr-automate.md
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotModelPredictVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="T:bolt.module.copilot.verbs.CopilotModelPrepareFetchVerb">
+            <summary>
+            "ai prepare-fetch" takes FetchXML file from AI and prepares it for execution in the current environment
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotModelPrepareFetchVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotPullVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotPushVerb.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+        <member name="M:bolt.module.copilot.verbs.CopilotVerbBase.ResolveEnvironmentAsync(bolt.cli.Command,System.Threading.CancellationToken)">
+            <summary>Resolves the target environment from the command's <c>--environment</c> argument
+            (or the active auth profile's default organization when omitted).</summary>
+        </member>
+        <member name="M:bolt.module.copilot.verbs.CopilotVerbBase.GetSingleBotAsync(bolt.cli.Command,bolt.dataverse.SelectedOrganizationInfo,System.Threading.CancellationToken)">
+            <summary>Resolves the single agent referenced by the command's <c>--bot</c> argument, which
+            accepts either a Copilot ID (GUID) or a schema name. Throws <see cref="T:bolt.system.VerbExecutionException"/>
+            when no agent or more than one agent matches.</summary>
+        </member>
+        <member name="P:bolt.module.copilot.verbs.CopilotVerbBase.AuthProfile">
+            <summary>
+            The required active auth profile for the execution of this verb.<br/>
+            This property is generated by declaring the AuthenticatedAttribute.
+            </summary>
+        </member>
+    </members>
+</doc>

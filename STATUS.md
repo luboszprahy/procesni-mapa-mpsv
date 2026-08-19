@@ -2,6 +2,44 @@
 
 Aktualizováno: 2026-08-19 16:14 (konec dne)
 
+## F2 ROZPRACOVANÁ — appka doauthorovaná (19.08.2026 večer)
+
+Solution zip dorazil (`input/procesnimapa_1_0_0_1.zip`, přišel přes git pull).
+Ověřeno: unmanaged, publisher `mpsv`/prefix `mpsv_`, connection reference na všech
+5 listů a **GUIDy listů se shodují s F1**.
+
+**Hotovo:**
+- `src/app_src/*.pa.yaml` — 3 obrazovky (`scr_Seznam`, `scr_Detail`, `scr_Vazby`)
+  + `App.OnStart` podle `deploy/app_navrh.md`. 64 prvků, 543 vzorců.
+- `src/check_app.py` — validace zdrojů proti `src/schema.json` (sloupce, odkazy
+  mezi prvky, navigace, delegace). **Ověřeno mutací: 5 z 5 zavedených chyb chyceno.**
+- `src/build_app.py` — reprodukovatelné přebalení: unpack (`--layout SourceCode`)
+  → výměna `Src/*.pa.yaml` → pack → zpět do solution + zvýšení verze.
+- `src/check_solution.py` — brána před importem, **24 kontrol, 0 chyb**.
+- **`deploy/procesnimapa_1_0_0_2.zip` — připraveno k importu jako upgrade.**
+
+**pac CLI je nově k dispozici** — nainstalováno rozšíření VS Code
+`microsoft-IsvExpTools.powerplatform-vscode` (pac 2.9.3); `build_app.py` si pac
+najde sám a nupkg si rozbalí do `runs/app_build/pac/`. Tím padá poznámka ve skillu,
+že .msapp nelze stavět lokálně — **jde to**, jen appka po importu musí být jednou
+otevřena ve Studiu (balík z YAML nese `packed.json` s `LoadFromYaml: true`
+a Controls/*.json se dogeneruje až tam).
+
+**Tři vědomé odchylky od `deploy/app_navrh.md`** (návrh zatím neaktualizován):
+1. Filtr sekce a útvaru je **textové pole se `StartsWith`**, ne dropdown —
+   `Distinct()` nad `Aktivity` není delegovatelný a nabídka by nad 2 000 aktivitami
+   tiše ztratila hodnoty.
+2. `primarni` ve vazebním listu je **Choice `ano`/`ne`**, ne Boolean (podle
+   `schema.json`) — zapisuje se `{ Value: "ano" }`.
+3. Uložení nové aktivity zakládá i **primární vazbu** do `AktivitaDilciProces`
+   (a při změně dílčího procesu ji přepíše) — jinak by se rozešla s daty importu,
+   kde má všech 46 aktivit vazbu `primarni = ano`.
+
+**Next step:** naimportovat `deploy/procesnimapa_1_0_0_2.zip` do PPF prostředí
+jako upgrade, otevřít appku ve Studiu (validace YAML) a projít 6 testů ze sekce
+„Jak se to ověří" v `deploy/app_navrh.md`. Test delegace (bod 3, >2 000 aktivit)
+se nesmí odkládat.
+
 ## F1 UZAVŘENA (19.08.2026 13:53)
 
 Oba skripty doběhly na `/sites/DigiData_D/testovaci_subsajta/procesnimapa`.

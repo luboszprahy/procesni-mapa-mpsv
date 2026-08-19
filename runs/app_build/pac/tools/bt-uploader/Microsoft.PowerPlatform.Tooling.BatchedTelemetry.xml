@@ -1,0 +1,1451 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.PowerPlatform.Tooling.BatchedTelemetry</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClient">
+            <summary>
+            Concrete implementation of an <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient"/>.
+            </summary>
+            <remarks>
+            The members of this class are made virtual in order to allow for mocking in unit tests.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions">
+            <summary>
+            Extensions for <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient"/> instances.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions.TrackEvent(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.ValueTuple{System.String,System.String}[])">
+            <summary>
+            Tracks a <see cref="T:Microsoft.ApplicationInsights.DataContracts.EventTelemetry"/> using tuple params syntax as syntax sugar alternative to constructing a new Dictionary.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions.TrackCall(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.Action)">
+            <summary>
+            Tracks a call to an action as a <see cref="T:Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry"/> operation with default support for capturing execution time, failures due to execeptions and recording any exceptions (but not handling them).
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions.TrackCall(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.Action{Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry})">
+            <summary>
+            Tracks a call to an action as a <see cref="T:Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry"/> operation with default support for capturing execution time, failures due to execeptions and recording any exceptions (but not handling them).
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions.TrackCall``1(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.Func{``0})">
+            <summary>
+            Tracks a call to a func as a <see cref="T:Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry"/> operation with default support for capturing execution time, failures due to execeptions and recording any exceptions (but not handling them).
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions.TrackCall``1(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.Func{Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry,``0})">
+            <summary>
+            Tracks a call to a func as a <see cref="T:Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry"/> operation with default support for capturing execution time, failures due to execeptions and recording any exceptions (but not handling them).
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryConfigurationException">
+            <summary>
+            Represents a product configuration error regarding telemetry.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryException">
+            <summary>
+            Exception that is thrown when there is a failure in an application's telemetry.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.ComposeAutomationAgentStringForExecutingAssembly">
+            <summary>
+            Composes the AutomationAgent string for the ExecutingAssembly.
+            This is a shortcut for calling <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.ComposeAutomationAgentString(System.Reflection.Assembly,System.String)"/>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.ComposeAutomationAgentString(System.Reflection.Assembly,System.String)">
+            <param name="productAssembly">The assembly name of the product that represents the agent.</param>
+            <param name="telemetryRoleName">The `Cloud_roleName` specified for telemetry purposes of the agent.
+            If specified, it will be used as the productName in the agent string instead of the assembly name.
+            Can be null.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.AddCommonAppStartProperties(Microsoft.ApplicationInsights.DataContracts.ISupportProperties,System.Reflection.Assembly,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment)">
+            <summary>
+            Adds custom properties for tracking the product assembly information along with the process language cultures used.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.AddCommonAppStartProperties(System.Collections.Generic.IDictionary{System.String,System.String},System.Reflection.Assembly,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment)">
+            <summary>
+            Adds custom properties for tracking the product assembly information along with the process language cultures used.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.ComposeAssemblyNameForTelemetry(System.Reflection.Assembly,System.Boolean)">
+            <summary>
+            Composes a short, easily parsable string that contains the assembly's name and version.
+            The format is the same used for User-Agent headers, namely "{Name}/{Version}".
+            </summary>
+            <param name="useFileVersion">Indicates whether to use the <see cref="P:System.Diagnostics.FileVersionInfo.FileVersion"/> to construct the version part of the output. Otherwise, uses the <see cref="P:System.Reflection.AssemblyName.Version"/>.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryUtility.ParseBooleanEnvironmentVariable(System.String)">
+            <summary>
+            Parses an environment variable value that accepts "1", "0", "true", "false" (case insensitive)
+            and returns its boolean value.
+            When the value is not set, or is invalid, null is returned.
+            </summary>
+            <param name="value">The environment value. i.e. <see cref="M:System.Environment.GetEnvironmentVariable(System.String)"/></param>
+            <returns>true when the value is "1" or "true"; false when the value is "0" or "false"; otherwise, null.</returns>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.CheckedOperationHolder`1">
+            <summary>
+            An <see cref="T:Microsoft.ApplicationInsights.Extensibility.IOperationHolder`1"/> implementation that will verify operations get disposed in the correct order, avoiding
+            hard to identify lost telemetry bugs.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource">
+            <summary>
+            Represents the connection information to an Application Insights resource.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource.#ctor(System.String)">
+            <summary>
+            Creates a new resource represented by the specified connection string.
+            </summary>
+            <param name="connectionString">The connection string for the App Insights resource as copied from the Azure Portal.</param>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource.InstrumentationKey">
+            <summary>
+            Gets the instrumentation key for this resource.
+            This value is set by specifying the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource.ConnectionString"/>;
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource.ConnectionString">
+            <summary>
+            Gets the connection string to use for this resource.
+            The value should be set to the copy/paste from the Azure Portal's value for Connection String.
+            Setting this will also set the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource.InstrumentationKey"/> property for backwards compatibility.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResource.DataBoundary">
+            <summary>
+            The data boundary (aka Azure Region) this resource belongs to. May be null.
+            </summary>
+            <remarks>
+            The values for this property can be found via the MSGraph `/organization` entity's `dataBoundary` privileged property.<br/>
+            At the time of writing, the only supported value is "EU", but others may be applicable in the future.
+            <see href="https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/26967/Azure-AD-dataBoundary-MS-Graph-Implementation-Guide"/>
+            </remarks>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppOperationCorrelationTelemetryInitializer">
+            <summary>
+            Initializes telemetry with the value of a telemetry source (aka SyntheticSource).
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryConfigUtility.CreateTelemetryConfigForClientApp(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppInsightsResourceProvider,Microsoft.ApplicationInsights.Channel.ITelemetryChannel,System.String,System.Reflection.Assembly,System.Guid,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettings,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.TryMapAgentToSyntheticSource)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration"/> instance using the passed in <see cref="T:Microsoft.ApplicationInsights.Channel.ITelemetryChannel"/> instance
+            and initializers for the minimum required setup for a client app.
+            </summary>
+            <param name="tryMapAgentToSyntheticSource">An optional mapping from the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment.AutomationAgent"/> to a SyntheticSource.</param>
+            <remarks>
+            Callers should perform their own logic on the returned configuration for functionality like:
+            - Flushing and disposing of the TelemetryConfiguration, as it is IDisposable and controls when the channel batched data will get flushed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryConfigUtility.GetUserSettingsFromSharedInstall">
+            <summary>
+            Most tools don't expose the ability to modify the users configuration settings, so this helper simplifies calling code by just getting it from the default location.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryConfigUtility.ComposeTelemetryCacheFolderPathForProduct(System.Reflection.Assembly,System.String)">
+            <summary>
+            Composes the folder path to the shared telemetry cache folder for the passed in product assembly.
+            </summary>
+            <param name="productAssembly">The assembly representing this product. It's name is used as a sub-folder path.</param>
+            <param name="telemetryCacheRootFolderPath">The default uses <see cref="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryConfigUtility.DefaultTelemetryCacheRootFolderPath"/>.</param>
+            <returns>The full path to the cache folder.</returns>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryConfigUtility.ComposeTelemetryCacheFolderPathForProduct(System.String,System.String)">
+            <summary>
+            Composes the folder path to the shared telemetry cache folder for the passed in product assembly.
+            </summary>
+            <param name="productName">The product name to use when creating the sub-folder for the cache.</param>
+            <param name="telemetryCacheRootFolderPath">The default uses <see cref="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryConfigUtility.DefaultTelemetryCacheRootFolderPath"/>.</param>
+            <returns>The full path to the cache folder.</returns>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.AppTelemetryEnvironment.OptOut">
+            <summary>
+            Indicates that this process should opt out of telemetry.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ClientAppTelemetryInitializer">
+            <summary>
+            Initializes common telemetry context for a client app by setting global context values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ClientAppTelemetryInitializer.#ctor(System.String,System.Reflection.Assembly,System.Guid,System.Guid,System.String)">
+            <param name="roleName">The 'cloud_RoleName' value in Application Insights.</param>
+            <param name="productAssembly">The assembly describing the product or execution program that created the session.</param>
+            <param name="sessionId">Unique id for the current process. If not explicitly specified, will create a new one.</param>
+            <param name="roleInstance">By default, the roleInstance is redacted so we don't capture the user's machine name. Set this explicitly to null if you'd like to use the current machine name</param>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment">
+            <summary>
+            The settings parsed from the current environment. When derived from environment variables these values
+            should use the global env variable names specified in <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.EnvironmentVariableNames"/>.
+            Each application may choose to also implement their own environment variables or other source for getting these settings.
+            e.g. the Pac CLI may choose to have its own env vars with a different prefix like "PAC_CLI_*". In this case, it's
+            recommended to still use the global env variable names ("PP_TOOLS_*") for when the app-specific variables are not set.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment.OptOut">
+            <summary>
+            Indicates that this process should opt out of telemetry.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment.DataBoundary">
+            <summary>
+            The data boundary region for which all telemetry should be sent.
+            </summary>
+            <remarks>
+            The values supported here piggy-back on the AAD Organization's `dataBoundary` property.
+            If an application doesn't support this data boundary, then the default for the application will be used.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment.AutomationAgent">
+            <summary>
+            The 'User-Agent' string representing the automation agent calling the current program.
+            The syntax of this value should be in the same format expected for HTTP User-Agent header.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment.LegacyTelemetrySource">
+            <summary>
+            The 'TelemetrySource' as specified by the legacy env variable <see cref="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.EnvironmentVariableNames.LegacyTelemetrySource"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettings.UniqueId">
+            <summary>
+            The unique id for the user logged in to the machine.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettings.TelemetryEnabled">
+            <summary>
+            Indicates whether the user default for whether to enable telemetry.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettingsProvider.GetCurrent">
+            <summary>Gets a snapshot of the current user settings.</summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettingsProvider.SetConfigValueTelemetryEnabled(System.Boolean)">
+            <summary>
+            Sets the configurable 'TelemetryEnabled' setting and persists to storage.
+            </summary>
+            <param name="telemetryEnabled">Indicates explicit setting for whether telemetry should be enabled for this user. Setting to `null` resets to the default per app.</param>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.MultiProcessIO">
+            <summary>
+            This class contains utilities that can help simplify robust file management activities when multiple processes may be accessing the same file.
+            </summary>
+            <remarks>
+            This is intentially an internal class so as to prevent unexpected breaking changes.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.SyntheticSourceTelemetryInitializer">
+            <summary>
+            Initializes telemetry with the value of a telemetry source (aka SyntheticSource).
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.TelemetryUserSettings">
+            <summary>
+            Immutable user settings for telemetry.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.TelemetryUserSettingsFileProvider">
+            <summary>
+            An implementation of <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettingsProvider"/> that uses a file on disk as the persistent storage.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.TelemetryUserSettingsProviderExtensions.GetCurrentOrDefault(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.ITelemetryUserSettingsProvider)">
+            <summary>
+            Gets the current user settings if available and able.
+            Otherwise, returns a new settings instance with a new one-time uniqueId.
+            This method will never throw.
+            </summary>
+            <returns>The current valid user settings, or a temporary default instance.</returns>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.UserSettingsException">
+            <summary>
+            An exception occurred interacting with the user settings file.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient">
+            <summary>
+            A client for creating telemetry around an underlying App Insights <see cref="T:Microsoft.ApplicationInsights.TelemetryClient"/> instance.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OneDS.TransportAsJsonStringConverter">
+            <summary>
+            Converter that supports serializing any object as a JSON string.
+            OneDS collector seems to fail ingestion silently when a data property is not a value type (string, number, boolean).
+            So complex properties on a 'Data' object should be serialized as a JSON string.
+            When the target data table supports a kusto 'dynamic' type, it'll get the parsed JSON object.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode">
+            <summary>
+            Common result codes for telemetry operations which are supported by the shared telemetry platform.
+            These are based upon the <see cref="T:System.Net.HttpStatusCode"/> enum, but are limited to codes that
+            apply to a CLI app.
+            </summary>
+            <remarks>
+            Care should be taken about translating http service result codes from services called from a CLI and
+            whether the code should be passed thru or translated to a different code based on the application logic.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode.BadRequest">
+            <summary>
+            Indicates a bad command line was recieved (e.g. input error, invalid args, etc)
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode.NotFound">
+            <summary>
+            Indicates an unknown command or action by the user.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode.InternalApplicationError">
+            <summary>
+            General internal application error, unknown, unhandled.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode.BadGateway">
+            <summary>
+            Indicates an error originating from code external to the application, usually coming from a service call.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCodeExtensions.ApplyResultCode(Microsoft.ApplicationInsights.DataContracts.RequestTelemetry,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode)">
+            <summary>
+            Updates the <see cref="P:Microsoft.ApplicationInsights.DataContracts.RequestTelemetry.Success"/> and <see cref="P:Microsoft.ApplicationInsights.DataContracts.RequestTelemetry.ResponseCode"/> properties
+            according to the specified <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCodeExtensions.ApplyResultCode(Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry,Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode)">
+            <summary>
+            Updates the <see cref="P:Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry.Success"/> and <see cref="P:Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry.ResultCode"/> properties
+            according to the specified <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker">
+            <summary>
+            A helper class that tracks custom start/stop events with support for capturing the duration, success and optionally a result code.
+            </summary>
+            <remarks>
+            This class is especially helpful for tracking operations which may overlap in an asynchronous manner (which App Insights operations do not support).
+            </remarks>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.#ctor(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.Boolean)">
+            <summary>
+            Creates a new instance and immediately tracks the 'start' event.
+            </summary>
+            <param name="telemetry">The telemetry client</param>
+            <param name="startEventName">The name of the 'start' event.</param>
+            <param name="stopEventName">The name of the 'stop' event.</param>
+            <param name="startProps">Custom properties passed to the 'start' event.</param>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.Success">
+            <summary>
+            Indicates whether the operation represented by this instance was succesful.
+            If <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.ResultCode"/> is set, the default for this property is set to <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCodeExtensions.IsSuccessful(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode)"/>;
+            otherwise, `false`.
+            If your app's logic doesn't match with the semantics of <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCodeExtensions.IsSuccessful(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.OperationTelemetryResultCode)"/>, simply set this value explicitly.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.ResultCode">
+            <summary>
+            Optional value indicating a result code for the operation.
+            This setting is only included if specified.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.ElapsedMilliseconds">
+            <summary>
+            Gets the total elapsed time since the start of the current instance, in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.StopProperties">
+            <summary>
+            The dictionary of properties that will be used to submit the results for the 'stop' event when this instance is disposed.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.StopMetrics">
+            <summary>
+            The dictionary of properties that will be used to submit the results for the 'stop' event when this instance is disposed.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.Dispose(System.Boolean)">
+            <summary>
+            Tracks the 'stop' event, and incorporates the values of <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.StopProperties"/>, <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.ResultCode"/>, <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.StartStopEventsTracker.Success"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTelemetryChannel.UploaderFolderPath">
+            <summary>
+            The folder path in which to find the uploader program.
+            The default in a sub folder named 'bt-uploader' relative to where this assembly is located.
+            Note: It is best to set this to a fully qualified path to remove ambiguity.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.UploaderFolderPath">
+            <summary>
+            The folder path in which to find the uploader program.
+            The default in a sub folder named 'bt-uploader' relative to where this assembly is located.
+            Note: It is best to set this to a fully qualified path to remove ambiguity.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.UploaderMaxIdleTimeSeconds">
+            <summary>
+            Set the number of seconds of idle time before the spawned uploader (called during a Flush/Dispose) will exit.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.MaxWaitMillisecondsOnDisposeToDetectUploaderFailure">
+            <summary>
+            The maximum number of milliseconds to wait to see if the uploader process has exited with a failure.
+            If the uploader process has failed, an exception will be thrown in this process.
+            This is done as part of the call to the Dispose method.
+            It's suggested to set this on DEBUG builds to help identify these kind of errors during development time.
+            Most likely, this value need not be more than a couple seconds, as errors on process startup tend to happen quickly.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.SkipStartUploadProcess">
+            <summary>
+            [For unit tests only]
+            Setting this to true will prevent starting the upload process.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.LastUploadProcessStarted">
+            <summary>
+            [For unit tests only]
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.EnableCaptureProcessOutput">
+            <summary>
+            [For unit tests only]
+            When set to true, the output from the upload process will be capturable and available from <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.LastUploadProcessOutput"/>
+            after the process has exited.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.BatchedTransmitter`1.LastUploadProcessOutput">
+            <summary>
+            [For unit tests only]
+            Returns all the text from the upload process output.
+            Note: each line is prepended with `ERR` or `OUT` to indicate which stream it came from.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryBuffer`1.Count">
+            <summary>
+            The number of items currently contained in the buffer.
+            These have not been flushed.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryBuffer`1.BacklogSize">
+            <summary>
+            The maximum number of items that can be stored in the backlog to be sent.
+            New items will get dropped once this limit is reached.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryChannelBase`1.#ctor(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryBuffer{`0},Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.ITelemetryTransmitter)">
+            <param name="transmitter">The transmitter implementation, which will be disposed when this instance is disposed.</param>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryChannelBase`1.DisableFlushOnDispose">
+            <summary>
+            Indicates whether <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryChannelBase`1.Dispose"/> will call <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryChannelBase`1.Flush"/> before disposing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryChannelBase`1.ValidateItem(`0)">
+            <summary>
+            When overridden in a derived class, allows the channel to perform validation on the item before sending to the internal buffer.<br/>
+            Note for implementers:<br/>
+            Consider logging invalid items to <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryChannelBase`1.TraceWriter"/> instead of throwing when in production.
+            </summary>
+            <param name="item">The telemetry item about to be sent to buffer.</param>
+            <returns>True if the item is valid and should be sent to the buffer, false otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryTransmitterBase`1.Flush">
+            <summary>
+            Called when there's an explicit request to flush the buffer.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryTransmitterBase`1.OnBufferFull">
+            <summary>
+            Default implementation calls <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryTransmitterBase`1.DequeueAndSend"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryChannel.TelemetryTransmitterBase`1.OnDisposing">
+            <summary>
+            Called when the transmitter is being disposed. This will only be called once.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.PropertyNames">
+            <summary>
+            Common property names used for telemetry captured for shared tools.
+            Note: The naming convention for properties (and metrics) is to use cammelCaseNames.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.PropertyNames.trackedAtMemberName">
+            <summary>
+            The property name used for <see cref="T:Microsoft.ApplicationInsights.DataContracts.ExceptionTelemetry"/> events to allow us to track where an exception event was being recorded.
+            Because it's possible to track an exception at multiple spots in the call stack, this can help to identify where in the call stack the exception is being tracked.
+            This is esp helpful for helper functions that help capture the context but doesn't actually handle the exception, e.g. <see cref="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClientExtensions.TrackCall(Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient,System.String,System.Action)"/> and its overloads.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.PropertyNames.LegacyTelemetrySource">
+            <summary>
+            The legacy name of the custom property used for indicating the telemetry source.
+            New code should set the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Extensibility.IAppTelemetryEnvironment.AutomationAgent"/>.
+            Note: the legacy property name used TitleCase, so this one does too.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.MetricNames">
+            <summary>
+            Common metric names used to telemetry captured for shared tools.
+            Note: The naming convention for metrics is different than properties to align with common App Insights metrics.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.MetricNames.DurationMs">
+            <summary>
+            Indicates the duration of some operation. Usually included as part of the 'end'/'stop' event that has a matching 'begin'/'start' event.
+            This metric should have the same semantic as the duration captured by an AI operation (i.e. Request or Dependency).
+            Most importantly, that the value should be in milliseconds.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.MetricNames.LegacyExecutionTimeMs">
+            <summary>
+            Legacy name used to report the execution time of some arbitrary operation.
+            New code should use <see cref="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.MetricNames.DurationMs"/> instead.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.EnvironmentVariableNames.LegacyTelemetrySource">
+            <summary>
+            This is the legacy env variable used by old ProcessLauncher implementations.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.EnvironmentVariableNames.PpToolsTelemetryOptOut">
+            <summary>
+            To opt out of telemetry, set this environment variable to `1` or `true`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.EnvironmentVariableNames.PpToolsTelemetryDataBoundary">
+            <summary>
+            To specify a data boundary region for which all telemetry should be sent.
+            </summary>
+            <remarks>
+            The values supported here piggy-back on the AAD Organization's `dataBoundary` property.
+            If an application doesn't support this data boundary, then the default for the application will be used.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TelemetryConstants.EnvironmentVariableNames.PpToolsAutomationAgent">
+            <summary>
+            Common environment variable that identifies when a tool is being called by some parent tool or custom script.
+            The syntax of this value should be in the same format expected for HTTP User-Agent header.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.NoopOperationHolder`1">
+            <summary>
+            A no-op implementation of <see cref="T:Microsoft.ApplicationInsights.Extensibility.IOperationHolder`1"/>.
+            It still provides callers the ability to access the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.NoopOperationHolder`1.Telemetry"/> property (set to a new instance) without getting a runtime exception.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.NoopTelemetryChannel">
+            <summary>
+            A no-op implementation of <see cref="T:Microsoft.ApplicationInsights.Channel.ITelemetryChannel"/>
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.NoopTelemetryClient">
+            <summary>
+            A no-op implementation of <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.IAppTelemetryClient"/>
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpy">
+            <summary>
+            An implementation of an <see cref="T:Microsoft.ApplicationInsights.Channel.ITelemetryChannel"/> that is sink, in that events are stored here, but never sent along.
+            This type can be especially useful for cases where only runtime inspection is necessary; e.g. from unit tests.
+            It simplifies the setup code needed in order to intercept actual telemetry data sent.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1">
+            <summary>
+            A base implementation for many of the telemetry channels.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1.Flush">
+            <summary>
+            Performs a seudo flush operation, allowing the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1.FlushedItemsCount"/> to be updated, and later verified.
+            It will not change the underlying capture of the <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1.AllSentTelemetries"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1.Clear">
+            <summary>
+            Clears all items sent by this instance and resets <see cref="P:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1.FlushedItemsCount"/> to 0.
+            Useful for scenarios where a test would like to ignore all previous events, and only capture new events.
+            Note: does not change state of whether this instance has been disposed already; use a new instance in that case.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryChannelSpyBase`1.ValidateItem(`0)">
+            <summary>
+            When overridden in a derived class, allows the channel to perform validation on the item before sending to the internal buffer. Default implementation always returns true.<br/>
+            </summary>
+            <param name="item">The telemetry item about to be sent to buffer.</param>
+            <returns>True if the item is valid and should be sent to the buffer, false otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.TelemetryTestingUtility.CreateClientWithMinimalConfig(Microsoft.ApplicationInsights.Channel.ITelemetryChannel)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.AppTelemetryClient"/> using minimal configs and the channel specified.
+            The default channel uses <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.NoopTelemetryChannel"/>.
+            </summary>
+            <param name="channel">The channel to use for the <see cref="P:Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.TelemetryChannel"/>. If this is not specified, a <see cref="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.Testing.NoopTelemetryChannel"/> is used in order to swallow events.</param>
+            <returns>A new instance.</returns>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.BatchedTelemetry.TraceContextHelper">
+            <summary>
+            Helper for working with the W3C trace-context spec.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.AsyncTelemetryChannel.PendingSendTasksCount">
+            <summary>
+            Used for testing purposes.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.AsyncTelemetryChannel.Send(Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetry)">
+            <summary>
+            Non-blocking send of telemetry item.
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.BatchedOneDSTelemetryChannel.MaxWaitMillisecondsOnDisposeToDetectUploaderFailure">
+            <summary>
+            The maximum number of milliseconds to wait to see if the uploader process has exited with a failure.
+            If the uploader process has failed, an exception will be thrown in this process.
+            This is done as part of the call to the Dispose method.
+            It's suggested to set this on DEBUG builds to help identify these kind of errors during development time.
+            Most likely, this value need not be more than a couple seconds, as errors on process startup tend to happen quickly.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.BatchedOneDSTelemetryChannel.UploaderMaxIdleTimeSeconds">
+            <summary>
+            Set the number of seconds of idle time before the spawned uploader (called during a Flush/Dispose) will exit.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.BatchedOneDSTelemetryChannel.UploaderFolderPath">
+            <summary>
+            The folder path in which to find the uploader program.
+            The default in a sub folder named 'bt-uploader' relative to where this assembly is located.
+            Note: It is best to set this to a fully qualified path to remove ambiguity.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.BatchedOneDSTelemetryChannel.SkipStartUploadProcess">
+            <summary>
+            [For unit tests only]
+            Setting this to true will prevent starting the upload process.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.BatchedOneDSTelemetryChannel.LastUploadProcessStarted">
+            <summary>
+            [For unit tests only]
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.BatchedOneDSTelemetryChannel.LastUploadProcessOutput">
+            <summary>
+            [For unit tests only]
+            Returns all the text from the upload process output.
+            Note: each line is prepended with `ERR` or `OUT` to indicate which stream it came from.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.CommonSchemaV4Serializer">
+            <summary>
+            Serializer for the OneDS using Microsoft Common Schema Version 4.0.
+            Official documentation can be found at: https://1dsdocs.azurewebsites.net/schema/README.html
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode">
+            <summary>
+            The 2-letter country code for a deployment geography.
+            The string value is normalized to upper-case for comparison purposes.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.AS">
+            <summary>Asia</summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.CN">
+            <summary>China</summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.EM">
+            <summary>UAE, South Africa, etc</summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.EU">
+            <summary>European Union</summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.NA">
+            <summary>North America</summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.ShortCode">
+            <summary>
+            The 2-digit country code for the geography represented by this instance.
+            Normalized to upper-case.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode.TryGetKnown(System.String,Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode@)">
+            <summary>
+            Parses the value string to a known <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode"/> value.
+            This method allows returning the same instance for known values to allow for faster comparisons.
+            </summary>
+            <param name="shortCode"></param>
+            <param name="dataBoundary"></param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.GeoLocationMapper">
+            <summary>
+            Mapping service for converting location strings to <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode"/> and <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode"/>s.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.GeoLocationMapper.TryMapLocationToGeo(System.String,Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode@)">
+            <summary>
+            Maps the location to a <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode"/>.
+            </summary>
+            <returns>true if a mapping exists from the specified <paramref name="location"/>.</returns>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode">
+            <summary>
+            The 2-letter country code for a deployment geography.
+            The string value is normalized to upper-case for comparison purposes.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode.ShortCode">
+            <summary>
+            The 2-digit country code for the geography represented by this instance.
+            Normalized to upper-case.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode.TryGetKnown(System.String,Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode@)">
+            <summary>
+            Parses the value string to a known <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.GeoShortCode"/> value.
+            This method allows returning the same instance for known values to allow for faster comparisons.
+            </summary>
+            <param name="location"></param>
+            <param name="geo"></param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSSelfRoutingTelemetry.GetSelfRoutingDataBoundary">
+            <summary>
+            Gets the <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode"/> that should be used to route this telemetry item.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetry.TelemetryName">
+            <summary>
+            Uniquely qualified name of the Common Schema Part B event.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetry.InstrumentationKey">
+            <summary>
+            An identifier used to identify applications or other logical groupings of events.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetry.Timestamp">
+            <summary>
+            The local time that the event was recorded.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetry.Data">
+            <summary>
+            Gets a POCO that will get serialized to JSON via the 'data' of Common Schema PartC.
+            This class should utilize System.Text.Json attributes to control serialization.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetryModule">
+            <summary>
+            Represents an object that supports initialization from <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetryModule.Initialize(Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration)">
+            <summary>
+            This method is called when a module is registered with a <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.NoThrowTelemetryChannel">
+            <summary>
+            A OneDS telemetry channel that catches any exceptions in the channel chain and logs the errors.
+            This allows apps to choose to compose their own telemetry channel chain without having to worry about exceptions.
+            For example, an app may choose to use this channel as the top-level channel in the chain, but only for non-DEBUG builds.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints">
+            <summary>
+            The OneCollector endpoints used for PPUX shell-telemetry.
+            Source: https://dev.azure.com/msazure/OneAgile/_git/power-platform-ux?path=packages/shell-telemetry/src/Constants.ts
+            Note the official endpoints can be found here:
+            https://eng.ms/docs/products/geneva/collect/clientingestion/onboardingsteps/endpoints/configureuploaddestination
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.RegionalPublicCloud.US">
+            <summary>
+            Domain: `us-mobile.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.RegionalPublicCloud.EU">
+            <summary>
+            This is the EUDB compliant endpoint.
+            Domain: `eu-mobile.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.NationalClouds.FairfaxDoj">
+            <summary>
+            Fairfax DoJ (L4, GCC, GCC High, Trailblazer).
+            Domain: `tb.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.NationalClouds.FairfaxDod">
+            <summary>
+            Fairfax DoD (L5, Pathfinder).
+            Domain: `pf.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.NationalClouds.Mooncake">
+            <summary>
+            Domain: `collector.azure.cn`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.NationalClouds.USNat">
+            <summary>
+            USNat (EX, AG08).
+            Domain: `collector.azure.eaglex.ic.gov`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.NationalClouds.USSec">
+            <summary>
+            USSec (RX, AG09).
+            Domain: `collector.azure.microsoft.scloud`.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.Legacy">
+            <summary>
+            These are now deprecated and should not be used.
+            See note titled "Do Not Use EMEA, NOAM, nor APAC Urls" on page at https://eng.ms/docs/products/geneva/collect/clientingestion/onboardingsteps/endpoints/configureuploaddestination
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.Legacy.NorthAmerica">
+            <summary>
+            Domain: `noam.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.Legacy.EuropeMiddleEastAfrica">
+            <summary>
+            Domain: `emea.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints.Legacy.Asia">
+            <summary>
+            Domain: `apac.events.data.microsoft.com`.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.OneDSEndpointConfiguration.#ctor(System.Uri,System.String)">
+            <param name="address">See wellknown uri constants in <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.OneDSCollectorEndpoints"/>.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryClientBase`1.Initialize(`0)">
+            <summary>
+            When overridden in a derived class, allows the initialization of the telemetry item before it is sent.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryClientBase`1.ValidateTelemetry(`0)">
+            <summary>
+            When overridden in a derived class, allows validation of the telemetry item before it is sent and after all initialization has completed.
+            </summary>
+            <param name="telemetry">The fully initialized telemetry item about to be sent.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration.#ctor(Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetryChannel)">
+            <summary>
+            
+            </summary>
+            <param name="telemetryChannel">The telemetry channel owned by this instance. Setting the channel in this ctor also sets <see cref="P:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration.ShouldDisposeChannel"/> to true.</param>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration.TelemetryChannel">
+            <summary>
+            Use to set the telemetry channel for this configuration instance.
+            Note: Setting via this property does not change the value of <see cref="P:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration.ShouldDisposeChannel"/>.
+            Use the ctor if you'd like the channel to be owned, and therefore disposed by this instance.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration.ShouldDisposeChannel">
+            <summary>
+            Indicates whether the <see cref="P:Microsoft.PowerPlatform.Tooling.OneDS.OneDSTelemetryConfiguration.TelemetryChannel"/> should get disposed when this configuration instance is disposed.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.SelfRoutingTelemetryChannel">
+            <summary>
+            A OneDS telemetry channel that routes telemetry to different channels based on a <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.DataBoundaryShortCode"/> property supplied by each supported telemetry item.
+            </summary>
+            <remarks>
+            This class makes it possible for us to separate telemetry routing from being a top-level configuration concern.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.OneDS.SelfRoutingTelemetryChannel.EnsureAllChannelsCreated">
+            <summary>
+            Forces all inner channels to be created.
+            By default, this class only creates channels when they are needed.
+            This method allows testing and clients to force all channels to be created for their own purposes. e.g. in Debug mode, to ensure tesing with all channels active.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.Testing.OneDSTelemetryChannelSpy">
+            <summary>
+            An implementation of an <see cref="T:Microsoft.PowerPlatform.Tooling.OneDS.IOneDSTelemetryChannel"/> that is sink, in that events are stored here, but never sent along.
+            This type can be especially useful for cases where only runtime inspection is necessary; e.g. from unit tests.
+            It simplifies the setup code needed in order to intercept actual telemetry data sent.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.Testing.OneDSTestingConstants.EmptyApiKey">
+            <summary>Used for testing.</summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.Testing.OneDSTestingConstants.TestInstrumentationKey">
+            <summary>
+            The instrumentation key used for <see cref="F:Microsoft.PowerPlatform.Tooling.OneDS.Testing.OneDSTestingConstants.TestApiKey"/>.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.Testing.OneDSTestingConstants.TestApiKey">
+            <summary>
+            An arbitrary API key used for testing. DO NOT use this key in production as it is not valid.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags">
+            <summary>
+            https://www.osgwiki.com/wiki/CommonSchema/flags
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventPersistence_Mask">
+            <summary>
+            Mask for the first byte
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventPersistence_Normal">
+            <summary>
+            an event can be lost due to low bandwidth or disk space constraints
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventPersistence_Critical">
+            <summary>
+            Used for events that should be prioritized over non-critical events. (It is unrelated to retention in Cosmos.)
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventLatency_Mask">
+            <summary>
+            Mask for the second byte
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventLatency_Normal">
+            <summary>
+            Default latency
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventLatency_RealTime">
+            <summary>
+            Low latency event. The platform may restrict events that can use this flag
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventLatency_CostDeferred">
+            <summary>
+            Latency depends on network cost. Functionally treated as "Normal" latency for N days, then becomes "RealTime" latency. The platform may restrict events that can use this flag
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.EventScrub_Mask">
+            <summary>
+            Mask for the third byte
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.Microsoft_Test">
+            <summary>
+            Reflects the value of the SQM IsTest registry key
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.Microsoft_Internal">
+            <summary>
+            Reflects the value of the SQM MSFTInternal registry key
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.Microsoft_IsPII_Mark">
+            <summary>
+            https://microsoft.sharepoint.com/teams/osg_core_fun/idt/OSGInstrument/SitePages/De-Identification%20of%20Telemetry%20Events.aspx
+            Contains PII. If an event is logged with LogOption.Sensitive using Service Logging Library(SLL), then the flags field will have the IsPII bit turned ON and the event will be considered UserSensitive.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.Microsoft_IsPII_Hash">
+            <summary>
+            Client has hashed or dropped any PII information in the event. Vortex will hash any server-supplied PII fields such as PUID or Global Device ID
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.Microsoft_IsPII_Drop">
+            <summary>
+            Client has dropped any PII information in the event. Information contained within attached MSA token will not be inserted
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.OneDS.UtcFlags.Microsoft_IsPII_Scrub">
+            <summary>
+            See details ​here.Collector to scrub ext.ingest.clientIp field stamped server-side.This takes precedence 
+            over both Hash Identifier and Drop Identifier flags above, so as long as this bit is set, the client IP 
+            will be scrubbed as "xxx.xxx.xxx.*" for IPv4 and will not be dropped. The main use case for this flag 
+            is Interchange customers that need to use OriginalMessage feature but wish not to have IP 
+            info in Geneva data store. For more details on this scenario: 1DS Interchange Default CommonSchema
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.AssemblyPpuxAppContextAttribute">
+            <summary>
+            Used to set the default values used by the <see cref="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.FromProductAssembly(System.Reflection.Assembly,System.String)"/> method.
+            </summary>
+        </member>
+        <member name="F:Microsoft.PowerPlatform.Tooling.ShellTelemetry.EventType.Scenario">
+            <summary>
+            Defines a scenario to track, that has a start, an end and duration.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.ScenarioType">
+            <summary>
+            eg. Create, Delete, Load, Update, Execute, etc.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.ScenarioModifier">
+            <summary>
+            eg. Start, Progress, Complete, Failure, etc.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.IPpuxScenario">
+            <summary>
+            Represents an in-progress scenario for PPUX shell telemetry schema.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.IShellTelemetryClient">
+            <summary>
+            Represent the abstraction of a telemetry client for PPUX Shell telemetry.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.AppName">
+            <summary>
+            Name of the app in the PPUX telemetry clusters.
+            By convension, Power Platform Developer Tool applications use the prefix: "ppdevtools-".
+            data_appName (EventInfo_AppName)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.AppEnvironment">
+            <summary>
+            data_appEnvironment (UserInfo_Environment)
+            local, dev, tie, test, preprod, preview, prod, gov, dod, mooncake, ex, rx
+            https://msazure.visualstudio.com/OneAgile/_git/power-platform-ux?path=/packages/build-scripts/src/config/env.interface.ts&amp;version=GBmaster&amp;_a=contents
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.DefaultScope">
+            <summary>
+            The default top-level scope to use for all telemetry produced by the app.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.DefaultTeam">
+            <summary>
+            The default top-level team to use for all telemetry produced by the app.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.FromProductAssembly(System.Reflection.Assembly,System.String)">
+            <summary>
+            Creates a new instance of <see cref="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext"/> using the metadata in the given <paramref name="productAssembly"/>.
+            This assembly is expected to have the <see cref="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.AssemblyPpuxAppContextAttribute"/> applied to it, otherwise, an exception will be thrown.
+            </summary>
+            <param name="productAssembly">Generally the entry assembly for the application or unit test assembly.</param>
+            <param name="appNameOverride">
+            Overrides the value set by the <see cref="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.AssemblyPpuxAppContextAttribute.AppName"/> attribute in the assembly.
+            The main usage for this is to allow for testing to override the default behavior.
+            </param>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppEnvironment">
+            <summary>
+            The normalized value for the PPUX data_appEnvironment property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxDeviceContext.OSName">
+            <summary>
+            e.g."Windows", "Linux" 
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxDeviceContext.OSVersion">
+            <summary>
+            e.g. "10" (for Windows 10).
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxDeviceContext.ScreenResolution">
+            <summary>
+            The resolution of the current screen.
+            Format: "{width}x{height}"
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetry">
+            <summary>
+            Wrapper class for all PPUX telemetry data sent via OneDS/OneCollector.
+            </summary>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData">
+            <summary>
+            Part C
+            These fields are defined by the Event Author, who has complete control over naming and data type of the fields. 
+            The Event Author is responsible for populating these fields when an event is instantiated.
+            https://github.com/microsoft/common-schema/blob/main/README.md
+            
+            Event
+            An actual instantiation of a set of data described by an Event Definition.This is the data that actually gets logged and 
+            transmitted over the wire to the Asimov system. An event emitted in response to a significant action or interaction. 
+            The data payload of the event describes attributes and semantics about the stimulus that triggered its creation.
+            
+            https://eng.ms/docs/cloud-ai-platform/business-applications-and-platform/bap-power-apps/power-platform-ux/telemetry/powerplatformux/event
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.AppName">
+            <summary>
+            Name of the app such as PacCli, PRT, CMT, make-powerapps-com, powerautomate-microsoft-com, ppuxdevcenter.
+            data_appName (EventInfo_AppName)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.AppEnvironment">
+            <summary>
+            data_appEnvironment (UserInfo_Environment)
+            tie, test, preprod, preview, prod, gov, high, dod, mooncake, ex, rx
+            https://msazure.visualstudio.com/OneAgile/_git/power-platform-ux?path=/packages/build-scripts/src/config/env.interface.ts&amp;version=GBmaster&amp;_a=contents
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Scope">
+            <summary>
+            Name of the package (or assembly) the log is coming from.
+            Ex: PAC CLI module name, Current Executing Assembly Name
+            data_scope (EventInfo_Scope)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.BuildNumber">
+            <summary>
+            The build name/number.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Team">
+            <summary>
+            Name of team owning the event.
+            data_team (EventInfo_Team)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.AppLocale">
+            <summary>
+            The application display language, in IETF language tag format. eg. `en`.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.UserLocale">
+            <summary>
+            User's locale. eg. `en-US`, `hi-IN`.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Timestamp">
+            <summary>
+            The time the event was logged including local time offset.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Time">
+            <summary>
+            UTC time when the event was logged.
+            data_time (EventInfo_Time)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.EventName">
+            <summary>
+            Name of the telemetry event.
+            data_eventName (EventInfo_EventName)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.EventType">
+            <summary>
+            e.g. Trace, Scenario, Custom, etc.
+            data_eventType (EventInfo_Type)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.EventSubtype">
+            <summary>
+            Subtype of the event.
+            For 'Scenario', can be 'Load', 'Execute', etc.
+            data_eventSubtype (EventInfo_Subtype)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.ScenarioId">
+            <summary>
+            GUID representing an identifier of a certain scenario for data_eventType = Scenario This will help to track scenario modifiers such as start/complete.
+            data_scenarioId (EventInfo_ScenarioId)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.EventModifier">
+            <summary>
+            Scenario Modifier used for data_eventType == Scenario or Custom.
+            Possible values: Failure, Progress, Start, Complete or string.
+            This can be used to calculate SLA.
+            data_eventModifier (EventInfo_Modifier)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Message">
+            <summary>
+            data_message (n/a)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Severity">
+            <summary>
+            LogLevel Possible values: Debug, Information, Warning, Error
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.EventProperties">
+            <summary>
+            data_eventInfo
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.ActivityId">
+            <summary>
+            UUID of an event. Used this to join OutgoingRequest table (data_activityId column)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.TenantId">
+            <summary>
+            User's AAD Tenant Id.
+            data_tenantId (UserInfo_TenantId)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.PrincipalObjectId">
+            <summary>
+            User's AAD Object Id.
+            data_principalObjectId (UserInfo_ObjectId)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.Puid">
+            <summary>
+            User's AAD PUID.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.OrganizationId">
+            <summary>
+            Dataverse organization id for the event.
+            data_organizationId (n/a)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.EnvironmentId">
+            <summary>
+            Environment id for the event.
+            data_organizationId (n/a)
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.ErrorCode">
+            <summary>
+            Error code for the event.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.ErrorName">
+            <summary>
+            Error name for the event.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.ErrorStack">
+            <summary>
+            Error stack for the event.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.CauseErrorCode">
+            <summary>
+            Error code for the innermost error.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.CauseErrorName">
+            <summary>
+            Error name for the innermost error.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.CauseErrorStack">
+            <summary>
+            Error stack for the innermost error.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.OSName">
+            <summary>
+            Name of the OS. ex: Windows
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxEventTelemetryData.OSVersion">
+            <summary>
+            Version of the OS.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxScenario.Start(System.Nullable{System.Int32},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <param name="properties">Properties that are unique to this event being tracked. Any properties here will override properties in <see name="ScenarioProperties"/>.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxScenario.Progress(System.String,System.Nullable{System.Int32},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <param name="properties">Properties that are unique to this event being tracked. Any properties here will override properties in <see name="ScenarioProperties"/>.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxScenario.Complete(System.String,System.Nullable{System.Int32},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <param name="properties">Properties that are unique to this event being tracked. Any properties here will override properties in <see name="ScenarioProperties"/>.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxScenario.Failure(System.String,System.Nullable{Microsoft.PowerPlatform.Tooling.ShellTelemetry.SeverityLevel},System.Nullable{System.Int32},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <param name="properties">Properties that are unique to this event being tracked. Any properties here will override properties in <see name="ScenarioProperties"/>.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxScenario.Failure(System.Exception,System.Nullable{Microsoft.PowerPlatform.Tooling.ShellTelemetry.SeverityLevel},System.Nullable{System.Int32},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            track Failure
+            </summary>
+            <param name="ex"></param>
+            <param name="severity"></param>
+            <param name="teamPriority"></param>
+            <param name="properties"></param>
+            <exception cref="T:System.ObjectDisposedException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxSessionContext.ClientSessionId">
+            <summary>
+            The id of the client session.
+            Defaults to <see cref="M:System.Guid.NewGuid"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxSessionContext.AppLocale">
+            <summary>
+            Gets the App's 2-letter language name via <see cref="P:System.Globalization.CultureInfo.CurrentCulture"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxSessionContext.UserLocale">
+            <summary>
+            Gets the user locale based on <see cref="P:System.Globalization.CultureInfo.CurrentUICulture"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext.#ctor(Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext)">
+            <summary>
+            Explicit copy ctor to ensure we create a new dictionary instance for the GlobalProperties.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext.DefaultScope">
+            <summary>
+            The default scope for all telemetry produced by clients that utilize this context.
+            By default (or whenever this property is set to `null`) the value comes from the <see cref="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.DefaultScope"/> property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext.DefaultTeam">
+            <summary>
+            The default team for all telemetry produced by clients that utilize this context.
+            By default (or whenever this property is set to `null`) the value comes from the <see cref="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxAppContext.DefaultTeam"/> property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext.CurrentActivityId">
+            <summary>
+            The id of the current activity.
+            All events within the same activity will get this id assigned to help correlate events with the same top-level client activity or operation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext.GlobalProperties">
+            <summary>
+            Shared properties that will be added to all events.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxTelemetryContext.ApplyToTelemetryData(Microsoft.PowerPlatform.Tooling.ShellTelemetry.IPpuxTelemetryDataContextProperties)">
+            <summary>
+            Sets the context-owned properites of the event data to the values in this context instance.
+            Most properties are overriden by the explicit values of the context.
+            </summary>
+            <param name="eventData"></param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxUserContext.Country">
+            <summary>
+            data_country: Usually a 2 letter code, seen equally with uppercase and lowercase.
+            </summary>
+        </member>
+        <member name="P:Microsoft.PowerPlatform.Tooling.ShellTelemetry.PpuxUserContext.Region">
+            <summary>
+            data_userRegion: Usually a 3-4 letter code, lowercase.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.ShellTelemetryClient.TrackScenario(System.String,Microsoft.PowerPlatform.Tooling.ShellTelemetry.ScenarioType,System.String,System.String,System.Nullable{System.Int32},System.Collections.Generic.Dictionary{System.String,System.Object},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <param name="scenarioProperties">Properties that are sent with every event associated with this scenario.</param>
+            <param name="startProperties">Properties that are only sent with the 'start' record for this scenario.</param>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.ShellTelemetry.ShellTelemetryClient.TrackScenarioEvent(System.String,System.Guid,Microsoft.PowerPlatform.Tooling.ShellTelemetry.ScenarioType,Microsoft.PowerPlatform.Tooling.ShellTelemetry.ScenarioModifier,System.String,System.Nullable{Microsoft.PowerPlatform.Tooling.ShellTelemetry.SeverityLevel},System.Nullable{System.TimeSpan},System.String,System.String,System.Nullable{System.Int32},System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object},System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object})">
+            <param name="scenarioProperties">Properties that are sent with every event associated with this scenario.</param>
+            <param name="additionalProperties">Properties that are unique to this event being tracked. Any properties here will override properties in <paramref name="scenarioProperties"/>.</param>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.TfmAdapters.DebugAnnotated">
+            <summary>
+            When targeting netstandard2.0 and netframework TFMs, many framework APIs do not have the nullable annotations.
+            This causes the compiler to emit warnings for all of these APIs. Callers must then add extra checks in cross-TFM code just
+            to appease the compiler because it thinks a value may be null.
+            This class is a simple wrapper around some of these utilities and adds the nullable annotations.
+            </summary>
+            <remarks>
+            Each of these methods is a simple wrapper around the corresponding string method. To optimize compiled code, we also hint to the compiler
+            to aggressively inline these methods so to remove any overhead of the wrapper.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.TfmAdapters.StringAnnotated">
+            <summary>
+            When targeting netstandard2.0 and netframework TFMs, many framework APIs do not have the nullable annotations.
+            This causes the compiler to emit warnings for all of these APIs. Callers must then add extra checks in cross-TFM code just
+            to appease the compiler because it thinks a value may be null.
+            This class is a simple wrapper around some of these utilities and adds the nullable annotations.
+            </summary>
+            <remarks>
+            Each of these methods is a simple wrapper around the corresponding string method. To optimize compiled code, we also hint to the compiler
+            to aggressively inline these methods so to remove any overhead of the wrapper.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.PowerPlatform.Tooling.TfmAdapters.TfmAdaptersStringExtensions">
+            <summary>
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.TfmAdapters.TfmAdaptersStringExtensions.ReplaceOrdinal(System.String,System.String,System.String)">
+            <summary>
+            Returns a new string in which all occurrences of a specified string in the current instance are replaced with another specified string, using ordinal comparison.
+            </summary>
+        </member>
+        <member name="M:Microsoft.PowerPlatform.Tooling.TfmAdapters.TfmAdaptersStringExtensions.ContainsOrdinal(System.String,System.String)">
+            <summary>
+            Returns a value indicating whether a specified string occurs within this string, using ordinal comparison.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullAttribute.#ctor">
+            <summary>Initializes a new instance of the System.Diagnostics.CodeAnalysis.NotNullAttribute class.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified return value condition.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute">
+            <summary>Specifies that the method will not return if the associated Boolean parameter is passed the specified value.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified parameter value.</summary>
+            <param name="parameterValue">
+            The condition parameter value. Code after the method will be considered unreachable by diagnostics if the argument to
+            the associated parameter matches this value.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.ParameterValue">
+            <summary>Gets the condition parameter value.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute">
+            <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String)">
+            <summary>Initializes the attribute with a field or property member.</summary>
+            <param name="member">
+            The field or property member that is promised to be not-null.
+            </param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String[])">
+            <summary>Initializes the attribute with the list of field and property members.</summary>
+            <param name="members">
+            The list of field and property members that are promised to be not-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.Members">
+            <summary>Gets field or property member names.</summary>
+        </member>
+        <member name="T:System.TfmMissingApisString">
+            <summary>
+            This class adds members to the String class which are not available in any of the .net frameworks, but are in Core.
+            </summary>
+        </member>
+    </members>
+</doc>

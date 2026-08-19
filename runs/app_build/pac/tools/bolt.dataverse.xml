@@ -1,0 +1,4149 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>bolt.dataverse</name>
+    </assembly>
+    <members>
+        <member name="M:bolt.cli.AuthenticatedClientFactoryExtensions.CreateHttpClientForErpRestApis(bolt.authentication.http.IAuthenticatedClientFactory,System.Uri)">
+            <summary>
+            Build an <see cref="T:bolt.authentication.http.IAuthenticatedHttpClient"/> targeting a Finance &amp; Operations runtime URL.
+            The audience is the F&amp;O URL itself, so the underlying <c>IAuthTokenStore</c> will mint a
+            token with <c>aud=&lt;fno-url&gt;</c> on the first call (lazy acquisition).
+            </summary>
+            <param name="factory">The authenticated client factory.</param>
+            <param name="erpUrl">F&amp;O runtime URL from <c>AuthProfile.ErpUrl</c>. Caller is
+            responsible for verifying the profile is F&amp;O-linked (see <see cref="M:bolt.cli.AuthenticatedClientFactoryExtensions.CreateHttpClientForErpRestApis(bolt.authentication.http.IAuthenticatedClientFactory,bolt.authentication.profiles.AuthProfile)"/> for the validating overload).</param>
+        </member>
+        <member name="M:bolt.cli.AuthenticatedClientFactoryExtensions.CreateHttpClientForErpRestApis(bolt.authentication.http.IAuthenticatedClientFactory,bolt.authentication.profiles.AuthProfile)">
+            <summary>
+            Ergonomic overload: build an F&amp;O HTTP client straight from an <see cref="T:bolt.authentication.profiles.AuthProfile"/>.
+            Throws if the profile is not F&amp;O-linked (i.e. <see cref="P:bolt.authentication.profiles.AuthProfile.ErpUrl"/> is null) so
+            downstream verbs get a clear, single-place failure instead of an obscure NRE.
+            </summary>
+            <param name="factory">The authenticated client factory.</param>
+            <param name="authProfile">Auth profile previously enriched with <see cref="P:bolt.authentication.profiles.AuthProfile.ErpUrl"/>
+            by <c>pac auth create</c> or the lazy resolution path in <c>pac auth who</c>.</param>
+        </member>
+        <member name="M:bolt.cli.CdsClientConnector.ConnectToEnvironment(bolt.authentication.profiles.AuthProfile,System.Uri)">
+            <summary>
+            Returns a connected <see cref="T:bolt.cli.ICdsClient"/>.
+            </summary>
+            <exception cref="T:bolt.system.VerbExecutionException">Thrown when the connection fails. See the inner exception for details.</exception>"
+        </member>
+        <member name="M:bolt.cli.CdsClientConnector.ConnectToEnvironmentNoOutputOrTelemetry(bolt.authentication.profiles.AuthProfile,System.Uri)">
+            <summary>
+            Returns a connected <see cref="T:bolt.cli.ICdsClient"/> but does not output progress to the output window or track telemetry.
+            </summary>
+            <exception cref="T:bolt.system.VerbExecutionException">Thrown when the connection fails. See the inner exception for details.</exception>"
+        </member>
+        <member name="M:bolt.cli.CdsClientConnector.ConnectToEnvironmentImpl(bolt.authentication.profiles.AuthProfile,System.Uri,System.Boolean)">
+            <exception cref="T:bolt.system.VerbExecutionException">Thrown when the connection fails. See the inner exception for details.</exception>"
+        </member>
+        <member name="T:bolt.cli.CdsClientConnectorExtensions">
+            <summary>
+            Provides extensions to the <see cref="T:bolt.cli.ICdsClient"/> interface for working with connectors.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.CdsClientException.SessionTrackingId">
+            <summary>
+            Gets or sets the session tracking ID that was used when this error occurred.
+            This ID can be provided to Microsoft support for request tracing in Dataverse logs.
+            </summary>
+            <remarks>
+            Returns <see cref="F:System.Guid.Empty"/> when not set. Callers should check for
+            <c>!= Guid.Empty</c> before displaying to users. Using non-nullable Guid
+            simplifies caller code and follows existing patterns in the codebase.
+            </remarks>
+        </member>
+        <member name="T:bolt.cli.CdsClientExtensions">
+            <summary>
+            Provides extensions to the <see cref="T:bolt.cli.ICdsClient"/> interface for working with connectors.
+            </summary>
+        </member>
+        <member name="T:bolt.cli.DiscoveryOrganizationDetails">
+            <summary>
+            DTO for Microsoft.Xrm.Sdk.Discovery.OrganizationDetail
+            </summary>
+        </member>
+        <member name="M:bolt.cli.DiscoveryOrganizationDetails.ToSelectedOrganizationInfo">
+            <exception cref="T:System.InvalidOperationException">Thrown if this instance is missing required data.</exception>
+        </member>
+        <member name="T:bolt.cli.EnvironmentArgumentOptions">
+            <summary>
+            Describes the options for a composite environment lookup argument(s).
+            The default settings enables the single '--environment' argument name with no text searching capability.
+            </summary>
+            <remarks>
+            WARNING: Implementation rules<br/>
+            The implementation of this class should abide by the following rules:<br/>
+            - The default values of properties should convey the default behavior of a new `--environment` argument (with no back compat issues) and fit the expected behavior of the 90% case of all verbs.
+              This rule is intended to keep verbs always using the same behavior so that verb authors have the little to no custom configuration.<br/>
+            - Name of properties should convey that setting a non-`default` value would be changing the default behavior.<br/>
+              e.g.
+              a boolean property named `EnableFoo` indicates that, by default, Behavior 'Foo' is disabled.<br/>
+              a boolean property named `DisableBar` indicates that, by default, Behavior 'Bar' is enabled.<br/>
+              an enum property named `EnumZad` should have a default value (i.e. the  enum member with a numeric value of `0`) that indicates the default behavior.<br/>
+            </remarks>
+        </member>
+        <member name="F:bolt.cli.EnvironmentArgumentOptions.Default">
+            <summary>
+            Returns the default options for the environment argument.
+            Which has an <see cref="P:bolt.cli.EnvironmentArgumentOptions.ArgumentName"/> of "--environment" and <see cref="P:bolt.cli.EnvironmentArgumentOptions.TextSearchBehavior"/> of <see cref="F:bolt.cli.EnvironmentLookupTextSearchBehavior.NotSupported"/>.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentArgumentOptions.ArgumentName">
+            <summary>
+            The name of the argument that will be used to lookup the environment.
+            The default is "--environment".
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentArgumentOptions.TextSearchBehavior">
+            <summary>
+            Indicates whether the argument value for the argument specified with <see cref="P:bolt.cli.EnvironmentArgumentOptions.ArgumentName"/> supports lookup by text name search.
+            And indicates the kind of searching it is capable of doing.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentArgumentOptions.EnvironmentIdArgumentName">
+            <summary>
+            Indicates the optional "--environmentId" like argument for verbs that supported this legacy argument.
+            This allows for backwards compatibility with existing verbs that used this argument before using the standardized "--environment" argument.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentArgumentOptions.EnvironmentUrlArgumentName">
+            <summary>
+            Indicates the optional "--environmentUrl" like argument for verbs that supported this legacy argument.
+            This allows for backwards compatibility with existing verbs that used this argument before using the standardized "--environment" argument.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentArgumentOptions.ResolverOptions">
+            <summary>
+            The options to use when resolving the environment argument (whether a lookup spec is explicitly specified on the command line or not).
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentData.OrganizationId">
+            <summary>
+            The organization id of the environment, if the environment has a Dataverse database.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentData.Location">
+            <summary>
+            The Geo the environment is in.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentData.AgentManagementEndpoint">
+            <summary>
+            Copilot Studio agent management endpoint, derived from BAP runtimeEndpoints["microsoft.PowerVirtualAgents"].
+            Null when the environment does not have Copilot Studio enabled.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentData.ErpUrl">
+            <summary>
+            Finance and Operations (ERP) runtime URL, derived from BAP properties.finOpsMetadata.url.
+            Null when the environment is not linked to ERP.
+            </summary>
+        </member>
+        <member name="T:bolt.cli.EnvironmentLookupResolverOptions">
+            <summary>
+            Describes the options for a resolving an environment lookup spec.
+            The default settings should be used for most verbs in order to have a consistent behavior across all commands.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentLookupResolverOptions.DisableMatchAuthProfileSelectedEnvironment">
+            <summary>
+            Explicitly disables the ability to match first with the default environment configured in the auth profile.
+            This feature is enabled by default as it's a performance optimization.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentLookupResolverOptions.DisableResolveViaDataverseClientWhenUrlIsProvided">
+            <summary>
+            When the user specifies a url, we use the Dataverse client to resolve the environment details.
+            This is done before finding the environment via Global Disco or BAP.
+            This is a performance benefit and avoids issues where SPN's may not have access to Global Disco or BAP Environments API.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentLookupResolverOptions.DisableAuthProfileSelectedOrgFallback">
+            <summary>
+            Explicitly disables the ability to use the auth profile's selected environment for the argument
+            when the user doesn't specify any of the environment lookup arguments.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.EnvironmentLookupSpec.Url">
+            <summary>
+            The url specified on the command line.
+            This url is verified to be an absolute https url.
+            </summary>
+        </member>
+        <member name="F:bolt.cli.EnvironmentLookupTextSearchBehavior.UniqueName">
+            <summary>
+            Equality match on the unique name.
+            </summary>
+        </member>
+        <member name="F:bolt.cli.EnvironmentLookupTextSearchBehavior.NamesAndUrls">
+            <summary>
+            Unique and friendly names along with matching text in the environment url.
+            </summary>
+        </member>
+        <member name="F:bolt.cli.EnvironmentLookupTextSearchBehavior.AcceptName">
+            <summary>
+            Helper enum for readability when converting legacy APIs.
+            Unique and friendly names along with matching text in the environment url.
+            </summary>
+        </member>
+        <member name="M:bolt.cli.EnvironmentResolver.ResolveEnvironmentLookupSpecAsync(bolt.authentication.profiles.AuthProfile,bolt.cli.EnvironmentLookupSpec,bolt.cli.EnvironmentLookupResolverOptions,System.Threading.CancellationToken)">
+            <summary>
+            Resolves the environment argument as specified by the user.
+            This method will throw if the organization could not be found using the specified <paramref name="authProfile"/> or if multiple orgs were found that match the <paramref name="lookupSpec"/>.
+            </summary>
+        </member>
+        <member name="M:bolt.cli.EnvironmentVerbArgumentDescription.#ctor(bolt.cli.EnvironmentArgumentOptions,System.Nullable{bolt.system.LocString},System.Boolean,System.String)">
+            <summary>
+            Creates a verb argument description which usually has name `--environment`.
+            This is configured in the <paramref name="lookupArgOptions"/> parameter via <see cref="P:bolt.cli.EnvironmentArgumentOptions.ArgumentName"/>.
+            </summary>
+            <param name="lookupArgOptions">The options for this argument. This is also used at runtime, so caller is expected to pass this in and usually hold it as a static readonly field.</param>
+            <param name="help">The custom help text. Otherwise, a default string is used based on the <paramref name="lookupArgOptions"/>.</param>
+            <param name="isRequired">Whether this argument is required. By default, it's false for most verbs since the environment can be resolved from the default org in the AuthProfile.</param>
+            <param name="alias">The alias for the argument, default is `-env`.</param>
+        </member>
+        <member name="P:bolt.cli.EnvironmentVerbArgumentDescription.LookupArgOptions">
+            <summary>
+            The options for how the environment argument should be parsed and resolved.
+            </summary>
+        </member>
+        <member name="T:bolt.cli.IBapEnvironmentsClient">
+            <summary>
+            Interface for getting environments using the BAP API.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.ICdsClient.DataverseServiceClient">
+            <summary>
+            Gives direct access to the inner <see cref="T:Microsoft.PowerPlatform.Dataverse.Client.ServiceClient"/> (aka DVSC).<br/>
+            Note: Usage of this instance circumvents our ability to track telemetry and errors in a central place.
+            WARNING: The Dataverse ServiceClient is not able to be mocked in tests, so testing verbs that use this property will be difficult.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.ICdsClient.OrganizationService">
+            <summary>
+            The inner implementation of the <see cref="T:Microsoft.Xrm.Sdk.IOrganizationService"/>.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.ICdsClient.SessionTrackingId">
+            <summary>
+            Gets the session tracking ID used to correlate requests to Dataverse for troubleshooting.
+            This ID is passed in HTTP headers and can be provided to Microsoft support for request tracing.
+            </summary>
+        </member>
+        <member name="T:bolt.cli.CdsFaultErrorCode">
+            <summary>
+            https://learn.microsoft.com/en-us/power-apps/developer/data-platform/reference/web-service-error-codes
+            </summary>
+        </member>
+        <member name="P:bolt.cli.ICdsEntityMethods.SessionTrackingId">
+            <summary>
+            Gets the session tracking ID used to correlate requests to Dataverse for troubleshooting.
+            This ID is passed in HTTP headers and can be provided to Microsoft support for request tracing.
+            </summary>
+        </member>
+        <member name="M:bolt.cli.ICdsEntityMethods.ExecuteMultipleWithRetry(Microsoft.Xrm.Sdk.OrganizationRequestCollection,System.Int32,System.Nullable{System.TimeSpan})">
+            <summary>
+            Executes multiple organization requests with automatic retry logic for transient failures.
+            Retries on <see cref="T:System.TimeoutException"/> and specific Dataverse fault codes (throttling, server errors).
+            </summary>
+            <param name="requests">The collection of organization requests to execute.</param>
+            <param name="maxRetries">Maximum number of retry attempts. Default is 3.</param>
+            <param name="retryDelay">Delay between retry attempts. Default is 5 seconds when null.</param>
+            <returns>The response containing results for each request in the batch.</returns>
+            <exception cref="T:System.TimeoutException">Thrown when all retry attempts are exhausted due to timeouts.</exception>
+        </member>
+        <member name="M:bolt.cli.IDataverseDiscoveryClient.DiscoverOrgs(bolt.authentication.profiles.AuthProfile,System.Threading.CancellationToken)">
+            <summary>
+            Returns all organizations available to the user specified by the <paramref name="authProfile"/>.
+            When the user is an application, this method will fall back to use the BAP Environments API since application users do not have access to Global Discovery.
+            </summary>
+        </member>
+        <member name="M:bolt.cli.IDataverseDiscoveryClient.GetDefaultOrganization(bolt.authentication.profiles.AuthProfile,System.Threading.CancellationToken)">
+            <summary>
+            Gets the default organization configured for the tenant for the specified user.
+            </summary>
+            <returns>The default organization if one exists for the tenant.</returns>
+        </member>
+        <member name="M:bolt.cli.IEnvironmentResolver.ResolveEnvironmentLookupSpecAsync(bolt.authentication.profiles.AuthProfile,bolt.cli.EnvironmentLookupSpec,bolt.cli.EnvironmentLookupResolverOptions,System.Threading.CancellationToken)">
+            <summary>
+            Resolves the environment argument as specified by the user.
+            This method will throw if the organization could not be found using the specified <paramref name="authProfile"/> or if multiple orgs were found that match the <paramref name="lookupSpec"/>.
+            </summary>
+        </member>
+        <member name="T:bolt.cli.IErpLinkageResolver">
+            <summary>
+            Best-effort resolver for the Finance and Operations (ERP) runtime URL linked to a Dataverse
+            environment, used to populate <see cref="P:bolt.authentication.profiles.AuthProfile.ErpUrl"/> for UNO environments.
+            </summary>
+            <remarks>
+            Implementations call the BAP environment API and surface the ERP URL when present. All
+            failure modes -- transient BAP errors, missing linkage, feature flag disabled, environment id
+            unavailable -- return <see langword="null"/> rather than throwing, so callers can use this
+            safely in auth flows without risking blocking authentication on F&amp;O-side state.
+            </remarks>
+        </member>
+        <member name="M:bolt.cli.IErpLinkageResolver.TryResolveErpUrlAsync(bolt.authentication.profiles.AuthProfile,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Resolves the ERP URL for the given Dataverse environment, or returns <see langword="null"/>
+            if no linkage is available, the lookup fails, or the feature is disabled.
+            </summary>
+            <param name="authProfile">Auth profile used to authenticate the BAP call.</param>
+            <param name="environmentId">Dataverse environment id to look up.</param>
+            <param name="cancellationToken">Cancellation token observed by the underlying BAP call.</param>
+            <returns>The ERP URL when the environment is F&amp;O-linked; otherwise <see langword="null"/>.</returns>
+        </member>
+        <member name="T:bolt.cli.IXppSdkStore">
+            <summary>
+            Persistence for installed X++ SDK entries. One entry per installed version.
+            Stored as JSON under PAC's local application data folder so that <c>pac package compile</c>
+            can find the compiler later without re-querying the environment.
+            </summary>
+            <remarks>
+            Interface is declared here so sibling modules (<c>bolt.module.tool</c>, <c>bolt.module.package</c>)
+            can reference it without depending on each other. Implementation is registered by
+            <c>bolt.module.tool</c>. Same pattern as <see cref="T:bolt.cli.IBapEnvironmentsClientFactory"/>.
+            </remarks>
+        </member>
+        <member name="M:bolt.cli.IXppSdkStore.List">
+            <summary>Returns all installed SDK entries.</summary>
+        </member>
+        <member name="M:bolt.cli.IXppSdkStore.GetByEnvironment(System.String)">
+            <summary>Returns the SDK entry installed for the given F&amp;O environment URL, or null.</summary>
+        </member>
+        <member name="M:bolt.cli.IXppSdkStore.GetByVersion(System.String)">
+            <summary>Returns the SDK entry matching the given four-part version, or null.</summary>
+        </member>
+        <member name="M:bolt.cli.IXppSdkStore.Upsert(bolt.cli.XppSdkEntry)">
+            <summary>Inserts or updates an entry, keyed by <see cref="P:bolt.cli.XppSdkEntry.AppVersion"/>.</summary>
+        </member>
+        <member name="M:bolt.cli.IXppSdkStore.Remove(System.String)">
+            <summary>Removes the entry matching the given version. Returns true if a row was removed.</summary>
+        </member>
+        <member name="T:bolt.cli.XppSdkEntry">
+            <summary>
+            Metadata for an X++ SDK installation on this machine. Persisted by the <see cref="T:bolt.cli.IXppSdkStore"/>
+            implementation so later invocations of <c>pac package compile --package-type erp</c> can locate
+            <c>xppc.exe</c> and the <c>PackagesLocalDirectory</c> reference tree.
+            </summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.AppVersion">
+            <summary>Four-part F&amp;O application version, e.g. <c>10.0.2588.0</c>.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.PackagesLocalDirectory">
+            <summary>Absolute path to the <c>PackagesLocalDirectory</c> root created by the install.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.XppcExe">
+            <summary>Absolute path to <c>xppc.exe</c> inside the SDK install.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.LabelcExe">
+            <summary>Absolute path to <c>LabelC.exe</c> (label compiler). Populated by installs that
+            validated the full toolchain; may be empty on entries written by older versions of the CLI.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.XppbpExe">
+            <summary>Absolute path to <c>xppbp.exe</c> (best-practices analyzer). Same backward-compat
+            caveat as <see cref="P:bolt.cli.XppSdkEntry.LabelcExe"/>.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.InstalledAt">
+            <summary>ISO-8601 timestamp of when the SDK was installed.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.Source">
+            <summary>
+            How this SDK was obtained. <c>devtools</c> = Path A (Dev Tools service SAS download).
+            <c>nuget</c> is reserved for Path B (MS-internal, not yet implemented).
+            </summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.EnvironmentUrl">
+            <summary>Environment URL (F&amp;O) the SDK was installed for. Used to map env → SDK.</summary>
+        </member>
+        <member name="P:bolt.cli.XppSdkEntry.DataverseUrl">
+            <summary>Dataverse URL associated with the environment when the SDK was installed.</summary>
+        </member>
+        <member name="F:bolt.dataverse.client.actions.ActionBase.WaitForAsyncJobStatus.TimedOut">
+            <summary>
+            The operation has not completed by the requested maxAsyncWaitTime.
+            The user will have already been notified that the operation has timed out, so callers need not add additional messages.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.client.actions.ActionBase.WaitForAsyncJobStatus.Succeeded">
+            <summary>
+            The operation has completed with a statuscode of succeeded.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.client.actions.ActionBase.WaitForAsyncJobStatus.FailedOrCanceled">
+            <summary>
+            Indicates that the async operation has completed with a statuscode of failed or canceled.
+            The progress will have already reported the friendlymessage to the user, so callers need not add additional messages.
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.client.AuthWrapper.GetAuthTokenAsync(System.String)">
+            <summary>
+            Called by DVSC when it needs an auth token for a given Dataverse instance.
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.client.BoltEntityExtentions.ToEntity(Microsoft.Xrm.Sdk.Entity,System.Type)">
+            <summary>
+            Unfortunately, there's no overload for Entity.ToEntity(Type), so we implement this extension to provide the missing implementation.
+            </summary>
+            <param name="entity">The entity to convert.</param>
+            <param name="targetEntityType">The type of </param>
+            <returns></returns>
+        </member>
+        <member name="M:bolt.dataverse.client.BoltEntityExtentions.DescendantEntities(Microsoft.Xrm.Sdk.Entity)">
+            <summary>
+            Enumerates all descendant entities of the given entity.
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.client.BoltEntityExtentions.GetAliasedAttributeValue``1(Microsoft.Xrm.Sdk.Entity,System.String)">
+            <summary>
+            Extension to pick up an Aliased value by type from an entity.
+            </summary>
+            <typeparam name="T">Type to return</typeparam>
+            <param name="entity"></param>
+            <param name="attributeName">Attribute name with Alias Tag to return</param>
+            <returns></returns>
+        </member>
+        <member name="M:bolt.dataverse.client.CdsClient.#ctor(bolt.dataverse.client.CdsClient)">
+            <summary>Copy ctor</summary>
+        </member>
+        <member name="M:bolt.dataverse.client.CdsServiceClient.#ctor(bolt.dataverse.client.CdsServiceClient,System.Guid)">
+            <summary>Copy ctor</summary>
+        </member>
+        <member name="P:bolt.dataverse.client.ClientPrimitives.SessionTrackingId">
+            <inheritdoc />
+        </member>
+        <member name="T:bolt.dataverse.client.DataverseClientLoggerExtensions">
+            <summary>
+            Class that can be used to add performant logging for classes in the bolt.dataverse.client namespace.
+            </summary>
+            <remarks>
+            This class uses the LoggerMessage pattern. See: https://learn.microsoft.com/en-us/dotnet/core/extensions/logger-message-generator<br/>
+            It's recommended to use the strong-typed generic <see cref="T:Microsoft.Extensions.Logging.ILogger`1"/> so messages are scoped to the logger class expected.
+            This also allows us to create less logger-specific static classes just for logging purposes.
+            </remarks>
+        </member>
+        <member name="P:bolt.dataverse.client.ICdsServiceClient.SessionTrackingId">
+            <summary>
+            Gets the session tracking ID used to correlate requests to Dataverse for troubleshooting.
+            This ID is passed in HTTP headers and can be provided to Microsoft support for request tracing.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.client.ICdsServiceClient.DataverseServiceClient">
+            <summary>
+            Gives direct access to the inner <see cref="T:Microsoft.PowerPlatform.Dataverse.Client.ServiceClient"/> (aka DVSC).
+            Note: Usage of this instance circumvents our ability to track telemetry and errors in a central place.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.client.ICdsServiceClient.OrganizationService">
+            <summary>
+            The inner implementation of the <see cref="T:Microsoft.Xrm.Sdk.IOrganizationService"/>.
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.client.ICdsServiceClient.ImportSolutionToCds(System.String,System.Guid@,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <returns>
+            Returns the <paramref name="importId"/> upon success.
+            Otherwise, <see cref="F:System.Guid.Empty"/> indicating an error occurred. The user should check the log files for the error details.
+            </returns>
+        </member>
+        <member name="M:bolt.dataverse.client.ICdsServiceClient.ImportSolutionToCdsAsync(System.String,System.Guid@,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <returns>
+            Returns the Async Job ID.  To find the status of the job, query the AsyncOperation Entity using GetEntityDataByID using the returned value of this method.
+            Otherwise, <see cref="F:System.Guid.Empty"/> indicating an error occurred. The user should check the log files for the error details.
+            </returns>
+        </member>
+        <member name="T:bolt.dataverse.client.LoggingOrganizationService">
+            <summary>
+            An implementation of an <see cref="T:Microsoft.Xrm.Sdk.IOrganizationService"/> that logs all calls to a target logger.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.client.PassThruOrganizationService">
+            <summary>
+            Represents a base class implementation of <see cref="T:Microsoft.Xrm.Sdk.IOrganizationService"/>, <see cref="T:Microsoft.PowerPlatform.Dataverse.Client.IOrganizationServiceAsync"/>, and <see cref="T:Microsoft.PowerPlatform.Dataverse.Client.IOrganizationServiceAsync2"/> that forwards all calls to an <see cref="T:Microsoft.PowerPlatform.Dataverse.Client.IOrganizationServiceAsync2"/> instance.
+            Derived classes may override any of the methods to provide custom behavior.
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.DataverseExtensions.TrimPublisher(System.String)">
+            <summary>
+            Trims publisher prefix from the enity or attribute name
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Boolean">
+            <summary>
+            A Boolean attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Customer">
+            <summary>
+            An attribute that represents a customer.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.DateTime">
+            <summary>
+            A date/time attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Decimal">
+            <summary>
+            A decimal attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Double">
+            <summary>
+            A double attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Integer">
+            <summary>
+            An integer attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Lookup">
+            <summary>
+            A lookup attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Memo">
+            <summary>
+            A memo attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Money">
+            <summary>
+            A money attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Owner">
+            <summary>
+            An owner attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.PartyList">
+            <summary>
+            A partylist attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Picklist">
+            <summary>
+            A picklist attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.State">
+            <summary>
+            A state attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Status">
+            <summary>
+            A status attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.String">
+            <summary>
+            A string attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Uniqueidentifier">
+            <summary>
+            An attribute that is an ID.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.CalendarRules">
+            <summary>
+            An attribute that contains calendar rules.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.Virtual">
+            <summary>
+            An attribute that is created by the system at run time.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.BigInt">
+            <summary>
+            A big integer attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.ManagedProperty">
+            <summary>
+            A managed property attribute.
+            </summary>
+        </member>
+        <member name="F:bolt.dataverse.model.AttributeType.EntityName">
+            <summary>
+            An entity name attribute.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.model.FetchXmlModel">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.Entity">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.Version">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.OutputFormat">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.Mapping">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.Distinct">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.Aggregate">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchXmlModel.Top">
+            <remarks/>
+        </member>
+        <member name="T:bolt.dataverse.model.FetchEntity">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.Attributes">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.AllAttributes">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.LinkEntities">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.Filters">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.Orders">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.Name">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.LinkType">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.From">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.To">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.Visible">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntity.Alias">
+            <remarks/>
+        </member>
+        <member name="T:bolt.dataverse.model.FetchEntityAttribute">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Name">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Build">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Addedby">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Alias">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Aggregate">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Groupby">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.DateGrouping">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.UserTimezone">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityAttribute.Distinct">
+            <remarks/>
+        </member>
+        <member name="T:bolt.dataverse.model.FetchEntityFilter">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityFilter.Conditions">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityFilter.Type">
+            <remarks/>
+        </member>
+        <member name="T:bolt.dataverse.model.FetchEntityOrder">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityOrder.Attribute">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityOrder.Alias">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityOrder.Descending">
+            <remarks/>
+        </member>
+        <member name="T:bolt.dataverse.model.FetchEntityFilterCondition">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityFilterCondition.Attribute">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityFilterCondition.Operator">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityFilterCondition.Value">
+            <remarks/>
+        </member>
+        <member name="P:bolt.dataverse.model.FetchEntityFilterCondition.Values">
+            <remarks/>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.DataverseServiceContext">
+            <summary>
+            Represents a source of entities bound to a Dataverse service. It tracks and manages changes made to the retrieved entities.
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.DataverseServiceContext.LoadProperty``1(``0,System.String)">
+            <summary>
+            This overload bypasses the CheckEntitySubclass method which prevents us from being able to .
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.businessunit_address1_addresstypecode">
+            <summary>
+            Type of address for address 1, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.businessunit_address1_shippingmethodcode">
+            <summary>
+            Method of shipment for address 1.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.businessunit_address2_addresstypecode">
+            <summary>
+            Type of address for address 2, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.businessunit_address2_shippingmethodcode">
+            <summary>
+            Method of shipment for address 2.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.BusinessUnit">
+            <summary>
+            Business, division, or department in the Microsoft Dynamics 365 database.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.BusinessUnit.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the businessunit entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.BusinessUnit.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_AddressId">
+            <summary>
+            Unique identifier for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_AddressTypeCode">
+            <summary>
+            Type of address for address 1, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_City">
+            <summary>
+            City name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Country">
+            <summary>
+            Country/region name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_County">
+            <summary>
+            County name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Fax">
+            <summary>
+            Fax number for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Latitude">
+            <summary>
+            Latitude for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Line1">
+            <summary>
+            First line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Line2">
+            <summary>
+            Second line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Line3">
+            <summary>
+            Third line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Longitude">
+            <summary>
+            Longitude for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Name">
+            <summary>
+            Name to enter for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_PostalCode">
+            <summary>
+            ZIP Code or postal code for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_PostOfficeBox">
+            <summary>
+            Post office box number for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_ShippingMethodCode">
+            <summary>
+            Method of shipment for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_StateOrProvince">
+            <summary>
+            State or province for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Telephone1">
+            <summary>
+            First telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Telephone2">
+            <summary>
+            Second telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_Telephone3">
+            <summary>
+            Third telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_UPSZone">
+            <summary>
+            United Parcel Service (UPS) zone for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address1_UTCOffset">
+            <summary>
+            UTC offset for address 1. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_AddressId">
+            <summary>
+            Unique identifier for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_AddressTypeCode">
+            <summary>
+            Type of address for address 2, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_City">
+            <summary>
+            City name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Country">
+            <summary>
+            Country/region name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_County">
+            <summary>
+            County name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Fax">
+            <summary>
+            Fax number for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Latitude">
+            <summary>
+            Latitude for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Line1">
+            <summary>
+            First line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Line2">
+            <summary>
+            Second line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Line3">
+            <summary>
+            Third line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Longitude">
+            <summary>
+            Longitude for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Name">
+            <summary>
+            Name to enter for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_PostalCode">
+            <summary>
+            ZIP Code or postal code for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_PostOfficeBox">
+            <summary>
+            Post office box number for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_ShippingMethodCode">
+            <summary>
+            Method of shipment for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_StateOrProvince">
+            <summary>
+            State or province for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Telephone1">
+            <summary>
+            First telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Telephone2">
+            <summary>
+            Second telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_Telephone3">
+            <summary>
+            Third telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_UPSZone">
+            <summary>
+            United Parcel Service (UPS) zone for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Address2_UTCOffset">
+            <summary>
+            UTC offset for address 2. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.BusinessUnitId">
+            <summary>
+            Unique identifier of the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.CalendarId">
+            <summary>
+            Fiscal calendar associated with the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.CostCenter">
+            <summary>
+            Name of the business unit cost center.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.CreatedOn">
+            <summary>
+            Date and time when the business unit was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the businessunit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.CreditLimit">
+            <summary>
+            Credit limit for the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Description">
+            <summary>
+            Description of the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.DisabledReason">
+            <summary>
+            Reason for disabling the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.DivisionName">
+            <summary>
+            Name of the division to which the business unit belongs.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.EMailAddress">
+            <summary>
+            Email address for the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.ExchangeRate">
+            <summary>
+            Exchange rate for the currency associated with the businessunit with respect to the base currency.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.FileAsName">
+            <summary>
+            Alternative name under which the business unit can be filed.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.FtpSiteUrl">
+            <summary>
+            FTP site URL for the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.ImportSequenceNumber">
+            <summary>
+            Unique identifier of the data import or data migration that created this record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.InheritanceMask">
+            <summary>
+            Inheritance mask for the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.IsDisabled">
+            <summary>
+            Information about whether the business unit is enabled or disabled.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.ModifiedOn">
+            <summary>
+            Date and time when the business unit was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who last modified the businessunit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Name">
+            <summary>
+            Name of the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.OverriddenCreatedOn">
+            <summary>
+            Date and time that the record was migrated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.ParentBusinessUnitId">
+            <summary>
+            Unique identifier for the parent business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Picture">
+            <summary>
+            Picture or diagram of the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.StockExchange">
+            <summary>
+            Stock exchange on which the business is listed.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.TickerSymbol">
+            <summary>
+            Stock exchange ticker symbol for the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.TransactionCurrencyId">
+            <summary>
+            Unique identifier of the currency associated with the businessunit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.UTCOffset">
+            <summary>
+            UTC offset for the business unit. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.VersionNumber">
+            <summary>
+            Version number of the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.WebSiteUrl">
+            <summary>
+            Website URL for the business unit.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.WorkflowSuspended">
+            <summary>
+            Information about whether workflow or sales process rules have been suspended.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.business_unit_connector">
+            <summary>
+            1:N business_unit_connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Referencedbusiness_unit_parent_business_unit">
+            <summary>
+            1:N business_unit_parent_business_unit
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.business_unit_roles">
+            <summary>
+            1:N business_unit_roles
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.business_unit_system_users">
+            <summary>
+            1:N business_unit_system_users
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.business_unit_teams">
+            <summary>
+            1:N business_unit_teams
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.Referencingbusiness_unit_parent_business_unit">
+            <summary>
+            N:1 business_unit_parent_business_unit
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.lk_businessunit_createdonbehalfby">
+            <summary>
+            N:1 lk_businessunit_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.lk_businessunit_modifiedonbehalfby">
+            <summary>
+            N:1 lk_businessunit_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.lk_businessunitbase_createdby">
+            <summary>
+            N:1 lk_businessunitbase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.BusinessUnit.lk_businessunitbase_modifiedby">
+            <summary>
+            N:1 lk_businessunitbase_modifiedby
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.connector_statecode">
+            <summary>
+            Status of the Connector
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.connector_statuscode">
+            <summary>
+            Reason for the status of the Connector
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.connector">
+            <summary>
+            Connector Entity to support Solutioning Integration
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.connector.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the connector entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.connector.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.Capabilities">
+            <summary>
+            Capabilities
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ConnectionParameters">
+            <summary>
+            Connection parameters of the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.connectorId">
+            <summary>
+            Unique identifier for entity instances
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ConnectorIdUnique">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ConnectorInternalId">
+            <summary>
+            Internal Connector Id
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ConnectorType">
+            <summary>
+            Connector Type
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.CreatedOn">
+            <summary>
+            Date and time when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.CustomCodeBlob">
+            <summary>
+            Custom Code for the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.CustomCodeBlobContent">
+            <summary>
+            Custom Code Content for the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.Description">
+            <summary>
+            Description of the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.DisplayName">
+            <summary>
+            Display Name of the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.IconBlob">
+            <summary>
+            Icon for the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.IconBrandColor">
+            <summary>
+            Connector Icon Branding Color
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ImportSequenceNumber">
+            <summary>
+            Sequence number of the import that created this record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.IntroducedVersion">
+            <summary>
+            Version in which the form is introduced.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.IsCustomizable">
+            <summary>
+            Tells whether the component can be customized.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.IsManaged">
+            <summary>
+            Indicates whether the solution component is part of a managed solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ModifiedBy">
+            <summary>
+            Unique identifier of the user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ModifiedOn">
+            <summary>
+            Date and time when the record was modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.Name">
+            <summary>
+            Required logical name of the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OpenApiDefinition">
+            <summary>
+            OpenApi Definition supported by Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OverriddenCreatedOn">
+            <summary>
+            Date and time that the record was migrated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OwnerId">
+            <summary>
+            Owner Id
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OwningBusinessUnit">
+            <summary>
+            Unique identifier for the business unit that owns the record
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OwningTeam">
+            <summary>
+            Unique identifier for the team that owns the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.OwningUser">
+            <summary>
+            Unique identifier for the user that owns the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.PolicyTemplateInstances">
+            <summary>
+            Apim Policy Template Instances
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.ScriptOperations">
+            <summary>
+            A list of operations to which the custom code will apply to.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.statecode">
+            <summary>
+            Status of the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.statuscode">
+            <summary>
+            Reason for the status of the Connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.TimeZoneRuleVersionNumber">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.UTCConversionTimeZoneCode">
+            <summary>
+            Time zone code that was in use when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.VersionNumber">
+            <summary>
+            Version Number
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.business_unit_connector">
+            <summary>
+            N:1 business_unit_connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.lk_connector_createdby">
+            <summary>
+            N:1 lk_connector_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.lk_connector_createdonbehalfby">
+            <summary>
+            N:1 lk_connector_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.lk_connector_modifiedby">
+            <summary>
+            N:1 lk_connector_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.lk_connector_modifiedonbehalfby">
+            <summary>
+            N:1 lk_connector_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.team_connector">
+            <summary>
+            N:1 team_connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.connector.user_connector">
+            <summary>
+            N:1 user_connector
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.CustomControl">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.CustomControl.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the customcontrol entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.CustomControl.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.AuthoringManifest">
+            <summary>
+            Authoring Manifest of the CustomControl.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.ClientJson">
+            <summary>
+            Custom control data in JSON format.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.CompatibleDataTypes">
+            <summary>
+            Compatible Data Types For Custom Controls
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.CreatedOn">
+            <summary>
+            Date and time when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.CustomControlId">
+            <summary>
+            Unique identifier of the Custom Control for the Microsoft Dynamics 365.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.CustomControlIdUnique">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.IntroducedVersion">
+            <summary>
+            Version in which the form is introduced.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.Manifest">
+            <summary>
+            Manifest of the CustomControl.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.ModifiedBy">
+            <summary>
+            Unique identifier of the user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.ModifiedOn">
+            <summary>
+            Date and time when the record was modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.Name">
+            <summary>
+            Name of the custom control.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the custom control.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.SupportedPlatform">
+            <summary>
+            Supported platforms of the CustomControl.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.Version">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.VersionNumber">
+            <summary>
+            Version number of the Custom Control.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.customcontrol_resource_id">
+            <summary>
+            1:N customcontrol_resource_id
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.lk_customcontrol_createdby">
+            <summary>
+            N:1 lk_customcontrol_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.lk_customcontrol_createdonbehalfby">
+            <summary>
+            N:1 lk_customcontrol_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.lk_customcontrol_modifiedby">
+            <summary>
+            N:1 lk_customcontrol_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControl.lk_customcontrol_modifiedonbehalfby">
+            <summary>
+            N:1 lk_customcontrol_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.CustomControlResource">
+            <summary>
+            Custom Control Resource Id
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.CustomControlResource.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the customcontrolresource entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.CustomControlResource.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.CreatedOn">
+            <summary>
+            Date and time when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.CustomControlId">
+            <summary>
+            Unique identifier of the custom control.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.CustomControlResourceId">
+            <summary>
+            Unique identifier of the Custom Control Resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.CustomControlResourceIdUnique">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.IntroducedVersion">
+            <summary>
+            Version in which the form is introduced.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.ModifiedBy">
+            <summary>
+            Unique identifier of the user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.ModifiedOn">
+            <summary>
+            Date and time when the record was modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.Name">
+            <summary>
+            Name of the custom control resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.Version">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.VersionNumber">
+            <summary>
+            Version number of the Custom Control Resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.VersionRequirement">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.WebResourceId">
+            <summary>
+            Unique identifier of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.customcontrol_resource_id">
+            <summary>
+            N:1 customcontrol_resource_id
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.lk_customcontrolresource_createdby">
+            <summary>
+            N:1 lk_customcontrolresource_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.lk_customcontrolresource_createdonbehalfby">
+            <summary>
+            N:1 lk_customcontrolresource_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.lk_customcontrolresource_modifiedby">
+            <summary>
+            N:1 lk_customcontrolresource_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.CustomControlResource.lk_customcontrolresource_modifiedonbehalfby">
+            <summary>
+            N:1 lk_customcontrolresource_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Entity_Ent.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the entity entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.Entity_Ent.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.AddressTableName">
+            <summary>
+            The address table name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.BaseTableName">
+            <summary>
+            The base table name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.CollectionName">
+            <summary>
+            The collection name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.EntityId">
+            <summary>
+            Unique identifier of the entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.EntitySetName1">
+            <summary>
+            The entity set name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ExtensionTableName">
+            <summary>
+            The extension table name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ExternalCollectionName">
+            <summary>
+            The external collection name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ExternalName">
+            <summary>
+            The external name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.IsActivity">
+            <summary>
+            Whether this entity is of type activity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.LogicalCollectionName">
+            <summary>
+            The logical collection name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.LogicalName1">
+            <summary>
+            The logical name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.Name">
+            <summary>
+            The name of this Entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ObjectTypeCode">
+            <summary>
+            The object type code of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.OriginalLocalizedCollectionName">
+            <summary>
+            The original localized collection name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.OriginalLocalizedName">
+            <summary>
+            The original localized name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ParentControllingAttributeName">
+            <summary>
+            The parent controlling attribute name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.PhysicalName">
+            <summary>
+            The physical name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.ReportViewName">
+            <summary>
+            The Report view name of this entity.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Entity_Ent.VersionNumber">
+            <summary>
+            The version number of this entity.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.publisher_address1_addresstypecode">
+            <summary>
+            Type of address for address 1, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.publisher_address1_shippingmethodcode">
+            <summary>
+            Method of shipment for address 1.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.publisher_address2_addresstypecode">
+            <summary>
+            Type of address for address 2. such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.publisher_address2_shippingmethodcode">
+            <summary>
+            Method of shipment for address 2.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Publisher">
+            <summary>
+            A publisher of a CRM solution.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Publisher.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the publisher entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.Publisher.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_AddressId">
+            <summary>
+            Unique identifier for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_AddressTypeCode">
+            <summary>
+            Type of address for address 1, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_City">
+            <summary>
+            City name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Country">
+            <summary>
+            Country/region name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_County">
+            <summary>
+            County name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Fax">
+            <summary>
+            Fax number for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Latitude">
+            <summary>
+            Latitude for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Line1">
+            <summary>
+            First line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Line2">
+            <summary>
+            Second line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Line3">
+            <summary>
+            Third line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Longitude">
+            <summary>
+            Longitude for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Name">
+            <summary>
+            Name to enter for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_PostalCode">
+            <summary>
+            ZIP Code or postal code for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_PostOfficeBox">
+            <summary>
+            Post office box number for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_ShippingMethodCode">
+            <summary>
+            Method of shipment for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_StateOrProvince">
+            <summary>
+            State or province for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Telephone1">
+            <summary>
+            First telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Telephone2">
+            <summary>
+            Second telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_Telephone3">
+            <summary>
+            Third telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_UPSZone">
+            <summary>
+            United Parcel Service (UPS) zone for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address1_UTCOffset">
+            <summary>
+            UTC offset for address 1. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_AddressId">
+            <summary>
+            Unique identifier for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_AddressTypeCode">
+            <summary>
+            Type of address for address 2. such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_City">
+            <summary>
+            City name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Country">
+            <summary>
+            Country/region name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_County">
+            <summary>
+            County name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Fax">
+            <summary>
+            Fax number for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Latitude">
+            <summary>
+            Latitude for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Line1">
+            <summary>
+            First line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Line2">
+            <summary>
+            Second line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Line3">
+            <summary>
+            Third line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Longitude">
+            <summary>
+            Longitude for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Name">
+            <summary>
+            Name to enter for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_PostalCode">
+            <summary>
+            ZIP Code or postal code for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_PostOfficeBox">
+            <summary>
+            Post office box number for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_ShippingMethodCode">
+            <summary>
+            Method of shipment for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_StateOrProvince">
+            <summary>
+            State or province for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Telephone1">
+            <summary>
+            First telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Telephone2">
+            <summary>
+            Second telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_Telephone3">
+            <summary>
+            Third telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_UPSZone">
+            <summary>
+            United Parcel Service (UPS) zone for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Address2_UTCOffset">
+            <summary>
+            UTC offset for address 2. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.CreatedOn">
+            <summary>
+            Date and time when the publisher was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.CustomizationOptionValuePrefix">
+            <summary>
+            Default option value prefix used for newly created options for solutions associated with this publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.CustomizationPrefix">
+            <summary>
+            Prefix used for new entities, attributes, and entity relationships for solutions associated with this publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.Description">
+            <summary>
+            Description of the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.EMailAddress">
+            <summary>
+            Email address for the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.EntityImage">
+            <summary>
+            Shows the default image for the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.EntityImageId">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.FriendlyName">
+            <summary>
+            User display name for this publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.IsReadonly">
+            <summary>
+            Indicates whether the publisher was created as part of a managed solution installation.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.ModifiedOn">
+            <summary>
+            Date and time when the publisher was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.PinpointPublisherDefaultLocale">
+            <summary>
+            Default locale of the publisher in Microsoft Pinpoint.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.PinpointPublisherId">
+            <summary>
+            Identifier of the publisher in Microsoft Pinpoint.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.PublisherId">
+            <summary>
+            Unique identifier of the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.SupportingWebsiteUrl">
+            <summary>
+            URL for the supporting website of this publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.UniqueName">
+            <summary>
+            The unique name of this publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.publisher_solution">
+            <summary>
+            1:N publisher_solution
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.lk_publisher_createdby">
+            <summary>
+            N:1 lk_publisher_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.lk_publisher_modifiedby">
+            <summary>
+            N:1 lk_publisher_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.lk_publisherbase_createdonbehalfby">
+            <summary>
+            N:1 lk_publisherbase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Publisher.lk_publisherbase_modifiedonbehalfby">
+            <summary>
+            N:1 lk_publisherbase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Role">
+            <summary>
+            Grouping of security privileges. Users are assigned roles that authorize their access to the Microsoft CRM system.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Role.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the role entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.Role.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.BusinessUnitId">
+            <summary>
+            Unique identifier of the business unit with which the role is associated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.CanBeDeleted">
+            <summary>
+            Tells whether the role can be deleted.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.CreatedOn">
+            <summary>
+            Date and time when the role was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ImportSequenceNumber">
+            <summary>
+            Unique identifier of the data import or data migration that created this record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.IsCustomizable">
+            <summary>
+            Information that specifies whether this component can be customized.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.IsInherited">
+            <summary>
+            Role is inherited by users from team membership, if role associated with team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.IsManaged">
+            <summary>
+            Indicates whether the solution component is part of a managed solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ModifiedOn">
+            <summary>
+            Date and time when the role was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who last modified the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.Name">
+            <summary>
+            Name of the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.OverriddenCreatedOn">
+            <summary>
+            Date and time that the record was migrated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ParentRoleId">
+            <summary>
+            Unique identifier of the parent role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.ParentRootRoleId">
+            <summary>
+            Unique identifier of the parent root role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.RoleId">
+            <summary>
+            Unique identifier of the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.RoleIdUnique">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.RoleTemplateId">
+            <summary>
+            Unique identifier of the role template that is associated with the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.VersionNumber">
+            <summary>
+            Version number of the role.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.Referencedrole_parent_role">
+            <summary>
+            1:N role_parent_role
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.Referencedrole_parent_root_role">
+            <summary>
+            1:N role_parent_root_role
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.systemuserroles_association">
+            <summary>
+            N:N systemuserroles_association
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.teamroles_association">
+            <summary>
+            N:N teamroles_association
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.business_unit_roles">
+            <summary>
+            N:1 business_unit_roles
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.lk_role_createdonbehalfby">
+            <summary>
+            N:1 lk_role_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.lk_role_modifiedonbehalfby">
+            <summary>
+            N:1 lk_role_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.lk_rolebase_createdby">
+            <summary>
+            N:1 lk_rolebase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.lk_rolebase_modifiedby">
+            <summary>
+            N:1 lk_rolebase_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.Referencingrole_parent_role">
+            <summary>
+            N:1 role_parent_role
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.Referencingrole_parent_root_role">
+            <summary>
+            N:1 role_parent_root_role
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Role.solution_role">
+            <summary>
+            N:1 solution_role
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.solution_solutiontype">
+            <summary>
+            All possible types of solution
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Solution">
+            <summary>
+            A solution which contains CRM customizations.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Solution.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the solution entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.Solution.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.ConfigurationPageId">
+            <summary>
+            A link to an optional configuration page for this solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.CreatedOn">
+            <summary>
+            Date and time when the solution was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.Description">
+            <summary>
+            Description of the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.FriendlyName">
+            <summary>
+            User display name for the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.InstalledOn">
+            <summary>
+            Date and time when the solution was installed/upgraded.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.IsApiManaged">
+            <summary>
+            Information about whether the solution is api managed.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.IsManaged">
+            <summary>
+            Indicates whether the solution is managed or unmanaged.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.IsVisible">
+            <summary>
+            Indicates whether the solution is visible outside of the platform.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.ModifiedOn">
+            <summary>
+            Date and time when the solution was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.ParentSolutionId">
+            <summary>
+            Unique identifier of the parent solution. Should only be non-null if this solution is a patch.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.PinpointPublisherId">
+            <summary>
+            Identifier of the publisher of this solution in Microsoft Pinpoint.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.PinpointSolutionDefaultLocale">
+            <summary>
+            Default locale of the solution in Microsoft Pinpoint.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.PinpointSolutionId">
+            <summary>
+            Identifier of the solution in Microsoft Pinpoint.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.PublisherId">
+            <summary>
+            Unique identifier of the publisher.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.SolutionId">
+            <summary>
+            Unique identifier of the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.SolutionPackageVersion">
+            <summary>
+            Solution package source organization version
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.SolutionType">
+            <summary>
+            Solution Type
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.TemplateSuffix">
+            <summary>
+            The template suffix of this solution
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.Thumbprint">
+            <summary>
+            thumbprint of the solution signature
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.UniqueName">
+            <summary>
+            The unique name of this solution
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.UpdatedOn">
+            <summary>
+            Date and time when the solution was updated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.UpgradeInfo">
+            <summary>
+            Contains component info for the solution upgrade operation
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.Version">
+            <summary>
+            Solution version, used to identify a solution for upgrades and hotfixes.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.Referencedsolution_parent_solution">
+            <summary>
+            1:N solution_parent_solution
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.solution_role">
+            <summary>
+            1:N solution_role
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.solution_solutioncomponent">
+            <summary>
+            1:N solution_solutioncomponent
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.lk_solution_createdby">
+            <summary>
+            N:1 lk_solution_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.lk_solution_modifiedby">
+            <summary>
+            N:1 lk_solution_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.lk_solutionbase_createdonbehalfby">
+            <summary>
+            N:1 lk_solutionbase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.lk_solutionbase_modifiedonbehalfby">
+            <summary>
+            N:1 lk_solutionbase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.publisher_solution">
+            <summary>
+            N:1 publisher_solution
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.solution_configuration_webresource">
+            <summary>
+            N:1 solution_configuration_webresource
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Solution.Referencingsolution_parent_solution">
+            <summary>
+            N:1 solution_parent_solution
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.solutioncomponent_rootcomponentbehavior">
+            <summary>
+            Indicates the include behavior of the root component.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.SolutionComponent">
+            <summary>
+            A component of a CRM solution.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.SolutionComponent.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the solutioncomponent entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.SolutionComponent.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.ComponentType">
+            <summary>
+            The object type code of the component.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the solution
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.CreatedOn">
+            <summary>
+            Date and time when the solution was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.IsMetadata">
+            <summary>
+            Indicates whether this component is metadata or data.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.ModifiedOn">
+            <summary>
+            Date and time when the solution was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.ObjectId">
+            <summary>
+            Unique identifier of the object with which the component is associated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.RootComponentBehavior">
+            <summary>
+            Indicates the include behavior of the root component.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.RootSolutionComponentId">
+            <summary>
+            The parent ID of the subcomponent, which will be a root
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.SolutionComponentId">
+            <summary>
+            Unique identifier of the solution component.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.SolutionId">
+            <summary>
+            Unique identifier of the solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.Referencedsolutioncomponent_parent_solutioncomponent">
+            <summary>
+            1:N solutioncomponent_parent_solutioncomponent
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.lk_solutioncomponentbase_createdonbehalfby">
+            <summary>
+            N:1 lk_solutioncomponentbase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.lk_solutioncomponentbase_modifiedonbehalfby">
+            <summary>
+            N:1 lk_solutioncomponentbase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.solution_solutioncomponent">
+            <summary>
+            N:1 solution_solutioncomponent
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SolutionComponent.Referencingsolutioncomponent_parent_solutioncomponent">
+            <summary>
+            N:1 solutioncomponent_parent_solutioncomponent
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_accessmode">
+            <summary>
+            Type of user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_address1_addresstypecode">
+            <summary>
+            Type of address for address 1, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_address1_shippingmethodcode">
+            <summary>
+            Method of shipment for address 1.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_address2_addresstypecode">
+            <summary>
+            Type of address for address 2, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_address2_shippingmethodcode">
+            <summary>
+            Method of shipment for address 2.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_azurestate">
+            <summary>
+            Azure state of user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_caltype">
+            <summary>
+            License type of user. This is used only in the on-premises version of the product. Online licenses are managed through Microsoft 365 Office Portal.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_deletestate">
+            <summary>
+            User delete state.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_emailrouteraccessapproval">
+            <summary>
+            Indicates the approval options for server-side synchronization or Email Router access.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_incomingemaildeliverymethod">
+            <summary>
+            Incoming email delivery method for the user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_invitestatuscode">
+            <summary>
+            User invitation status.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_outgoingemaildeliverymethod">
+            <summary>
+            Outgoing email delivery method for the user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_preferredaddresscode">
+            <summary>
+            Preferred address for the user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_preferredemailcode">
+            <summary>
+            Preferred email address for the user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.systemuser_preferredphonecode">
+            <summary>
+            Preferred phone number for the user.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.SystemUser">
+            <summary>
+            Person with access to the Microsoft CRM system and who owns objects in the Microsoft CRM database.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.SystemUser.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the systemuser entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.SystemUser.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.AccessMode">
+            <summary>
+            Type of user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_AddressId">
+            <summary>
+            Unique identifier for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_AddressTypeCode">
+            <summary>
+            Type of address for address 1, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_City">
+            <summary>
+            City name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Composite">
+            <summary>
+            Shows the complete primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Country">
+            <summary>
+            Country/region name in address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_County">
+            <summary>
+            County name for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Fax">
+            <summary>
+            Fax number for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Latitude">
+            <summary>
+            Latitude for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Line1">
+            <summary>
+            First line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Line2">
+            <summary>
+            Second line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Line3">
+            <summary>
+            Third line for entering address 1 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Longitude">
+            <summary>
+            Longitude for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Name">
+            <summary>
+            Name to enter for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_PostalCode">
+            <summary>
+            ZIP Code or postal code for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_PostOfficeBox">
+            <summary>
+            Post office box number for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_ShippingMethodCode">
+            <summary>
+            Method of shipment for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_StateOrProvince">
+            <summary>
+            State or province for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Telephone1">
+            <summary>
+            First telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Telephone2">
+            <summary>
+            Second telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_Telephone3">
+            <summary>
+            Third telephone number associated with address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_UPSZone">
+            <summary>
+            United Parcel Service (UPS) zone for address 1.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address1_UTCOffset">
+            <summary>
+            UTC offset for address 1. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_AddressId">
+            <summary>
+            Unique identifier for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_AddressTypeCode">
+            <summary>
+            Type of address for address 2, such as billing, shipping, or primary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_City">
+            <summary>
+            City name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Composite">
+            <summary>
+            Shows the complete secondary address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Country">
+            <summary>
+            Country/region name in address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_County">
+            <summary>
+            County name for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Fax">
+            <summary>
+            Fax number for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Latitude">
+            <summary>
+            Latitude for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Line1">
+            <summary>
+            First line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Line2">
+            <summary>
+            Second line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Line3">
+            <summary>
+            Third line for entering address 2 information.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Longitude">
+            <summary>
+            Longitude for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Name">
+            <summary>
+            Name to enter for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_PostalCode">
+            <summary>
+            ZIP Code or postal code for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_PostOfficeBox">
+            <summary>
+            Post office box number for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_ShippingMethodCode">
+            <summary>
+            Method of shipment for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_StateOrProvince">
+            <summary>
+            State or province for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Telephone1">
+            <summary>
+            First telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Telephone2">
+            <summary>
+            Second telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_Telephone3">
+            <summary>
+            Third telephone number associated with address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_UPSZone">
+            <summary>
+            United Parcel Service (UPS) zone for address 2.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Address2_UTCOffset">
+            <summary>
+            UTC offset for address 2. This is the difference between local time and standard Coordinated Universal Time.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ApplicationId">
+            <summary>
+            The identifier for the application. This is used to access data in another application.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ApplicationIdUri">
+            <summary>
+            The URI used as a unique logical identifier for the external app. This can be used to validate the application.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.AzureActiveDirectoryObjectId">
+            <summary>
+            This is the application directory object Id.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.AzureDeletedOn">
+            <summary>
+            Date and time when the user was set as soft deleted in Azure.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.AzureState">
+            <summary>
+            Azure state of user
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.BusinessUnitId">
+            <summary>
+            Unique identifier of the business unit with which the user is associated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.CalendarId">
+            <summary>
+            Fiscal calendar associated with the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.CALType">
+            <summary>
+            License type of user. This is used only in the on-premises version of the product. Online licenses are managed through Microsoft 365 Office Portal
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.CreatedOn">
+            <summary>
+            Date and time when the user was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the systemuser.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DefaultFiltersPopulated">
+            <summary>
+            Indicates if default outlook filters have been populated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DefaultMailbox">
+            <summary>
+            Select the mailbox associated with this user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DefaultOdbFolderName">
+            <summary>
+            Type a default folder name for the user's OneDrive For Business location.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DeletedState">
+            <summary>
+            User delete state
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DisabledReason">
+            <summary>
+            Reason for disabling the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DisplayInServiceViews">
+            <summary>
+            Whether to display the user in service views.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.DomainName">
+            <summary>
+            Active Directory domain of which the user is a member.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.EmailRouterAccessApproval">
+            <summary>
+            Shows the status of the primary email address.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.EmployeeId">
+            <summary>
+            Employee identifier for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.EntityImage">
+            <summary>
+            Shows the default image for the record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.EntityImageId">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ExchangeRate">
+            <summary>
+            Exchange rate for the currency associated with the systemuser with respect to the base currency.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.FirstName">
+            <summary>
+            First name of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.FullName">
+            <summary>
+            Full name of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.GovernmentId">
+            <summary>
+            Government identifier for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.HomePhone">
+            <summary>
+            Home phone number for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IdentityId">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ImportSequenceNumber">
+            <summary>
+            Unique identifier of the data import or data migration that created this record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IncomingEmailDeliveryMethod">
+            <summary>
+            Incoming email delivery method for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.InternalEMailAddress">
+            <summary>
+            Internal email address for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.InviteStatusCode">
+            <summary>
+            User invitation status.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IsDisabled">
+            <summary>
+            Information about whether the user is enabled.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IsEmailAddressApprovedByO365Admin">
+            <summary>
+            Shows the status of approval of the email address by O365 Admin.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IsIntegrationUser">
+            <summary>
+            Check if user is an integration user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IsLicensed">
+            <summary>
+            Information about whether the user is licensed.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.IsSyncWithDirectory">
+            <summary>
+            Information about whether the user is synced with the directory.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.JobTitle">
+            <summary>
+            Job title of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.LastName">
+            <summary>
+            Last name of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.MiddleName">
+            <summary>
+            Middle name of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.MobileAlertEMail">
+            <summary>
+            Mobile alert email address for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.MobileOfflineProfileId">
+            <summary>
+            Items contained with a particular SystemUser.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.MobilePhone">
+            <summary>
+            Mobile phone number for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ModifiedOn">
+            <summary>
+            Date and time when the user was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who last modified the systemuser.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.NickName">
+            <summary>
+            Nickname of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.OutgoingEmailDeliveryMethod">
+            <summary>
+            Outgoing email delivery method for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.OverriddenCreatedOn">
+            <summary>
+            Date and time that the record was migrated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ParentSystemUserId">
+            <summary>
+            Unique identifier of the manager of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PassportHi">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PassportLo">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PersonalEMailAddress">
+            <summary>
+            Personal email address of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PhotoUrl">
+            <summary>
+            URL for the Website on which a photo of the user is located.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PositionId">
+            <summary>
+            User's position in hierarchical security model.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PreferredAddressCode">
+            <summary>
+            Preferred address for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PreferredEmailCode">
+            <summary>
+            Preferred email address for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.PreferredPhoneCode">
+            <summary>
+            Preferred phone number for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.ProcessId">
+            <summary>
+            Shows the ID of the process.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.QueueId">
+            <summary>
+            Unique identifier of the default queue for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Salutation">
+            <summary>
+            Salutation for correspondence with the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.SetupUser">
+            <summary>
+            Check if user is a setup user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.SharePointEmailAddress">
+            <summary>
+            SharePoint Work Email Address
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Skills">
+            <summary>
+            Skill set of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.StageId">
+            <summary>
+            Shows the ID of the stage.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.SystemUserId">
+            <summary>
+            Unique identifier for the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.TerritoryId">
+            <summary>
+            Unique identifier of the territory to which the user is assigned.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.TimeZoneRuleVersionNumber">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Title">
+            <summary>
+            Title of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.TransactionCurrencyId">
+            <summary>
+            Unique identifier of the currency associated with the systemuser.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.TraversedPath">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.UserLicenseType">
+            <summary>
+            Shows the type of user license.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.UserPuid">
+            <summary>
+             User PUID User Identifiable Information
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.UTCConversionTimeZoneCode">
+            <summary>
+            Time zone code that was in use when the record was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.VersionNumber">
+            <summary>
+            Version number of the user.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.WindowsLiveID">
+            <summary>
+            Windows Live ID
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.YammerEmailAddress">
+            <summary>
+            User's Yammer login email address
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.YammerUserId">
+            <summary>
+            User's Yammer ID
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.YomiFirstName">
+            <summary>
+            Pronunciation of the first name of the user, written in phonetic hiragana or katakana characters.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.YomiFullName">
+            <summary>
+            Pronunciation of the full name of the user, written in phonetic hiragana or katakana characters.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.YomiLastName">
+            <summary>
+            Pronunciation of the last name of the user, written in phonetic hiragana or katakana characters.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.YomiMiddleName">
+            <summary>
+            Pronunciation of the middle name of the user, written in phonetic hiragana or katakana characters.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_businessunit_createdonbehalfby">
+            <summary>
+            1:N lk_businessunit_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_businessunit_modifiedonbehalfby">
+            <summary>
+            1:N lk_businessunit_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_businessunitbase_createdby">
+            <summary>
+            1:N lk_businessunitbase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_businessunitbase_modifiedby">
+            <summary>
+            1:N lk_businessunitbase_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_connector_createdby">
+            <summary>
+            1:N lk_connector_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_connector_createdonbehalfby">
+            <summary>
+            1:N lk_connector_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_connector_modifiedby">
+            <summary>
+            1:N lk_connector_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_connector_modifiedonbehalfby">
+            <summary>
+            1:N lk_connector_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrol_createdby">
+            <summary>
+            1:N lk_customcontrol_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrol_createdonbehalfby">
+            <summary>
+            1:N lk_customcontrol_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrol_modifiedby">
+            <summary>
+            1:N lk_customcontrol_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrol_modifiedonbehalfby">
+            <summary>
+            1:N lk_customcontrol_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrolresource_createdby">
+            <summary>
+            1:N lk_customcontrolresource_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrolresource_createdonbehalfby">
+            <summary>
+            1:N lk_customcontrolresource_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrolresource_modifiedby">
+            <summary>
+            1:N lk_customcontrolresource_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_customcontrolresource_modifiedonbehalfby">
+            <summary>
+            1:N lk_customcontrolresource_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_publisher_createdby">
+            <summary>
+            1:N lk_publisher_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_publisher_modifiedby">
+            <summary>
+            1:N lk_publisher_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_publisherbase_createdonbehalfby">
+            <summary>
+            1:N lk_publisherbase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_publisherbase_modifiedonbehalfby">
+            <summary>
+            1:N lk_publisherbase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_role_createdonbehalfby">
+            <summary>
+            1:N lk_role_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_role_modifiedonbehalfby">
+            <summary>
+            1:N lk_role_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_rolebase_createdby">
+            <summary>
+            1:N lk_rolebase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_rolebase_modifiedby">
+            <summary>
+            1:N lk_rolebase_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_solution_createdby">
+            <summary>
+            1:N lk_solution_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_solution_modifiedby">
+            <summary>
+            1:N lk_solution_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_solutionbase_createdonbehalfby">
+            <summary>
+            1:N lk_solutionbase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_solutionbase_modifiedonbehalfby">
+            <summary>
+            1:N lk_solutionbase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_solutioncomponentbase_createdonbehalfby">
+            <summary>
+            1:N lk_solutioncomponentbase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_solutioncomponentbase_modifiedonbehalfby">
+            <summary>
+            1:N lk_solutioncomponentbase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencedlk_systemuser_createdonbehalfby">
+            <summary>
+            1:N lk_systemuser_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencedlk_systemuser_modifiedonbehalfby">
+            <summary>
+            1:N lk_systemuser_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencedlk_systemuserbase_createdby">
+            <summary>
+            1:N lk_systemuserbase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencedlk_systemuserbase_modifiedby">
+            <summary>
+            1:N lk_systemuserbase_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_team_createdonbehalfby">
+            <summary>
+            1:N lk_team_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_team_modifiedonbehalfby">
+            <summary>
+            1:N lk_team_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_teambase_administratorid">
+            <summary>
+            1:N lk_teambase_administratorid
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_teambase_createdby">
+            <summary>
+            1:N lk_teambase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_teambase_modifiedby">
+            <summary>
+            1:N lk_teambase_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_webresourcebase_createdonbehalfby">
+            <summary>
+            1:N lk_webresourcebase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.lk_webresourcebase_modifiedonbehalfby">
+            <summary>
+            1:N lk_webresourcebase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.user_connector">
+            <summary>
+            1:N user_connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referenceduser_parent_user">
+            <summary>
+            1:N user_parent_user
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.webresource_createdby">
+            <summary>
+            1:N webresource_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.webresource_modifiedby">
+            <summary>
+            1:N webresource_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.systemuserroles_association">
+            <summary>
+            N:N systemuserroles_association
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.teammembership_association">
+            <summary>
+            N:N teammembership_association
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.business_unit_system_users">
+            <summary>
+            N:1 business_unit_system_users
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencinglk_systemuser_createdonbehalfby">
+            <summary>
+            N:1 lk_systemuser_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencinglk_systemuser_modifiedonbehalfby">
+            <summary>
+            N:1 lk_systemuser_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencinglk_systemuserbase_createdby">
+            <summary>
+            N:1 lk_systemuserbase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencinglk_systemuserbase_modifiedby">
+            <summary>
+            N:1 lk_systemuserbase_modifiedby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.SystemUser.Referencinguser_parent_user">
+            <summary>
+            N:1 user_parent_user
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.team_membershiptype">
+            <summary>
+            Information about team membership type.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.team_type">
+            <summary>
+            Information about team type.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Team">
+            <summary>
+            Collection of system users that routinely collaborate. Teams can be used to simplify record sharing and provide team members with common access to organization data when team members belong to different Business Units.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.Team.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the team entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.Team.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.AdministratorId">
+            <summary>
+            Unique identifier of the user primary responsible for the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.AzureActiveDirectoryObjectId">
+            <summary>
+            The Azure active directory object Id for a group.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.BusinessUnitId">
+            <summary>
+            Unique identifier of the business unit with which the team is associated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.CreatedOn">
+            <summary>
+            Date and time when the team was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.DelegatedAuthorizationId">
+            <summary>
+            The delegated authorization context for the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.Description">
+            <summary>
+            Description of the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.EMailAddress">
+            <summary>
+            Email address for the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ExchangeRate">
+            <summary>
+            Exchange rate for the currency associated with the team with respect to the base currency.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ImportSequenceNumber">
+            <summary>
+            Unique identifier of the data import or data migration that created this record.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.IsDefault">
+            <summary>
+            Information about whether the team is a default business unit team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ModifiedOn">
+            <summary>
+            Date and time when the team was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who last modified the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.Name">
+            <summary>
+            Name of the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.OverriddenCreatedOn">
+            <summary>
+            Date and time that the record was migrated.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ProcessId">
+            <summary>
+            Shows the ID of the process.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.QueueId">
+            <summary>
+            Unique identifier of the default queue for the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.RegardingObjectId">
+            <summary>
+            Choose the record that the team relates to.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.ShareLinkQualifier">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.StageId">
+            <summary>
+            Shows the ID of the stage.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.SystemManaged">
+            <summary>
+            Select whether the team will be managed by the system.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.TeamId">
+            <summary>
+            Unique identifier for the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.TeamTemplateId">
+            <summary>
+            Shows the team template that is associated with the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.TeamType">
+            <summary>
+            Select the team type.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.TransactionCurrencyId">
+            <summary>
+            Unique identifier of the currency associated with the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.TraversedPath">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.VersionNumber">
+            <summary>
+            Version number of the team.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.YomiName">
+            <summary>
+            Pronunciation of the full name of the team, written in phonetic hiragana or katakana characters.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.team_connector">
+            <summary>
+            1:N team_connector
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.teammembership_association">
+            <summary>
+            N:N teammembership_association
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.teamroles_association">
+            <summary>
+            N:N teamroles_association
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.business_unit_teams">
+            <summary>
+            N:1 business_unit_teams
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.lk_team_createdonbehalfby">
+            <summary>
+            N:1 lk_team_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.lk_team_modifiedonbehalfby">
+            <summary>
+            N:1 lk_team_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.lk_teambase_administratorid">
+            <summary>
+            N:1 lk_teambase_administratorid
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.lk_teambase_createdby">
+            <summary>
+            N:1 lk_teambase_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.Team.lk_teambase_modifiedby">
+            <summary>
+            N:1 lk_teambase_modifiedby
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.webresource_webresourcetype">
+            <summary>
+            Drop-down list for selecting the type of the web resource.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.WebResource">
+            <summary>
+            Data equivalent to files used in Web development. Web resources provide client-side components that are used to provide custom user interface elements.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.WebResource.Fields">
+            <summary>
+            Available fields, a the time of codegen, for the webresource entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.WebResource.#ctor">
+            <summary>
+            Default Constructor.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.CanBeDeleted">
+            <summary>
+            Information that specifies whether this component can be deleted.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ComponentState">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.Content">
+            <summary>
+            Bytes of the web resource, in Base64 format.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ContentFileRef">
+            <summary>
+            Reference to the content file on Azure.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ContentJson">
+            <summary>
+            Json representation of the content of the resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ContentJsonFileRef">
+            <summary>
+            Reference to the Json content file on Azure.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.CreatedBy">
+            <summary>
+            Unique identifier of the user who created the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.CreatedOn">
+            <summary>
+            Date and time when the web resource was created.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.CreatedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who created the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.DependencyXml">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.Description">
+            <summary>
+            Description of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.DisplayName">
+            <summary>
+            Display name of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.IntroducedVersion">
+            <summary>
+            Version in which the form is introduced.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.IsAvailableForMobileOffline">
+            <summary>
+            Information that specifies whether this web resource is available for mobile client in offline mode.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.IsCustomizable">
+            <summary>
+            Information that specifies whether this component can be customized.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.IsEnabledForMobileClient">
+            <summary>
+            Information that specifies whether this web resource is enabled for mobile client.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.IsHidden">
+            <summary>
+            Information that specifies whether this component should be hidden.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.LanguageCode">
+            <summary>
+            Language of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ModifiedBy">
+            <summary>
+            Unique identifier of the user who last modified the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ModifiedOn">
+            <summary>
+            Date and time when the web resource was last modified.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.ModifiedOnBehalfBy">
+            <summary>
+            Unique identifier of the delegate user who modified the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.Name">
+            <summary>
+            Name of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.OrganizationId">
+            <summary>
+            Unique identifier of the organization associated with the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.OverwriteTime">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.SilverlightVersion">
+            <summary>
+            Silverlight runtime version number required by a silverlight web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.SolutionId">
+            <summary>
+            Unique identifier of the associated solution.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.WebResourceId">
+            <summary>
+            Unique identifier of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.WebResourceIdUnique">
+            <summary>
+            For internal use only.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.WebResourceType">
+            <summary>
+            Drop-down list for selecting the type of the web resource.
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.solution_configuration_webresource">
+            <summary>
+            1:N solution_configuration_webresource
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.lk_webresourcebase_createdonbehalfby">
+            <summary>
+            N:1 lk_webresourcebase_createdonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.lk_webresourcebase_modifiedonbehalfby">
+            <summary>
+            N:1 lk_webresourcebase_modifiedonbehalfby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.webresource_createdby">
+            <summary>
+            N:1 webresource_createdby
+            </summary>
+        </member>
+        <member name="P:bolt.dataverse.servicemodel.WebResource.webresource_modifiedby">
+            <summary>
+            N:1 webresource_modifiedby
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.EntityOptionSetEnum.GetEnum(Microsoft.Xrm.Sdk.Entity,System.String)">
+            <summary>
+            Returns the integer version of an OptionSetValue
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.EntityOptionSetEnum.GetMultiEnum``1(Microsoft.Xrm.Sdk.Entity,System.String)">
+            <summary>
+            Returns a collection of integer version's of an Multi-Select OptionSetValue for a given attribute on the passed entity
+            </summary>
+        </member>
+        <member name="M:bolt.dataverse.servicemodel.EntityOptionSetEnum.GetMultiEnum``1(Microsoft.Xrm.Sdk.Entity,System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Returns a OptionSetValueCollection based on a list of Multi-Select OptionSetValues
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.componentstate">
+            <summary>
+            The state of this component.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.componenttype">
+            <summary>
+            All of the possible component types for solutions.
+            </summary>
+        </member>
+        <member name="T:bolt.dataverse.servicemodel.isinherited">
+            <summary>
+            The role is inherited
+            </summary>
+        </member>
+    </members>
+</doc>

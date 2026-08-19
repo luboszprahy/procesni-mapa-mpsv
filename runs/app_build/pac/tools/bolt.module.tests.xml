@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>bolt.module.tests</name>
+    </assembly>
+    <members>
+        <member name="T:bolt.module.tests.AuthOptions">
+            <summary>
+            Cert authentication options currently available.
+            Helper function <see cref="M:bolt.module.tests.TestsAuthOptionsExtensions.GetFullAuthOptionName(bolt.module.tests.AuthOptions)"/> returns a corresponding cert auth.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.AuthOptions.None">
+            <summary>
+            Represents a default certificate location option.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.AuthOptions.Certenv">
+            <summary>
+            Represents the certificate environment variable location option.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.AuthOptions.Certstore">
+            <summary>
+            Represents the certificate store location option.
+            </summary>
+        </member>
+        <member name="M:bolt.module.tests.TestsAuthOptionsExtensions.GetFullAuthOptionName(bolt.module.tests.AuthOptions)">
+            <summary>
+            Helper function that translates <see cref="T:bolt.module.tests.AuthOptions"/> to its corresponding cert auth name. This restricts the possible user inputs to a pre-defined set of values that prevents the user from entering any string as input.
+            </summary>
+            <returns>The full user auth type name</returns>
+            <exception cref="T:System.ArgumentException">If an invalid sub-domain name is specified.</exception>
+        </member>
+        <member name="T:bolt.module.tests.PlayerSubDomain">
+            <summary>
+            Sub-domain names that correspond to available Power Apps Web Player domain names.
+            Helper function <see cref="M:bolt.module.tests.TestsPlayerSubDomainExtensions.GetFullDomainName(bolt.module.tests.PlayerSubDomain)"/> returns a corresponding web player domain name for these sub-domain names.
+            <seealso href="https://dev.azure.com/msazure/OneAgile/_git/power-platform-ux?path=packages/powerapps-portal-common/src/settings.ts" />
+            </summary>
+        </member>
+        <member name="M:bolt.module.tests.TestsPlayerSubDomainExtensions.GetFullDomainName(bolt.module.tests.PlayerSubDomain)">
+            <summary>
+            Helper function that translates <see cref="T:bolt.module.tests.PlayerSubDomain"/> to its corresponding web player domain name. This restricts the possible user inputs to a pre-defined set of values that prevents the user from entering any string as input.
+            </summary>
+            <returns>The full web player domain name</returns>
+            <exception cref="T:System.ArgumentException">If an invalid sub-domain name is specified.</exception>
+        </member>
+        <member name="T:bolt.module.tests.ProviderOptions">
+            <summary>
+            User provider options currently available.
+            Helper function <see cref="M:bolt.module.tests.TestsProviderOptionsExtensions.GetFullProviderOptionName(bolt.module.tests.ProviderOptions)"/> returns a corresponding provider name.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.ProviderOptions.Canvas">
+            <summary>
+            Represents the Canvas provider.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.ProviderOptions.Mda">
+            <summary>
+            Represents the MDA provider.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.ProviderOptions.Portal">
+            <summary>
+            Represents the PowerApps Portal provider.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.ProviderOptions.Powerfx">
+            <summary>
+            Represents the Powerfx provider.
+            </summary>
+        </member>
+        <member name="M:bolt.module.tests.TestsProviderOptionsExtensions.GetFullProviderOptionName(bolt.module.tests.ProviderOptions)">
+            <summary>
+            Helper function that translates <see cref="T:bolt.module.tests.ProviderOptions"/> to its corresponding provider name. This restricts the possible user inputs to a pre-defined set of values that prevents the user from entering any string as input.
+            </summary>
+            <returns>The full user auth type name</returns>
+            <exception cref="T:System.ArgumentException">If an invalid sub-domain name is specified.</exception>
+        </member>
+        <member name="M:bolt.module.tests.TestsProvider.InstallPlaywrightBrowsers">
+            <summary>
+            Installs browser binaries required by Playwright.
+            Here, only Chromium is being installed as the default choice.
+            See: https://playwright.dev/dotnet/docs/browsers
+            </summary>
+            <returns>Process exit code</returns>
+        </member>
+        <member name="T:bolt.module.tests.UserAuthOptions">
+            <summary>
+            User authentication options currently available.
+            Helper function <see cref="M:bolt.module.tests.TestsUserAuthOptionsExtensions.GetFullUserAuthOptionName(bolt.module.tests.UserAuthOptions)"/> returns a corresponding user auth.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.UserAuthOptions.Storagestate">
+            <summary>
+            Represents the storagestate userauth provider.
+            </summary>
+        </member>
+        <member name="F:bolt.module.tests.UserAuthOptions.Dataverse">
+            <summary>
+            Represents the dataverse userauth provider.
+            </summary>
+        </member>
+        <member name="M:bolt.module.tests.TestsUserAuthOptionsExtensions.GetFullUserAuthOptionName(bolt.module.tests.UserAuthOptions)">
+            <summary>
+            Helper function that translates <see cref="T:bolt.module.tests.UserAuthOptions"/> to its corresponding user auth name. This restricts the possible user inputs to a pre-defined set of values that prevents the user from entering any string as input.
+            </summary>
+            <returns>The full user auth type name</returns>
+            <exception cref="T:System.ArgumentException">If an invalid sub-domain name is specified.</exception>
+        </member>
+    </members>
+</doc>

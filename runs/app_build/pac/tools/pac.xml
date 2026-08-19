@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>pac</name>
+    </assembly>
+    <members>
+        <member name="T:bolt.SessionServiceExtensions">
+            <summary>
+            Extension methods that break up Session's DI registrations into focused groups,
+            reducing class coupling in the composition root.
+            </summary>
+        </member>
+        <member name="M:bolt.SessionServiceExtensions.AddSessionLogging(Microsoft.Extensions.DependencyInjection.IServiceCollection,bolt.cli.SessionConfig)">
+            <summary>
+            Registers logging services (NLog, console logging, log file locator).
+            </summary>
+        </member>
+        <member name="M:bolt.SessionServiceExtensions.AddSessionTelemetry(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Reflection.Assembly,bolt.cli.ISessionConfig)">
+            <summary>
+            Registers telemetry infrastructure: AppInsights channel, telemetry configuration,
+            user settings provider, and the ITelemetry/ITelemetryStatusChange singletons.
+            </summary>
+        </member>
+        <member name="M:bolt.SessionServiceExtensions.AddSessionAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,bolt.cli.ISessionConfig)">
+            <summary>
+            Registers authentication services and configures auth options from environment variables.
+            </summary>
+        </member>
+        <member name="M:bolt.SessionServiceExtensions.AddSessionOutput(Microsoft.Extensions.DependencyInjection.IServiceCollection,bolt.cli.ISessionConfig)">
+            <summary>
+            Registers the IOutputWindow implementation based on session mode (interactive, non-interactive, JSON)
+            and related output services (ICommandProgress, IUserHelp).
+            </summary>
+        </member>
+        <member name="M:bolt.SessionServiceExtensions.AddSessionCoreServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Reflection.Assembly)">
+            <summary>
+            Registers core tooling services (PacToolSet, TemplateInstantiator, ProcessLauncher, etc.)
+            and the Dataverse HTTP client with user-agent configuration.
+            </summary>
+        </member>
+    </members>
+</doc>
