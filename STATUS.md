@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-19 10:31
+Aktualizováno: 2026-08-19 13:28
 
 ## CO JE NA TOBĚ
 
@@ -20,9 +20,37 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**Re-audit F1** (kolo 2) — první kolo našlo 1 blokující + 2 k opravě, všechny
-tři jsou opravené a ověřené, ale re-audit ještě neproběhl. Až projde, je F1
-připravená na první ostrý běh. Pak F2 (canvas app) / F3 (publikační flow).
+**F1 je hotová a auditem prošla — čeká na první ostrý běh, který musíš spustit ty
+(bod 4 výše).** Mezitím pokračuju na F2 (stavba canvas appky) a F3.
+
+## Audit F1 — kolo 2 (19.08.2026): 0 blokujících, F1 připravená
+
+Opravy P-01, P-02 i P-03 přijaty. Auditor při hledání dalších obchazek našel
+jeden nový nález, **P-04 — opraveno a ověřeno**:
+
+Obsahová kontrola anonymity hlídala jen seznam názvů (`TOKENY`), ale
+`anonymize.py` anonymizuje i **čísla útvarů** (3/33/331/11/111/113…)
+a **čísla vnitřních předpisů** (`SP 10/2021`). Reálný útvarový kód vrácený
+do jinak čistých dat tedy prošel — a přitom právě útvary prozradí
+o organizační struktuře nejvíc. Kontrola teď pokrývá všechny tři kategorie
+a vzory se importují z `anonymize.py`, aby se obě strany nemohly rozejít.
+
+Dvě pasti, na které jsem při opravě narazil a které řeší kód:
+- **Identifikační kódy nesmí do kontroly vstupovat.** `07-11`, `07-12-003`
+  vypadají jako útvary a vyvolávaly falešné poplachy. Kódy jsou strukturální
+  klíče, ne identifikující údaj.
+- **Časové razítko `datum_aktualizace`** (`…T11:28:00Z`) obsahuje „11".
+  Datumy se proto přeskakují **podle typu ve schématu**, ne podle jména
+  sloupce — příští datumový sloupec tím pádem stejnou past nezaloží.
+
+Ověřeno pěti scénáři: čistá data projdou; podvržený útvar `331`, předpis
+`SP 10/2021`, název `MPSV` i sekce `3` skončí `exit 1`; plná reálná data
+odmítnuta výčtem všech tří kategorií.
+
+Auditor dále ověřil tvrzení v `deploy/app_navrh.md` o delegaci a o vzorci
+pro přidělení kódu — bez faktických chyb. Nedelegovatelnost `Search()`/`in`
+nešla lokálně ověřit (appka neexistuje) → zůstává jako **neověřené tvrzení**,
+ne zpochybněné.
 
 ## Audit F1 — kolo 1 (19.08.2026), nálezy opraveny
 
