@@ -271,7 +271,10 @@ def main():
             print("CHYBA: %s" % e)
         sys.exit("\nODMITNUTO: %s nesedi na schema (%d chyb). Sprav data nebo schema\n"
                  "a spust znovu; kontrolu delá src/check_schema.py." % (datadir, len(chyby)))
-    ted = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    # jen datum, ne cas: pole znamena "kdy byl zaznam naposledy aktualizovan"
+    # a den je dost jemny. S presnosti na sekundy menila kazda regenerace
+    # razitko u vsech 46 aktivit a delala zbytecny diff.
+    ted = datetime.now(timezone.utc).strftime("%Y-%m-%dT00:00:00Z")
 
     data, popis = [], []
     for lst in schema["lists"]:

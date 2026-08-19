@@ -63,30 +63,52 @@ viz/              grafické výstupy (HTML mapy, obrázky)
 
 ## Příkazy
 
-Windows / PowerShell — před spuštěním nastav UTF-8 na stdout:
+Windows. Python **jen z venv** — `openpyxl` je nainstalovaný tam, ne v systémovém.
+Skripty se spouštějí **z kořene projektu**, cesty k `input/`, `runs/`, `viz/`
+jsou relativní. Cesty piš s lomítky dopředu, zpětná lomítka se v markdownu lámou.
 
 ```powershell
 $env:PYTHONIOENCODING = "utf-8"
+$py = ".venv/Scripts/python.exe"
 
-# 1) podklady -> normalizovaný model + report kvality dat
-python src
-ormalize.py                      # -> runs
-ormalize\ (*.csv, model.json, report.md)
+# --- datová vrstva ---
+& $py src/normalize.py        # podklady -> runs/normalize/ (*.csv, model.json, report.md)
+                              #   kódy bere z kody.json a nikdy je nepřečísluje
+& $py src/anonymize.py        # runs/normalize -> runs/anonym/ (data pro cizí tenant)
+& $py src/build_mapa.py       # model -> viz/mapa_prototyp.html
+& $py src/build_mapa.py --model runs/anonym/model.json --out viz/mapa_dev_anonym.html
 
-# 2) model -> interaktivní HTML mapa (šablona + zapečená data)
-python srcuild_mapa.py                     # -> viz\mapa_prototyp.html
+# --- SharePoint vrstva (vše se generuje ze src/schema.json) ---
+& $py src/check_schema.py     # validace schéma<->data + deploy/sharepoint_schema.md
+& $py src/make_setup.py       # -> src/setup_sharepoint.js  (založení listů a sloupců)
+& $py src/make_import.py      # -> src/import_data.js       (import dat, jen anonymizovaná)
 
-# 3) anonymizace pro vývoj v cizím tenantu (PPF)
-python srcnonymize.py                      # -> runsnonympython srcuild_mapa.py --model runsnonym\model.json --out viz\mapa_dev_anonym.html
+# --- testy (Node) ---
+node src/check_setup.js       # 32 kontrol provisioningu proti falešnému SharePointu
+node src/check_import.js      # 26 kontrol importu
 
-# pomocné: výpis obsahu podkladů
-python src\dump_docx.py "input\Metodika_pro_praci_s_procesy_verze1.0.docx"
-python src\dump_xlsx.py "input\VZOR_Evidenční karta _ S 3_varianta 17.7.2026.xlsx" 200
+# --- pomocné: výpis obsahu podkladů ---
+& $py src/dump_docx.py "input/Metodika_pro_praci_s_procesy_verze1.0.docx"
+& $py src/dump_xlsx.py "input/VZOR_Evidenční karta _ S 3_varianta 17.7.2026.xlsx" 200
 ```
 
+`setup_sharepoint.js` a `import_data.js` se **nespouštějí z konzole Windows** —
+vkládají se do konzole prohlížeče (F12) na stránce cílového SharePoint webu.
+Oba jsou idempotentní a web si odvodí z adresy stránky.
+
 Prohlédnutí HTML v prohlížeči: `file://` bývá blokované, spusť
-`python -m http.server 8765 --bind 127.0.0.1` a otevři
+`& $py -m http.server 8765 --bind 127.0.0.1` a otevři
 `http://127.0.0.1:8765/viz/mapa_prototyp.html`.
+
+## Klíčové soubory
+
+| Soubor | Role |
+|---|---|
+| `src/schema.json` | **jediný zdroj pravdy** o struktuře SharePoint listů; čte ho validátor i oba generátory |
+| `kody.json` | zmrazený rejstřík identifikačních kódů — jednou přidělený kód se nemění |
+| `PRD.md` / `PLAN.md` / `STATUS.md` | zadání / postup / stav; `STATUS.md` má nahoře „CO JE NA TOBĚ" a „CO DĚLÁM JÁ" |
+| `AUDIT.md` | nálezy nezávislého auditu a jejich vyřízení |
+| `deploy/` | výstupy k nasazení: schéma listů, návrh appky, návod na publikační flow |
 
 ## Datový model (implementovaný)
 

@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-19 13:53
+Aktualizováno: 2026-08-19 16:14 (konec dne)
 
 ## F1 UZAVŘENA (19.08.2026 13:53)
 
@@ -31,6 +31,23 @@ Dvě zjištění z reality, která mock neukázal:
    a **do falešného SharePointu v testech**, aby se past nemohla vrátit;
    ověřeno mutací.
 
+## KONEC DNE 19.08.2026 — kde se pokračuje
+
+**Blokující pro zítřek:** solution s canvas appkou **nedorazila**. V `input/`
+ani v Downloads/na ploše nic nového nebylo. Zítra ji zkopírovat do `input/`
+(zip z Power Apps → Solutions → Export, unmanaged).
+
+Co má obsahovat, aby stačilo jedno kolo:
+- publisher `mpsv`, prefix `mpsv_` (ne `ppf_`) — kvůli přenosu na tenant MPSV,
+- **připojených všech 5 SharePoint listů** z vývojové site (connection reference
+  se lokálně dogenerovat nedá, proto musí vzniknout ve Studiu),
+- stačí jedna obrazovka, klidně prázdná,
+- export **unmanaged**, ideálně už s finálním názvem appky (přejmenování
+  později mění GUID a znamená nový import místo upgradu).
+
+Napojení přes environment variables řeším já při přebalení — listy stačí
+připojit normálně.
+
 ## CO JE NA TOBĚ
 
 Zadavatelka není k dispozici (stav 19.08.2026), takže se pracuje podle best
@@ -44,16 +61,18 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
    (viz sekce „Identifikační kódy" níže).
 4. **Hotovo** — provisioning i import proběhly (viz sekce nahoře).
 5. **Hotovo** — druhý běh potvrdil idempotenci.
-6. **Pro F2 potřebuju vědět:** máš v PPF prostředí nějakou existující canvas
-   app, ze které se dá vyjít? `.msapp` nejde postavit od nuly (`pac` CLI není
-   k dispozici), takže appka musí vzniknout v Power Apps Studiu — buď ručně
-   podle návodu, který připravím, nebo úpravou zdrojáků existující appky.
+6. **Zítra: dodat solution zip s canvas appkou** do `input/` — podrobnosti
+   v sekci „KONEC DNE" nahoře.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**F1 hotová a nasazená.** Pokračuju na F2 — podklad pro stavbu canvas appky
-v Power Apps Studiu (`.msapp` nejde postavit od nuly, `pac` CLI není
-k dispozici, viz bod 6 výše).
+**F1 hotová a nasazená.** F2 čeká na solution zip (viz sekce „KONEC DNE").
+
+Dělba práce u canvas apps je zavedená a zapsaná ve skillu `power-Apps-skill`
+i v paměti projektu: uživatel založí appku ve Studiu a pošle solution,
+asistent doauthoruje obrazovky v `Controls/*.json` a vrátí přebalený zip
+k importu jako upgrade. `.msapp` nejde postavit od nuly — `pac` CLI není
+k dispozici.
 
 ## Audit F1 — kolo 2 (19.08.2026): 0 blokujících, F1 připravená
 
