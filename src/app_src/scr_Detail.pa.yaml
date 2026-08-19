@@ -60,13 +60,12 @@ Screens:
             X: =40
             Y: =96
       - cmb_Agenda:
-          Control: Combobox@2.4.0
+          Control: Classic/ComboBox@2.4.0
           Properties:
             DefaultSelectedItems: =Filter(colAgendy, Title = Left(varDpKod, 2))
             DisplayFields: =["nazev"]
             Font: =Font.'Open Sans'
             Height: =40
-            IsSearchable: =true
             Items: =colAgendy
             OnChange: |-
               =Reset(cmb_Proces);
@@ -89,13 +88,12 @@ Screens:
             X: =40
             Y: =172
       - cmb_Proces:
-          Control: Combobox@2.4.0
+          Control: Classic/ComboBox@2.4.0
           Properties:
             DefaultSelectedItems: =Filter(colProcesy, Title = Left(varDpKod, 5))
             DisplayFields: =["nazev"]
             Font: =Font.'Open Sans'
             Height: =40
-            IsSearchable: =true
             Items: =Filter(colProcesy, agenda_kod = cmb_Agenda.Selected.Title)
             OnChange: =Reset(cmb_Dilci)
             SearchFields: =["nazev"]
@@ -116,13 +114,12 @@ Screens:
             X: =40
             Y: =248
       - cmb_Dilci:
-          Control: Combobox@2.4.0
+          Control: Classic/ComboBox@2.4.0
           Properties:
             DefaultSelectedItems: =Filter(colDilci, Title = varDpKod)
             DisplayFields: =["nazev"]
             Font: =Font.'Open Sans'
             Height: =40
-            IsSearchable: =true
             Items: =Filter(colDilci, proces_kod = cmb_Proces.Selected.Title)
             SearchFields: =["nazev"]
             SelectMultiple: =false

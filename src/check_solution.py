@@ -133,9 +133,7 @@ def main():
 
         # každý použitý control musí mít definici šablony, jinak Studio appku
         # neotevře a ohlásí to jako chybu YAML (past z importu 1.0.0.2)
-        NAZEV_SABLONY = {"Label": "label", "Gallery": "gallery", "Rectangle": "rectangle",
-                         "Image": "image", "Icon": "icon", "Timer": "timer",
-                         "Button": "button", "TextInput": "text", "DropDown": "dropdown"}
+        typy = json.loads(Path("src/control_templates.json").read_text(encoding="utf-8"))["typy"]
         sablony_json = cti(msapp, "Templates.json")
         if sablony_json:
             znamé = {x["Name"] for x in json.loads(sablony_json)["UsedTemplates"]}
@@ -143,8 +141,8 @@ def main():
             for polozka in polozky:
                 if polozka.endswith(".pa.yaml"):
                     for control in re.findall(r"Control:\s*(\S+)", cti(msapp, Path(polozka).name) or ""):
-                        nazev = control.split("@")[0].split("/")[-1]
-                        pouzite.add(NAZEV_SABLONY.get(nazev, nazev.lower()))
+                        overit(control in typy, f"neznámý typ controlu '{control}'")
+                        pouzite.add(typy.get(control, control))
             overit(pouzite <= znamé,
                    f"chybí definice šablon pro controly: {sorted(pouzite - znamé)}")
 

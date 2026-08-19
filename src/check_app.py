@@ -17,13 +17,9 @@ APP_SRC = Path("src/app_src")
 SCHEMA = Path("src/schema.json")
 SABLONY = Path("src/control_templates.json")
 
-# Control: v pa.yaml -> název šablony v control_templates.json
-NAZEV_SABLONY = {
-    "Label": "label", "Gallery": "gallery", "Rectangle": "rectangle",
-    "Image": "image", "Icon": "icon", "Timer": "timer",
-    "Button": "button", "TextInput": "text", "DropDown": "dropdown",
-    "Combobox": "combobox",
-}
+def nacti_typy():
+    """Povolené hodnoty Control: -> název šablony. Ověřeno proti pa.yaml funkčních appek."""
+    return json.loads(SABLONY.read_text(encoding="utf-8"))["typy"]
 
 # Zobrazované názvy datových zdrojů tak, jak je appka vidí v connection reference.
 # Klíč = název ve vzorcích, hodnota = název listu v schema.json.
@@ -230,7 +226,7 @@ def nacti_povolene_vlastnosti():
     return povolene
 
 
-def kontrola_vlastnosti(soubory, povolene):
+def kontrola_vlastnosti(soubory, povolene, typy):
     """PA2108 — nastavovaná vlastnost musí u daného typu controlu existovat."""
     # vlastnosti, které nepatří controlu, ale zápisu v pa.yaml
     mimo = {"Control", "Variant", "Properties", "Children"}
@@ -244,8 +240,15 @@ def kontrola_vlastnosti(soubory, povolene):
                 continue
             for jmeno_obrazovky, telo in obsah.items():
                 for jmeno, definice, typ in prvky_se_typem(telo):
-                    sablona = NAZEV_SABLONY.get(typ.split("@")[0].split("/")[-1])
-                    if sablona is None or sablona not in povolene:
+                    sablona = typy.get(typ)
+                    if sablona is None:
+                        chyby.append(
+                            f"{jmeno}: neznámý typ controlu '{typ}'. Povolené tvary jsou "
+                            f"{sorted(typy)} — bez prefixu Classic/ mapuje Studio control "
+                            f"na modernější verzi a odmítne vlastnosti (PA2106/PA2108)"
+                        )
+                        continue
+                    if sablona not in povolene:
                         continue
                     znama = povolene[sablona] | vzdy
                     for vlastnost in (definice.get("Properties") or {}):
@@ -311,7 +314,7 @@ def main():
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
     kontrola_unikatnosti(soubory)
-    kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti())
+    kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti(), nacti_typy())
 
     print(f"souborů: {len(soubory)}   obrazovek: {len(obrazovky)}   prvků: {len(controly)}   vzorců: {len(vzorce)}")
     for obrazovka in sorted(obrazovky):

@@ -30,12 +30,7 @@ SABLONY = Path("src/control_templates.json")
 
 OBRAZOVKY = ["scr_Seznam", "scr_Detail", "scr_Vazby"]
 
-# Control: v pa.yaml -> název šablony v References/Templates.json
-NAZEV_SABLONY = {
-    "Label": "label", "Gallery": "gallery", "Rectangle": "rectangle",
-    "Image": "image", "Icon": "icon", "Timer": "timer",
-    "Button": "button", "TextInput": "text", "DropDown": "dropdown",
-}
+
 
 
 def najdi_pac(zadana):
@@ -93,7 +88,9 @@ def doplnit_sablony(cesta_msapp):
     nezná, a ohlásí to jako chybu YAML. Definice jsou nezávislé na tenantu
     (ověřeno shodou sdílených šablon), takže je stačí přiložit.
     """
-    zasoba = {s["Name"]: s for s in json.loads(Path(SABLONY).read_text(encoding="utf-8"))["sablony"]}
+    data = json.loads(Path(SABLONY).read_text(encoding="utf-8"))
+    zasoba = {s["Name"]: s for s in data["sablony"]}
+    typy = data["typy"]
 
     with zipfile.ZipFile(cesta_msapp) as balik:
         polozky = {n: balik.read(n) for n in balik.namelist()}
@@ -103,11 +100,12 @@ def doplnit_sablony(cesta_msapp):
     pritomne = {s["Name"] for s in templates["UsedTemplates"]}
 
     potreba = set()
-    for jmeno, data in polozky.items():
+    for jmeno, obsah in polozky.items():
         if jmeno.replace("\\", "/").endswith(".pa.yaml"):
-            for control in re.findall(r"Control:\s*(\S+)", data.decode("utf-8-sig")):
-                nazev = control.split("@")[0].split("/")[-1]
-                potreba.add(NAZEV_SABLONY.get(nazev, nazev.lower()))
+            for control in re.findall(r"Control:\s*(\S+)", obsah.decode("utf-8-sig")):
+                if control not in typy:
+                    raise SystemExit(f"CHYBA: neznámý typ controlu '{control}' — doplň ho do {SABLONY}")
+                potreba.add(typy[control])
 
     chybi = sorted(potreba - pritomne)
     nemam = [s for s in chybi if s not in zasoba]

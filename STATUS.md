@@ -2,40 +2,33 @@
 
 Aktualizováno: 2026-08-19 16:14 (konec dne)
 
-## F2 — appka opravena podle hlášek Studia, balík 1.0.0.4 (19.08.2026 večer)
+## F2 — controly srovnány podle vzorových appek, balík 1.0.0.5 (19.08.2026 večer)
 
-Import 1.0.0.3 Studio odmítlo se **sedmi konkrétními hláškami**. Obě příčiny byly
-v mých zdrojích a obě jsou opravené:
+Import 1.0.0.4 Studio odmítlo kvůli Comboboxu. **Příčina: špatný tvar identifikátoru.**
+Psal jsem `Combobox@2.4.0`; správně je **`Classic/ComboBox@2.4.0`** — s prefixem
+`Classic/` a velkým `B`. Bez prefixu Studio control namapuje na **moderní
+`ComboBox@0.0.51`** (varování PA2106 o novější verzi) a jeho vlastnosti
+`DisplayFields`, `SearchFields`, `Size` pak neexistují (PA2108).
+Vlastnosti samotné byly správně — chyboval jen název typu.
 
-1. **PA2110 — jména prvků musí být unikátní napříč celou appkou**, ne jen v rámci
-   obrazovky. Kolidovaly `rec_Hlavicka`, `lbl_Kod`, `txt_Utvar`, `txt_Sekce` mezi
-   `scr_Seznam` a `scr_Detail`. V detailu přejmenovány na `*Detail`.
-2. **PA2108 — `Classic/DropDown` nemá nastavitelnou vlastnost `Value`.** V definici
-   šablony je `Value` **vnořená uvnitř `<property name="Items">`** jako popis sloupce
-   dat, ne vlastní vlastnost controlu. Kaskáda agenda→proces→dílčí proces proto
-   přešla na **`Combobox@2.4.0`** s `DisplayFields` / `SearchFields` /
-   `DefaultSelectedItems` — ten navíc vrací celý záznam, takže `.Selected.Title`
-   funguje tak, jak `deploy/app_navrh.md` od začátku předpokládal.
-   `drp_Stav` zůstává DropDown: jeho `Items` je literál `["(vše)", …]`, kde je
-   `Selected.Value` čtení výstupu, což je v pořádku.
+**Poučení: zdrojem pravdy pro pa.yaml jsou pa.yaml funkčních appek, ne XML definice
+šablon.** Ve vzorech ze skillu (`MiddleOfficeParametrizace`, `VendorManagement`) je
+70 souborů `pa.yaml`; z nich je ověřený přesný tvar každého identifikátoru.
+Užitečný nález navíc: u `Classic/DropDown` se zobrazovaný sloupec nastavuje tečkovou
+notací **`Items.Value: =Value`**, ne vlastností `Value` — proto ji Studio hlásilo
+jako neznámou.
 
-**Validátor umí obojí offline** — `src/check_app.py` má dvě nové kontroly:
-- unikátnost jmen napříč všemi obrazovkami (PA2110),
-- každá nastavovaná vlastnost musí být v definici šablony (PA2108). Povolené
-  vlastnosti se čtou z `src/control_templates.json`: **přímí potomci `<properties>`
-  bez `direction="out"`** plus zděděné `<appMagic:includeProperty>`. Vnořené
-  `<property>` se ignorují — právě ta past s `dropdown.Value`.
+**Nová kontrola (mutačně ověřena 2/2):** `Control:` musí být přesně jeden z tvarů
+zapsaných v `src/control_templates.json` → `typy`. Chytí chybějící `Classic/`
+i neexistující verzi. Mapování typ→šablona je teď na **jednom místě** — čtou ho
+`check_app.py`, `build_app.py` i `check_solution.py` (dřív tři vlastní kopie, které
+se mohly rozejít).
 
-**Mutačně ověřeno (3 z 3):** duplicitní jméno, `Value` u Comboboxu i překlep
-vlastnosti kontrola zachytí, po obnovení je zase zeleno.
+**K importu: `deploy/procesnimapa_1_0_0_5.zip`** — `check_app.py` čistý,
+`check_solution.py` 89 kontrol / 0 chyb. Starší vadné balíky z `deploy/` smazány.
 
-`src/control_templates.json` teď drží **9 šablon** (přibyl `combobox@2.4.0`) a slouží
-dvěma účelům: build z něj doplňuje chybějící definice do `.msapp`, validátor z něj
-čte povolené vlastnosti.
-
-**K importu: `deploy/procesnimapa_1_0_0_4.zip`** (25 kontrol, 0 chyb).
-Vadné balíky 1.0.0.2 a 1.0.0.3 smazány z `deploy/`, 1.0.0.2 zůstává jako regresní
-vzorek v `runs/vadny_balik/`.
+**Co offline validace stále neumí:** gramatiku Power Fx uvnitř vzorců. Pokud Studio
+ohlásí další chybu, čekat ji tam.
 
 **Next step:** import → otevřít ve Studiu → 6 testů z `deploy/app_navrh.md`.
 
