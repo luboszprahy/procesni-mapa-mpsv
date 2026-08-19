@@ -8,3 +8,4 @@ __pycache__/
 # Lokální / dočasné
 *.log
 .venv/
+runs/app_build/
