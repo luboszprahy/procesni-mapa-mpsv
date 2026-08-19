@@ -2,36 +2,42 @@
 
 Aktualizováno: 2026-08-19 16:14 (konec dne)
 
-## F2 — appka přebalena znovu, past se šablonami vyřešena (19.08.2026 večer)
+## F2 — appka opravena podle hlášek Studia, balík 1.0.0.4 (19.08.2026 večer)
 
-Import 1.0.0.2 Studio odmítlo („something wrong with yaml code"). **Příčina:**
-`References/Templates.json` nesl jen 5 šablon, které používala prázdná appka
-(`label`, `gallery`, `rectangle`, `image`, `icon`). Moje obrazovky potřebují navíc
-`Classic/Button`, `Classic/TextInput` a `Classic/DropDown` — Studio narazí na control
-bez definice šablony a ohlásí to jako vadný YAML.
+Import 1.0.0.3 Studio odmítlo se **sedmi konkrétními hláškami**. Obě příčiny byly
+v mých zdrojích a obě jsou opravené:
 
-Druhý export ze Studia (`input/procesnimapa_1_0_0_2 (2).zip`) byl obsahově
-**totožný** s prvním — controly do appky přidány nebyly.
+1. **PA2110 — jména prvků musí být unikátní napříč celou appkou**, ne jen v rámci
+   obrazovky. Kolidovaly `rec_Hlavicka`, `lbl_Kod`, `txt_Utvar`, `txt_Sekce` mezi
+   `scr_Seznam` a `scr_Detail`. V detailu přejmenovány na `*Detail`.
+2. **PA2108 — `Classic/DropDown` nemá nastavitelnou vlastnost `Value`.** V definici
+   šablony je `Value` **vnořená uvnitř `<property name="Items">`** jako popis sloupce
+   dat, ne vlastní vlastnost controlu. Kaskáda agenda→proces→dílčí proces proto
+   přešla na **`Combobox@2.4.0`** s `DisplayFields` / `SearchFields` /
+   `DefaultSelectedItems` — ten navíc vrací celý záznam, takže `.Selected.Title`
+   funguje tak, jak `deploy/app_navrh.md` od začátku předpokládal.
+   `drp_Stav` zůstává DropDown: jeho `Items` je literál `["(vše)", …]`, kde je
+   `Selected.Value` čtení výstupu, což je v pořádku.
 
-**Vyřešeno bez dalšího zásahu ve Studiu.** Definice šablon nejsou vázané na tenant:
-sdílené šablony (`label`, `gallery`, `rectangle`, `icon`) jsou byte-identické mezi
-naší appkou a vzorem `MiddleOfficeParametrizace` ze skillu `power-Apps-skill`.
-Odtud jsou vytažené i tři chybějící — ve verzích, které přesně odpovídají mým
-zdrojům (`button@2.2.0`, `dropdown@2.3.1`, `text@2.3.2`).
+**Validátor umí obojí offline** — `src/check_app.py` má dvě nové kontroly:
+- unikátnost jmen napříč všemi obrazovkami (PA2110),
+- každá nastavovaná vlastnost musí být v definici šablony (PA2108). Povolené
+  vlastnosti se čtou z `src/control_templates.json`: **přímí potomci `<properties>`
+  bez `direction="out"`** plus zděděné `<appMagic:includeProperty>`. Vnořené
+  `<property>` se ignorují — právě ta past s `dropdown.Value`.
 
-- `src/control_templates.json` — zásoba definic (53 kB).
-- `src/build_app.py` — nový krok `doplnit_sablony()`: po packu porovná controly
-  použité v pa.yaml proti `UsedTemplates` a chybějící doplní; když definici nemá,
-  **skončí chybou** místo aby vyrobil balík, který Studio odmítne.
-- `src/check_solution.py` — 25. kontrola: každý použitý control musí mít šablonu.
-  **Regresně ověřeno na vadném balíku** 1.0.0.2 (odložen do `runs/vadny_balik/`) —
-  kontrola ho zamítne přesně s tímto nálezem.
+**Mutačně ověřeno (3 z 3):** duplicitní jméno, `Value` u Comboboxu i překlep
+vlastnosti kontrola zachytí, po obnovení je zase zeleno.
 
-**K importu: `deploy/procesnimapa_1_0_0_3.zip`** (25 kontrol, 0 chyb).
-Postavena z druhého exportu, verze 1.0.0.3, import jako upgrade.
+`src/control_templates.json` teď drží **9 šablon** (přibyl `combobox@2.4.0`) a slouží
+dvěma účelům: build z něj doplňuje chybějící definice do `.msapp`, validátor z něj
+čte povolené vlastnosti.
 
-**Next step:** import → otevřít appku ve Studiu → 6 testů z `deploy/app_navrh.md`
-(bod 3, delegace nad >2 000 aktivitami, se nesmí odkládat).
+**K importu: `deploy/procesnimapa_1_0_0_4.zip`** (25 kontrol, 0 chyb).
+Vadné balíky 1.0.0.2 a 1.0.0.3 smazány z `deploy/`, 1.0.0.2 zůstává jako regresní
+vzorek v `runs/vadny_balik/`.
+
+**Next step:** import → otevřít ve Studiu → 6 testů z `deploy/app_navrh.md`.
 
 ## F2 ROZPRACOVANÁ — appka doauthorovaná (19.08.2026 večer)
 

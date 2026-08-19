@@ -8,12 +8,22 @@ import io
 import json
 import re
 import sys
+from xml.etree import ElementTree
 from pathlib import Path
 
 import yaml
 
 APP_SRC = Path("src/app_src")
 SCHEMA = Path("src/schema.json")
+SABLONY = Path("src/control_templates.json")
+
+# Control: v pa.yaml -> název šablony v control_templates.json
+NAZEV_SABLONY = {
+    "Label": "label", "Gallery": "gallery", "Rectangle": "rectangle",
+    "Image": "image", "Icon": "icon", "Timer": "timer",
+    "Button": "button", "TextInput": "text", "DropDown": "dropdown",
+    "Combobox": "combobox",
+}
 
 # Zobrazované názvy datových zdrojů tak, jak je appka vidí v connection reference.
 # Klíč = název ve vzorcích, hodnota = název listu v schema.json.
@@ -165,7 +175,7 @@ def kontrola_odkazu(vzorce, controly):
                          "NotificationType", "DisplayMode", "RGBA", "PowerAppsTheme",
                          "FirstError", "Defaults", "Blank"}
     for cesta, prop, text in vzorce:
-        for odkaz in re.findall(r"\b(gal_[A-Za-z0-9_]+|txt_[A-Za-z0-9_]+|drp_[A-Za-z0-9_]+|btn_[A-Za-z0-9_]+|lbl_[A-Za-z0-9_]+|ico_[A-Za-z0-9_]+|rec_[A-Za-z0-9_]+|sep_[A-Za-z0-9_]+|scr_[A-Za-z0-9_]+)\b", text):
+        for odkaz in re.findall(r"\b(gal_[A-Za-z0-9_]+|cmb_[A-Za-z0-9_]+|txt_[A-Za-z0-9_]+|drp_[A-Za-z0-9_]+|btn_[A-Za-z0-9_]+|lbl_[A-Za-z0-9_]+|ico_[A-Za-z0-9_]+|rec_[A-Za-z0-9_]+|sep_[A-Za-z0-9_]+|scr_[A-Za-z0-9_]+)\b", text):
             if odkaz in povolene_predpony:
                 continue
             if odkaz not in controly:
@@ -191,6 +201,95 @@ def kontrola_delegace(vzorce):
             varovani.append(f"{cesta}.Items: Sort v Items se přepočítá při každém překreslení")
 
 
+def nacti_povolene_vlastnosti():
+    """Pro každou šablonu controlu vrátí množinu vlastností, které lze nastavit.
+
+    Nastavitelné jsou vlastní vlastnosti s direction="in" a zděděné includeProperty.
+    Vlastnosti s direction="out" (a ty bez direction, např. dropdown.Value) Studio
+    odmítne hláškou PA2108.
+    """
+    data = json.loads(SABLONY.read_text(encoding="utf-8"))
+    povolene = {}
+    for sablona in data["sablony"]:
+        koren = ElementTree.fromstring(sablona["Template"])
+        jmena = set(re.findall(r'<appMagic:includeProperty[^>]*name="([^"]+)"', sablona["Template"]))
+
+        # Jen přímí potomci <properties> jsou vlastnosti controlu. Vnořené
+        # <property> popisují sloupce dat (dropdown.Value uvnitř Items) a Studio
+        # je jako vlastnost neuznává — právě na tom spadl import 1.0.0.3.
+        for skupina in koren:
+            if not skupina.tag.endswith("properties"):
+                continue
+            for vlastnost in skupina:
+                if not vlastnost.tag.endswith("property"):
+                    continue
+                jmeno = vlastnost.get("name")
+                if jmeno and vlastnost.get("direction") != "out":
+                    jmena.add(jmeno)
+        povolene[sablona["Name"]] = jmena
+    return povolene
+
+
+def kontrola_vlastnosti(soubory, povolene):
+    """PA2108 — nastavovaná vlastnost musí u daného typu controlu existovat."""
+    # vlastnosti, které nepatří controlu, ale zápisu v pa.yaml
+    mimo = {"Control", "Variant", "Properties", "Children"}
+    vzdy = {"Text", "Fill", "Color", "X", "Y", "Width", "Height", "Visible",
+            "OnSelect", "Items", "Default", "Reset", "Tooltip", "DisplayMode"}
+
+    for cesta in soubory:
+        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        for koren, obsah in (dokument or {}).items():
+            if koren != "Screens":
+                continue
+            for jmeno_obrazovky, telo in obsah.items():
+                for jmeno, definice, typ in prvky_se_typem(telo):
+                    sablona = NAZEV_SABLONY.get(typ.split("@")[0].split("/")[-1])
+                    if sablona is None or sablona not in povolene:
+                        continue
+                    znama = povolene[sablona] | vzdy
+                    for vlastnost in (definice.get("Properties") or {}):
+                        if vlastnost in mimo:
+                            continue
+                        if vlastnost not in znama:
+                            chyby.append(
+                                f"{jmeno}.{vlastnost}: vlastnost '{vlastnost}' typ "
+                                f"'{typ}' nemá (Studio hlásí PA2108)"
+                            )
+
+
+def prvky_se_typem(uzel):
+    """Projde strom obrazovky a vrátí (jméno, definice, typ controlu)."""
+    for polozka in (uzel.get("Children") or []):
+        for jmeno, definice in polozka.items():
+            typ = definice.get("Control")
+            if typ:
+                yield jmeno, definice, typ
+            yield from prvky_se_typem(definice)
+
+
+def kontrola_unikatnosti(soubory):
+    """PA2110 — jména prvků musí být unikátní napříč celou appkou, ne jen obrazovkou."""
+    kde = {}
+    for cesta in soubory:
+        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        for koren, obsah in (dokument or {}).items():
+            if koren != "Screens":
+                continue
+            for jmeno_obrazovky, telo in obsah.items():
+                if jmeno_obrazovky in kde:
+                    chyby.append(f"obrazovka '{jmeno_obrazovky}' je definovaná dvakrát")
+                kde[jmeno_obrazovky] = cesta.name
+                for jmeno, _definice, _typ in prvky_se_typem(telo):
+                    if jmeno in kde:
+                        chyby.append(
+                            f"prvek '{jmeno}' už existuje v {kde[jmeno]} "
+                            f"(znovu v {cesta.name}) — Studio hlásí PA2110"
+                        )
+                    else:
+                        kde[jmeno] = cesta.name
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -211,6 +310,8 @@ def main():
     kontrola_odkazu(vzorce, controly)
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
+    kontrola_unikatnosti(soubory)
+    kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti())
 
     print(f"souborů: {len(soubory)}   obrazovek: {len(obrazovky)}   prvků: {len(controly)}   vzorců: {len(vzorce)}")
     for obrazovka in sorted(obrazovky):
