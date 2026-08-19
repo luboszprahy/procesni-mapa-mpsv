@@ -2,6 +2,30 @@
 
 Aktualizováno: 2026-08-19 16:14 (konec dne)
 
+## !! F2 BLOKOVANÁ — import 1.0.0.2 se ve Studiu neotevře (19.08.2026)
+
+Studio hlásí chybu YAML kódu. **Příčina zjištěna:** `.msapp` nese v
+`References/Templates.json` jen 5 šablon controlů, které původní prázdná appka
+používala — `label 2.5.1`, `gallery 2.15.0`, `rectangle 2.3.0`, `image 2.2.3`,
+`icon 2.5.0`.
+
+Moje obrazovky používají navíc **`Classic/TextInput@2.3.2`, `Classic/DropDown@2.3.1`
+a `Classic/Button@2.2.0`** (verze převzaté ze skillu `power-Apps-skill`, tedy z jiné
+appky). Jejich definice v balíku chybí a `pac canvas pack` je nedoplňuje — Studio
+pak narazí na neznámou šablonu a ohlásí to jako vadný YAML.
+
+**Oprava (nejlevnější cesta):** v Power Apps Studiu vložit do appky ručně jeden
+Button, jeden Text input a jeden Drop down (stačí kamkoli, klidně hned smazat až po
+exportu ne — musí v appce zůstat), appku uložit a **znovu exportovat solution**.
+Tím se do `Templates.json` dostanou i tyto tři šablony ve verzích, které prostředí
+zná. Pak znovu `python src/build_app.py` a `python src/check_solution.py`.
+
+**Do `src/check_solution.py` doplnit kontrolu:** každý `Control:` použitý ve
+zdrojích musí být v `References/Templates.json`. Tahle past by se jinak vrátila.
+
+Zdroje v `src/app_src/` jsou jinak v pořádku — validace i mutační test prošly,
+chyba je výhradně v chybějících definicích šablon.
+
 ## F2 ROZPRACOVANÁ — appka doauthorovaná (19.08.2026 večer)
 
 Solution zip dorazil (`input/procesnimapa_1_0_0_1.zip`, přišel přes git pull).
