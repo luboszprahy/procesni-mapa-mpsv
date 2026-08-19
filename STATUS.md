@@ -2,35 +2,35 @@
 
 Aktualizováno: 2026-08-19 16:14 (konec dne)
 
-## F2 — controly srovnány podle vzorových appek, balík 1.0.0.5 (19.08.2026 večer)
+## F2 — APPKA SE OTEVŘELA (19.08.2026 večer)
 
-Import 1.0.0.4 Studio odmítlo kvůli Comboboxu. **Příčina: špatný tvar identifikátoru.**
-Psal jsem `Combobox@2.4.0`; správně je **`Classic/ComboBox@2.4.0`** — s prefixem
-`Classic/` a velkým `B`. Bez prefixu Studio control namapuje na **moderní
-`ComboBox@0.0.51`** (varování PA2106 o novější verzi) a jeho vlastnosti
-`DisplayFields`, `SearchFields`, `Size` pak neexistují (PA2108).
-Vlastnosti samotné byly správně — chyboval jen název typu.
+`deploy/procesnimapa_1_0_0_5.zip` naimportován a **appka se ve Studiu otevřela.**
+Tři obrazovky (`scr_Seznam`, `scr_Detail`, `scr_Vazby`) postavené z `pa.yaml`,
+89 kontrol balíku bez chyby.
 
-**Poučení: zdrojem pravdy pro pa.yaml jsou pa.yaml funkčních appek, ne XML definice
-šablon.** Ve vzorech ze skillu (`MiddleOfficeParametrizace`, `VendorManagement`) je
-70 souborů `pa.yaml`; z nich je ověřený přesný tvar každého identifikátoru.
-Užitečný nález navíc: u `Classic/DropDown` se zobrazovaný sloupec nastavuje tečkovou
-notací **`Items.Value: =Value`**, ne vlastností `Value` — proto ji Studio hlásilo
-jako neznámou.
+Cesta k tomu vedla přes tři kola importu; všechny tři příčiny jsou teď pokryté
+offline kontrolou v `src/check_app.py` a zapsané do skillu `power-Apps-skill`
+(nová sekce „Doauthorování canvas appky z pa.yaml"):
 
-**Nová kontrola (mutačně ověřena 2/2):** `Control:` musí být přesně jeden z tvarů
-zapsaných v `src/control_templates.json` → `typy`. Chytí chybějící `Classic/`
-i neexistující verzi. Mapování typ→šablona je teď na **jednom místě** — čtou ho
-`check_app.py`, `build_app.py` i `check_solution.py` (dřív tři vlastní kopie, které
-se mohly rozejít).
+1. **Chybějící definice šablon** v `References/Templates.json` — prázdná appka nese
+   jen 5 šablon, které sama používá. Doplňuje `build_app.py` z `src/control_templates.json`.
+2. **PA2110** — jména prvků musí být unikátní napříč celou appkou.
+3. **PA2108/PA2106** — přesný tvar `Control:` rozhoduje: `Classic/ComboBox@2.4.0`,
+   ne `Combobox@2.4.0`. Bez prefixu Studio mapuje na moderní control jiné verze.
 
-**K importu: `deploy/procesnimapa_1_0_0_5.zip`** — `check_app.py` čistý,
-`check_solution.py` 89 kontrol / 0 chyb. Starší vadné balíky z `deploy/` smazány.
+Nástroje, které z toho zůstaly (všechny kontroly **mutačně ověřené**):
+`src/check_app.py` (typy, vlastnosti, unikátnost, sloupce, delegace),
+`src/build_app.py` (unpack → výměna zdrojů → pack → doplnění šablon → solution),
+`src/check_solution.py` (89 kontrol balíku před importem),
+`src/control_templates.json` (9 šablon + povolené tvary `Control:`).
 
-**Co offline validace stále neumí:** gramatiku Power Fx uvnitř vzorců. Pokud Studio
-ohlásí další chybu, čekat ji tam.
+**Zbývá k uzavření F2:** projít 6 testů ze sekce „Jak se to ověří"
+v `deploy/app_navrh.md` — kaskáda, přidělení kódu, **delegace nad >2 000 aktivitami**,
+M:N vazba, kolize kódu, referenční integrita. Test delegace se nesmí odkládat.
 
-**Next step:** import → otevřít ve Studiu → 6 testů z `deploy/app_navrh.md`.
+**Neuzavřené proti návrhu:** `deploy/app_navrh.md` ještě nezná tři odchylky
+(filtr útvaru/sekce textem místo `Distinct`, `primarni` jako Choice `ano`/`ne`,
+zakládání primární vazby při uložení) ani přechod na `Classic/ComboBox`.
 
 ## F2 ROZPRACOVANÁ — appka doauthorovaná (19.08.2026 večer)
 
