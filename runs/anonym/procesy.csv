@@ -1,5 +1,5 @@
 ﻿kod;nazev;agenda_kod;vlastnik;pocet_aktivit;stav_mapovani;zdroj
-01-01;Strategie a koncepce XÚ;01;72;6;zmapováno;rejstrik
+01-01;Strategie a koncepce XÚ;01;"72; 71";6;zmapováno;rejstrik
 01-02;Operativní řízení útvarů XÚ a resortních organizací;01;71;1;zmapováno;rejstrik
 01-03;Správa rozpočtové kapitoly;01;;0;nezmapováno;rejstrik
 01-04;Programové financování XÚ a resortu;01;;0;nezmapováno;rejstrik
@@ -40,7 +40,7 @@
 07-05;Finance;07;;0;nezmapováno;rejstrik
 07-06;Statistika;07;;0;nezmapováno;rejstrik
 07-07;Správa majetku;07;;0;nezmapováno;rejstrik
-07-08;Řízení lidských zdrojů;07;72;22;zmapováno;rejstrik
+07-08;Řízení lidských zdrojů;07;"72; 71";22;zmapováno;rejstrik
 07-09;Odborná podpora;07;;0;nezmapováno;rejstrik
 07-10;Administrativní podpora;07;;0;nezmapováno;rejstrik
 07-11;Náhrada škody;07;71;3;zmapováno;rejstrik

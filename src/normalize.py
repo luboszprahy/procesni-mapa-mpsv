@@ -32,6 +32,14 @@ def clean(v):
     return "" if s.lower() in {"x", "-", "n/a"} else s
 
 
+def clean_multi(v):
+    """Jako clean(), ale radky bunky zustanou oddelene strednikem."""
+    if v is None:
+        return ""
+    parts = [clean(p) for p in str(v).replace("\r\n", "\n").split("\n")]
+    return "; ".join(p for p in parts if p)
+
+
 def key(s):
     """Porovnavaci klic: bez diakritiky, bez interpunkce, lowercase."""
     s = unicodedata.normalize("NFD", clean(s).lower())
@@ -49,18 +57,52 @@ def theme(cell):
             fg.rgb if fg.type == "rgb" else None)
 
 
-def top(counter):
-    return counter.most_common(1)[0][0] if counter else ""
+def owners(counter):
+    """Vsichni vlastnici, nejcastejsi prvni; vice vlastniku je pripustny stav."""
+    return "; ".join(v for v, _ in counter.most_common() if v)
 
 
 class Registry:
-    """Ciselniky s prirazovanim kodu a evidenci variant zapisu."""
+    """Ciselniky s prirazovanim kodu a evidenci variant zapisu.
 
-    def __init__(self):
+    Kody se prideluji jednou a dal se nemeni: uz prideleny kod se cte ze
+    zmrazeneho rejstriku (kody.json), nove polozky dostavaji prvni volne cislo
+    v ramci sve urovne. Bez toho by vlozeni polozky doprostred precislovalo
+    vse pod ni a rozbilo vazby, ktere na kodu stoji.
+    """
+
+    def __init__(self, frozen=None):
         self.agendy = {}       # key -> dict
         self.procesy = {}      # (agenda_key, proces_key) -> dict
         self.dilci = {}        # (agenda_key, proces_key, dp_key) -> dict
         self.variants = defaultdict(Counter)   # key -> Counter(raw)
+        f = frozen or {}
+        self.frozen = {"agendy": dict(f.get("agendy", {})),
+                       "procesy": dict(f.get("procesy", {})),
+                       "dilci": dict(f.get("dilci", {})),
+                       "aktivity": dict(f.get("aktivity", {}))}
+        self.kody_aktivit = {}   # aktivita_key -> kod
+
+    @staticmethod
+    def _fk(kk):
+        return kk if isinstance(kk, str) else "||".join(kk)
+
+    def _kod(self, uroven, kk, sirka, pouzite, prefix=""):
+        """Vrat zmrazeny kod, jinak prvni volne cislo na teto urovni."""
+        drive = self.frozen[uroven].get(self._fk(kk))
+        if drive:
+            return drive
+        obsazena = {int(k.rsplit("-", 1)[-1]) for k in pouzite if k}
+        n = next(i for i in range(1, 10 ** sirka) if i not in obsazena)
+        return prefix + ("%0*d" % (sirka, n))
+
+    def export_kody(self):
+        return {
+            "agendy": {self._fk(k): v["kod"] for k, v in self.agendy.items()},
+            "procesy": {self._fk(k): v["kod"] for k, v in self.procesy.items()},
+            "dilci": {self._fk(k): v["kod"] for k, v in self.dilci.items()},
+            "aktivity": dict(self.kody_aktivit),
+        }
 
     def _var(self, k, raw):
         if raw:
@@ -74,7 +116,9 @@ class Registry:
         a = self.agendy.get(k)
         if a is None:
             a = self.agendy[k] = {
-                "key": k, "nazev": clean(raw), "kod": "%02d" % (len(self.agendy) + 1),
+                "key": k, "nazev": clean(raw),
+                "kod": self._kod("agendy", k, 2,
+                                 [a["kod"] for a in self.agendy.values()]),
                 "vlastnici": Counter(), "zdroj": zdroj, "procesy": [],
             }
         if vlastnik:
@@ -91,7 +135,9 @@ class Registry:
         if p is None:
             p = self.procesy[kk] = {
                 "key": k, "nazev": clean(raw), "agenda": agenda["key"],
-                "kod": "%s-%02d" % (agenda["kod"], len(agenda["procesy"]) + 1),
+                "kod": self._kod("procesy", kk, 2,
+                                 [self.procesy[x]["kod"] for x in agenda["procesy"]],
+                                 agenda["kod"] + "-"),
                 "vlastnici": Counter(), "zdroj": zdroj, "dilci": [],
             }
             agenda["procesy"].append(kk)
@@ -109,7 +155,9 @@ class Registry:
         if d is None:
             d = self.dilci[kk] = {
                 "key": k, "nazev": clean(raw), "agenda": proces["agenda"], "proces": proces["key"],
-                "kod": "%s-%03d" % (proces["kod"], len(proces["dilci"]) + 1),
+                "kod": self._kod("dilci", kk, 3,
+                                 [self.dilci[x]["kod"] for x in proces["dilci"]],
+                                 proces["kod"] + "-"),
                 "vlastnici": Counter(), "zdroj": zdroj, "stav": stav, "aktivity": [],
             }
             proces["dilci"].append(kk)
@@ -174,10 +222,10 @@ def parse_karta(path, reg, issues):
 
     aktivity, vazby, by_key, seen = [], [], {}, set()
 
-    def cell(r, c):
+    def cell(r, c, multi=False):
         """Ocisti bunku a zaznamenej, kdyz se puvodni zapis od ocisteneho lisi."""
         v = ws.cell(r, c).value
-        s = clean(v)
+        s = clean_multi(v) if multi else clean(v)
         if isinstance(v, str) and s and s != v:
             issues.append(("očištěné buňky", "řádek %d, sloupec %s: %r -> %r"
                            % (r, openpyxl.utils.get_column_letter(c), v, s)))
@@ -188,7 +236,7 @@ def parse_karta(path, reg, issues):
         p_naz, p_vl = cell(r, 5), cell(r, 6)
         d_naz, d_vl = cell(r, 8), cell(r, 9)
         k_naz, k_vyk = cell(r, 11), cell(r, 12)
-        spolu, predpis = cell(r, 14), cell(r, 15)
+        spolu, predpis = cell(r, 14), cell(r, 15, multi=True)
         if not any((a_naz, p_naz, d_naz, k_naz)):
             continue
         for label, val in (("agendu", a_naz), ("proces", p_naz),
@@ -222,7 +270,11 @@ def parse_karta(path, reg, issues):
             seen.add((kk, dp["kod"]))
             dp["aktivity"].append(kk)
             if not akt["kod"]:
-                akt["kod"] = "%s-%04d" % (dp["kod"], len(dp["aktivity"]))
+                akt["kod"] = reg._kod("aktivity", kk, 4,
+                                      [by_key[x]["kod"] for x in dp["aktivity"]
+                                       if by_key[x]["kod"].startswith(dp["kod"] + "-")],
+                                      dp["kod"] + "-")
+                reg.kody_aktivit[kk] = akt["kod"]
             vazby.append({"aktivita": kk, "dilci_proces": dp["kod"],
                           "primarni": akt["primarni_dp"] == dp["kod"]})
     return {"sekce": sekce, "spravce": spravce, "aktivity": aktivity, "vazby": vazby}
@@ -252,6 +304,8 @@ def main():
     ap.add_argument("--input", default="input")
     ap.add_argument("--out", default="runs/normalize")
     ap.add_argument("--prah", type=float, default=0.85, help="práh podobnosti pro duplicity")
+    ap.add_argument("--kody", default="kody.json",
+                    help="zmrazený rejstřík identifikačních kódů (přidělený kód se už nemění)")
     args = ap.parse_args()
 
     inp, out = Path(args.input), Path(args.out)
@@ -261,14 +315,17 @@ def main():
     if rej is None or kar is None:
         sys.exit("nenalezeny podklady v %s (rejstřík=%s, karta=%s)" % (inp, rej, kar))
 
-    reg, issues = Registry(), []
+    kody_path = Path(args.kody)
+    frozen = (json.loads(kody_path.read_text(encoding="utf-8"))
+              if kody_path.exists() else {})
+    reg, issues = Registry(frozen), []
     n_p, n_d = parse_rejstrik(rej, reg, issues)
     karta = parse_karta(kar, reg, issues)
 
     for grp, kind in ((reg.agendy, "agenda"), (reg.procesy, "proces"), (reg.dilci, "dílčí proces")):
         for it in grp.values():
             if len(it["vlastnici"]) > 1:
-                issues.append(("vlastnictví", "%s %r (%s) má více vlastníků: %s"
+                issues.append(("více vlastníků (přípustný stav)", "%s %r (%s): %s"
                                % (kind, it["nazev"][:60], it["kod"],
                                   ", ".join(sorted(it["vlastnici"])))))
     for k, c in reg.variants.items():
@@ -289,19 +346,19 @@ def main():
             return "zmapováno jiným útvarem"
         return "nezmapováno"
 
-    agendy = [{"kod": a["kod"], "nazev": a["nazev"], "vlastnik": top(a["vlastnici"]),
+    agendy = [{"kod": a["kod"], "nazev": a["nazev"], "vlastnik": owners(a["vlastnici"]),
                "pocet_aktivit": akt_agenda[a["key"]],
                "stav_mapovani": stav_mapovani(akt_agenda[a["key"]]),
                "zdroj": a["zdroj"]} for a in reg.agendy.values()]
     procesy = [{"kod": p["kod"], "nazev": p["nazev"], "agenda_kod": reg.agendy[p["agenda"]]["kod"],
-                "vlastnik": top(p["vlastnici"]),
+                "vlastnik": owners(p["vlastnici"]),
                 "pocet_aktivit": akt_proces[(p["agenda"], p["key"])],
                 "stav_mapovani": stav_mapovani(akt_proces[(p["agenda"], p["key"])]),
                 "zdroj": p["zdroj"]}
                for p in reg.procesy.values()]
     dilci = [{"kod": d["kod"], "nazev": d["nazev"],
               "proces_kod": reg.procesy[(d["agenda"], d["proces"])]["kod"],
-              "vlastnik": top(d["vlastnici"]), "stav_rejstrik": d["stav"],
+              "vlastnik": owners(d["vlastnici"]), "stav_rejstrik": d["stav"],
               "pocet_aktivit": len(d["aktivity"]),
               "stav_mapovani": stav_mapovani(len(d["aktivity"]), d["stav"]),
               "zdroj": d["zdroj"]}
@@ -333,6 +390,8 @@ def main():
              "aktivity": aktivity, "vazby": vazby}
     (out / "model.json").write_text(json.dumps(model, ensure_ascii=False, indent=1),
                                     encoding="utf-8")
+    kody_path.write_text(json.dumps(reg.export_kody(), ensure_ascii=False,
+                                    indent=1, sort_keys=True), encoding="utf-8")
 
     dups = near_duplicates(karta["aktivity"], args.prah)
     by_kind = defaultdict(list)
