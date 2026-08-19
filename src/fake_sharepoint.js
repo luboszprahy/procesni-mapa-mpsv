@@ -19,8 +19,17 @@ function falesnySharePoint(predpripraveneListy) {
       url: "/sites/X/procesnimapa/Lists/" + nazev,
       typ: "SP.Data." + nazev + "ListItem",
       popis: popis || "",
-      fields: new Map([["Title", { InternalName: "Title", TypeAsString: "Text",
-                                   Hidden: false, Indexed: false, Title: "Title" }]]),
+      // SharePoint zaklada tyhle dva sloupce sam pri vytvoreni listu
+      // (overeno 19.08.2026 v PPF) - mock je ma taky, aby test chytil,
+      // kdyby vypadly z vyjimek a zacaly se hlasit jako "navic".
+      fields: new Map([
+        ["Title", { InternalName: "Title", TypeAsString: "Text",
+                    Hidden: false, Indexed: false, Title: "Title" }],
+        ["_ColorTag", { InternalName: "_ColorTag", TypeAsString: "Text",
+                        Hidden: false, Indexed: false, Title: "Color Tag" }],
+        ["ComplianceAssetId", { InternalName: "ComplianceAssetId", TypeAsString: "Text",
+                                Hidden: false, Indexed: false, Title: "Compliance Asset Id" }],
+      ]),
       viewFields: ["LinkTitle"], viewQuery: "", verzovani: false,
       items: [],
     };

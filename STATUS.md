@@ -1,6 +1,30 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-19 13:28
+Aktualizováno: 2026-08-19 13:50
+
+## PRVNÍ OSTRÝ BĚH PROBĚHL (19.08.2026 13:50) — F1 NASAZENA
+
+Oba skripty doběhly na `/sites/DigiData_D/testovaci_subsajta/procesnimapa`.
+
+**Provisioning:** 5 listů založeno, všech 33 sloupců schématu `zalozen`/`vestaveny`,
+žádný `CHYBI`. GUIDy listů:
+`Agendy 211209f7` · `Procesy 87116681` · `DilciProcesy cd8741a3` ·
+`Aktivity 9dfbb5a1` · `AktivitaDilciProces d2067990`.
+
+**Import:** 7 / 46 / 250 / 46 / 46, **0 chyb**, `ocekavano` = `v listech`.
+Stránkování i idempotence odbaveny bez zásahu.
+
+Dvě zjištění z reality, která mock neukázal:
+
+1. **`Options` bit 4 sloupce do výchozího zobrazení nedostal** — všech 33 mělo
+   `ve_zobrazeni: doplneno`, tedy zařadila je až záchranná větev
+   `AddViewField`. Výsledek je správný, ale potvrzuje, že na bit 4 se
+   spoléhat nedá a dorovnání zobrazení musí zůstat.
+2. **SharePoint zakládá u každého listu `_ColorTag` a `ComplianceAssetId`** —
+   hlásilo se 10 sloupců „NAVIC". Nic nerozbíjejí, ale kazily smysl kontrolní
+   tabulky (má v ní vyčnívat anomálie, ne šum). Doplněny do výjimek
+   a **do falešného SharePointu v testech**, aby se past nemohla vrátit;
+   ověřeno mutací.
 
 ## CO JE NA TOBĚ
 
@@ -13,10 +37,11 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
    nebo změnit prozatímní rozhodnutí. Ukázat jí `viz/mapa_prototyp.html`.
 3. **Před nasazením na MPSV, ne dřív:** nechat potvrdit výchozí číslování kódů
    (viz sekce „Identifikační kódy" níže).
-4. **Až řeknu, že je to připravené:** spustit v konzoli prohlížeče na
-   `/sites/DigiData_D/testovaci_subsajta/procesnimapa` nejdřív
-   `src/setup_sharepoint.js`, pak `src/import_data.js`. Zatím nespouštěj —
-   čeká se na re-audit (kolo 2).
+4. **Hotovo** — provisioning i import proběhly (viz sekce nahoře).
+5. **Zbývá potvrdit idempotenci na ostrém prostředí:** spustit
+   `src/setup_sharepoint.js` **podruhé**. Očekávaný výsledek: u všech sloupců
+   `existoval` / `vestaveny`, `ve_zobrazeni: ano`, a **žádný řádek `NAVIC`**
+   (po opravě výjimek). Když to bude sedět, je F1 uzavřená.
 
 ## CO DĚLÁM JÁ (další krok)
 

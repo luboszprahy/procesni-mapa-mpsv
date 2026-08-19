@@ -264,7 +264,11 @@ for (const lst of SCHEMA.lists) {
   const ocekavane = new Set(lst.columns.map((c) => c.name));
   const navic = (poPolich.value || []).filter(
     (f) => !f.Hidden && !ocekavane.has(f.InternalName) &&
-           !["ContentType", "Attachments", "Edit", "LinkTitleNoMenu", "LinkTitle",
+           // _ColorTag a ComplianceAssetId zaklada SharePoint sam pri vytvoreni
+           // listu (overeno 19.08.2026 v PPF). Bez nich by tabulka hlasila
+           // 10 sloupcu "navic" a skutecna anomalie by v tom sumu zanikla.
+           !["_ColorTag", "ComplianceAssetId",
+             "ContentType", "Attachments", "Edit", "LinkTitleNoMenu", "LinkTitle",
              "DocIcon", "ItemChildCount", "FolderChildCount", "AppAuthor", "AppEditor",
              "_ComplianceFlags", "_ComplianceTag", "_ComplianceTagWrittenTime",
              "_ComplianceTagUserId", "_IsRecord", "TaxCatchAll", "TaxCatchAllLabel",
