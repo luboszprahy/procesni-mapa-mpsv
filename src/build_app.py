@@ -13,6 +13,7 @@ v rozšíření Power Platform Tools ve VS Code.
 
 import argparse
 import io
+import json
 import os
 import re
 import shutil
@@ -25,8 +26,16 @@ APP_SRC = Path("src/app_src")
 VYCHOZI_SOLUTION = Path("input/procesnimapa_1_0_0_1.zip")
 VYSTUP = Path("deploy")
 PRACOVNI = Path("runs/app_build")
+SABLONY = Path("src/control_templates.json")
 
 OBRAZOVKY = ["scr_Seznam", "scr_Detail", "scr_Vazby"]
+
+# Control: v pa.yaml -> název šablony v References/Templates.json
+NAZEV_SABLONY = {
+    "Label": "label", "Gallery": "gallery", "Rectangle": "rectangle",
+    "Image": "image", "Icon": "icon", "Timer": "timer",
+    "Button": "button", "TextInput": "text", "DropDown": "dropdown",
+}
 
 
 def najdi_pac(zadana):
@@ -74,6 +83,50 @@ def zabal(adresar, cil):
         for cesta in sorted(adresar.rglob("*")):
             if cesta.is_file():
                 balik.write(cesta, cesta.relative_to(adresar).as_posix())
+
+
+def doplnit_sablony(cesta_msapp):
+    """Doplní do balíku definice controlů, které původní appka neobsahovala.
+
+    Prázdná appka ze Studia nese v References/Templates.json jen šablony, které
+    sama používala. Studio pak odmítne otevřít appku s controlem, jehož definici
+    nezná, a ohlásí to jako chybu YAML. Definice jsou nezávislé na tenantu
+    (ověřeno shodou sdílených šablon), takže je stačí přiložit.
+    """
+    zasoba = {s["Name"]: s for s in json.loads(Path(SABLONY).read_text(encoding="utf-8"))["sablony"]}
+
+    with zipfile.ZipFile(cesta_msapp) as balik:
+        polozky = {n: balik.read(n) for n in balik.namelist()}
+
+    klic = next(n for n in polozky if n.replace("\\", "/").endswith("References/Templates.json"))
+    templates = json.loads(polozky[klic].decode("utf-8-sig"))
+    pritomne = {s["Name"] for s in templates["UsedTemplates"]}
+
+    potreba = set()
+    for jmeno, data in polozky.items():
+        if jmeno.replace("\\", "/").endswith(".pa.yaml"):
+            for control in re.findall(r"Control:\s*(\S+)", data.decode("utf-8-sig")):
+                nazev = control.split("@")[0].split("/")[-1]
+                potreba.add(NAZEV_SABLONY.get(nazev, nazev.lower()))
+
+    chybi = sorted(potreba - pritomne)
+    nemam = [s for s in chybi if s not in zasoba]
+    if nemam:
+        raise SystemExit(f"CHYBA: pro šablony {nemam} nemám definici v {SABLONY}")
+
+    doplnene = []
+    for sablona in chybi:
+        templates["UsedTemplates"].append(zasoba[sablona])
+        doplnene.append(f"{sablona}@{zasoba[sablona]['Version']}")
+
+    if not doplnene:
+        return []
+
+    polozky[klic] = json.dumps(templates, ensure_ascii=False).encode("utf-8")
+    with zipfile.ZipFile(cesta_msapp, "w", zipfile.ZIP_DEFLATED) as balik:
+        for jmeno, data in polozky.items():
+            balik.writestr(jmeno, data)
+    return doplnene
 
 
 def main():
@@ -135,6 +188,10 @@ def main():
     novy_msapp = PRACOVNI / "app.msapp"
     vystup_pac = spust([str(pac), "canvas", "pack", "--sources", str(zdroje), "--msapp", str(novy_msapp)])
     print(vystup_pac.strip().splitlines()[-1])
+
+    doplneno = doplnit_sablony(novy_msapp)
+    if doplneno:
+        print(f"doplněné šablony controlů: {', '.join(doplneno)}")
 
     shutil.copy(novy_msapp, msapp)
 

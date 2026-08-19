@@ -13,8 +13,14 @@ import sys
 import zipfile
 from pathlib import Path
 
-VSTUP = Path("input/procesnimapa_1_0_0_1.zip")
-VYSTUP = Path("deploy/procesnimapa_1_0_0_2.zip")
+import argparse
+
+_p = argparse.ArgumentParser()
+_p.add_argument("--vstup", default="input/procesnimapa_1_0_0_2 (2).zip")
+_p.add_argument("--vystup", default="deploy/procesnimapa_1_0_0_3.zip")
+_a = _p.parse_args()
+VSTUP = Path(_a.vstup)
+VYSTUP = Path(_a.vystup)
 
 OCEKAVANE_OBRAZOVKY = {"scr_Seznam", "scr_Detail", "scr_Vazby"}
 OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces"}
@@ -124,6 +130,23 @@ def main():
             jmena = {d.get("Name") for d in json.loads(datasources).get("DataSources", [])}
             overit(OCEKAVANE_LISTY <= jmena,
                    f"v appce chybí datové zdroje: {sorted(OCEKAVANE_LISTY - jmena)}")
+
+        # každý použitý control musí mít definici šablony, jinak Studio appku
+        # neotevře a ohlásí to jako chybu YAML (past z importu 1.0.0.2)
+        NAZEV_SABLONY = {"Label": "label", "Gallery": "gallery", "Rectangle": "rectangle",
+                         "Image": "image", "Icon": "icon", "Timer": "timer",
+                         "Button": "button", "TextInput": "text", "DropDown": "dropdown"}
+        sablony_json = cti(msapp, "Templates.json")
+        if sablony_json:
+            znamé = {x["Name"] for x in json.loads(sablony_json)["UsedTemplates"]}
+            pouzite = set()
+            for polozka in polozky:
+                if polozka.endswith(".pa.yaml"):
+                    for control in re.findall(r"Control:\s*(\S+)", cti(msapp, Path(polozka).name) or ""):
+                        nazev = control.split("@")[0].split("/")[-1]
+                        pouzite.add(NAZEV_SABLONY.get(nazev, nazev.lower()))
+            overit(pouzite <= znamé,
+                   f"chybí definice šablon pro controly: {sorted(pouzite - znamé)}")
 
         # politika projektu: žádné externí zdroje.
         # Komentáře se přeskakují — hlavičku s odkazem na dokumentaci píše do
