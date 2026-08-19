@@ -1,8 +1,8 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-19 13:50
+Aktualizováno: 2026-08-19 13:53
 
-## PRVNÍ OSTRÝ BĚH PROBĚHL (19.08.2026 13:50) — F1 NASAZENA
+## F1 UZAVŘENA (19.08.2026 13:53)
 
 Oba skripty doběhly na `/sites/DigiData_D/testovaci_subsajta/procesnimapa`.
 
@@ -13,6 +13,11 @@ Oba skripty doběhly na `/sites/DigiData_D/testovaci_subsajta/procesnimapa`.
 
 **Import:** 7 / 46 / 250 / 46 / 46, **0 chyb**, `ocekavano` = `v listech`.
 Stránkování i idempotence odbaveny bez zásahu.
+
+**Druhý běh provisioningu (idempotence na ostrém prostředí):** všech 33 sloupců
+`existoval`/`vestaveny`, `ve_zobrazeni: ano` u všech, žádný řádek `NAVIC`,
+`HOTOVO: vsech 33 radku v poradku`. Skript je tedy opravdu idempotentní
+a lze ho pustit znovu kdykoli — i na tenantu MPSV.
 
 Dvě zjištění z reality, která mock neukázal:
 
@@ -38,15 +43,17 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
 3. **Před nasazením na MPSV, ne dřív:** nechat potvrdit výchozí číslování kódů
    (viz sekce „Identifikační kódy" níže).
 4. **Hotovo** — provisioning i import proběhly (viz sekce nahoře).
-5. **Zbývá potvrdit idempotenci na ostrém prostředí:** spustit
-   `src/setup_sharepoint.js` **podruhé**. Očekávaný výsledek: u všech sloupců
-   `existoval` / `vestaveny`, `ve_zobrazeni: ano`, a **žádný řádek `NAVIC`**
-   (po opravě výjimek). Když to bude sedět, je F1 uzavřená.
+5. **Hotovo** — druhý běh potvrdil idempotenci.
+6. **Pro F2 potřebuju vědět:** máš v PPF prostředí nějakou existující canvas
+   app, ze které se dá vyjít? `.msapp` nejde postavit od nuly (`pac` CLI není
+   k dispozici), takže appka musí vzniknout v Power Apps Studiu — buď ručně
+   podle návodu, který připravím, nebo úpravou zdrojáků existující appky.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**F1 je hotová a auditem prošla — čeká na první ostrý běh, který musíš spustit ty
-(bod 4 výše).** Mezitím pokračuju na F2 (stavba canvas appky) a F3.
+**F1 hotová a nasazená.** Pokračuju na F2 — podklad pro stavbu canvas appky
+v Power Apps Studiu (`.msapp` nejde postavit od nuly, `pac` CLI není
+k dispozici, viz bod 6 výše).
 
 ## Audit F1 — kolo 2 (19.08.2026): 0 blokujících, F1 připravená
 
