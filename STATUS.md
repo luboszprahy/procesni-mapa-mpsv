@@ -35,11 +35,17 @@ obě ověřené mutací** (vrácení právě opravené chyby je shodí):
 Ověřeno v balíku: `testzip` obou zipů čistý, v YAML žádný `ComboBoxSample`,
 `ShowColumns` a `Search` s identifikátory, 3× `SearchItems`, verze 1.0.0.6.
 
-**Pozor — na tomhle stroji (5CG5210MB2) `pac` není.** Přebalení proto proběhlo
-novou větví `build_app.py --bez-pac`, která vymění `Src/*.pa.yaml` přímo
-v hotovém `.msapp`. Jde to jen u balíku, který už z YAML zabalený je
-(`packed.json` → `LoadFromYaml: true`) — na exportu ze Studia to selže a skript
-to sám ohlásí.
+**Nová větev `build_app.py --bez-pac`** vymění `Src/*.pa.yaml` přímo v hotovém
+`.msapp`; funguje jen u balíku už zabaleného z YAML (`packed.json` →
+`LoadFromYaml: true`), na exportu ze Studia sama ohlásí chybu. Vznikla proto,
+že na 5CG5210MB2 `pac` nebyl — mezitím **doinstalován** (rozšíření VS Code
+`microsoft-IsvExpTools.powerplatform-vscode`, pac 2.9.3), takže na tomhle
+stroji fungují obě cesty.
+
+**Křížová kontrola obou cest:** týž balík postavený přes `pac` je proti
+`--bez-pac` **bajtově shodný ve všech položkách kromě `packed.json`**, kde se
+liší jediná hodnota `LastPackedDateTimeUtc` (časové razítko balení).
+Větev bez pac tedy nevyrábí jiný artefakt, jen ho vyrábí bez nástroje.
 
 **Nedořešeno:** že po importu bude chyb opravdu 0, se offline dokázat nedá —
 kontroly pokrývají obě nalezené příčiny, ne zbytek seznamu, který na snímku
@@ -50,7 +56,20 @@ seznam a doopravím.
 „A new version of this app is coming" — naimportovaná verze se hráčům ukáže
 až po **Save & Publish** ve Studiu.
 
-## F3 rozpracované: pojistné flow nad `nazev_kratky` (krok 9b)
+## F3 krok 9b HOTOV: pojistné flow nad `nazev_kratky` (20.08.2026)
+
+`deploy/flow_AktualizaceKratkehoNazvu.md` — klikací návod do designeru.
+Trigger nad `Aktivity`, řetěz Compose akcí místo regulárních výrazů, zápis
+jen když se hodnota liší (tím i ochrana proti cyklení: počítá se vždy
+z `nazev`, nikdy z `nazev_kratky`). Návod nese i pět ověřovacích kroků
+s konkrétními aktivitami z dat (`07-04-006-0001` je nejdelší, 220 znaků)
+a příkaz, který vypíše, co má v poli být.
+
+**Pozor na přenos:** zápisová akce `Update item` nesmí mít list jako runtime
+výraz (flow by po importu nešlo zapnout), takže se na tenantu MPSV staví
+podle návodu znovu — proměnnou prostředí to nevyřeší.
+
+
 
 `src/check_zkraceni_flow.py` — ověřuje, že řetěz Compose akcí, který flow
 `AktualizaceKratkehoNazvu` použije (bez regulárních výrazů: kolaps mezer
@@ -60,7 +79,7 @@ průchody ořezu koncových `,;.`), dává **týž výsledek jako kanonická
 + 14 hraničních), shoda ve všech; mutačně ověřeno (bez ořezu, jen dva
 průchody, jiná hranice slova, řez na 150 → test padá).
 
-**Zbývá:** sepsat klikací návod `deploy/flow_AktualizaceKratkehoNazvu.md`.
+**Zbývá:** postavit flow v designeru podle návodu (až bude appka bez chyb).
 
 ## F2 — APPKA SE OTEVŘELA (19.08.2026 večer)
 
