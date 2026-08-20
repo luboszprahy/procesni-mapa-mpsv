@@ -2,6 +2,12 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+> **RESTART KONVERZACE 20.08.2026 13:48 — začni souborem `HANDOVER.md`.**
+> Je v něm pět zadaných a zatím neudělaných věcí (grafika podle Správy
+> notifikací, klikací celý řádek, zrušení info panelu ve prospěch tooltipu,
+> tlačítko „Zobrazit v HTML" místo globusu, dokončení `MapaPublishFlow`),
+> předlohy v `input/snimky/vzor-notifikace-*.png` a všechny příkazy.
+
 ## Grafika sjednocena + úklid — 1.0.0.19 (20.08.2026 odpoledne)
 
 **Styl je nově na jednom místě.** `App.OnStart` drží 16 proměnných
