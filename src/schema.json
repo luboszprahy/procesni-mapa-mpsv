@@ -380,6 +380,57 @@
         }
       ],
       "display": "Vazba aktivita–dílčí proces"
+    },
+    {
+      "name": "Utvary",
+      "csv": "utvary.csv",
+      "popis": "Ciselnik utvaru (sekce/odbor/oddeleni). Utvary v podkladech vlastni ciselnik nemaji - kody se odvozuji z cisel v aktivitach, nazvy jsou zastupne a doplni je zadavatelka.",
+      "display": "Útvary",
+      "default_sort": {
+        "column": "Title",
+        "vzestupne": true
+      },
+      "columns": [
+        {
+          "name": "Title",
+          "display": "Kód útvaru",
+          "type": "Text",
+          "maxlen": 20,
+          "required": true,
+          "indexed": true,
+          "csv": "kod",
+          "popis": "Cislo utvaru. 1 cislice = sekce, 2 = odbor, 3 = oddeleni."
+        },
+        {
+          "name": "nazev",
+          "display": "Název útvaru",
+          "type": "Text",
+          "maxlen": 255,
+          "required": true,
+          "csv": "nazev"
+        },
+        {
+          "name": "uroven",
+          "display": "Úroveň",
+          "type": "Choice",
+          "indexed": true,
+          "csv": "uroven",
+          "choices": [
+            "sekce",
+            "odbor",
+            "oddělení"
+          ]
+        },
+        {
+          "name": "nadrizeny_kod",
+          "display": "Nadřízený útvar (kód)",
+          "type": "Text",
+          "maxlen": 20,
+          "indexed": true,
+          "csv": "nadrizeny_kod",
+          "popis": "Kod nadrizeneho utvaru; u sekce prazdne."
+        }
+      ]
     }
   ]
 }

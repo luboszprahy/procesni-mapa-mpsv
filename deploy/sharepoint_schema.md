@@ -142,3 +142,20 @@ Zdroj dat: `aktivita_dilciproces.csv` (46 řádků). Verzování: zapnuto.
 
 - `primarni` — hodnoty: `ano`, `ne`
 - `Title` — Odvozeny klic - zajistuje idempotenci importu a brani duplicitni vazbe.
+
+### `Utvary`
+
+Ciselnik utvaru (sekce/odbor/oddeleni). Utvary v podkladech vlastni ciselnik nemaji - kody se odvozuji z cisel v aktivitach, nazvy jsou zastupne a doplni je zadavatelka.
+
+Zdroj dat: `utvary.csv` (8 řádků). Verzování: zapnuto. Výchozí řazení: `Title`.
+
+| Interní název | Zobrazovaný název | Typ | Povinný | Indexovaný | Zdroj v CSV |
+|---|---|---|---|---|---|
+| `Title` | Kód útvaru | Jeden řádek textu | ano | ano | kod |
+| `nazev` | Název útvaru | Jeden řádek textu | ano | ne | nazev |
+| `uroven` | Úroveň | Volba | ne | ano | uroven |
+| `nadrizeny_kod` | Nadřízený útvar (kód) | Jeden řádek textu | ne | ano | nadrizeny_kod |
+
+- `uroven` — hodnoty: `sekce`, `odbor`, `oddělení`
+- `Title` — Cislo utvaru. 1 cislice = sekce, 2 = odbor, 3 = oddeleni.
+- `nadrizeny_kod` — Kod nadrizeneho utvaru; u sekce prazdne.

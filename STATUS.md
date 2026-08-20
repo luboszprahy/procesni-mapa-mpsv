@@ -2,6 +2,52 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## Balík 1.0.0.11 — nápověda, ikona mapy, číselník útvarů (20.08.2026)
+
+**Podrobné tooltipy u všech ovládacích prvků** (27 celkem) — každý vysvětluje
+nejen co pole je, ale i proč a jaká má pravidla; cílem je, aby k appce nebyl
+potřeba samostatný návod. Nejvíc prostoru dostaly dílčí procesy a vazby M:N,
+kterým uživatel nerozuměl.
+
+**Info panel „i" v hlavičce seznamu i detailu** vysvětluje stavbu kódu
+`AA-BB-CCC-DDDD`, jak se přiděluje a proč se nikdy nemění.
+
+**Ikona zeměkoule** v hlavičce seznamu otevře publikovanou HTML mapu.
+Mapa zatím **neexistuje** — vznikne až publikačním flow (F3 krok 9), do té doby
+odkaz vede na nenahraný soubor.
+
+**Odchylka od pravidla „žádné hardcoded URL":** adresa mapy je v `App.OnStart`
+(`varMapaUrl`). Canvas app umí číst jen datasetové proměnné prostředí, textové
+ne, a list `Nastaveni` zatím není. Zapsáno jako **jediná povolená výjimka**
+v `check_solution.py` (`VYJIMKA_URL`), která se při každém běhu vypíše jako
+varování. Trvalé řešení: list `Nastaveni` (F3) nebo konfigurace přes flow.
+
+## Číselník útvarů — nový list `Utvary`
+
+Útvary v podkladech číselník nemají, jsou jen jako čísla v evidenčních kartách.
+Hierarchie je ale v samotném čísle (1 číslice = sekce, 2 = odbor, 3 = oddělení),
+takže ji `src/make_utvary.py` odvodí z dat a doplní i nadřízené úrovně, které se
+samy v aktivitách nevyskytují. **Názvy jsou zástupné** („Útvar 711 (oddělení)")
+— skutečné doplní zadavatelka.
+
+- `runs/anonym/utvary.csv` — 7 útvarů (1 sekce, 2 odbory, 4 oddělení),
+- `runs/normalize/utvary.csv` — 8 útvarů z reálných dat,
+- schéma má **6 listů / 37 sloupců**, `check_schema` prošel,
+- `setup_sharepoint.js` i `import_data.js` přegenerovány, node testy sedí
+  (počty 7 / 46 / 250 / 46 / 46 / **7**), mutačně ověřeno.
+
+**Past, kterou to odhalilo:** první verze zástupných názvů („Sekce 7") spustila
+kontrolu anonymity — hlídá vzor „sekce <číslice>" jako identifikující údaj.
+Kontrola má pravdu, proto se změnil formát názvu, ne kontrola.
+
+**CO JE POTŘEBA UDĚLAT (uživatel):** aby appka číselník využila, musí
+1. v konzoli prohlížeče na vývojové site spustit **znovu `setup_sharepoint.js`**
+   (idempotentní — založí jen nový list `Utvary`) a pak `import_data.js`,
+2. ve Studiu **připojit list `Utvary` jako datový zdroj** a solution znovu
+   exportovat (connection reference lokálně vzniknout nemůže).
+Teprve pak přepnu filtr útvaru a pole „Vykonává útvar" z volného textu
+na číselník.
+
 ## Balík 1.0.0.10 — UI podle připomínek + oprava aktivace flow (20.08.2026)
 
 **Import 1.0.0.9 prošel, ale aktivace flow selhala:**

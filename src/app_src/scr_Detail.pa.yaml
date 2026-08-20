@@ -7,7 +7,8 @@ Screens:
       Fill: =RGBA(248, 249, 250, 1)
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
       OnVisible: |-
-        =Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
+        =Set(varNapovedaKod, false);
+        Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
         Reset(drp_Agenda);
         Reset(drp_Proces);
         Reset(drp_Dilci)
@@ -23,6 +24,7 @@ Screens:
       - ico_Zpet:
           Control: Classic/Icon@2.5.0
           Properties:
+            Tooltip: '="Zpět na seznam aktivit. Neuložené změny se zahodí."'
             Color: =RGBA(255, 255, 255, 1)
             Height: =40
             Icon: =Icon.ChevronLeft
@@ -62,6 +64,7 @@ Screens:
       - drp_Agenda:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem, vlastníkem je sekce. Výběr agendy určuje, které procesy se nabídnou níž. Když agendu změníš, proces i dílčí proces se vynulují — kombinace z různých agend neexistuje."'
             AllowEmptySelection: =true
             Default: =If(varNova, "", LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev))
             Font: =Font.'Open Sans'
@@ -88,6 +91,7 @@ Screens:
       - drp_Proces:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem, vlastníkem je odbor. Nabízejí se jen procesy vybrané agendy. Dokud není vybraná agenda, je pole zašedlé — to není chyba, jen kaskáda čeká na nadřazenou úroveň."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Agenda.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
             Default: =If(varNova, "", LookUp(colProcesy, Title = Left(varDpKod, 5), Title & " · " & nazev))
@@ -117,6 +121,7 @@ Screens:
       - drp_Dilci:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…""."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
             Default: =If(varNova, "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
@@ -145,6 +150,7 @@ Screens:
       - txt_Nazev:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Znění činnosti tak, jak má stát v organizačním řádu — celá věta, ne heslo. Toto je nejnižší úroveň hierarchie a vykonává ji oddělení. Pole je bez omezení délky (nejdelší aktivita v datech má 220 znaků); pro řazení v seznamu se z něj automaticky odvozuje zkrácená verze na 150 znaků."'
             HintText: ="Znění činnosti tak, jak má být v organizačním řádu"
             Default: =If(varNova, "", varAktivita.nazev)
             Font: =Font.'Open Sans'
@@ -168,6 +174,7 @@ Screens:
       - txt_Spolupracuje:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Útvary, které se na aktivitě podílejí, ale nejsou za ni odpovědné. Víc útvarů odděl středníkem (712; 721). Odpovědný útvar patří do pole „Vykonává útvar"", ne sem."'
             HintText: ="Útvary, které se na aktivitě podílejí — např. 712; 721"
             Default: =If(varNova, "", varAktivita.spolupracuje)
             Font: =Font.'Open Sans'
@@ -191,6 +198,7 @@ Screens:
       - txt_TextOR:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Nepovinné. Místo pro formulaci, která půjde doslova do organizačního řádu, pokud se má lišit od znění aktivity. Dokud je prázdné, použije se při generování organizačního řádu znění aktivity. Generování samo je až druhá fáze projektu."'
             HintText: ="Nepovinné, plní se až pro generování organizačního řádu"
             Default: =If(varNova, "", varAktivita.text_pro_or)
             Font: =Font.'Open Sans'
@@ -310,6 +318,7 @@ Screens:
       - txt_UtvarDetail:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Oddělení, které aktivitu skutečně vykonává a nese za ni odpovědnost — číslem, např. 711. Podle tohoto pole se filtruje seznam a jednou podle něj bude sestavený text organizačního řádu. Číselník útvarů zatím není, píše se ručně; pozor na překlepy, jinak se aktivita ve filtru schová."'
             HintText: ="Oddělení, které aktivitu vykonává — např. 711"
             Default: =If(varNova, "", varAktivita.vykonava)
             Font: =Font.'Open Sans'
@@ -332,6 +341,7 @@ Screens:
       - txt_SekceDetail:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Číslo sekce, pod kterou vykonávající útvar patří (např. 7). Slouží k filtrování a k rozdělení evidence mezi sekční správce procesního rámce."'
             HintText: ="Číslo sekce — např. 7"
             Default: =If(varNova, "", varAktivita.sekce)
             Font: =Font.'Open Sans'
@@ -354,6 +364,7 @@ Screens:
       - txt_Predpis:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Vnitřní předpis, o který se aktivita opírá — např. SP 10/2021. Víc předpisů odděl středníkem. Slouží jako doklad, proč se činnost vykonává; při revizi předpisu je podle tohoto pole vidět, kterých aktivit se změna týká."'
             HintText: ="Víc předpisů oddělte středníkem — např. SP 10/2021; VP 02/2016"
             Default: =If(varNova, "", varAktivita.vnitrni_predpis)
             Font: =Font.'Open Sans'
@@ -377,6 +388,7 @@ Screens:
       - drp_StavDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Pracovní = rozpracováno, schváleno = potvrzené znění pro organizační řád. Přepnutím na „schváleno"" dáváš najevo, že formulace prošla vlastníkem procesu. Automatické schvalování s notifikacemi součástí této fáze není."'
             Default: =If(varNova, "pracovní", varAktivita.stav.Value)
             Font: =Font.'Open Sans'
             Height: =40
@@ -401,6 +413,7 @@ Screens:
       - btn_Vazby:
           Control: Classic/Button@2.2.0
           Properties:
+            Tooltip: '="Otevře přiřazení aktivity do DALŠÍCH dílčích procesů. Standardně aktivita patří do jednoho (vybraného výše) — ale metodika připouští, že tutéž činnost vykonává útvar ve víc dílčích procesech. Pak ji přidej i tam a v mapě se objeví v obou větvích, aniž by vznikl duplicitní záznam."'
             Color: =RGBA(0, 18, 107, 1)
             Fill: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
@@ -415,6 +428,7 @@ Screens:
       - btn_Ulozit:
           Control: Classic/Button@2.2.0
           Properties:
+            Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód (první volné čtyřčíslí ve vybraném dílčím procesu) a založí se primární vazba do rejstříku. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku — stačí uložit znovu."'
             Fill: =RGBA(0, 120, 212, 1)
             Font: =Font.'Open Sans'
             Height: =44
@@ -492,6 +506,7 @@ Screens:
       - btn_Smazat:
           Control: Classic/Button@2.2.0
           Properties:
+            Tooltip: '="Smaže aktivitu i všechna její zařazení do dílčích procesů. Nevratné. Číselník agend, procesů a dílčích procesů zůstane nedotčený — maže se jen tato jedna aktivita."'
             Color: =RGBA(168, 0, 0, 1)
             Fill: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
@@ -510,3 +525,72 @@ Screens:
             Width: =160
             X: =920
             Y: =664
+      - ico_InfoDetail:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =28
+            Icon: =Icon.Information
+            OnSelect: =Set(varNapovedaKod, !varNapovedaKod)
+            Tooltip: '="Jak se tvoří identifikační kód"'
+            Width: =28
+            X: =Parent.Width - 80
+            Y: =22
+      - rec_NapovedaDetail:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =340
+            Visible: =varNapovedaKod
+            Width: =640
+            X: =280
+            Y: =120
+      - rec_NapovedaOkrajDetail:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 18, 107, 1)
+            Height: =340
+            Visible: =varNapovedaKod
+            Width: =4
+            X: =280
+            Y: =120
+      - lbl_NapovedaDetail:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(50, 49, 48, 1)
+            Font: =Font.'Open Sans'
+            Height: =300
+            Size: =11
+            Text: |-
+              ="Identifikační kód aktivity: AA-BB-CCC-DDDD
+
+              AA     agenda (např. 07)
+              BB     proces uvnitř agendy (07-04)
+              CCC    dílčí proces (07-04-006)
+              DDDD   pořadí aktivity v dílčím procesu (07-04-006-0001)
+
+              Kód se skládá z výběru agenda → proces → dílčí proces a přiděluje se sám při prvním uložení: aktivita dostane první volné čtyřčíslí ve svém dílčím procesu.
+
+              Jednou přidělený kód se už nikdy nemění — ani když se aktivita přesune do jiného dílčího procesu, ani když se před ní něco smaže. Vazby v rejstříku i v mapě na něm stojí.
+
+              Vlastník (sekce, odbor, oddělení) součástí kódu není. Eviduje se zvlášť, aby organizační změny kódy nepřečíslovaly."
+            VerticalAlign: =VerticalAlign.Top
+            Visible: =varNapovedaKod
+            Width: =570
+            X: =308
+            Y: =140
+      - ico_ZavritNapoveduDetail:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Height: =32
+            Icon: =Icon.Cancel
+            OnSelect: =Set(varNapovedaKod, false)
+            PaddingBottom: =8
+            PaddingLeft: =8
+            PaddingRight: =8
+            PaddingTop: =8
+            Visible: =varNapovedaKod
+            Width: =32
+            X: =880
+            Y: =128

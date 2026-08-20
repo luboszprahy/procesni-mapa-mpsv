@@ -9,7 +9,7 @@
       nasbira se a vypise na konci, aby bylo videt, co presne selhalo.
 
    SADA DAT: runs/anonym
-   POCTY:    Agendy=7, Procesy=46, DilciProcesy=250, Aktivity=46, AktivitaDilciProces=46
+   POCTY:    Agendy=7, Procesy=46, DilciProcesy=250, Aktivity=46, AktivitaDilciProces=46, Utvary=7
 */
 (async () => {
 "use strict";
@@ -2711,7 +2711,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-009-0001",
@@ -2724,7 +2724,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-009-0002",
@@ -2737,7 +2737,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-009-0003",
@@ -2750,7 +2750,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-004-0001",
@@ -2763,7 +2763,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0001",
@@ -2776,7 +2776,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0002",
@@ -2789,7 +2789,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-01-001-0001",
@@ -2802,7 +2802,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-01-001-0002",
@@ -2815,7 +2815,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-01-004-0001",
@@ -2828,7 +2828,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-01-004-0002",
@@ -2841,7 +2841,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-01-004-0003",
@@ -2854,7 +2854,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-05-001-0001",
@@ -2867,7 +2867,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-05-002-0001",
@@ -2880,7 +2880,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-004-0002",
@@ -2893,7 +2893,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-05-003-0001",
@@ -2906,7 +2906,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-004-0003",
@@ -2919,7 +2919,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-11-001-0001",
@@ -2932,7 +2932,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-11-002-0001",
@@ -2945,7 +2945,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-11-002-0002",
@@ -2958,7 +2958,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-002-0001",
@@ -2971,7 +2971,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-002-0002",
@@ -2984,7 +2984,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-002-0003",
@@ -2997,7 +2997,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-006-0001",
@@ -3010,7 +3010,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-04-005-0001",
@@ -3023,7 +3023,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-01-003-0001",
@@ -3036,7 +3036,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-01-003-0002",
@@ -3049,7 +3049,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-01-003-0003",
@@ -3062,7 +3062,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "01-01-004-0001",
@@ -3075,7 +3075,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0003",
@@ -3088,7 +3088,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0004",
@@ -3101,7 +3101,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0005",
@@ -3114,7 +3114,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0006",
@@ -3127,7 +3127,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0007",
@@ -3140,7 +3140,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0008",
@@ -3153,7 +3153,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-001-0009",
@@ -3166,7 +3166,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-002-0001",
@@ -3179,7 +3179,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-004-0001",
@@ -3192,7 +3192,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-004-0002",
@@ -3205,7 +3205,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-003-0001",
@@ -3218,7 +3218,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-005-0001",
@@ -3231,7 +3231,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-005-0002",
@@ -3244,7 +3244,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-007-0001",
@@ -3257,7 +3257,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-007-0002",
@@ -3270,7 +3270,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-006-0001",
@@ -3283,7 +3283,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    },
    {
     "Title": "07-08-008-0001",
@@ -3296,7 +3296,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-19T00:00:00Z"
+    "datum_aktualizace": "2026-08-20T00:00:00Z"
    }
   ]
  },
@@ -3578,6 +3578,53 @@ const DATA = [
     "aktivita_kod": "07-08-008-0001",
     "dilci_proces_kod": "07-08-008",
     "primarni": "ano"
+   }
+  ]
+ },
+ {
+  "list": "Utvary",
+  "rows": [
+   {
+    "Title": "7",
+    "nazev": "Útvar 7 (sekce)",
+    "uroven": "sekce",
+    "nadrizeny_kod": ""
+   },
+   {
+    "Title": "71",
+    "nazev": "Útvar 71 (odbor)",
+    "uroven": "odbor",
+    "nadrizeny_kod": "7"
+   },
+   {
+    "Title": "72",
+    "nazev": "Útvar 72 (odbor)",
+    "uroven": "odbor",
+    "nadrizeny_kod": "7"
+   },
+   {
+    "Title": "711",
+    "nazev": "Útvar 711 (oddělení)",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "71"
+   },
+   {
+    "Title": "712",
+    "nazev": "Útvar 712 (oddělení)",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "71"
+   },
+   {
+    "Title": "721",
+    "nazev": "Útvar 721 (oddělení)",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "72"
+   },
+   {
+    "Title": "723",
+    "nazev": "Útvar 723 (oddělení)",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "72"
    }
   ]
  }

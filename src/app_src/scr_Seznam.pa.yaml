@@ -30,6 +30,7 @@ Screens:
       - btn_Nova:
           Control: Classic/Button@2.2.0
           Properties:
+            Tooltip: '="Založí novou aktivitu. Kód se nezadává — přidělí se sám při uložení podle vybraného dílčího procesu. Povinné je znění aktivity a dílčí proces; ostatní pole jde doplnit později."'
             Fill: =RGBA(0, 120, 212, 1)
             Font: =Font.'Open Sans'
             Height: =40
@@ -56,6 +57,7 @@ Screens:
       - txt_Hledat:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Tooltip: '="Hledá podle ZAČÁTKU názvu aktivity, ne kdekoli uvnitř. Napíšeš-li „Tvorba"", najde „Tvorba Služebního řádu"", ale ne „Roční tvorba plánu"". Je to daň za rychlost: takový dotaz umí vyřídit SharePoint sám i nad tisíci aktivitami. Fulltext přes celý rejstřík nabízí publikovaná HTML mapa. Prázdné pole = bez omezení."'
             Default: =""
             Font: =Font.'Open Sans'
             Height: =40
@@ -67,6 +69,7 @@ Screens:
       - drp_Sekce:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Filtruje podle čísla sekce, která aktivitu vykonává. Nabídka se plní z hodnot, které v aktivitách skutečně jsou — co v datech není, tady nenajdeš. „(vše)"" vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
@@ -78,6 +81,7 @@ Screens:
       - drp_Utvar:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Filtruje podle oddělení, které aktivitu vykonává (např. 711). Nabídka se plní z hodnot v aktivitách. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)""."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
@@ -89,6 +93,7 @@ Screens:
       - drp_Stav:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Pracovní = rozpracovaný záznam, na kterém se ještě pracuje. Schváleno = potvrzené znění, které smí jít do organizačního řádu. Stav se přepíná v detailu aktivity; schvalovací kolečko s notifikacemi zatím není součástí řešení."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
@@ -111,6 +116,7 @@ Screens:
       - drp_Razeni:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Tooltip: '="Mění pořadí seznamu. Kód = pořadí v rejstříku (agenda, proces, dílčí proces, aktivita) — nejlepší pro procházení celé struktury. Název = abecedně. Útvar = seskupí aktivity jednoho oddělení za sebe. Řazení neovlivňuje filtry ani počet zobrazených aktivit."'
             Default: ="kód"
             Font: =Font.'Open Sans'
             Height: =40
@@ -222,6 +228,7 @@ Screens:
             - ico_Detail:
                 Control: Classic/Icon@2.5.0
                 Properties:
+                  Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
                   Color: =RGBA(166, 166, 166, 1)
                   Height: =40
                   Icon: =Icon.ChevronRight
@@ -244,3 +251,84 @@ Screens:
                   OnSelect: =Select(Parent)
                   Width: =Parent.TemplateWidth
                   Y: =Parent.TemplateHeight - 1
+      - ico_Mapa:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =28
+            Icon: =Icon.Globe
+            OnSelect: =Launch(varMapaUrl, {}, LaunchTarget.New)
+            Tooltip: '="Otevřít procesní mapu (HTML) v novém okně"'
+            Visible: =!IsBlank(varMapaUrl)
+            Width: =28
+            X: =Parent.Width - 288
+            Y: =26
+      - ico_InfoSeznam:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =28
+            Icon: =Icon.Information
+            OnSelect: =Set(varNapovedaKod, !varNapovedaKod)
+            Tooltip: '="Jak se tvoří identifikační kód"'
+            Width: =28
+            X: =Parent.Width - 240
+            Y: =26
+      - rec_NapovedaSeznam:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =340
+            Visible: =varNapovedaKod
+            Width: =640
+            X: =280
+            Y: =120
+      - rec_NapovedaOkrajSeznam:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 18, 107, 1)
+            Height: =340
+            Visible: =varNapovedaKod
+            Width: =4
+            X: =280
+            Y: =120
+      - lbl_NapovedaSeznam:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(50, 49, 48, 1)
+            Font: =Font.'Open Sans'
+            Height: =300
+            Size: =11
+            Text: |-
+              ="Identifikační kód aktivity: AA-BB-CCC-DDDD
+
+              AA     agenda (např. 07)
+              BB     proces uvnitř agendy (07-04)
+              CCC    dílčí proces (07-04-006)
+              DDDD   pořadí aktivity v dílčím procesu (07-04-006-0001)
+
+              Kód se skládá z výběru agenda → proces → dílčí proces a přiděluje se sám při prvním uložení: aktivita dostane první volné čtyřčíslí ve svém dílčím procesu.
+
+              Jednou přidělený kód se už nikdy nemění — ani když se aktivita přesune do jiného dílčího procesu, ani když se před ní něco smaže. Vazby v rejstříku i v mapě na něm stojí.
+
+              Vlastník (sekce, odbor, oddělení) součástí kódu není. Eviduje se zvlášť, aby organizační změny kódy nepřečíslovaly."
+            VerticalAlign: =VerticalAlign.Top
+            Visible: =varNapovedaKod
+            Width: =570
+            X: =308
+            Y: =140
+      - ico_ZavritNapoveduSeznam:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Height: =32
+            Icon: =Icon.Cancel
+            OnSelect: =Set(varNapovedaKod, false)
+            PaddingBottom: =8
+            PaddingLeft: =8
+            PaddingRight: =8
+            PaddingTop: =8
+            Visible: =varNapovedaKod
+            Width: =32
+            X: =880
+            Y: =128

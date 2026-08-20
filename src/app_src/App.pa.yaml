@@ -1,5 +1,8 @@
 # Zdroj canvas appky "procesni mapa" — App.
 # Generováno ručně podle deploy/app_navrh.md, schéma listů src/schema.json.
+# varMapaUrl je JEDINÉ místo s adresou publikované mapy. Canvas app umí číst
+# jen datasetové proměnné prostředí, textové ne — dokud nevznikne list
+# Nastaveni (F3), musí adresa být tady. Při přenosu na MPSV se mění tady.
 # colUtvary/colSekce plní nabídky filtrů. Distinct nad Aktivitami není
 # delegovatelný — nad 2 000 aktivitami by nabídka přestala být úplná.
 # Do té doby je to nejlevnější zdroj hodnot; pak bude potřeba číselník útvarů.
@@ -15,6 +18,7 @@ App:
       Collect(colUtvary, Distinct(Aktivity, vykonava));
       ClearCollect(colSekce, { Value: "(vše)" });
       Collect(colSekce, Distinct(Aktivity, sekce));
+      Set(varMapaUrl, "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/procesni_mapa.html");
       Set(varNova, false);
       Set(varAktivita, Blank())
     Theme: =PowerAppsTheme

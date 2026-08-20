@@ -1,0 +1,8 @@
+﻿kod;nazev;uroven;nadrizeny_kod
+7;Útvar 7 (sekce);sekce;
+71;Útvar 71 (odbor);odbor;7
+72;Útvar 72 (odbor);odbor;7
+711;Útvar 711 (oddělení);oddělení;71
+712;Útvar 712 (oddělení);oddělení;71
+721;Útvar 721 (oddělení);oddělení;72
+723;Útvar 723 (oddělení);oddělení;72

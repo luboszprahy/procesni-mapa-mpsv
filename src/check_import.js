@@ -42,7 +42,7 @@ function tvrd(podminka, popis) {
 
 (async () => {
   const ocekavane = { Agendy: 7, Procesy: 46, DilciProcesy: 250, Aktivity: 46,
-                      AktivitaDilciProces: 46 };
+                      AktivitaDilciProces: 46, Utvary: 7 };
 
   console.log("--- 1. beh (prazdne listy) ---");
   const sp = falesnySharePoint(SCHEMA.lists);
@@ -61,7 +61,7 @@ function tvrd(podminka, popis) {
                   sp.listy.get(nazev).items.length);
     }
   }
-  tvrd(pocty, "pocty polozek sedi: 7 / 46 / 250 / 46 / 46");
+  tvrd(pocty, "pocty polozek sedi: 7 / 46 / 250 / 46 / 46 / 7");
   tvrd(souhrn1.every((s) => s.zalozeno === ocekavane[s.list] && s.chyb === 0),
        "souhrnna tabulka hlasi vse zalozene a nula chyb");
 

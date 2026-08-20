@@ -1,0 +1,9 @@
+﻿kod;nazev;uroven;nadrizeny_kod
+1;Útvar 1 (sekce);sekce;
+3;Útvar 3 (sekce);sekce;
+11;Útvar 11 (odbor);odbor;1
+33;Útvar 33 (odbor);odbor;3
+111;Útvar 111 (oddělení);oddělení;11
+113;Útvar 113 (oddělení);oddělení;11
+331;Útvar 331 (oddělení);oddělení;33
+332;Útvar 332 (oddělení);oddělení;33

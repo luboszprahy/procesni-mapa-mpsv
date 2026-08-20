@@ -26,7 +26,14 @@ OCEKAVANE_OBRAZOVKY = {"scr_Seznam", "scr_Detail", "scr_Vazby"}
 OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces"}
 
 chyby = []
+varovani = []
 kontrol = 0
+
+# Jediná povolená adresa v appce: odkaz na publikovanou mapu. Canvas app umí
+# číst jen datasetové proměnné prostředí, textové ne — dokud nevznikne list
+# Nastaveni (F3), nemá kam jinam. Hlásí se jako varování, aby se na přenos
+# na MPSV nezapomnělo; kdekoli jinde je URL dál chyba.
+VYJIMKA_URL = "varMapaUrl"
 
 
 def overit(podminka, popis):
@@ -174,10 +181,19 @@ def main():
                 continue
             text = cti(msapp, Path(polozka).name)
             radky = [r for r in (text or "").splitlines() if not r.lstrip().startswith("#")]
-            overit(not any("http://" in r or "https://" in r for r in radky),
+            s_url = [r for r in radky if "http://" in r or "https://" in r]
+            povolene = [r for r in s_url if VYJIMKA_URL in r]
+            for radek in povolene:
+                varovani.append(
+                    f"{Path(polozka).name}: povolená výjimka {VYJIMKA_URL} — adresa mapy "
+                    f"je v appce natvrdo, při přenosu na MPSV ji je nutné změnit"
+                )
+            overit(not [r for r in s_url if VYJIMKA_URL not in r],
                    f"{polozka} obsahuje externí URL")
 
     print(f"kontrol: {kontrol}, chyb: {len(chyby)}")
+    for text_varovani in varovani:
+        print(f"VAROVÁNÍ: {text_varovani}")
     for text in chyby:
         print(f"CHYBA: {text}")
     if chyby:
