@@ -50,7 +50,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
-            Text: ="Hledání a filtry — prázdná nabídka „(vše)" znamená bez omezení"
+            Text: ="Hledání a filtry — prázdná nabídka „(vše)“ znamená bez omezení"
             Width: =700
             X: =40
             Y: =76

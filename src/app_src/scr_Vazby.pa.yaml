@@ -52,7 +52,7 @@ Screens:
             Height: =52
             Size: =10
             Text: |-
-              ="Táž aktivita se může vykonávat ve víc dílčích procesech. Vlevo je seznam, kam už je zařazená; „primární" je ta z detailu aktivity a odebrat ji tady nelze. Vpravo vyberte další dílčí proces tlačítkem +."
+              ="Táž aktivita se může vykonávat ve víc dílčích procesech. Vlevo je seznam, kam už je zařazená; „primární“ je ta z detailu aktivity a odebrat ji tady nelze. Vpravo vyberte další dílčí proces tlačítkem +."
             Width: =1220
             X: =40
             Y: =84

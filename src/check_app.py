@@ -253,6 +253,53 @@ def kontrola_vzorovych_dat(soubory, typy, vzorova):
                             )
 
 
+def bez_retezcu_presne(text):
+    """Vyhodí obsah řetězců; vrátí (zbytek, chyba). \"\" uvnitř je escapovaná uvozovka."""
+    zbytek, index, v_retezci = [], 0, False
+    while index < len(text):
+        znak = text[index]
+        if znak == '"':
+            if v_retezci and index + 1 < len(text) and text[index + 1] == '"':
+                index += 2
+                continue
+            v_retezci = not v_retezci
+            index += 1
+            continue
+        if not v_retezci:
+            zbytek.append(znak)
+        index += 1
+    if v_retezci:
+        return "".join(zbytek), "neuzavřený řetězec"
+    hloubka = 0
+    for znak in zbytek:
+        if znak == "(":
+            hloubka += 1
+        elif znak == ")":
+            hloubka -= 1
+            if hloubka < 0:
+                return "".join(zbytek), "závorka navíc"
+    if hloubka:
+        return "".join(zbytek), f"chybí {hloubka}× zavírací závorka"
+    return "".join(zbytek), None
+
+
+def kontrola_syntaxe(vzorce):
+    """Uvozovky a závorky musí vyjít.
+
+    Typická past: text má typografickou uvozovku otevírací („) a ASCII zavírací
+    ("). Ta řetězec ukončí dřív, Power Fx pak hlásí „Expected operator" a lavinu
+    navazujících „Name isn't valid" — chyb je pak desítky a žádná neukazuje
+    na skutečné místo.
+    """
+    for cesta, prop, text in vzorce:
+        if not isinstance(text, str) or not text.lstrip().startswith("="):
+            continue
+        _, chyba = bez_retezcu_presne(text)
+        if chyba:
+            ukazka = " ".join(text.split())[:110]
+            chyby.append(f"{cesta}.{prop}: {chyba} — {ukazka}")
+
+
 def kontrola_razeni(vzorce):
     """Pořadí řazení musí být kvalifikované — holé Descending Studio nezná."""
     for cesta, prop, text in vzorce:
@@ -534,6 +581,7 @@ def main():
     kontrola_navigace(vzorce, obrazovky)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
+    kontrola_syntaxe(vzorce)
     kontrola_razeni(vzorce)
     kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti(), nacti_typy())
     kontrola_vzorovych_dat(soubory, nacti_typy(), nacti_vzorova_data())

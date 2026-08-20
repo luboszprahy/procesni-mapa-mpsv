@@ -2,6 +2,29 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## 40 chyb ve vzorcích — příčina dva popisky, opraveno v 1.0.0.13 (20.08.2026)
+
+Po importu 1.0.0.12 hlásilo Studio ~40 chyb typu „Expected operator" a
+„Name isn't valid". Příčinou byly **dva popisky**, ve kterých jsem napsal
+typografickou uvozovku otevírací („) a **ASCII zavírací** (") — ta ukončí
+řetězec dřív, zbytek textu se parsuje jako výrazy a jedna vada vyrobí desítky
+hlášek, z nichž žádná neukazuje na skutečné místo:
+
+- `lbl_l_Filtry.Text` (seznam) — „(vše)" ,
+- `lbl_l_Vysvetleni.Text` (vazby) — „primární".
+
+**Nová kontrola `kontrola_syntaxe`** projde každý vzorec a ověří, že uvozovky
+a závorky vyjdou (escapované `""` se počítají správně). Najde to za sekundu
+a ukáže konkrétní vlastnost. Mutačně ověřeno vrácením přesně té uvozovky.
+
+Tím jsou v `check_app.py` pokryté všechny čtyři pasti, které dnes shodily
+import nebo otevření: nesettovatelná `hidden` vlastnost (PA2108), duplicitní
+klíč (PA1001), řetězec místo identifikátoru a teď nevyvážené uvozovky.
+Připomínka: **žádnou z nich `pac canvas pack` nechytí.**
+
+**`deploy/procesnimapa_1_0_0_13.zip`** — brány čisté. Starší balíky
+1.0.0.11 a 1.0.0.12 smazány.
+
 ## 1.0.0.11 spadl na PA1001, opraveno v 1.0.0.12 (20.08.2026)
 
 Appka se neotevřela: `PA1001 … Duplicate name 'Tooltip'` ve `scr_Vazby`.
