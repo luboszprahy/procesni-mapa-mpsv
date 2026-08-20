@@ -58,7 +58,10 @@ SLOUPCOVE_FUNKCE = {
     "DropColumns": 1,
     "RenameColumns": 1,
     "AddColumns": 1,
-    "SortByColumns": 1,
+    # SortByColumns tady schválně NENÍ: příznak supportcolumnnamesasidentifiers
+    # na ni nedopadá a identifikátor odmítne ("name isn't valid", ověřeno
+    # importem 1.0.0.13). Bere řetězec. Appka ji proto vůbec nepoužívá —
+    # řadí se přes Sort(), který dostává výraz a je jednoznačný v obou režimech.
     "GroupBy": 1,
     "Ungroup": 1,
     "Distinct": 1,

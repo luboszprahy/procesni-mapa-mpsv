@@ -2,6 +2,24 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## SortByColumns neumí identifikátory — 1.0.0.14 (20.08.2026)
+
+Po 1.0.0.13 zbylo 6 chyb, všechny v `gal_Aktivity.Items`: `SortByColumns`
+odmítla názvy sloupců zapsané jako identifikátory. Příznak
+`supportcolumnnamesasidentifiers` na ni tedy **nedopadá** — přesně jak říká
+skill `power-Apps-skill` („ShowColumns chce identifikátory, SortByColumns
+řetězce"). Tuhle poznámku jsem při zavádění kontroly identifikátorů přehlédl
+a zařadil `SortByColumns` mezi ostatní.
+
+**Řešení: řadí se přes `Sort()`**, který nedostává název sloupce, ale výraz —
+je proto jednoznačný v obou režimech a zůstává delegovatelný. `SortByColumns`
+je z tabulky `SLOUPCOVE_FUNKCE` v `check_app.py` odebraná i s vysvětlením,
+aby na ni nikdo (ani já) znovu nepoužil identifikátory.
+
+**`deploy/procesnimapa_1_0_0_14.zip`** — brány čisté, dvě varování (výjimka
+z delegace u `Distinct`, `Sort` v `Items` se přepočítá při překreslení).
+Balík 1.0.0.13 smazán.
+
 ## 40 chyb ve vzorcích — příčina dva popisky, opraveno v 1.0.0.13 (20.08.2026)
 
 Po importu 1.0.0.12 hlásilo Studio ~40 chyb typu „Expected operator" a
