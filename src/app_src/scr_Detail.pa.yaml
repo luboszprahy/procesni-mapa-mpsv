@@ -315,14 +315,20 @@ Screens:
             Width: =300
             X: =700
             Y: =324
-      - txt_UtvarDetail:
-          Control: Classic/TextInput@2.3.2
+      - drp_UtvarDetail:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Oddělení, které aktivitu skutečně vykonává a nese za ni odpovědnost — číslem, např. 711. Podle tohoto pole se filtruje seznam a jednou podle něj bude sestavený text organizačního řádu. Číselník útvarů zatím není, píše se ručně; pozor na překlepy, jinak se aktivita ve filtru schová."'
-            HintText: ="Oddělení, které aktivitu vykonává — např. 711"
-            Default: =If(varNova, "", varAktivita.vykonava)
+            Tooltip: '="Útvar, který aktivitu vykonává a nese za ni odpovědnost. Vybírá se z číselníku útvarů, aby se do evidence nedostaly překlepy — podle tohoto pole se filtruje seznam a jednou z něj bude sestavený text organizačního řádu. Chybí-li útvar v nabídce, doplní ho správce do listu Útvary."'
+            AllowEmptySelection: =true
+            Default: |-
+              =If(
+                  varNova,
+                  "",
+                  LookUp(colUtvary, Title = varAktivita.vykonava, Title & " · " & nazev)
+              )
             Font: =Font.'Open Sans'
             Height: =40
+            Items: =Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev)
             Size: =13
             Width: =300
             X: =700
@@ -338,14 +344,20 @@ Screens:
             Width: =300
             X: =1020
             Y: =324
-      - txt_SekceDetail:
-          Control: Classic/TextInput@2.3.2
+      - drp_SekceDetail:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Číslo sekce, pod kterou vykonávající útvar patří (např. 7). Slouží k filtrování a k rozdělení evidence mezi sekční správce procesního rámce."'
-            HintText: ="Číslo sekce — např. 7"
-            Default: =If(varNova, "", varAktivita.sekce)
+            Tooltip: '="Sekce, pod kterou vykonávající útvar patří. Vybírá se z číselníku útvarů (úroveň sekce). Podle sekce se dělí evidence mezi sekční správce procesního rámce a filtruje se seznam aktivit."'
+            AllowEmptySelection: =true
+            Default: |-
+              =If(
+                  varNova,
+                  "",
+                  LookUp(colUtvary, Title = varAktivita.sekce, Title & " · " & nazev)
+              )
             Font: =Font.'Open Sans'
             Height: =40
+            Items: =Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev)
             Size: =13
             Width: =300
             X: =1020
@@ -469,11 +481,11 @@ Screens:
                                   nazev: txt_Nazev.Text,
                                   nazev_kratky: Left(txt_Nazev.Text, 150),
                                   dilci_proces_kod: Left(drp_Dilci.Selected.Value, 9),
-                                  vykonava: txt_UtvarDetail.Text,
+                                  vykonava: Left(drp_UtvarDetail.Selected.Value, Find(" ·", drp_UtvarDetail.Selected.Value & " ·") - 1),
                                   spolupracuje: txt_Spolupracuje.Text,
                                   vnitrni_predpis: txt_Predpis.Text,
                                   text_pro_or: txt_TextOR.Text,
-                                  sekce: txt_SekceDetail.Text,
+                                  sekce: Left(drp_SekceDetail.Selected.Value, Find(" ·", drp_SekceDetail.Selected.Value & " ·") - 1),
                                   stav: { Value: drp_StavDetail.Selected.Value },
                                   datum_aktualizace: Now()
                               }

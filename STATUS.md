@@ -2,6 +2,30 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## Číselník útvarů zapojen — 1.0.0.16 (20.08.2026)
+
+Uživatel dodal `input/procesnimapa_1_0_0_15.zip` **bez chyb ve Studiu**
+a s připojeným listem `Útvary` (GUID `774d8b0a`). Appka ho teď používá:
+
+- `App.OnStart` načítá `colUtvary` z číselníku a z něj staví nabídky filtrů
+  (`kód · název`, zvlášť sekce a zvlášť odbory/oddělení),
+- v seznamu filtrují **kódy držené v proměnných** (`varUtvarKod`, `varSekceKod`),
+  které se plní v `OnChange` — dotaz nad `Aktivity` tak zůstává delegovatelný,
+- v detailu jsou **„Vykonává útvar" a „Sekce" nabídky z číselníku**, ne volný
+  text; ukládá se jen kód (`Left(x, Find(" ·", x & " ·") - 1)` — spojka na konci
+  zaručí, že `Find` neselže ani u prázdného výběru).
+
+**Výjimka z delegace padla.** `Distinct` nad `Aktivity` už v appce není,
+`VYJIMKY_DELEGACE` v `check_app.py` je prázdná a kontrola nehlásí varování.
+`check_solution.py` navíc hlídá, že připojení listu `Útvary` z balíku nezmizí.
+
+**`deploy/procesnimapa_1_0_0_16.zip`** — postaveno ze základu 1.0.0.15,
+brány čisté. Zbývá jediné varování (`Sort` v `Items` se přepočítá při
+překreslení), vědomé.
+
+**Pozn.:** ve Studiu se do appky připojily i `Documents` a `CustomGallerySample`
+— nevadí, ale při úklidu před předáním je odpojit.
+
 ## SortByColumns neumí identifikátory — 1.0.0.14 (20.08.2026)
 
 Po 1.0.0.13 zbylo 6 chyb, všechny v `gal_Aktivity.Items`: `SortByColumns`

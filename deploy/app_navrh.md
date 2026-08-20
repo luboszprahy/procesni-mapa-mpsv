@@ -54,12 +54,17 @@ textové pole (hledá se od začátku názvu, jinak by se ztratila delegace).
 Nabídky sekce a útvaru plní `App.OnStart` z `Distinct(Aktivity, …)` do kolekcí
 `colSekce` a `colUtvary`, první položka je `(vše)`.
 
-**Vědomý ústupek:** `Distinct` nad `Aktivity` delegovatelný není — nad 2 000
-aktivitami přestane být nabídka úplná. Jiný zdroj hodnot dnes neexistuje
-(útvary ani sekce nemají číselník), takže je to nejlevnější řešení do doby,
-než rejstřík naroste; pak je potřeba založit číselník útvarů. Výjimka je
-zapsaná v `src/check_app.py` (`VYJIMKY_DELEGACE`) a kontrola ji při každém
-běhu vypíše jako varování, aby se na ni nezapomnělo.
+Nabídky se plní **z číselníku `Útvary`** (list, viz `deploy/sharepoint_schema.md`),
+ne z hodnot v aktivitách: číselník je malý, načte se celý do kolekce, takže
+nabídka zůstane úplná bez ohledu na to, kolik aktivit v rejstříku je.
+Položka má tvar `kód · název`; do dat se ukládá jen kód, který se z ní
+odřízne (`Left(x, Find(" ·", x & " ·") - 1)` — spojka na konci zaručí, že
+`Find` nikdy neselže, ani u prázdného výběru).
+
+Totéž platí v detailu aktivity: **„Vykonává útvar" a „Sekce" jsou nabídky
+z číselníku**, ne volný text — tím se do evidence nedostanou překlepy, které
+by aktivitu schovaly před filtrem. Chybí-li útvar v nabídce, doplní ho správce
+do listu `Útvary`.
 
 Řazení řeší nabídka „Řadit podle" (kód / název / útvar) přes `SortByColumns`
 nad indexovanými sloupci — zůstává delegovatelné. Proto je filtr ve vzorci

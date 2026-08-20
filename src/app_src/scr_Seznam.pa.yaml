@@ -69,11 +69,20 @@ Screens:
       - drp_Sekce:
           Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Filtruje podle čísla sekce, která aktivitu vykonává. Nabídka se plní z hodnot, které v aktivitách skutečně jsou — co v datech není, tady nenajdeš. „(vše)“ vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
+            Tooltip: '="Filtruje podle sekce, pod kterou vykonávající útvar patří. Nabídka se plní z číselníku útvarů, takže je úplná bez ohledu na to, kolik aktivit v rejstříku je. „(vše)“ vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
-            Items: =colSekce
+            Items: =colSekceNabidka
+            OnChange: |-
+              =Set(
+                  varSekceKod,
+                  If(
+                      drp_Sekce.Selected.Value = "(vše)",
+                      "",
+                      Left(drp_Sekce.Selected.Value, Find(" ·", drp_Sekce.Selected.Value & " ·") - 1)
+                  )
+              )
             Size: =13
             Width: =140
             X: =436
@@ -81,11 +90,20 @@ Screens:
       - drp_Utvar:
           Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Filtruje podle oddělení, které aktivitu vykonává (např. 711). Nabídka se plní z hodnot v aktivitách. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)“."'
+            Tooltip: '="Filtruje podle útvaru, který aktivitu vykonává. Nabídka je z číselníku útvarů ve tvaru „kód · název“ a obsahuje odbory i oddělení. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)“."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
-            Items: =colUtvary
+            Items: =colUtvarNabidka
+            OnChange: |-
+              =Set(
+                  varUtvarKod,
+                  If(
+                      drp_Utvar.Selected.Value = "(vše)",
+                      "",
+                      Left(drp_Utvar.Selected.Value, Find(" ·", drp_Utvar.Selected.Value & " ·") - 1)
+                  )
+              )
             Size: =13
             Width: =180
             X: =592
@@ -150,23 +168,23 @@ Screens:
                   Sort(Filter(
                       Aktivity,
                       IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
-                      drp_Sekce.Selected.Value = "(vše)" || sekce = drp_Sekce.Selected.Value,
-                      drp_Utvar.Selected.Value = "(vše)" || vykonava = drp_Utvar.Selected.Value,
+                      IsBlank(varSekceKod) || sekce = varSekceKod,
+                      IsBlank(varUtvarKod) || vykonava = varUtvarKod,
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
                   ), nazev_kratky, SortOrder.Ascending),
                   "útvar",
                   Sort(Filter(
                       Aktivity,
                       IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
-                      drp_Sekce.Selected.Value = "(vše)" || sekce = drp_Sekce.Selected.Value,
-                      drp_Utvar.Selected.Value = "(vše)" || vykonava = drp_Utvar.Selected.Value,
+                      IsBlank(varSekceKod) || sekce = varSekceKod,
+                      IsBlank(varUtvarKod) || vykonava = varUtvarKod,
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
                   ), vykonava, SortOrder.Ascending),
                   Sort(Filter(
                       Aktivity,
                       IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
-                      drp_Sekce.Selected.Value = "(vše)" || sekce = drp_Sekce.Selected.Value,
-                      drp_Utvar.Selected.Value = "(vše)" || vykonava = drp_Utvar.Selected.Value,
+                      IsBlank(varSekceKod) || sekce = varSekceKod,
+                      IsBlank(varUtvarKod) || vykonava = varUtvarKod,
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
                   ), Title, SortOrder.Ascending)
               )

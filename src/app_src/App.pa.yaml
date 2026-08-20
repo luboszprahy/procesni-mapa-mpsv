@@ -3,21 +3,22 @@
 # varMapaUrl je JEDINÉ místo s adresou publikované mapy. Canvas app umí číst
 # jen datasetové proměnné prostředí, textové ne — dokud nevznikne list
 # Nastaveni (F3), musí adresa být tady. Při přenosu na MPSV se mění tady.
-# colUtvary/colSekce plní nabídky filtrů. Distinct nad Aktivitami není
-# delegovatelný — nad 2 000 aktivitami by nabídka přestala být úplná.
-# Do té doby je to nejlevnější zdroj hodnot; pak bude potřeba číselník útvarů.
+# Nabídky útvarů a sekcí se plní z číselníku 'Útvary', ne z hodnot v aktivitách:
+# číselník je malý a načte se celý, takže nabídka je úplná bez ohledu na to,
+# kolik aktivit v rejstříku je. Položka nabídky má tvar "kód · název".
 App:
   Properties:
     OnStart: |-
       =Concurrent(
           ClearCollect(colAgendy, ShowColumns(Agendy, Title, nazev, vlastnik)),
           ClearCollect(colProcesy, ShowColumns(Procesy, Title, nazev, agenda_kod, vlastnik)),
-          ClearCollect(colDilci, ShowColumns('Dílčí procesy', Title, nazev, proces_kod, vlastnik))
+          ClearCollect(colDilci, ShowColumns('Dílčí procesy', Title, nazev, proces_kod, vlastnik)),
+          ClearCollect(colUtvary, ShowColumns('Útvary', Title, nazev, uroven, nadrizeny_kod))
       );
-      ClearCollect(colUtvary, { Value: "(vše)" });
-      Collect(colUtvary, Distinct(Aktivity, vykonava));
-      ClearCollect(colSekce, { Value: "(vše)" });
-      Collect(colSekce, Distinct(Aktivity, sekce));
+      ClearCollect(colUtvarNabidka, { Value: "(vše)" });
+      Collect(colUtvarNabidka, Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev));
+      ClearCollect(colSekceNabidka, { Value: "(vše)" });
+      Collect(colSekceNabidka, Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev));
       Set(varMapaUrl, "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/procesni_mapa.html");
       Set(varNova, false);
       Set(varAktivita, Blank())

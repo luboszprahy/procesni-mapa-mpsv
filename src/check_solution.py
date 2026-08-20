@@ -23,7 +23,8 @@ VSTUP = Path(_a.vstup)
 VYSTUP = Path(_a.vystup)
 
 OCEKAVANE_OBRAZOVKY = {"scr_Seznam", "scr_Detail", "scr_Vazby"}
-OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces"}
+OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces",
+                   "Útvary"}
 
 chyby = []
 varovani = []

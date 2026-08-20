@@ -43,11 +43,10 @@ VELKE_LISTY = ["Aktivity", "Vazba aktivita–dílčí proces"]
 # Vědomé ústupky z delegace: (control, vlastnost, funkce) -> proč se to smí.
 # Hlásí se jako varování, ne chyba — ale nesmí zmizet z výstupu, aby se na ně
 # při růstu dat přišlo dřív, než začnou tiše ořezávat.
-VYJIMKY_DELEGACE = {
-    ("App", "OnStart", "Distinct"):
-        "nabídky filtrů útvaru a sekce; jiný zdroj hodnot než Aktivity neexistuje. "
-        "Nad 2 000 aktivitami přestane být nabídka úplná — pak založit číselník útvarů",
-}
+# (Prázdné. Výjimka pro Distinct nad Aktivitami padla 20.08.2026 — nabídky
+# filtrů se plní z číselníku Útvary, takže nedelegovatelný dotaz nad velkým
+# listem už v appce není.)
+VYJIMKY_DELEGACE = {}
 
 # Appka běží s příznakem supportcolumnnamesasidentifiers = True (Properties.json
 # v .msapp), takže názvy sloupců se těmto funkcím předávají jako identifikátory.
