@@ -1,6 +1,55 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 15:25
+Aktualizováno: 2026-08-20 18:40
+
+## Fulltext, mazání s potvrzením, datum vytvoření — 1.0.0.23 (20.08.2026 18:40)
+
+**Hledání najde řetězec kdekoli v názvu i v kódu.** `StartsWith` hledal jen od
+začátku názvu; nahradil ho `Search(…, txt, nazev_kratky, Title)`.
+
+Cena za to je delegace: **`Search` delegovatelný není** a SharePoint konektor
+umí z textových operací delegovat jedině `StartsWith`. Aby to bolelo co nejmíň,
+je `Search` navlečený **až na výsledek delegovaného `Filter`** — sekce, útvar
+a stav zúží dotaz na serveru nad celým rejstříkem a fulltext běží nad tím, co
+přijde. Do 2 000 aktivit (dnes 46) je výsledek úplný; nad tím prohledá jen
+první okno. `lbl_ChipFiltr` na to **oranžově upozorní**, když se hledá bez
+zúžení, a výjimka je pojmenovaná ve `VYJIMKY_DELEGACE`, takže z výstupu brány
+nezmizí. Až rejstřík povyroste, je náhradou fulltext v publikované HTML mapě
+nebo pomocný indexovaný sloupec s normalizovaným názvem.
+
+**Mazání aktivity přímo ze seznamu, ale jen přes potvrzení.** Ikona koše
+v řádku pouze nastaví `varSmazat`; smaže až tlačítko v dialogu, který má
+červený pruh, vypíše kód i název a připomíná, že zmizí i zařazení do dílčích
+procesů. Power Apps nemá nativní `confirm()`, takže je to vrstva nad
+obrazovkou; stín zachytí kliknutí mimo kartu.
+
+**Akční ikony musely nad překryvnou vrstvu.** `lbl_RadekPrekryv` pokrývá celý
+řádek kvůli hoveru, takže ikony pod ním by nešly kliknout — v pořadí potomků
+jsou proto až za ním. Alternativa (zkrátit vrstvu) by znamenala, že se pravý
+okraj řádku při najetí nezvýrazní.
+
+**Nová brána `kontrola_potvrzeni_mazani`.** Uvnitř galerie se nesmí objevit
+`Remove`/`RemoveIf` — řádek je celý klikací a ikony jsou malé, takže mazání
+přímo v šabloně řádku znamená nevratnou ztrátu dat na jeden překlep. Kontrola
+rovnou našla `ico_Odebrat` na `scr_Vazby`; tam je to ale **vratná** operace
+(vazba se vrátí kliknutím na + vedle a primární vazbu vzorec odebrat nedovolí),
+takže dostala pojmenovanou výjimku ve `VYJIMKY_MAZANI` a hlásí se jako varování.
+
+**Sloupec VYTVOŘENO a řazení podle něj.** Bere se vestavěný SharePointí
+`Created`, ne `datum_aktualizace` — datum vzniku ručně změnit nejde. První klik
+na hlavičku dá nejnovější nahoru.
+
+**Šipka řazení je vidět.** Aktivní sloupec je nově **modrý** a nese `▲`/`▼`;
+dřív byla šipka šedá v šedém textu velikosti 10. Výchozí řazení je podle kódu.
+
+**Filtry zdrobněly** — výška 36 → 32, písmo 12 → 11, popisky 10 → 9, užší pole.
+
+**Mutační testy:** 3 nad kontrolou mazání a datem (všechny chycené).
+
+### Nedořešené, čeká na rozhodnutí
+`btn_Smazat` v detailu aktivity maže **bez potvrzení** — je mimo galerii, takže
+ho nová brána nehlídá. Nekonzistence proti seznamu; sjednotit by znamenalo
+přidat týž dialog i na `scr_Detail`.
 
 ## Tlačítko „Zobrazit v HTML" míří na náhled knihovny — 1.0.0.22 (20.08.2026 15:25)
 

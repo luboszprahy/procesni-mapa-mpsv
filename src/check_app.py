@@ -43,10 +43,18 @@ VELKE_LISTY = ["Aktivity", "Vazba aktivita–dílčí proces"]
 # Vědomé ústupky z delegace: (control, vlastnost, funkce) -> proč se to smí.
 # Hlásí se jako varování, ne chyba — ale nesmí zmizet z výstupu, aby se na ně
 # při růstu dat přišlo dřív, než začnou tiše ořezávat.
-# (Prázdné. Výjimka pro Distinct nad Aktivitami padla 20.08.2026 — nabídky
-# filtrů se plní z číselníku Útvary, takže nedelegovatelný dotaz nad velkým
-# listem už v appce není.)
-VYJIMKY_DELEGACE = {}
+VYJIMKY_DELEGACE = {
+    ("gal_Aktivity", "Items", "Search"): (
+        "fulltext přes celý název i kód; SharePoint konektor deleguje jen "
+        "StartsWith, takže hledání kdekoli uvnitř řetězce delegovat nelze. "
+        "Search je proto navlečený AŽ NA VÝSLEDEK delegovaného Filter — sekce, "
+        "útvar a stav zúží dotaz na serveru nad celým rejstříkem a fulltext "
+        "běží nad tím, co přijde. Do 2 000 aktivit je výsledek úplný, nad tím "
+        "prohledá jen první okno a lbl_ChipFiltr na to oranžově upozorní. "
+        "Až rejstřík povyroste, je náhradou fulltext v publikované HTML mapě "
+        "nebo pomocný indexovaný sloupec s normalizovaným názvem"
+    ),
+}
 
 # Appka běží s příznakem supportcolumnnamesasidentifiers = True (Properties.json
 # v .msapp), takže názvy sloupců se těmto funkcím předávají jako identifikátory.
@@ -646,6 +654,68 @@ def porovnej(jmeno_obrazovky, obdelniky):
             )
 
 
+# Mazání v galerii, které se smí obejít bez potvrzení: (obrazovka, control) -> proč.
+# Hlásí se jako varování, ne chyba — smysl je, aby každé takové místo bylo
+# vidět a dalo se znovu posoudit, ne aby zmizelo.
+VYJIMKY_MAZANI = {
+    ("scr_Vazby", "ico_Odebrat"): (
+        "odebírá jen zařazení aktivity do dalšího dílčího procesu, ne data — "
+        "vrátí se jedním kliknutím na + v nabídce vedle, a primární vazbu "
+        "vzorec odebrat nedovolí. Dialog by u vratné operace jen překážel"
+    ),
+}
+
+
+def kontrola_potvrzeni_mazani(soubory):
+    """Uvnitř galerie se nesmí mazat — jen otevřít potvrzovací dialog.
+
+    Řádek galerie se dá trefit omylem (je celý klikací a ikony jsou malé),
+    takže `Remove`/`RemoveIf` přímo v šabloně řádku znamená nevratnou ztrátu
+    dat na jeden překlep. Mazat smí až tlačítko dialogu, které je jinde na
+    obrazovce a vyžaduje druhé kliknutí.
+
+    Vratné operace (odebrání vazby) patří do VYJIMKY_MAZANI a hlásí se jako
+    varování.
+    """
+    def uvnitr_galerie(uzel):
+        for polozka in uzel or []:
+            for jmeno, definice in polozka.items():
+                deti = definice.get("Children")
+                if jmeno.startswith("gal_"):
+                    yield from vsechny(deti)
+                elif deti:
+                    yield from uvnitr_galerie(deti)
+
+    def vsechny(uzel):
+        for polozka in uzel or []:
+            for jmeno, definice in polozka.items():
+                yield jmeno, definice
+                yield from vsechny(definice.get("Children"))
+
+    for cesta in soubory:
+        dokument = nacti_yaml(cesta)
+        for koren, obsah in (dokument or {}).items():
+            if koren != "Screens":
+                continue
+            for jmeno_obrazovky, telo in obsah.items():
+                for jmeno, definice in uvnitr_galerie(telo.get("Children")):
+                    for prop, text in (definice.get("Properties") or {}).items():
+                        if not re.search(r"\bRemove(If)?\s*\(", str(text)):
+                            continue
+                        duvod = VYJIMKY_MAZANI.get((jmeno_obrazovky, jmeno))
+                        if duvod:
+                            varovani.append(
+                                f"{jmeno_obrazovky}: '{jmeno}.{prop}' maže uvnitř galerie "
+                                f"bez potvrzení — povolená výjimka: {duvod}"
+                            )
+                        else:
+                            chyby.append(
+                                f"{jmeno_obrazovky}: '{jmeno}.{prop}' maže přímo uvnitř "
+                                "galerie — řádek se dá trefit omylem, takže mazat smí "
+                                "až tlačítko potvrzovacího dialogu"
+                            )
+
+
 def kontrola_adresy_mapy(vzorce):
     """varMapaUrl nesmí být přímý odkaz na soubor v knihovně.
 
@@ -695,6 +765,7 @@ def main():
     kontrola_navigace(vzorce, obrazovky)
     kontrola_prekryvu(soubory)
     kontrola_adresy_mapy(vzorce)
+    kontrola_potvrzeni_mazani(soubory)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
     kontrola_syntaxe(vzorce)

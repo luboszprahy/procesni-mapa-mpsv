@@ -46,5 +46,6 @@ App:
       Set(varNova, false);
       Set(varAktivita, Blank());
       Set(varRazeni, "kod");
-      Set(varRazeniAsc, true)
+      Set(varRazeniAsc, true);
+      Set(varSmazat, Blank())
     Theme: =PowerAppsTheme
