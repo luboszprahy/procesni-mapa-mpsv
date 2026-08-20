@@ -8,9 +8,9 @@ Screens:
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
       OnVisible: |-
         =Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
-        Reset(cmb_Agenda);
-        Reset(cmb_Proces);
-        Reset(cmb_Dilci)
+        Reset(drp_Agenda);
+        Reset(drp_Proces);
+        Reset(drp_Dilci)
     Children:
       - rec_HlavickaDetail:
           Control: Rectangle@2.3.0
@@ -59,20 +59,17 @@ Screens:
             Width: =620
             X: =40
             Y: =96
-      - cmb_Agenda:
-          Control: Classic/ComboBox@2.4.0
+      - drp_Agenda:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            DefaultSelectedItems: =Filter(colAgendy, Title = Left(varDpKod, 2))
-            DisplayFields: =["nazev"]
+            AllowEmptySelection: =true
+            Default: =If(varNova, "", LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev))
             Font: =Font.'Open Sans'
             Height: =40
-            Items: =colAgendy
+            Items: =Distinct(colAgendy, Title & " · " & nazev)
             OnChange: |-
-              =Reset(cmb_Proces);
-              Reset(cmb_Dilci)
-            SearchFields: =["nazev"]
-            SearchItems: =Search(colAgendy, Self.SearchText, nazev)
-            SelectMultiple: =false
+              =Reset(drp_Proces);
+              Reset(drp_Dilci)
             Size: =13
             Width: =620
             X: =40
@@ -88,23 +85,19 @@ Screens:
             Width: =620
             X: =40
             Y: =172
-      - cmb_Proces:
-          Control: Classic/ComboBox@2.4.0
+      - drp_Proces:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            DefaultSelectedItems: =Filter(colProcesy, Title = Left(varDpKod, 5))
-            DisplayFields: =["nazev"]
+            AllowEmptySelection: =true
+            Default: =If(varNova, "", LookUp(colProcesy, Title = Left(varDpKod, 5), Title & " · " & nazev))
             Font: =Font.'Open Sans'
             Height: =40
-            Items: =Filter(colProcesy, agenda_kod = cmb_Agenda.Selected.Title)
-            OnChange: =Reset(cmb_Dilci)
-            SearchFields: =["nazev"]
-            SearchItems: |-
-              =Search(
-                  Filter(colProcesy, agenda_kod = cmb_Agenda.Selected.Title),
-                  Self.SearchText,
-                  nazev
+            Items: |-
+              =Distinct(
+                  Filter(colProcesy, agenda_kod = Left(drp_Agenda.Selected.Value, 2)),
+                  Title & " · " & nazev
               )
-            SelectMultiple: =false
+            OnChange: =Reset(drp_Dilci)
             Size: =13
             Width: =620
             X: =40
@@ -120,22 +113,18 @@ Screens:
             Width: =620
             X: =40
             Y: =248
-      - cmb_Dilci:
-          Control: Classic/ComboBox@2.4.0
+      - drp_Dilci:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            DefaultSelectedItems: =Filter(colDilci, Title = varDpKod)
-            DisplayFields: =["nazev"]
+            AllowEmptySelection: =true
+            Default: =If(varNova, "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
             Font: =Font.'Open Sans'
             Height: =40
-            Items: =Filter(colDilci, proces_kod = cmb_Proces.Selected.Title)
-            SearchFields: =["nazev"]
-            SearchItems: |-
-              =Search(
-                  Filter(colDilci, proces_kod = cmb_Proces.Selected.Title),
-                  Self.SearchText,
-                  nazev
+            Items: |-
+              =Distinct(
+                  Filter(colDilci, proces_kod = Left(drp_Proces.Selected.Value, 5)),
+                  Title & " · " & nazev
               )
-            SelectMultiple: =false
             Size: =13
             Width: =620
             X: =40
@@ -225,7 +214,7 @@ Screens:
             Height: =40
             PaddingLeft: =12
             Size: =13
-            Text: =cmb_Agenda.Selected.vlastnik
+            Text: =LookUp(colAgendy, Title = Left(drp_Agenda.Selected.Value, 2), vlastnik)
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =700
@@ -249,7 +238,7 @@ Screens:
             Height: =40
             PaddingLeft: =12
             Size: =13
-            Text: =cmb_Proces.Selected.vlastnik
+            Text: =LookUp(colProcesy, Title = Left(drp_Proces.Selected.Value, 5), vlastnik)
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =700
@@ -273,7 +262,7 @@ Screens:
             Height: =40
             PaddingLeft: =12
             Size: =13
-            Text: =cmb_Dilci.Selected.vlastnik
+            Text: =LookUp(colDilci, Title = Left(drp_Dilci.Selected.Value, 9), vlastnik)
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =700
@@ -386,13 +375,13 @@ Screens:
             Height: =44
             OnSelect: |-
               =Set(varChyba, "");
-              If(IsBlank(cmb_Dilci.Selected.Title), Set(varChyba, "Vyber dílčí proces."));
+              If(IsBlank(drp_Dilci.Selected.Value), Set(varChyba, "Vyber dílčí proces."));
               If(IsBlank(txt_Nazev.Text), Set(varChyba, "Vyplň znění aktivity."));
               If(
                   !IsBlank(varChyba),
                   Notify(varChyba, NotificationType.Warning),
                   Set(varStaryDp, If(varNova, "", varAktivita.dilci_proces_kod));
-                  Set(varPrefix, cmb_Dilci.Selected.Title & "-");
+                  Set(varPrefix, Left(drp_Dilci.Selected.Value, 9) & "-");
                   Set(
                       varNovyKod,
                       If(
@@ -420,7 +409,7 @@ Screens:
                                   Title: varNovyKod,
                                   nazev: txt_Nazev.Text,
                                   nazev_kratky: Left(txt_Nazev.Text, 150),
-                                  dilci_proces_kod: cmb_Dilci.Selected.Title,
+                                  dilci_proces_kod: Left(drp_Dilci.Selected.Value, 9),
                                   vykonava: txt_UtvarDetail.Text,
                                   spolupracuje: txt_Spolupracuje.Text,
                                   vnitrni_predpis: txt_Predpis.Text,
@@ -431,15 +420,15 @@ Screens:
                               }
                           );
                           If(
-                              varNova || varStaryDp <> cmb_Dilci.Selected.Title,
+                              varNova || varStaryDp <> Left(drp_Dilci.Selected.Value, 9),
                               RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varNovyKod, primarni.Value = "ano");
                               Patch(
                                   'Vazba aktivita–dílčí proces',
                                   Defaults('Vazba aktivita–dílčí proces'),
                                   {
-                                      Title: varNovyKod & "__" & cmb_Dilci.Selected.Title,
+                                      Title: varNovyKod & "__" & Left(drp_Dilci.Selected.Value, 9),
                                       aktivita_kod: varNovyKod,
-                                      dilci_proces_kod: cmb_Dilci.Selected.Title,
+                                      dilci_proces_kod: Left(drp_Dilci.Selected.Value, 9),
                                       primarni: { Value: "ano" }
                                   }
                               )

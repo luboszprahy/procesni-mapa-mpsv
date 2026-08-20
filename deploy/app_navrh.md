@@ -1,7 +1,7 @@
 # Návrh pořizovací aplikace — Rejstřík agend a procesů MPSV
 
 Canvas app nad SharePoint listy podle `deploy/sharepoint_schema.md`.
-Pokrývá FR-2 z `PRD.md`. Verze návrhu 1.0 (19.08.2026).
+Pokrývá FR-2 z `PRD.md`. Verze návrhu 1.1 (20.08.2026) — kaskáda přepsána na dropdowny, viz níže.
 
 ## Proč canvas app a ne formulář SharePointu
 
@@ -42,12 +42,16 @@ Proto:
 ```
 Filter(
     Aktivity,
-    (IsBlank(cmb_Sekce.Selected.Value)   || sekce = cmb_Sekce.Selected.Value),
-    (IsBlank(cmb_Utvar.Selected.Value)   || vykonava = cmb_Utvar.Selected.Value),
-    (IsBlank(cmb_Stav.Selected.Value)    || stav = cmb_Stav.Selected.Value),
-    (IsBlank(txt_Hledat.Text)            || StartsWith(nazev_kratky, txt_Hledat.Text))
+    IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
+    IsBlank(txt_Sekce.Text)  || sekce = txt_Sekce.Text,
+    IsBlank(txt_Utvar.Text)  || vykonava = txt_Utvar.Text,
+    drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
 )
 ```
+
+Sekce a útvar jsou **textová pole**, ne nabídky: `Distinct()` nad `Aktivity`
+delegovatelný není, takže by nabídka nad 2 000 aktivitami tiše ztratila hodnoty.
+Stav je nabídka, protože jeho hodnoty jsou dané schématem (`Choice`).
 
 Hledání je tedy **od začátku názvu**, ne „obsahuje". Popisek pole to musí říct
 („Název začíná na…"), jinak uživatel nabude dojmu, že hledání nefunguje.
@@ -85,27 +89,59 @@ klíč `<aktivita_kod>__<dilci_proces_kod>`, `primarni` = `ne`
 
 ```
 Concurrent(
-    ClearCollect(colAgendy,  ShowColumns(Agendy,       "Title","nazev","vlastnik")),
-    ClearCollect(colProcesy, ShowColumns(Procesy,      "Title","nazev","agenda_kod","vlastnik")),
-    ClearCollect(colDilci,   ShowColumns(DilciProcesy, "Title","nazev","proces_kod","vlastnik"))
+    ClearCollect(colAgendy,  ShowColumns(Agendy,           Title, nazev, vlastnik)),
+    ClearCollect(colProcesy, ShowColumns(Procesy,          Title, nazev, agenda_kod, vlastnik)),
+    ClearCollect(colDilci,   ShowColumns('Dílčí procesy',  Title, nazev, proces_kod, vlastnik))
 )
 ```
 
-`ShowColumns` chce **identifikátory sloupců**, zatímco `SortByColumns` řetězce —
-záměna je běžný zdroj chyb. Výběr sloupců není kosmetika: bez něj se tahají celé
-záznamy včetně systémových polí a načtení se zbytečně prodlouží.
+Názvy sloupců jsou **identifikátory, ne řetězce** — appka běží s příznakem
+`supportcolumnnamesasidentifiers` (`Properties.json` v `.msapp`). S řetězci
+`ShowColumns` neprojde, kolekce zůstanou bez schématu a všechny vzorce, které
+se na jejich sloupce odkazují, spadnou na „Name isn't valid". Totéž platí pro
+`Search()`. Výběr sloupců není kosmetika: bez něj se tahají celé záznamy
+včetně systémových polí a načtení se zbytečně prodlouží.
 
 ## Kaskáda číselníků
 
+Tři `Classic/DropDown`, položky se skládají jako **`kód · název`**:
+
 ```
-cmb_Agenda.Items = colAgendy
-cmb_Proces.Items = Filter(colProcesy, agenda_kod = cmb_Agenda.Selected.Title)
-cmb_Dilci.Items  = Filter(colDilci,   proces_kod = cmb_Proces.Selected.Title)
+drp_Agenda.Items = Distinct(colAgendy, Title & " · " & nazev)
+drp_Proces.Items = Distinct(Filter(colProcesy, agenda_kod = Left(drp_Agenda.Selected.Value, 2)),
+                            Title & " · " & nazev)
+drp_Dilci.Items  = Distinct(Filter(colDilci,   proces_kod = Left(drp_Proces.Selected.Value, 5)),
+                            Title & " · " & nazev)
 ```
 
 Filtruje se nad **kolekcemi**, ne nad zdrojem — proto tu delegace nehraje roli.
 Při změně agendy se musí vyresetovat proces i dílčí proces (`Reset()`), jinak
 zůstane viset nekonzistentní kombinace.
+
+**Proč dropdown a ne combobox** (rozhodnuto 20.08.2026 po neúspěšném importu):
+`Classic/ComboBox` má vlastnost `SearchItems` označenou v šabloně jako
+`hidden="true"` — Studio si ji dopočítává, když zdroj navážeš v návrháři,
+ale **z YAML ji nastavit nejde** (packer skončí `PA2108`). Nenastavená přitom
+dědí výchozí hodnotu `Search(ComboBoxSample, Self.SearchText, Value1)`, která
+míří na ukázková data, takže appka po importu hlásí „Name isn't valid".
+Z YAML je tedy tenhle control nepoužitelný v obou variantách.
+
+Ztráta je malá: kaskáda zúží nabídku na jednotky položek (procesy v agendě,
+dílčí procesy v procesu), takže se hledání šeptem nechybí. Fulltext nad celým
+rejstříkem obstarává seznam aktivit a obrazovka vazeb.
+
+**Proč `Distinct` a proč `kód · název`:** klasický dropdown si zobrazovaný
+sloupec drží ve vlastnosti `Value` **vnořené uvnitř `Items`**, a ta se z YAML
+nastavit taky nedá. `Distinct()` vrací jednosloupcovou tabulku se sloupcem
+pojmenovaným přesně `Value`, takže se vazba trefí sama. Kód v textu je pak
+jediné, co spolehlivě vede zpátky na záznam — čte se pevnou délkou
+(`Left(…, 2)` agenda, `5` proces, `9` dílčí proces), protože kódy
+`AA-BB-CCC-DDDD` mají pevnou šířku. Vlastníci se dohledávají `LookUp`
+nad kolekcí podle téhož kódu.
+
+`AllowEmptySelection = true` je u všech tří povinné: bez něj dropdown vybere
+první položku sám a nová aktivita by tiše vznikla pod prvním dílčím procesem
+v seznamu.
 
 ## Přidělení kódu aktivity
 
@@ -113,7 +149,7 @@ Kód `AA-BB-CCC-DDDD` vzniká z vybraného dílčího procesu a prvního volnéh
 čtyřčíslí. Musí se počítat **nad zdrojem, delegovaně**, ne nad kolekcí:
 
 ```
-Set(varPrefix, cmb_Dilci.Selected.Title & "-");
+Set(varPrefix, Left(drp_Dilci.Selected.Value, 9) & "-");
 Set(varPosledni,
     First(
         Sort(
@@ -150,13 +186,13 @@ IfError(
             Title:            varNovyKod,
             nazev:            txt_Nazev.Text,
             nazev_kratky:     Left(txt_Nazev.Text, 150),
-            dilci_proces_kod: cmb_Dilci.Selected.Title,
+            dilci_proces_kod: Left(drp_Dilci.Selected.Value, 9),
             vykonava:         txt_Utvar.Text,
             spolupracuje:     txt_Spolupracuje.Text,
             vnitrni_predpis:  txt_Predpis.Text,
             text_pro_or:      txt_TextOR.Text,
             sekce:            txt_Sekce.Text,
-            stav:             cmb_Stav.Selected.Value,
+            stav:             { Value: drp_StavDetail.Selected.Value },
             datum_aktualizace: Now()
         }
     ),
@@ -169,6 +205,14 @@ zatímco import zkracuje na hranici slova a doplňuje výpustku. Srovnání zaji
 pojistné flow `AktualizaceKratkehoNazvu` (`PLAN.md` krok 9b), které hodnotu
 po zápisu přepíše na kanonický tvar. Appka tedy nemusí logiku zkracování
 duplikovat — jen nesmí pole nechat prázdné, protože se podle něj řadí.
+
+## Vazba na dílčí procesy při uložení
+
+Uložení aktivity zakládá i **primární vazbu** do `AktivitaDilciProces`
+(`primarni` = Choice `ano`, zapisuje se `{ Value: "ano" }`), a při změně
+dílčího procesu ji přepíše. Bez toho by se appka rozešla s daty importu,
+kde má primární vazbu každá ze 46 aktivit — a mapa by aktivitu ve větvi
+neukázala.
 
 ## Referenční integrita
 

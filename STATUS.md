@@ -2,6 +2,48 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## F2 — import 1.0.0.6 spadl na PA2108, opraveno v 1.0.0.7 (20.08.2026)
+
+Appka se po importu 1.0.0.6 **neotevřela**:
+`PA2108 : Unknown property 'SearchItems' for control type 'Classic/ComboBox@2.4.0'`
+(3×). Moje oprava předchozí chyby byla tedy špatná — `SearchItems` má
+v šabloně `hidden="true"`, což znamená **vlastnost, kterou Studio dopočítává
+při vazbě v návrháři a z YAML se nastavit nedá**. Zároveň platí, že
+nenastavená dědí `Search(ComboBoxSample, …)`. `Classic/ComboBox` je tedy
+z YAML **nepoužitelný v obou směrech** — nastavit nejde a nenastavit taky ne.
+
+**Řešení: kaskáda přepsána na `Classic/DropDown`** (`drp_Agenda`, `drp_Proces`,
+`drp_Dilci`). Položky jsou `Distinct(…, Title & " · " & nazev)` — `Distinct`
+vrací jednosloupcovou tabulku se sloupcem `Value`, což je přesně jméno, které
+klasický dropdown pro zobrazovaný sloupec čeká (i tahle vlastnost je vnořená
+a z YAML nenastavitelná). Kód se čte pevnou délkou (`Left(…,2/5/9)`), vlastníci
+`LookUp` nad kolekcí. `AllowEmptySelection = true` u všech tří, jinak dropdown
+vybere první položku sám a nová aktivita by tiše vznikla pod prvním dílčím
+procesem.
+
+**Potvrzeno vzorem z praxe:** VendorManagement (PPF produkce) používá moderní
+`ComboBox@0.0.51`, který `SearchItems` vůbec nemá. Ta cesta je otevřená, kdyby
+bylo hledání v kaskádě potřeba — chce ale doplnit šablonu `modernCombobox`
+a nejspíš i příznak `fluentv9controlspreview` (vzor ho má, naše appka ne).
+Dropdown volen proto, že nepřidává žádný nový příznak ani šablonu a kaskáda
+stejně zúží nabídku na jednotky položek.
+
+**Nová offline kontrola (mutačně ověřená):** `check_app.py` odmítá jak
+nastavení `hidden` vlastnosti (PA2108), tak typ controlu, jehož `hidden`
+vlastnost dědí vzorová data — s hláškou „použij jiný typ controlu".
+
+**Důležité zjištění o `pac`:** `pac canvas pack` tuhle chybu **nechytí** —
+zabalí to bez námitek (ověřeno mutací). Lokální bránou je tedy `check_app.py`,
+ne pac. Úspěšný `pack` neříká nic o tom, jestli se appka ve Studiu otevře.
+
+**`deploy/procesnimapa_1_0_0_7.zip`** — postaveno přes `pac`, brána
+`check_solution.py` 90 kontrol / 0 chyb, v balíku žádný `ComboBox`
+ani `SearchItems`, 3× dropdown s `Distinct` a `AllowEmptySelection`.
+
+**`deploy/app_navrh.md` srovnán se skutečností** (verze 1.1): kaskáda,
+identifikátory sloupců, filtr seznamu textovými poli, `primarni` jako Choice
+a zakládání primární vazby při uložení.
+
 ## F2 — 67 chyb ve Studiu diagnostikováno, balík 1.0.0.6 k importu (20.08.2026)
 
 Ze snímků v `input/` (Studio, panel Formulas): **67 chyb, z toho 38 na `scr_Detail`**.

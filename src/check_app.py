@@ -185,8 +185,17 @@ def kontrola_vzorovych_dat(soubory, typy, vzorova):
                 for jmeno, definice, typ in prvky_se_typem(telo):
                     sablona = typy.get(typ)
                     nastavene = set(definice.get("Properties") or {})
-                    for vlastnost, vychozi in vzorova.get(sablona, {}).items():
-                        if vlastnost not in nastavene:
+                    for vlastnost, (vychozi, skryta) in vzorova.get(sablona, {}).items():
+                        if vlastnost in nastavene:
+                            continue
+                        if skryta:
+                            chyby.append(
+                                f"{jmeno}: typ '{typ}' nelze authorovat z YAML — vlastnost "
+                                f"'{vlastnost}' má výchozí hodnotu '{vychozi}' na vzorová data "
+                                f"a přepsat ji nejde (hidden, Studio ji dopočítává při vazbě "
+                                f"v návrháři). Použij jiný typ controlu."
+                            )
+                        else:
                             chyby.append(
                                 f"{jmeno}.{vlastnost}: nenastaveno, takže se použije "
                                 f"výchozí hodnota šablony '{vychozi}' odkazující na "
@@ -200,10 +209,11 @@ def nacti_vzorova_data():
     nalezene = {}
     for sablona in data["sablony"]:
         vlastnosti = {}
-        for shoda in re.finditer(r'<property name="([^"]+)"[^>]*defaultValue="([^"]*)"',
-                                 sablona["Template"]):
-            if "Sample" in shoda.group(2):
-                vlastnosti[shoda.group(1)] = shoda.group(2)
+        for shoda in re.finditer(r'<property name="([^"]+)"([^>]*)>', sablona["Template"]):
+            atributy = shoda.group(2)
+            vychozi = re.search(r'defaultValue="([^"]*)"', atributy)
+            if vychozi and "Sample" in vychozi.group(1):
+                vlastnosti[shoda.group(1)] = (vychozi.group(1), 'hidden="true"' in atributy)
         if vlastnosti:
             nalezene[sablona["Name"]] = vlastnosti
     return nalezene
@@ -311,6 +321,11 @@ def nacti_povolene_vlastnosti():
                 if not vlastnost.tag.endswith("property"):
                     continue
                 jmeno = vlastnost.get("name")
+                # hidden="true" = vlastnost, kterou dopočítává Studio při vazbě
+                # v návrháři (combobox.SearchItems, dropdown.Value). V YAML ji
+                # nastavit nejde — packer skončí PA2108 a appka se neotevře.
+                if vlastnost.get("hidden") == "true":
+                    continue
                 if jmeno and vlastnost.get("direction") != "out":
                     jmena.add(jmeno)
         povolene[sablona["Name"]] = jmena
