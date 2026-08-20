@@ -57,7 +57,7 @@ Screens:
       - txt_Hledat:
           Control: Classic/TextInput@2.3.2
           Properties:
-            Tooltip: '="Hledá podle ZAČÁTKU názvu aktivity, ne kdekoli uvnitř. Napíšeš-li „Tvorba"", najde „Tvorba Služebního řádu"", ale ne „Roční tvorba plánu"". Je to daň za rychlost: takový dotaz umí vyřídit SharePoint sám i nad tisíci aktivitami. Fulltext přes celý rejstřík nabízí publikovaná HTML mapa. Prázdné pole = bez omezení."'
+            Tooltip: '="Hledá podle ZAČÁTKU názvu aktivity, ne kdekoli uvnitř. Napíšeš-li „Tvorba“, najde „Tvorba Služebního řádu“, ale ne „Roční tvorba plánu“. Je to daň za rychlost: takový dotaz umí vyřídit SharePoint sám i nad tisíci aktivitami. Fulltext přes celý rejstřík nabízí publikovaná HTML mapa. Prázdné pole = bez omezení."'
             Default: =""
             Font: =Font.'Open Sans'
             Height: =40
@@ -69,7 +69,7 @@ Screens:
       - drp_Sekce:
           Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Filtruje podle čísla sekce, která aktivitu vykonává. Nabídka se plní z hodnot, které v aktivitách skutečně jsou — co v datech není, tady nenajdeš. „(vše)"" vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
+            Tooltip: '="Filtruje podle čísla sekce, která aktivitu vykonává. Nabídka se plní z hodnot, které v aktivitách skutečně jsou — co v datech není, tady nenajdeš. „(vše)“ vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
@@ -81,7 +81,7 @@ Screens:
       - drp_Utvar:
           Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Filtruje podle oddělení, které aktivitu vykonává (např. 711). Nabídka se plní z hodnot v aktivitách. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)""."'
+            Tooltip: '="Filtruje podle oddělení, které aktivitu vykonává (např. 711). Nabídka se plní z hodnot v aktivitách. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)“."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40

@@ -121,7 +121,7 @@ Screens:
       - drp_Dilci:
           Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…""."'
+            Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…“."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
             Default: =If(varNova, "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
@@ -174,7 +174,7 @@ Screens:
       - txt_Spolupracuje:
           Control: Classic/TextInput@2.3.2
           Properties:
-            Tooltip: '="Útvary, které se na aktivitě podílejí, ale nejsou za ni odpovědné. Víc útvarů odděl středníkem (712; 721). Odpovědný útvar patří do pole „Vykonává útvar"", ne sem."'
+            Tooltip: '="Útvary, které se na aktivitě podílejí, ale nejsou za ni odpovědné. Víc útvarů odděl středníkem (712; 721). Odpovědný útvar patří do pole „Vykonává útvar“, ne sem."'
             HintText: ="Útvary, které se na aktivitě podílejí — např. 712; 721"
             Default: =If(varNova, "", varAktivita.spolupracuje)
             Font: =Font.'Open Sans'
@@ -388,7 +388,7 @@ Screens:
       - drp_StavDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
-            Tooltip: '="Pracovní = rozpracováno, schváleno = potvrzené znění pro organizační řád. Přepnutím na „schváleno"" dáváš najevo, že formulace prošla vlastníkem procesu. Automatické schvalování s notifikacemi součástí této fáze není."'
+            Tooltip: '="Pracovní = rozpracováno, schváleno = potvrzené znění pro organizační řád. Přepnutím na „schváleno“ dáváš najevo, že formulace prošla vlastníkem procesu. Automatické schvalování s notifikacemi součástí této fáze není."'
             Default: =If(varNova, "pracovní", varAktivita.stav.Value)
             Font: =Font.'Open Sans'
             Height: =40

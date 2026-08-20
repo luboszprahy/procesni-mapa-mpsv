@@ -69,6 +69,47 @@ chyby = []
 varovani = []
 
 
+class BezDuplicit(yaml.SafeLoader):
+    """SafeLoader, který duplicitní klíč nahlásí místo tichého přepsání.
+
+    PyYAML poslední výskyt tiše vyhraje, ale packer canvas appky skončí
+    PA1001 „Duplicate name ... used" a appka se neotevře. Kontrola tedy
+    musí být přísnější než parser, jinou past neuvidí.
+    """
+
+
+def _mapovani(nacitac, uzel, deep=False):
+    klice = set()
+    for klic_uzel, _ in uzel.value:
+        klic = nacitac.construct_object(klic_uzel, deep=deep)
+        if klic in klice:
+            raise yaml.constructor.ConstructorError(
+                None, None,
+                f"duplicitní klíč '{klic}' (řádek {klic_uzel.start_mark.line + 1})",
+                uzel.start_mark)
+        klice.add(klic)
+    return yaml.SafeLoader.construct_mapping(nacitac, uzel, deep)
+
+
+BezDuplicit.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    lambda nacitac, uzel: _mapovani(nacitac, uzel))
+
+
+def nacti_yaml(cesta):
+    """Načte pa.yaml; chybu zapíše jako nález, ať výstup zůstane čitelný."""
+    try:
+        return yaml.load(io.open(cesta, encoding="utf-8"), Loader=BezDuplicit)
+    except yaml.YAMLError as chyba:
+        popis = " ".join(str(chyba).split())
+        if not any(popis in x for x in chyby):
+            chyby.append(f"{Path(cesta).name}: {popis}")
+        return {}
+
+
+
+
+
 def nacti_schema():
     data = json.loads(SCHEMA.read_text(encoding="utf-8-sig"))
     return {
@@ -106,7 +147,7 @@ def projdi_stromy(soubory):
 
     for cesta in soubory:
         try:
-            dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+            dokument = nacti_yaml(cesta)
         except yaml.YAMLError as chyba:
             chyby.append(f"{cesta.name}: YAML nelze načíst — {chyba}")
             continue
@@ -186,7 +227,7 @@ def kontrola_vzorovych_dat(soubory, typy, vzorova):
     neexistuje. Studio to hlásí až po importu jako "Name isn't valid".
     """
     for cesta in soubory:
-        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        dokument = nacti_yaml(cesta)
         for koren, obsah in (dokument or {}).items():
             if koren != "Screens":
                 continue
@@ -236,7 +277,7 @@ def kontrola_obsahovych_vychozich(soubory, typy, lokalizovane):
     a appka tvrdí, že data nejsou.
     """
     for cesta in soubory:
-        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        dokument = nacti_yaml(cesta)
         for koren, obsah in (dokument or {}).items():
             if koren != "Screens":
                 continue
@@ -412,7 +453,7 @@ def kontrola_vlastnosti(soubory, povolene, typy):
             "OnSelect", "Items", "Default", "Reset", "Tooltip", "DisplayMode"}
 
     for cesta in soubory:
-        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        dokument = nacti_yaml(cesta)
         for koren, obsah in (dokument or {}).items():
             if koren != "Screens":
                 continue
@@ -453,7 +494,7 @@ def kontrola_unikatnosti(soubory):
     """PA2110 — jména prvků musí být unikátní napříč celou appkou, ne jen obrazovkou."""
     kde = {}
     for cesta in soubory:
-        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        dokument = nacti_yaml(cesta)
         for koren, obsah in (dokument or {}).items():
             if koren != "Screens":
                 continue

@@ -18,7 +18,7 @@ Screens:
       - ico_ZpetV:
           Control: Classic/Icon@2.5.0
           Properties:
-            Tooltip: '=\"Zpět na detail aktivity. Přiřazení dílčích procesů se ukládá hned při kliknutí, takže se odchodem nic neztratí."'
+            Tooltip: '="Zpět na detail aktivity. Přiřazení dílčích procesů se ukládá hned při kliknutí, takže se odchodem nic neztratí."'
             Color: =RGBA(255, 255, 255, 1)
             Height: =40
             Icon: =Icon.ChevronLeft
@@ -120,7 +120,7 @@ Screens:
             - ico_Odebrat:
                 Control: Classic/Icon@2.5.0
                 Properties:
-                  Tooltip: '=\"Odebere aktivitu z tohoto dílčího procesu. Samotná aktivita zůstane — mizí jen její zařazení do této větve mapy. Primární zařazení (označené „primární“) tímto způsobem odebrat nelze; to se mění výběrem dílčího procesu v detailu aktivity."'
+                  Tooltip: '="Odebere aktivitu z tohoto dílčího procesu. Samotná aktivita zůstane — mizí jen její zařazení do této větve mapy. Primární zařazení (označené „primární“) tímto způsobem odebrat nelze; to se mění výběrem dílčího procesu v detailu aktivity."'
                   Color: =RGBA(168, 0, 0, 1)
                   Height: =36
                   Icon: =Icon.Trash
@@ -134,7 +134,6 @@ Screens:
                   PaddingLeft: =10
                   PaddingRight: =10
                   PaddingTop: =10
-                  Tooltip: '="Odebrat vazbu"'
                   Visible: =ThisItem.primarni.Value <> "ano"
                   Width: =36
                   X: =Parent.TemplateWidth - Self.Width - 12
@@ -213,7 +212,7 @@ Screens:
             - ico_Pridat:
                 Control: Classic/Icon@2.5.0
                 Properties:
-                  Tooltip: '=\"Přiřadí aktivitu i do tohoto dílčího procesu. Nevzniká kopie: je to pořád tatáž aktivita s jedním kódem, jen se v procesní mapě objeví ve víc větvích. Používá se, když tutéž činnost útvar vykonává v několika dílčích procesech."'
+                  Tooltip: '="Přiřadí aktivitu i do tohoto dílčího procesu. Nevzniká kopie: je to pořád tatáž aktivita s jedním kódem, jen se v procesní mapě objeví ve víc větvích. Používá se, když tutéž činnost útvar vykonává v několika dílčích procesech."'
                   Color: =RGBA(0, 120, 212, 1)
                   Height: =36
                   Icon: =Icon.Add
@@ -240,7 +239,6 @@ Screens:
                   PaddingLeft: =10
                   PaddingRight: =10
                   PaddingTop: =10
-                  Tooltip: '="Přidat vazbu"'
                   Width: =36
                   X: =Parent.TemplateWidth - Self.Width - 12
                   Y: =14

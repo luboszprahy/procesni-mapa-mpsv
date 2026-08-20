@@ -2,6 +2,25 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## 1.0.0.11 spadl na PA1001, opraveno v 1.0.0.12 (20.08.2026)
+
+Appka se neotevřela: `PA1001 … Duplicate name 'Tooltip'` ve `scr_Vazby`.
+Dvě chyby v jednom místě, obě moje:
+
+1. **Duplicitní vlastnost** — dvě ikony už `Tooltip` měly a doplnění podrobných
+   textů ho přidalo podruhé.
+2. **Zbytek escapování** (`'=\"…"'`) ve třech tooltipech na téže obrazovce.
+
+**Proč to kontrola nechytila:** PyYAML u duplicitního klíče **tiše vezme
+poslední** a jede dál — parser je shovívavější než packer canvas appky.
+`check_app.py` proto nově načítá YAML vlastním loaderem, který duplicitní klíč
+ohlásí jako chybu (mutačně ověřeno reprodukcí přesně té hlášky z importu).
+Připomínka: **`pac canvas pack` tuhle třídu chyb taky nechytí** — zabalí to.
+
+**`deploy/procesnimapa_1_0_0_12.zip`** — brány čisté (`check_app`,
+`check_flow` 19 kontrol / 104 vzorků, `check_solution` 107 kontrol).
+Balík 1.0.0.11 smazán, ať se omylem neimportuje.
+
 ## Balík 1.0.0.11 — nápověda, ikona mapy, číselník útvarů (20.08.2026)
 
 **Podrobné tooltipy u všech ovládacích prvků** (27 celkem) — každý vysvětluje
