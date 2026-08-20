@@ -1,6 +1,51 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 14:15
+Aktualizováno: 2026-08-20 15:00
+
+## Hover na řádku, překryvy a oprava flow — 1.0.0.21 (20.08.2026 15:00)
+
+**Řádek na najetí myší nereagoval a byla to systémová chyba, ne kosmetika.**
+Hover dostane jen control **přímo pod kurzorem**, a řádek galerie je ze čtyř
+pětin pokrytý labely — podkladový obdélník s `HoverFill` se ho proto nikdy
+nedočkal. Řeší to **průhledná vrstva přes celý řádek** (`lbl_RadekPrekryv`,
+poslední potomek = nejvýš): `Fill` průhledná, `HoverFill` 10% modrá,
+`HoverBorderColor` modrý rámeček. Je to **Label, ne Rectangle** — jen Label
+umí `HoverBorderColor`. Vrstva zároveň dělá klikání celého řádku, takže
+`OnSelect` na labelech je pojistka, ne jediná cesta.
+
+**Pohyb řádku zapíná `Gallery.Transition`.** Bez `Transition.Push` galerie
+na najetí nereaguje vůbec; žádná jiná vlastnost to nedělá.
+
+**Nová brána `kontrola_prekryvu` v `check_app.py`.** Vznikla z vady, kterou
+našel uživatel očima: `lbl_l_Vazby` (X 40, šířka 740) zasahoval do nabídky
+`drp_StavDetail` (X 700) a navíc seděl na téže pozici jako `lbl_l_TextOR`.
+Studio ani packer takový překryv nehlásí, appka se otevře — pozná se to až
+na snímku obrazovky. Kontrola porovnává **jen sourozence**: souřadnice prvku
+uvnitř galerie jsou relativní k šabloně řádku, takže srovnávat je s prvky
+obrazovky nemá smysl (první verze na tom vyrobila 5 falešných nálezů).
+Počítá se jen tam, kde jsou všechny čtyři souřadnice čísla.
+
+**Kontrola rovnou našla tři další překryvy na `scr_Vazby`** — vysvětlující
+odstavec (Y 84, výška 52) přetékal přes popisky obou sloupců i přes
+vyhledávací pole. Zkrácen na 40 px, vše pod ním o 36 px níž.
+`lbl_l_Vazby` v detailu je teď krátký popisek nad tlačítkem; plný výklad
+zůstal v tooltipu tlačítka.
+
+**Flow spadlo na typu obsahu šablony.** `body('Sablona')?['$content']` skončilo
+hláškou *„Property selection is not supported on values of type 'String'"*:
+`Get file content using path` s `inferContentType=true` u `.html` odvodí
+textový typ a obsah **dekóduje sám**, takže `body()` vrací rovnou řetězec, ne
+objekt s base64. Výraz je teď `replace(replace(body('Sablona'), …))` —
+bez `string()` naschvál, aby při změně typu spadl hlasitě místo tichého zápisu
+JSON obalu do stránky. Brána má na to tři kontroly (`?['$content']` se nesmí
+objevit, `base64ToString` taky ne, `inferContentType` musí být `true`)
+a mutační test **regresi na tuhle chybu**.
+
+**Mutační testy:** 13 nad flow, 3 nad kontrolou překryvu — všechny chycené.
+
+### Další krok
+Nezměnil se: ověřit, jestli tenant HTML ze Site Assets **zobrazí, nebo stáhne**
+(`deploy/navod_publikace_mapy.md`, krok 2).
 
 ## Grafika podle vzoru + publikační flow — 1.0.0.20 (20.08.2026 14:15)
 

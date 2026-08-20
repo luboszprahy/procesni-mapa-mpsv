@@ -145,15 +145,20 @@ def akce(web, tabulky):
         "runAfter": {predchozi: ["Succeeded"]},
     }
 
-    # Get file content vrací binárku v base64 — bez base64ToString by se
-    # nahrazování kotev nechytlo. Kolem __GEN__ musí být uvozovky, je to
-    # řetězcový literál v JavaScriptu uvnitř šablony.
+    # body('Sablona') je rovnou řetězec, ne objekt s $content: s
+    # inferContentType=true konektor odvodí u .html textový typ a obsah
+    # dekóduje sám. Původní base64ToString(body('Sablona')?['$content'])
+    # shodilo běh 20.08.2026 hláškou „Property selection is not supported
+    # on values of type 'String'". Bez string() naschvál — kdyby konektor
+    # jednou vrátil objekt, replace() spadne hlasitě místo toho, aby do
+    # stránky tiše zapsal JSON obalu.
+    # Kolem __GEN__ musí být uvozovky, je to řetězcový literál v JavaScriptu.
     kroky["Stranka"] = {
         "type": "Compose",
         "inputs": (
             "@replace("
             "replace("
-            "base64ToString(body('Sablona')?['$content']),"
+            "body('Sablona'),"
             " '__DATA_JSON__', string(outputs('Model'))"
             "),"
             " '__GEN__',"

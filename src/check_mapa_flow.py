@@ -213,9 +213,23 @@ def main():
     # -------------------------------------------------------------- 3. význam
     if "Stranka" in akce and SABLONA.exists() and MODEL.exists():
         vyraz = akce["Stranka"]["inputs"]
-        overit("base64ToString" in vyraz,
-               "Stranka: bez base64ToString se nahrazování nechytne, "
-               "Get file content vrací binárku")
+        # Ověřeno během 20.08.2026: Get file content s inferContentType=true
+        # vrací u .html rovnou řetězec, ne objekt. Výběr property nad ním
+        # shodí celý běh — a chytit se to dá jedině tady, protože import
+        # i zapnutí flow projdou.
+        overit("?['$content']" not in vyraz,
+               "Stranka: body('Sablona') je řetězec, ne objekt — výběr "
+               "?['$content'] běh shodí ('Property selection is not supported "
+               "on values of type String')")
+        overit("base64ToString" not in vyraz,
+               "Stranka: base64ToString nad už dekódovaným řetězcem selže")
+        overit("body('Sablona')" in vyraz,
+               "Stranka: nečte obsah šablony z kroku Sablona")
+        sablona_akce = akce.get("Sablona", {})
+        overit(sablona_akce.get("inputs", {}).get("parameters", {})
+               .get("inferContentType") is True,
+               "Sablona: inferContentType musí být true — na tom stojí, že "
+               "body() vrátí řetězec, se kterým výraz v kroku Stranka počítá")
         sablona = io.open(SABLONA, encoding="utf-8").read()
         for kotva in KOTVY:
             overit(sablona.count(kotva) == 1,
@@ -246,7 +260,7 @@ def vyhodnot(vyraz, sablona, model):
     Ověřuje se tvar výrazu z balíku; když nesedí, vrací None místo toho, aby
     kontrola tiše prošla nad něčím jiným, než se nasazuje.
     """
-    if not re.search(r"replace\(\s*replace\(", vyraz):
+    if not re.search(r"replace\(\s*replace\(\s*body\('Sablona'\)\s*,", vyraz):
         return None
     if "'__DATA_JSON__'" not in vyraz or "'__GEN__'" not in vyraz:
         return None

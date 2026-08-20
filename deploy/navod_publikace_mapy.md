@@ -1,4 +1,4 @@
-# Nasazení HTML mapy — co udělat po importu 1.0.0.20
+# Nasazení HTML mapy — co udělat po importu 1.0.0.21
 
 Tři kroky, každý má vlastní ověření. Dělej je v pořadí — druhý bez prvního
 selže až za běhu flow, ne při ukládání.

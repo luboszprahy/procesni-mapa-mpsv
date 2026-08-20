@@ -540,6 +540,9 @@ Screens:
               )
             TemplatePadding: =0
             TemplateSize: =56
+            # Pohyb řádku při najetí myší. Bez toho galerie na hover nereaguje
+            # vůbec — Transition je jediná vlastnost, která to zapíná.
+            Transition: =Transition.Push
             Width: =Parent.Width - 80
             X: =40
             Y: =276
@@ -657,18 +660,36 @@ Screens:
                 Properties:
                   Color: =stylTextSlaby
                   Height: =32
-                  HoverColor: =stylAkce
                   Icon: =Icon.ChevronRight
-                  OnSelect: |-
-                    =Set(varNova, false);
-                    Set(varAktivita, ThisItem);
-                    Navigate(scr_Detail, ScreenTransition.Cover)
                   PaddingBottom: =9
                   PaddingLeft: =9
                   PaddingRight: =9
                   PaddingTop: =9
-                  PressedColor: =stylAkceStisk
-                  Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
                   Width: =32
                   X: =Parent.TemplateWidth - 56
                   Y: =(Parent.TemplateHeight - 1) / 2 - 16
+            # Průhledná vrstva PŘES celý řádek, poslední = nejvýš.
+            # Hover dostane jen control přímo pod kurzorem, a řádek je ze čtyř
+            # pětin pokrytý labely — podkladový obdélník se ho proto nikdy
+            # nedočkal a řádek na najetí nereagoval. Tahle vrstva hover
+            # zachytí za celý řádek a zároveň dělá kliknutí kamkoli.
+            # Label, ne Rectangle: jen Label umí HoverBorderColor.
+            - lbl_RadekPrekryv:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderThickness: =2
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =Parent.TemplateHeight - 1
+                  HoverBorderColor: =stylAkce
+                  HoverFill: =RGBA(0, 90, 181, 0.10)
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
+                  PressedFill: =RGBA(0, 90, 181, 0.20)
+                  Text: =""
+                  Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0

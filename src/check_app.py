@@ -574,6 +574,78 @@ def kontrola_unikatnosti(soubory):
                         kde[jmeno] = cesta.name
 
 
+# Prvky, které se překrývat SMĚJÍ: podklady (rec_) leží pod popisky z definice
+# a překryvná vrstva galerie leží nad celým řádkem záměrně.
+PREKRYV_POVOLEN = {"lbl_RadekPrekryv"}
+
+
+def kontrola_prekryvu(soubory):
+    """Dva prvky s obsahem nesmějí ležet přes sebe.
+
+    Vzniklo z lbl_l_Vazby (20.08.2026): popisek široký 740 px zasahoval do
+    nabídky Stav a seděl na stejné pozici jako jiný popisek. Studio ani packer
+    to nehlásí, appka se otevře — vidí to až člověk na snímku obrazovky.
+
+    Počítá se jen tam, kde jsou všechny čtyři souřadnice obou prvků čísla;
+    výrazy typu `Parent.Width - 80` se přeskakují, protože bez znalosti šířky
+    plochy by kontrola jen hádala.
+    """
+    obsahove = ("lbl_", "txt_", "drp_", "btn_", "cmb_", "ico_")
+
+    def sourozenci(uzel):
+        """Skupiny prvků se společným rodičem. Souřadnice prvku uvnitř galerie
+        jsou relativní k šabloně řádku, takže srovnávat je s prvky obrazovky
+        nedává smysl."""
+        skupina = []
+        for polozka in uzel or []:
+            for jmeno, definice in polozka.items():
+                skupina.append((jmeno, definice))
+                if definice.get("Children"):
+                    yield from sourozenci(definice["Children"])
+        if skupina:
+            yield skupina
+
+    for cesta in soubory:
+        dokument = nacti_yaml(cesta)
+        for koren, obsah in (dokument or {}).items():
+            if koren != "Screens":
+                continue
+            for jmeno_obrazovky, telo in obsah.items():
+                for skupina in sourozenci(telo.get("Children")):
+                    obdelniky = []
+                    for jmeno, definice in skupina:
+                        if not jmeno.startswith(obsahove) or jmeno in PREKRYV_POVOLEN:
+                            continue
+                        vlastnosti = definice.get("Properties") or {}
+                        souradnice = []
+                        for klic in ("X", "Y", "Width", "Height"):
+                            hodnota = str(vlastnosti.get(klic, "")).lstrip("=").strip()
+                            souradnice.append(int(hodnota) if hodnota.isdigit() else None)
+                        if any(s is None for s in souradnice):
+                            continue
+                        # Prvky skryté za stejné podmínky se nepřekrývají za běhu.
+                        viditelnost = str(vlastnosti.get("Visible", "")).strip()
+                        obdelniky.append((jmeno, souradnice, viditelnost))
+
+                    porovnej(jmeno_obrazovky, obdelniky)
+
+
+def porovnej(jmeno_obrazovky, obdelniky):
+    for i, (jmeno_a, (xa, ya, wa, ha), va) in enumerate(obdelniky):
+        for jmeno_b, (xb, yb, wb, hb), vb in obdelniky[i + 1:]:
+            prekryv_x = min(xa + wa, xb + wb) - max(xa, xb)
+            prekryv_y = min(ya + ha, yb + hb) - max(ya, yb)
+            if prekryv_x <= 0 or prekryv_y <= 0:
+                continue
+            chyby.append(
+                f"{jmeno_obrazovky}: '{jmeno_a}' a '{jmeno_b}' se překrývají "
+                f"o {prekryv_x}×{prekryv_y} px — Studio to nehlásí, "
+                f"pozná se to až na snímku obrazovky"
+                + ("" if va != vb or not va else
+                   f" (obojí Visible: {va}, takže i za běhu naráz)")
+            )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -594,6 +666,7 @@ def main():
     kontrola_odkazu(vzorce, controly)
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
+    kontrola_prekryvu(soubory)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
     kontrola_syntaxe(vzorce)

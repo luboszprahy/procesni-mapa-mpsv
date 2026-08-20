@@ -51,13 +51,13 @@ Screens:
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
-            Height: =52
+            Height: =40
             Size: =10
             Text: |-
               ="Táž aktivita se může vykonávat ve víc dílčích procesech. Vlevo je seznam, kam už je zařazená; „primární“ je ta z detailu aktivity a odebrat ji tady nelze. Vpravo vyberte další dílčí proces tlačítkem +."
             Width: =1220
             X: =40
-            Y: =84
+            Y: =80
       - lbl_l_Prirazene:
           Control: Label@2.5.1
           Properties:
@@ -68,7 +68,7 @@ Screens:
             Text: ="Přiřazeno"
             Width: =620
             X: =40
-            Y: =96
+            Y: =132
       - gal_Vazby:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -79,7 +79,7 @@ Screens:
             TemplateSize: =64
             Width: =620
             X: =40
-            Y: =128
+            Y: =164
           Children:
             - rec_RadekVazby:
                 Control: Rectangle@2.3.0
@@ -171,7 +171,7 @@ Screens:
             Text: ="Přidat další dílčí proces"
             Width: =620
             X: =700
-            Y: =96
+            Y: =132
       - txt_HledatDp:
           Control: Classic/TextInput@2.3.2
           Properties:
@@ -186,7 +186,7 @@ Screens:
             Size: =13
             Width: =620
             X: =700
-            Y: =128
+            Y: =164
       - gal_Nabidka:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -201,7 +201,7 @@ Screens:
             TemplateSize: =64
             Width: =620
             X: =700
-            Y: =180
+            Y: =216
           Children:
             - rec_RadekNabidka:
                 Control: Rectangle@2.3.0

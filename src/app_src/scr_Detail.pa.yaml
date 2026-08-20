@@ -445,14 +445,13 @@ Screens:
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =20
             Size: =10
-            Text: |-
-              ="Aktivita patří primárně do dílčího procesu vybraného výše. Pokud ji vykonáváte i v jiných dílčích procesech, přiřaďte ji tlačítkem vpravo."
+            Text: ="Zařazení do dílčích procesů"
             Visible: =!varNova
-            Width: =740
-            X: =40
-            Y: =548
+            Width: =240
+            X: =1020
+            Y: =524
       - btn_Vazby:
           Control: Classic/Button@2.2.0
           Properties:

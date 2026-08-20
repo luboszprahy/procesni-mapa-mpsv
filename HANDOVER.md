@@ -1,4 +1,4 @@
-# HANDOVER — stav k restartu konverzace (20.08.2026 14:15)
+# HANDOVER — stav k restartu konverzace (20.08.2026 15:00)
 
 Tenhle soubor je vstupní bod pro novou session. Nejdřív si přečti `STATUS.md`
 (chronologie a odůvodnění rozhodnutí), pak tohle (co se má udělat teď).
@@ -6,7 +6,7 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 
 ## 1. CO JE NA TOBĚ (uživateli) — v tomto pořadí
 
-1. **Importovat `deploy/procesnimapa_1_0_0_20.zip`** jako upgrade a appku
+1. **Importovat `deploy/procesnimapa_1_0_0_21.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
 2. **Nahrát `deploy/mapa_template.html` a `deploy/procesni_mapa.html`
    do Site Assets** a kliknutím ověřit, jestli tenant HTML **zobrazí, nebo
@@ -21,12 +21,31 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 5. **Úklid v prostředí (odloženo vědomě):** odpojit z appky datové zdroje
    `Documents` a `CustomGallerySample` a odebrat ze solution connection
    reference `ppf_sharedsharepointonline_12718` („SharePoint Pruvodnilist-12718",
-   zbytek z jiného projektu). **Až po tom, co 1.0.0.20 běží** — obě flow na ní
+   zbytek z jiného projektu). **Až po tom, co 1.0.0.21 běží** — obě flow na ní
    dnes visí, takže odebrání je nutné udělat pro obě naráz, a míchat to
    s velkou funkční změnou by znamenalo, že při selhání importu nepoznáš,
    co ho shodilo.
 
-## 2. CO DĚLÁM JÁ (asistent) — hotovo v 1.0.0.20
+## 2. CO DĚLÁM JÁ (asistent)
+
+### Opraveno v 1.0.0.21
+
+- **Řádek reaguje na najetí myší.** Hover dostane jen control přímo pod
+  kurzorem a řádek je ze čtyř pětin pokrytý labely, takže podkladový obdélník
+  se ho nikdy nedočkal. Přes celý řádek je teď průhledná vrstva
+  `lbl_RadekPrekryv` (Label, ne Rectangle — jen Label umí `HoverBorderColor`)
+  s 10% modrým podbarvením a modrým rámečkem. Pohyb řádku zapíná
+  `Gallery.Transition = Transition.Push`.
+- **Překryvy popisků.** `lbl_l_Vazby` zasahoval do nabídky Stav a seděl na téže
+  pozici jako `lbl_l_TextOR`; je z něj krátký popisek nad tlačítkem, plný
+  výklad zůstal v jeho tooltipu. Nová brána `kontrola_prekryvu` rovnou našla
+  tři další překryvy na `scr_Vazby` — opraveny.
+- **Flow spadlo na typu obsahu šablony.** `Get file content using path`
+  s `inferContentType=true` vrací u `.html` rovnou řetězec, ne objekt s base64,
+  takže `body('Sablona')?['$content']` běh shodilo. Výraz i brána opraveny,
+  mutační test má na tuhle chybu regresi.
+
+### Hotovo v 1.0.0.20
 
 **Grafika seznamu přestavěná podle vzoru Správy notifikací**
 (`input/snimky/vzor-notifikace-2.png`):
@@ -67,7 +86,7 @@ co otevřít dřív, než flow poprvé proběhne.
 | věc | kde |
 |---|---|
 | základ pro build (nejnovější export ze Studia) | `input/procesnimapa_1_0_0_18.zip` |
-| poslední vydaný balík | `deploy/procesnimapa_1_0_0_20.zip` |
+| poslední vydaný balík | `deploy/procesnimapa_1_0_0_21.zip` |
 | k nahrání do Site Assets | `deploy/mapa_template.html`, `deploy/procesni_mapa.html` |
 | nasazovací návod | `deploy/navod_publikace_mapy.md` |
 | datový kontrakt mapy + klikací fallback | `deploy/flow_MapaPublish.md` |
@@ -88,7 +107,7 @@ $env:PYTHONIOENCODING = "utf-8"
 $py = ".venv/Scripts/python.exe"
 
 & $py src/check_app.py                       # brána nad zdroji appky
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.21
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.22
 & $py src/build_flow.py      --solution deploy/procesnimapa_1_0_0_21.zip
 & $py src/build_mapa_flow.py --solution deploy/procesnimapa_1_0_0_21.zip
 & $py src/check_flow.py      --solution deploy/procesnimapa_1_0_0_21.zip
@@ -109,9 +128,9 @@ přepisuje od základu, takže by doplněné akce zahodil.
 - Appka: 3 obrazovky, kaskáda agenda → proces → dílčí proces, přidělování
   kódů, vazby M:N, filtry z číselníku `Útvary`, řazení klikem na hlavičku.
 - Flow `AktualizaceKratkehoNazvu`: hotové, ověřené mini-interpretem (104 vzorků).
-- Flow `MapaPublishFlow`: hotové, 126 kontrol, 12 mutací ověřených.
-- Brány: `check_app` (7 tříd), `check_flow` (19), `check_mapa_flow` (126),
-  `check_solution` (124), node testy provisioningu a importu.
+- Flow `MapaPublishFlow`: hotové, 129 kontrol, 13 mutací ověřených.
+- Brány: `check_app` (8 tříd), `check_flow` (19), `check_mapa_flow` (129),
+  `check_solution` (125), node testy provisioningu a importu.
   **Všechny kontroly jsou mutačně ověřené.**
 
 ## 6. Otevřená rizika
