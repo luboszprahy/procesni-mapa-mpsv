@@ -2,6 +2,34 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## Galerie ve stylu notifikací — 1.0.0.17 (20.08.2026)
+
+Seznam aktivit přestavěn podle vzoru z MessageCenterDashboard: hlavička
+sloupců (KÓD / AKTIVITA / STAV), řádek s podbarvením při výběru, barevný pruh
+podle stavu, kód v „chipu", název na dvou řádcích, stav jako barevný štítek
+a šipka do detailu. Klasická `Gallery@2.15.0` neumí `TemplateFill` ani
+zaoblení rohů, takže je to poskládané z vrstev uvnitř šablony řádku.
+
+**Nová kontrola `kontrola_barev`** — `RGBA()` musí dostat čtyři čísla.
+Vzniklo to z vlastního překlepu (`RGBA(223, haha, 0, 0)`), který by jinak
+propadl až do Studia.
+
+**Past, která mě stála čtvrt hodiny:** vkládání kódu přes bash heredoc mi do
+`check_app.py` zapsalo neviditelný znak `` místo `` v regulárním výrazu.
+Kontrola pak nikdy nesedla a `inspect.getsource` vypadal správně, protože
+backspace v terminálu smaže předchozí znak. Odhaleno až disassemblem.
+Zdroje jsou od řídicích znaků vyčištěné.
+
+**`deploy/procesnimapa_1_0_0_17.zip`** — brány čisté, 1.0.0.16 smazán.
+
+### Zbývá k tomuto zadání
+- **HTML mapa**: vygenerovat z anonymizovaných dat a nahrát do Site Assets
+  (konzolový skript), aby ikona v appce vedla na existující soubor.
+- **Tlačítko „obnovit data v mapě"**: potřebuje flow `MapaPublish`. Postup:
+  uživatel založí v designeru flow s triggerem **PowerApps V2** + jednou akcí,
+  přidá ho ve Studiu do appky (Power Automate → Add flow) a exportuje;
+  asistent pak doplní akce flow i tlačítko volající `MapaPublish.Run()`.
+
 ## Číselník útvarů zapojen — 1.0.0.16 (20.08.2026)
 
 Uživatel dodal `input/procesnimapa_1_0_0_15.zip` **bez chyb ve Studiu**

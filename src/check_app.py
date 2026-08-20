@@ -285,6 +285,19 @@ def bez_retezcu_presne(text):
     return "".join(zbytek), None
 
 
+def kontrola_barev(vzorce):
+    """RGBA() musí dostat čtyři čísla — překlep v barvě jinak projde až do Studia."""
+    for cesta, prop, text in vzorce:
+        for shoda in re.finditer(r"RGBA\s*\(", text):
+            zavorka = text.index("(", shoda.start())
+            argumenty = rozdel_argumenty(argumenty_volani(text, zavorka))
+            spatne = [a for a in argumenty if not re.fullmatch(r"-?\d+(\.\d+)?%?", a)]
+            if len(argumenty) != 4 or spatne:
+                chyby.append(
+                    f"{cesta}.{prop}: RGBA{tuple(argumenty)} — čekám čtyři čísla"
+                )
+
+
 def kontrola_syntaxe(vzorce):
     """Uvozovky a závorky musí vyjít.
 
@@ -584,6 +597,7 @@ def main():
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
     kontrola_syntaxe(vzorce)
+    kontrola_barev(vzorce)
     kontrola_razeni(vzorce)
     kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti(), nacti_typy())
     kontrola_vzorovych_dat(soubory, nacti_typy(), nacti_vzorova_data())

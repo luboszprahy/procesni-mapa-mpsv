@@ -156,6 +156,55 @@ Screens:
             Width: =400
             X: =40
             Y: =148
+      - rec_HlavickaTabulky:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(240, 243, 249, 1)
+            Height: =32
+            Width: =Parent.Width - 80
+            X: =40
+            Y: =180
+      - lbl_h_Kod:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =10
+            Text: ="KÓD"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =148
+            X: =60
+            Y: =180
+      - lbl_h_Nazev:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =10
+            Text: ="AKTIVITA"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =400
+            X: =224
+            Y: =180
+      - lbl_h_Stav:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =10
+            Text: ="STAV"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =112
+            X: =Parent.Width - 240
+            Y: =180
       - gal_Aktivity:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -188,36 +237,81 @@ Screens:
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
                   ), Title, SortOrder.Ascending)
               )
+            TemplatePadding: =0
             TemplateSize: =96
             Width: =Parent.Width - 80
             X: =40
-            Y: =184
+            Y: =216
           Children:
+            - rec_RadekPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: |-
+                    =If(
+                        ThisItem.IsSelected,
+                        RGBA(232, 240, 254, 1),
+                        RGBA(255, 255, 255, 1)
+                    )
+                  Height: =Parent.TemplateHeight - 8
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
+            - rec_Pruh:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: |-
+                    =If(
+                        ThisItem.stav.Value = "schváleno",
+                        RGBA(16, 124, 16, 1),
+                        RGBA(0, 18, 107, 1)
+                    )
+                  Height: =Parent.TemplateHeight - 8
+                  OnSelect: =Select(Parent)
+                  Width: =4
+                  X: =0
+                  Y: =0
+            - rec_KodPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(240, 243, 249, 1)
+                  Height: =32
+                  OnSelect: =Select(Parent)
+                  Width: =148
+                  X: =20
+                  Y: =(Parent.TemplateHeight - 8) / 2 - 16
             - lbl_Kod:
                 Control: Label@2.5.1
                 Properties:
+                  Align: =Align.Center
                   Color: =RGBA(0, 18, 107, 1)
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
-                  Height: =24
+                  Height: =32
                   OnSelect: =Select(Parent)
                   Size: =11
                   Text: =ThisItem.Title
-                  Width: =160
-                  X: =16
-                  Y: =12
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =148
+                  X: =20
+                  Y: =(Parent.TemplateHeight - 8) / 2 - 16
             - lbl_NazevKratky:
                 Control: Label@2.5.1
                 Properties:
+                  Color: =RGBA(32, 31, 30, 1)
                   Font: =Font.'Open Sans'
-                  Height: =52
+                  FontWeight: |-
+                    =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                  Height: =44
                   OnSelect: =Select(Parent)
+                  PaddingBottom: =0
+                  PaddingTop: =0
                   Size: =13
                   Text: =ThisItem.nazev_kratky
                   VerticalAlign: =VerticalAlign.Top
-                  Width: =Parent.TemplateWidth - 620
+                  Width: =Parent.TemplateWidth - 500
                   X: =184
-                  Y: =12
+                  Y: =16
             - lbl_Utvar:
                 Control: Label@2.5.1
                 Properties:
@@ -225,29 +319,51 @@ Screens:
                   Font: =Font.'Open Sans'
                   Height: =20
                   OnSelect: =Select(Parent)
+                  PaddingTop: =0
                   Size: =10
                   Text: |-
-                    ="vykonává: " & ThisItem.vykonava & "   ·   sekce " & ThisItem.sekce
-                  Width: =Parent.TemplateWidth - 620
+                    ="vykonává " & ThisItem.vykonava & "   ·   sekce " & ThisItem.sekce
+                  Width: =Parent.TemplateWidth - 500
                   X: =184
-                  Y: =66
+                  Y: =62
+            - rec_StavPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: |-
+                    =If(
+                        ThisItem.stav.Value = "schváleno",
+                        RGBA(223, 244, 223, 1),
+                        RGBA(253, 243, 226, 1)
+                    )
+                  Height: =28
+                  OnSelect: =Select(Parent)
+                  Width: =112
+                  X: =Parent.TemplateWidth - 200
+                  Y: =(Parent.TemplateHeight - 8) / 2 - 14
             - lbl_Stav:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =If(ThisItem.stav.Value = "schváleno", RGBA(16, 124, 16, 1), RGBA(161, 96, 0, 1))
+                  Align: =Align.Center
+                  Color: |-
+                    =If(
+                        ThisItem.stav.Value = "schváleno",
+                        RGBA(16, 124, 16, 1),
+                        RGBA(161, 96, 0, 1)
+                    )
                   Font: =Font.'Open Sans'
-                  Height: =24
+                  Height: =28
                   OnSelect: =Select(Parent)
-                  Size: =11
+                  Size: =10
                   Text: =ThisItem.stav.Value
-                  Width: =120
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =112
                   X: =Parent.TemplateWidth - 200
-                  Y: =24
+                  Y: =(Parent.TemplateHeight - 8) / 2 - 14
             - ico_Detail:
                 Control: Classic/Icon@2.5.0
                 Properties:
                   Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
-                  Color: =RGBA(166, 166, 166, 1)
+                  Color: =RGBA(96, 94, 92, 1)
                   Height: =40
                   Icon: =Icon.ChevronRight
                   OnSelect: |-
@@ -259,16 +375,9 @@ Screens:
                   PaddingRight: =12
                   PaddingTop: =12
                   Width: =40
-                  X: =Parent.TemplateWidth - Self.Width - 12
-                  Y: =16
-            - sep_Radek:
-                Control: Rectangle@2.3.0
-                Properties:
-                  Fill: =RGBA(237, 235, 233, 1)
-                  Height: =1
-                  OnSelect: =Select(Parent)
-                  Width: =Parent.TemplateWidth
-                  Y: =Parent.TemplateHeight - 1
+                  X: =Parent.TemplateWidth - Self.Width - 16
+                  Y: =(Parent.TemplateHeight - 8) / 2 - 20
+
       - ico_Mapa:
           Control: Classic/Icon@2.5.0
           Properties:
