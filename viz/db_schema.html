@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Datovy model - procesni mapa MPSV</title>
+<style>
+:root {
+  --bg:#f6f7f9; --fg:#16181d; --muted:#666e7a; --card:#fff; --line:#c9cfd8;
+  --edge:#7b8794; --head:#1f3a5f; --headfg:#fff;
+  --pk:#b45309; --req:#9f1239; --idx:#0f766e; --ref:#1d4ed8; --der:#6d28d9; --new:#4b5563;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#12141a; --fg:#e6e8ec; --muted:#98a1b0; --card:#1b1f27; --line:#333a46;
+    --edge:#7d8798; --head:#24405f; --headfg:#eaf1fb;
+    --pk:#f0b429; --req:#f472a0; --idx:#4ecdc4; --ref:#8ab4ff; --der:#c4a5ff; --new:#9aa3b2;
+  }
+}
+* { box-sizing:border-box; }
+body { margin:0; padding:28px; background:var(--bg); color:var(--fg);
+  font:14px/1.45 "Segoe UI",system-ui,sans-serif; }
+h1 { margin:0 0 4px; font-size:21px; }
+.sub { color:var(--muted); margin:0 0 14px; font-size:13px; }
+.sub code, .note code { font-family:Consolas,monospace; }
+.legend { display:flex; flex-wrap:wrap; gap:14px; margin:0 0 20px; font-size:12px; color:var(--muted); }
+.legend b { font-weight:600; color:var(--fg); }
+.wrap { overflow-x:auto; padding-bottom:12px; }
+.canvas { position:relative; }
+svg { position:absolute; inset:0; z-index:0; overflow:visible; }
+.e { fill:none; stroke:var(--edge); stroke-width:1.6; }
+.e-dash { stroke-dasharray:5 4; opacity:.75; }
+.box { position:absolute; z-index:1; background:var(--card); border:1px solid var(--line);
+  border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.12); overflow:hidden; }
+.head { height:48px; display:flex; align-items:center; gap:8px; padding:0 12px;
+  background:var(--head); color:var(--headfg); }
+.hn { font-weight:600; font-size:15px; }
+.hi { font-family:Consolas,monospace; font-size:11px; opacity:.72; }
+.cnt { margin-left:auto; font-size:11px; opacity:.8; }
+.row { height:26px; display:flex; align-items:center; gap:7px; padding:0 12px;
+  border-top:1px solid var(--line); font-size:12px; white-space:nowrap; }
+.cn { font-family:Consolas,monospace; min-width:118px; flex:none; }
+.cd { color:var(--muted); overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.ct { margin-left:auto; color:var(--muted); font-size:11px; font-family:Consolas,monospace; flex:none; }
+.b { font-size:9.5px; text-transform:uppercase; letter-spacing:.4px; padding:1px 4px;
+  border:1px solid currentColor; border-radius:3px; flex:none; }
+.b-pk { color:var(--pk); } .b-req { color:var(--req); } .b-idx { color:var(--idx); }
+.b-ref { color:var(--ref); } .b-der { color:var(--der); } .b-new { color:var(--new); }
+.note { margin-top:22px; max-width:960px; color:var(--muted); font-size:12.5px; }
+.note b { color:var(--fg); }
+</style></head><body>
+<h1>Datový model — rejstřík agend a procesů</h1>
+<p class="sub">SharePoint Online, 6 seznamů. Generováno ze <code>src/schema.json</code> (verze 1.0, prefix <code>mpsv_</code>), počty záznamů z <code>runs/normalize/</code>.</p>
+<div class="legend">
+  <span><b>KLIC</b> Title = přirozený identifikační kód</span>
+  <span><b>POVINNE</b> required</span>
+  <span><b>INDEX</b> indexovaný sloupec</span>
+  <span><b>-&gt;</b> textový odkaz na Title cílového listu</span>
+  <span><b>ODVOZENE</b> dopočítává import a appka</span>
+  <span><b>MIMO KARTU</b> v evidenční kartě neexistuje</span>
+  <span>—— vazba ze schématu &nbsp;&nbsp; - - - logická vazba</span>
+</div>
+<div class="wrap"><div class="canvas" style="width:1150px;height:1196px">
+<svg width="1150" height="1196" viewBox="0 0 1150 1196">
+<defs>
+<marker id="a-solid" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+  <path d="M0 0 L9 4.5 L0 9 z" fill="var(--edge)"/></marker>
+<marker id="a-dash" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+  <path d="M0 0 L9 4.5 L0 9 z" fill="var(--edge)" opacity=".75"/></marker>
+</defs>
+<path class="e e-solid" d="M 40 381.0 H 20 V 91.0 H 40" marker-end="url(#a-solid)"><title>N:1</title></path><path class="e e-solid" d="M 40 645.0 H 20 V 329.0 H 40" marker-end="url(#a-solid)"><title>N:1</title></path><path class="e e-solid" d="M 40 961.0 H 20 V 593.0 H 40" marker-end="url(#a-solid)"><title>N:1 primarni zarazeni</title></path><path class="e e-solid" d="M 630 909.0 H 550 V 883.0 H 510" marker-end="url(#a-solid)"><title>N:1</title></path><path class="e e-solid" d="M 630 935.0 H 550 V 593.0 H 510" marker-end="url(#a-solid)"><title>N:1</title></path><path class="e e-dash" d="M 1100 169.0 H 1120 V 91.0 H 1100" marker-end="url(#a-dash)"><title>hierarchie utvaru</title></path><path class="e e-dash" d="M 510 987.0 H 580 V 91.0 H 630" marker-end="url(#a-dash)"><title>logicka vazba</title></path>
+</svg>
+<div class="box" style="left:40px;top:30px;width:470px"><div class="head"><span class="hn">Agendy</span><span class="hi">Agendy</span><span class="cnt">7 zázn.</span></div><div class="row"><span class="cn">Title</span><span class="cd" title="Identifikacni kod AA. Prirozeny klic.">Kód</span><span class="ct">Text(20)</span><span class="b b-pk">klic</span><span class="b b-req">povinne</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">nazev</span><span class="cd" title="Název">Název</span><span class="ct">Text(255)</span><span class="b b-req">povinne</span></div><div class="row"><span class="cn">vlastnik</span><span class="cd" title="Sekce. Vice vlastniku je pripustny stav - oddelovac &#x27;; &#x27;.">Vlastník agendy</span><span class="ct">Text(255)</span></div><div class="row"><span class="cn">stav_mapovani</span><span class="cd" title="Stav mapování">Stav mapování</span><span class="ct">Choice/3</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">zdroj</span><span class="cd" title="Odkud polozka prisla - rejstrik nebo evidencni karta utvaru.">Zdroj</span><span class="ct">Choice/2</span></div></div><div class="box" style="left:40px;top:268px;width:470px"><div class="head"><span class="hn">Procesy</span><span class="hi">Procesy</span><span class="cnt">46 zázn.</span></div><div class="row"><span class="cn">Title</span><span class="cd" title="Identifikacni kod AA-BB.">Kód</span><span class="ct">Text(20)</span><span class="b b-pk">klic</span><span class="b b-req">povinne</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">nazev</span><span class="cd" title="Název">Název</span><span class="ct">Text(255)</span><span class="b b-req">povinne</span></div><div class="row"><span class="cn">agenda_kod</span><span class="cd" title="Textovy odkaz na Agendy.Title - ne lookup ID (prenositelnost mezi tenanty).">Agenda (kód)</span><span class="ct">Text(20)</span><span class="b b-req">povinne</span><span class="b b-idx">index</span><span class="b b-ref">-&gt; Agendy</span></div><div class="row"><span class="cn">vlastnik</span><span class="cd" title="Odbor. Vice vlastniku pripustne - oddelovac &#x27;; &#x27;.">Vlastník procesu</span><span class="ct">Text(255)</span></div><div class="row"><span class="cn">stav_mapovani</span><span class="cd" title="Stav mapování">Stav mapování</span><span class="ct">Choice/3</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">zdroj</span><span class="cd" title="Zdroj">Zdroj</span><span class="ct">Choice/2</span></div></div><div class="box" style="left:40px;top:532px;width:470px"><div class="head"><span class="hn">Dílčí procesy</span><span class="hi">DilciProcesy</span><span class="cnt">250 zázn.</span></div><div class="row"><span class="cn">Title</span><span class="cd" title="Identifikacni kod AA-BB-CCC.">Kód</span><span class="ct">Text(20)</span><span class="b b-pk">klic</span><span class="b b-req">povinne</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">nazev</span><span class="cd" title="Nejdelsi namereny nazev 166 znaku - rezerva do 255 je mala, ale sloupec musi zustat Text kvuli razeni a indexaci.">Název</span><span class="ct">Text(255)</span><span class="b b-req">povinne</span></div><div class="row"><span class="cn">proces_kod</span><span class="cd" title="Proces (kód)">Proces (kód)</span><span class="ct">Text(20)</span><span class="b b-req">povinne</span><span class="b b-idx">index</span><span class="b b-ref">-&gt; Procesy</span></div><div class="row"><span class="cn">vlastnik</span><span class="cd" title="Odbor. Vice vlastniku pripustne - oddelovac &#x27;; &#x27;.">Vlastník dílčího procesu</span><span class="ct">Text(255)</span></div><div class="row"><span class="cn">stav_rejstrik</span><span class="cd" title="Barevne odliseni v puvodnim rejstriku.">Stav v rejstříku</span><span class="ct">Choice/3</span></div><div class="row"><span class="cn">stav_mapovani</span><span class="cd" title="Stav mapování">Stav mapování</span><span class="ct">Choice/3</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">zdroj</span><span class="cd" title="Zdroj">Zdroj</span><span class="ct">Choice/2</span></div></div><div class="box" style="left:40px;top:822px;width:470px"><div class="head"><span class="hn">Aktivity</span><span class="hi">Aktivity</span><span class="cnt">46 zázn.</span></div><div class="row"><span class="cn">Title</span><span class="cd" title="Identifikacni kod AA-BB-CCC-DDDD.">Kód</span><span class="ct">Text(20)</span><span class="b b-pk">klic</span><span class="b b-req">povinne</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">nazev</span><span class="cd" title="Uplny nazev. Note (vice radku, prosty text) - namereno 220 znaku, hranice 255 je blizko. Note nejde indexovat ani radit, proto vedle nej stoji nazev_kratky.">Název aktivity (úplný)</span><span class="ct">Note</span><span class="b b-req">povinne</span></div><div class="row"><span class="cn">nazev_kratky</span><span class="cd" title="Odvozeny ze sloupce nazev - useknuty na hranici slova na 150 znaku, s vypustkou. Slouzi k razeni a indexaci ve view, ktere Note neumi. Udrzuje ho import a porizovaci appka pri kazde zmene nazvu.">Název</span><span class="ct">Text(255)</span><span class="b b-idx">index</span><span class="b b-der">odvozene</span></div><div class="row"><span class="cn">dilci_proces_kod</span><span class="cd" title="Primarni zarazeni. Vsechna zarazeni vc. tohoto drzi list AktivitaDilciProces.">Primární dílčí proces (kód)</span><span class="ct">Text(20)</span><span class="b b-req">povinne</span><span class="b b-idx">index</span><span class="b b-ref">-&gt; DilciProcesy</span></div><div class="row"><span class="cn">vykonava</span><span class="cd" title="Oddeleni.">Vykonává útvar</span><span class="ct">Text(255)</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">spolupracuje</span><span class="cd" title="Spolupracuje">Spolupracuje</span><span class="ct">Note</span></div><div class="row"><span class="cn">vnitrni_predpis</span><span class="cd" title="Vice predpisu oddeleno &#x27;; &#x27;. Namereno 293 znaku - proto Note.">Vnitřní předpis</span><span class="ct">Note</span></div><div class="row"><span class="cn">text_pro_or</span><span class="cd" title="V evidencni karte neexistuje - zaklada se prazdny, plni se rucne pro budouci generovani organizacniho radu.">Text pro OŘ</span><span class="ct">Note</span><span class="b b-new">mimo kartu</span></div><div class="row"><span class="cn">sekce</span><span class="cd" title="Sekce">Sekce</span><span class="ct">Text(20)</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">stav</span><span class="cd" title="V evidencni karte neexistuje - pri importu se plni hodnotou &#x27;pracovní&#x27;.">Stav</span><span class="ct">Choice/2</span><span class="b b-idx">index</span><span class="b b-new">mimo kartu</span></div><div class="row"><span class="cn">datum_aktualizace</span><span class="cd" title="V evidencni karte neexistuje - pri importu se plni datem importu, dal ji udrzuje porizovaci appka.">Datum aktualizace</span><span class="ct">DateTime</span><span class="b b-new">mimo kartu</span></div></div><div class="box" style="left:630px;top:30px;width:470px"><div class="head"><span class="hn">Útvary</span><span class="hi">Utvary</span><span class="cnt">8 zázn.</span></div><div class="row"><span class="cn">Title</span><span class="cd" title="Cislo utvaru. 1 cislice = sekce, 2 = odbor, 3 = oddeleni.">Kód útvaru</span><span class="ct">Text(20)</span><span class="b b-pk">klic</span><span class="b b-req">povinne</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">nazev</span><span class="cd" title="Název útvaru">Název útvaru</span><span class="ct">Text(255)</span><span class="b b-req">povinne</span></div><div class="row"><span class="cn">uroven</span><span class="cd" title="Úroveň">Úroveň</span><span class="ct">Choice/3</span><span class="b b-idx">index</span></div><div class="row"><span class="cn">nadrizeny_kod</span><span class="cd" title="Kod nadrizeneho utvaru; u sekce prazdne.">Nadřízený útvar (kód)</span><span class="ct">Text(20)</span><span class="b b-idx">index</span></div></div><div class="box" style="left:630px;top:822px;width:470px"><div class="head"><span class="hn">Vazba aktivita–dílčí proces</span><span class="hi">AktivitaDilciProces</span><span class="cnt">46 zázn.</span></div><div class="row"><span class="cn">Title</span><span class="cd" title="Odvozeny klic - zajistuje idempotenci importu a brani duplicitni vazbe.">Klíč</span><span class="ct">Text(40)</span><span class="b b-pk">klic</span><span class="b b-req">povinne</span><span class="b b-idx">index</span><span class="b b-der">odvozene</span></div><div class="row"><span class="cn">aktivita_kod</span><span class="cd" title="Aktivita (kód)">Aktivita (kód)</span><span class="ct">Text(20)</span><span class="b b-req">povinne</span><span class="b b-idx">index</span><span class="b b-ref">-&gt; Aktivity</span></div><div class="row"><span class="cn">dilci_proces_kod</span><span class="cd" title="Dílčí proces (kód)">Dílčí proces (kód)</span><span class="ct">Text(20)</span><span class="b b-req">povinne</span><span class="b b-idx">index</span><span class="b b-ref">-&gt; DilciProcesy</span></div><div class="row"><span class="cn">primarni</span><span class="cd" title="Primární">Primární</span><span class="ct">Choice/2</span></div></div>
+</div></div>
+<p class="note">Vazby se drží <b>kódem</b> (<code>Title</code>), ne SharePoint lookup ID — model je tím
+přenositelný mezi tenanty a migrovatelný do Dataverse. Zařazení aktivity do dílčích procesů je
+<b>M:N</b> přes list <code>AktivitaDilciProces</code>; sloupec <code>dilci_proces_kod</code> v listu
+Aktivity nese jen primární zařazení a je v M:N tabulce zopakován. Vazba
+<code>Aktivity.vykonava</code> → <code>Útvary</code> je zatím jen logická — ve schématu není
+deklarovaná jako <code>ref</code>, protože číselník útvarů se odvozuje z čísel v aktivitách.</p>
+</body></html>
