@@ -9,7 +9,7 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 | F0 | Normalizace podkladů + prototyp mapy | **hotovo** |
 | F1 | SharePoint rejstřík — schéma, provisioning, import dat | **hotovo** |
 | F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.20, čeká na import) |
-| F3 | Publikační flow: data → HTML mapa v Site Assets | **flow hotové**, zbývá krok 10 |
+| F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo**, zbývá adresa pro tlačítko |
 | F4 | Přenos na tenant MPSV | čeká na F2+F3 |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
@@ -246,21 +246,30 @@ spustí znovu, proto podmínka „přepiš jen když se liší".
 250+ položek to znamená dávku běhů. Import proto plní `nazev_kratky` rovnou
 a flow je jen pojistka.
 
-### 10. Ověření zobrazení mapy na SP stránce — ODLOŽENO (rozhodnutí 19.08.2026)
+### 10. Ověření zobrazení mapy na SP stránce — HOTOVO 20.08.2026, dopadlo dobře
 
-Ověření se **teď nedělá** — řešení se nejprve zhotoví a otestuje se až po nasazení.
-Krok zůstává v plánu jako povinný, ale posouvá se za krok 12.
+**Mapa se v tenantu zobrazí.** Klik na `procesni_mapa.html` v knihovně
+Site Assets ji otevře; `securitypolicyviolation` v konzoli nepadá, protože
+data jsou zapečená a stránka nic nefetchuje. Tím padlo riziko, které se od
+začátku neslo jako jediné, co mohlo celý přístup k mapě otočit — publikační
+flow (krok 9) zůstává a zobrazení se do canvas appky stěhovat nemusí.
 
-**verify (až se bude dělat):** otevřít HTML ze Site Assets v prohlížeči a v konzoli
-zkontrolovat, že nepadá žádná `securitypolicyviolation`. Data jsou zapečená, takže
-CSP sandbox (blokuje `connect-src` i `img-src`) nevadí — ověřit, ne předpokládat.
-**edge cases:** tenant může HTML ze Site Assets **stahovat** místo zobrazovat
-(Strict browser file handling) → pak zvolit zobrazení přes canvas app (vzor 1).
-**risk:** **neseme ho vědomě.** Je to jediný bod, kde se může celý přístup k mapě
-otočit, a odkladem se ověření dostává až za hotové F2 a F3. Pokud se ukáže, že
-tenant HTML ze Site Assets nezobrazí, propadne práce na publikačním flow (krok 9)
-a zobrazení se přesune do canvas appky. Mitigace: mapu stavět tak, aby zapečený
-JSON šel použít i v canvas appce, a do flow neinvestovat víc, než je nutné.
+**Zároveň to opravuje závěr z FloorPlanu** („`.html` i `.aspx` ze Site Assets
+se v PPF stahují vždy, hosting dead-end"). Neplatí to — stahuje se **přímý
+odkaz na soubor**, ne otevření z knihovny.
+
+**Zbývá dílčí vada:** tlačítko „Zobrazit v HTML" v appce volá `Launch()` na
+přímou cestu `…/SiteAssets/procesni_mapa.html` a na tu SharePoint kvůli
+*Strict browser file handling* pošle `Content-Disposition: attachment`.
+
+**verify:** `src/zjisti_url_mapy.js` v konzoli změří u šesti kandidátních
+adres hlavičku odpovědi a vypíše `ZOBRAZÍ SE` / `STÁHNE SE`; funkční adresa
+se dosadí do `varMapaUrl` v `App.OnStart` (jediné místo v appce).
+**edge cases:** fetch musí běžet s `redirect: "manual"` — potichu následované
+přesměrování by změřilo hlavičky jiné adresy.
+**risk:** kdyby se stahovalo úplně všechno, zbývá **stránka s web partem
+Vložit** (stránky se nestahují nikdy); mapa v iframu poběží i pod sandboxem
+`about:srcdoc`, protože nic nefetchuje. Cena je užší zobrazovací plocha.
 
 ### 11. Brána: `/audit` před transportem
 

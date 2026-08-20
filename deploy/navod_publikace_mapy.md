@@ -21,26 +21,58 @@ Přetáhni do ní z `deploy/`:
 **Ověření:** oba soubory jsou v knihovně vidět a mají nenulovou velikost
 (94 kB a 13 kB).
 
-## 2. Ověřit, že tenant HTML zobrazí a nestáhne
+## 2. Najít adresu, kterou se mapa ZOBRAZÍ (ne stáhne)
 
-**Tohle je jediná neověřená věc celého řešení a rozhoduje o tom, jestli
-publikační flow má vůbec smysl.** V PPF tenantu se `.html` ze Site Assets
-kvůli nastavení *Strict browser file handling* může místo zobrazení stáhnout;
-u FloorPlanu se to tak chovalo.
+**Ověřeno 20.08.2026: klik na soubor v knihovně mapu zobrazí.** Publikační
+flow tedy smysl má a hlavní riziko projektu padlo. Zbývá dílčí, ale otravná
+věc: **tlačítko „Zobrazit v HTML" v appce soubor stáhne do Downloads.**
 
-V knihovně klikni na `procesni_mapa.html`.
+Rozdíl není v souboru, ale v adrese. Knihovna otevírá soubor náhledovou
+stránkou SharePointu, kdežto appka volá `Launch()` na přímou cestu
+`…/SiteAssets/procesni_mapa.html` — a na tu SharePoint kvůli *Strict browser
+file handling* pošle `Content-Disposition: attachment`, tedy „stáhni".
 
-| co se stane | co to znamená |
-|---|---|
-| stránka se otevře a strom jde rozbalovat | funguje, pokračuj krokem 3 |
-| prohlížeč soubor **stáhne** | tudy cesta nevede — zobrazení se musí přesunout do canvas appky (HTML viewer control) a publikační flow se zahodí |
+### Cesta A — najít funkční adresu (zkus první, je to na dvě minuty)
 
-Když se stránka otevře, ještě otevři F12 → Console a zkontroluj, že tam není
-`securitypolicyviolation`. Mapa žádná externí data netahá (vše je zapečené),
-takže by být neměla — ale je to levné ověření.
+Vlož do konzole (F12) na libovolné stránce cílového webu obsah
+**`src/zjisti_url_mapy.js`**. Skript si web odvodí z adresy stránky, u šesti
+kandidátních adres **změří hlavičku odpovědi** a vypíše tabulku
+`varianta → ZOBRAZÍ SE / STÁHNE SE`.
 
-**Tlačítko „Zobrazit v HTML"** v appce míří přesně na tento soubor. Adresu drží
-`varMapaUrl` v `App.OnStart` a je to jediné místo, kde je zapsaná.
+Pošli řádek té varianty, která se zobrazí — dosadí se do `varMapaUrl`
+v `App.OnStart`. Je to **jediné místo v appce**, kde je adresa mapy zapsaná.
+
+Rychlejší varianta téhož, když se ti nechce spouštět skript: klikni na soubor
+v knihovně, počkej, až se mapa zobrazí, a **zkopíruj adresu z adresního
+řádku**. Ta je z definice ta správná.
+
+### Cesta B — stránka s web partem Vložit (když se stáhne úplně všechno)
+
+Spolehlivější v tom smyslu, že nezávisí na tom, jak tenant servíruje soubory
+z knihoven: **stránky se nestahují nikdy.**
+
+1. Na webu **Nová → Stránka**, pojmenovat „Procesní mapa".
+2. Přidat web part **Vložit (Embed)** a vložit:
+   ```html
+   <iframe src="/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/procesni_mapa.html"
+           style="width:100%;height:900px;border:0"></iframe>
+   ```
+3. Publikovat a adresu stránky dát do `varMapaUrl`.
+
+Mapa v iframu poběží: SharePoint ho sice servíruje jako sandbox
+(`about:srcdoc`, `connect-src 'none'`), ale **data jsou zapečená přímo
+ve stránce**, takže nic nefetchuje a CSP jí nevadí. Přesně tuhle cestu
+nakonec zvolil FloorPlan.
+
+Cena: náhledová oblast bývá užší než celá šířka okna — modern pages ani
+full-width sekce v tomhle tenantu k dispozici nejsou. Mapa je responzivní,
+takže to není vada, jen menší plocha.
+
+### Ještě zkontroluj konzoli
+
+Až mapa poběží, otevři F12 → Console a ověř, že tam není
+`securitypolicyviolation`. Mapa žádná externí data netahá, takže by být
+neměla — ale je to levné ověření.
 
 ## 3. Zapnout a spustit MapaPublishFlow
 

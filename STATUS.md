@@ -1,6 +1,40 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 15:00
+Aktualizováno: 2026-08-20 15:15
+
+## Hlavní riziko projektu padlo — mapa se v tenantu ZOBRAZÍ (20.08.2026 15:15)
+
+**Klik na `procesni_mapa.html` v knihovně Site Assets mapu otevře.** Odložené
+ověření z `PLAN.md` kroku 10 tím proběhlo a dopadlo dobře: publikační flow
+smysl má a zobrazení se nemusí stěhovat do canvas appky. Je to zároveň
+oprava závěru z FloorPlanu, který tvrdil, že `.html` i `.aspx` ze Site Assets
+se v PPF tenantu stahují **vždy** — neplatí to.
+
+**Zbývá dílčí vada: tlačítko „Zobrazit v HTML" soubor stáhne do Downloads.**
+Rozdíl není v souboru, ale v adrese. Knihovna otevírá soubor náhledovou
+stránkou SharePointu; appka volá `Launch()` na přímou cestu
+`…/SiteAssets/procesni_mapa.html` a na tu pošle SharePoint kvůli *Strict
+browser file handling* `Content-Disposition: attachment`.
+
+**Sonda `src/zjisti_url_mapy.js`** to rozhodne měřením, ne hádáním: u šesti
+kandidátních adres (přímá, `?web=1`, `Doc.aspx` ve dvou režimech,
+`embed.aspx`, `WopiFrame.aspx`, plus `LinkingUrl` ze SharePointu) přečte
+hlavičku odpovědi a vypíše `ZOBRAZÍ SE` / `STÁHNE SE`. Volá se
+s `redirect: "manual"` — kdyby fetch přesměrování potichu následoval, měřily
+by se hlavičky úplně jiné adresy.
+
+Záložní cesta, kdyby se stahovalo všechno: **stránka s web partem Vložit**
+(stránky se nestahují nikdy). Mapa v iframu poběží i pod sandboxem
+`about:srcdoc` s `connect-src 'none'`, protože data jsou zapečená přímo
+ve stránce a nic nefetchuje. Obě cesty popisuje
+`deploy/navod_publikace_mapy.md` krok 2.
+
+**Grafika:** uživatel ji odsouhlasil jako lepší, další kolo úprav odloženo.
+
+### Další krok
+Dostat funkční adresu (sonda nebo prostě zkopírovat z adresního řádku)
+a dosadit ji do `varMapaUrl` v `App.OnStart` — je to jediné místo v appce,
+kde je adresa mapy zapsaná.
 
 ## Hover na řádku, překryvy a oprava flow — 1.0.0.21 (20.08.2026 15:00)
 

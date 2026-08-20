@@ -8,10 +8,12 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 
 1. **Importovat `deploy/procesnimapa_1_0_0_21.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-2. **Nahrát `deploy/mapa_template.html` a `deploy/procesni_mapa.html`
-   do Site Assets** a kliknutím ověřit, jestli tenant HTML **zobrazí, nebo
-   stáhne**. To je jediná neověřená věc celého řešení — postup a co dělat
-   v obou případech má `deploy/navod_publikace_mapy.md`.
+2. **Zjistit adresu, kterou se mapa zobrazí** — dnešní tlačítko
+   „Zobrazit v HTML" soubor **stáhne**, protože `Launch()` míří na přímou
+   cestu k souboru. Buď zkopíruj adresu z adresního řádku, když ti mapa
+   běží po kliknutí v knihovně, nebo vlož do konzole `src/zjisti_url_mapy.js`
+   (změří to u šesti kandidátních adres). **Pošli mi ji** — dosadí se do
+   `varMapaUrl` v `App.OnStart`. Podrobně `deploy/navod_publikace_mapy.md` krok 2.
 3. **Zapnout a ručně spustit `MapaPublishFlow`** (import stav zapnutí nemění).
    Kontrolní body po běhu jsou v témže návodu; nejdůležitější: krok
    `Nacti_DilciProcesy` musí vrátit **250 položek, ne 100**.
@@ -27,6 +29,15 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
    co ho shodilo.
 
 ## 2. CO DĚLÁM JÁ (asistent)
+
+### Zjištěno 20.08.2026
+
+- **Mapa se v tenantu ZOBRAZÍ** (klik na soubor v knihovně) — hlavní riziko
+  projektu padlo, publikační flow má smysl. Opravuje to závěr z FloorPlanu,
+  že `.html` ze Site Assets se v PPF stahuje vždy.
+- **Tlačítko v appce ale soubor stáhne**, protože `Launch()` míří na přímou
+  cestu. Čeká se na funkční adresu, viz bod 2 výše.
+- **Grafika odsouhlasena jako lepší**, další kolo úprav odloženo.
 
 ### Opraveno v 1.0.0.21
 
@@ -135,8 +146,8 @@ přepisuje od základu, takže by doplněné akce zahodil.
 
 ## 6. Otevřená rizika
 
-- **Zobrazí tenant HTML ze Site Assets?** Neověřeno. Když ne, publikační flow
-  propadne a zobrazení se musí přesunout do canvas appky. Viz krok 2 výše.
+- ~~Zobrazí tenant HTML ze Site Assets?~~ **Ověřeno 20.08.2026: ano.**
+  Zbývá jen najít adresu, na kterou má mířit `Launch()` z appky.
 - **Delegace nad 2 000 aktivitami.** Test se odkládá od začátku a je to
   jediný bod, kde se může ukázat, že seznam tiše ořezává. Čísla v souhrnné
   kartě jsou proto počítaná z galerie, ne z listu, a popisek říká „zobrazeno".
