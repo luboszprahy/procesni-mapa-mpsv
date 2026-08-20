@@ -111,6 +111,15 @@ def main():
             overit(json.loads(packed).get("LoadConfiguration", {}).get("LoadFromYaml") is True,
                    "packed.json nemá LoadFromYaml=true — Studio by načetlo zastaralé Controls/*.json")
 
+        # vzorce předávají názvy sloupců jako identifikátory (ShowColumns, Search) —
+        # to platí jen s tímhle příznakem; kdyby ho balík ztratil, Studio je odmítne
+        vlastnosti = cti(msapp, "Properties.json")
+        if vlastnosti:
+            priznaky = json.loads(vlastnosti).get("AppPreviewFlagsMap", {})
+            overit(priznaky.get("supportcolumnnamesasidentifiers") is True,
+                   "appka nemá supportcolumnnamesasidentifiers=True, ale vzorce "
+                   "předávají sloupce jako identifikátory")
+
         nalezene = {Path(p).name.replace(".pa.yaml", "") for p in polozky if p.endswith(".pa.yaml")}
         overit(OCEKAVANE_OBRAZOVKY <= nalezene,
                f"v .msapp chybí obrazovky: {sorted(OCEKAVANE_OBRAZOVKY - nalezene)}")

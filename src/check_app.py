@@ -40,6 +40,22 @@ NEDELEGOVATELNE = ["Search", "Distinct", "CountRows", "CountIf", "Sum", "Max", "
 # Listy, u kterých na delegaci opravdu záleží (rostou do tisíců).
 VELKE_LISTY = ["Aktivity", "Vazba aktivita–dílčí proces"]
 
+# Appka běží s příznakem supportcolumnnamesasidentifiers = True (Properties.json
+# v .msapp), takže názvy sloupců se těmto funkcím předávají jako identifikátory.
+# Řetězec na místě sloupce = chyba "Name isn't valid" / "invalid arguments".
+# Hodnota = kolik prvních argumentů sloupec nenese.
+SLOUPCOVE_FUNKCE = {
+    "ShowColumns": 1,
+    "DropColumns": 1,
+    "RenameColumns": 1,
+    "AddColumns": 1,
+    "SortByColumns": 1,
+    "GroupBy": 1,
+    "Ungroup": 1,
+    "Distinct": 1,
+    "Search": 2,
+}
+
 chyby = []
 varovani = []
 
@@ -116,6 +132,81 @@ def argumenty_volani(text, pozice):
             if hloubka == 0:
                 return text[pozice + 1:index]
     return text[pozice + 1:]
+
+
+def rozdel_argumenty(text):
+    """Rozdělí seznam argumentů na nejvyšší úrovni — závorky a řetězce se přeskakují."""
+    casti, hloubka, start, v_retezci = [], 0, 0, False
+    for index, znak in enumerate(text):
+        if znak == '"':
+            v_retezci = not v_retezci
+        elif v_retezci:
+            continue
+        elif znak in "([{":
+            hloubka += 1
+        elif znak in ")]}":
+            hloubka -= 1
+        elif znak == "," and hloubka == 0:
+            casti.append(text[start:index])
+            start = index + 1
+    casti.append(text[start:])
+    return [c.strip() for c in casti]
+
+
+def kontrola_identifikatoru(vzorce):
+    """Sloupec se v režimu identifikátorů nesmí předávat jako řetězec."""
+    for cesta, prop, text in vzorce:
+        for funkce, preskoc in SLOUPCOVE_FUNKCE.items():
+            for shoda in re.finditer(rf"\b{funkce}\s*\(", text):
+                zavorka = text.index("(", shoda.start())
+                argumenty = rozdel_argumenty(argumenty_volani(text, zavorka))
+                for argument in argumenty[preskoc:]:
+                    if argument.startswith('"') and argument.endswith('"'):
+                        chyby.append(
+                            f"{cesta}.{prop}: {funkce}() dostává sloupec jako řetězec "
+                            f"{argument} — appka běží s supportcolumnnamesasidentifiers, "
+                            f"takže musí být identifikátor {argument.strip(chr(34))}"
+                        )
+
+
+def kontrola_vzorovych_dat(soubory, typy, vzorova):
+    """Vlastnost, jejíž výchozí hodnota míří na vzorová data, musí být nastavená.
+
+    Nenastavená vlastnost si vezme výchozí hodnotu ze šablony controlu — a ta
+    u ComboBoxu odkazuje na ukázkový zdroj ComboBoxSample, který v appce
+    neexistuje. Studio to hlásí až po importu jako "Name isn't valid".
+    """
+    for cesta in soubory:
+        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        for koren, obsah in (dokument or {}).items():
+            if koren != "Screens":
+                continue
+            for _obrazovka, telo in obsah.items():
+                for jmeno, definice, typ in prvky_se_typem(telo):
+                    sablona = typy.get(typ)
+                    nastavene = set(definice.get("Properties") or {})
+                    for vlastnost, vychozi in vzorova.get(sablona, {}).items():
+                        if vlastnost not in nastavene:
+                            chyby.append(
+                                f"{jmeno}.{vlastnost}: nenastaveno, takže se použije "
+                                f"výchozí hodnota šablony '{vychozi}' odkazující na "
+                                f"vzorová data, která v appce nejsou"
+                            )
+
+
+def nacti_vzorova_data():
+    """Pro každou šablonu vrátí vlastnosti, jejichž výchozí hodnota míří na vzorová data."""
+    data = json.loads(SABLONY.read_text(encoding="utf-8"))
+    nalezene = {}
+    for sablona in data["sablony"]:
+        vlastnosti = {}
+        for shoda in re.finditer(r'<property name="([^"]+)"[^>]*defaultValue="([^"]*)"',
+                                 sablona["Template"]):
+            if "Sample" in shoda.group(2):
+                vlastnosti[shoda.group(1)] = shoda.group(2)
+        if vlastnosti:
+            nalezene[sablona["Name"]] = vlastnosti
+    return nalezene
 
 
 def kontrola_sloupcu(vzorce, schema):
@@ -314,7 +405,9 @@ def main():
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
     kontrola_unikatnosti(soubory)
+    kontrola_identifikatoru(vzorce)
     kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti(), nacti_typy())
+    kontrola_vzorovych_dat(soubory, nacti_typy(), nacti_vzorova_data())
 
     print(f"souborů: {len(soubory)}   obrazovek: {len(obrazovky)}   prvků: {len(controly)}   vzorců: {len(vzorce)}")
     for obrazovka in sorted(obrazovky):

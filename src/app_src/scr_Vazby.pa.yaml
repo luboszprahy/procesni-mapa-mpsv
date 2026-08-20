@@ -163,7 +163,7 @@ Screens:
               =If(
                   IsBlank(txt_HledatDp.Text),
                   colDilci,
-                  Search(colDilci, txt_HledatDp.Text, "Title", "nazev")
+                  Search(colDilci, txt_HledatDp.Text, Title, nazev)
               )
             TemplateSize: =64
             Width: =620

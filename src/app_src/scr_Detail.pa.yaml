@@ -71,6 +71,7 @@ Screens:
               =Reset(cmb_Proces);
               Reset(cmb_Dilci)
             SearchFields: =["nazev"]
+            SearchItems: =Search(colAgendy, Self.SearchText, nazev)
             SelectMultiple: =false
             Size: =13
             Width: =620
@@ -97,6 +98,12 @@ Screens:
             Items: =Filter(colProcesy, agenda_kod = cmb_Agenda.Selected.Title)
             OnChange: =Reset(cmb_Dilci)
             SearchFields: =["nazev"]
+            SearchItems: |-
+              =Search(
+                  Filter(colProcesy, agenda_kod = cmb_Agenda.Selected.Title),
+                  Self.SearchText,
+                  nazev
+              )
             SelectMultiple: =false
             Size: =13
             Width: =620
@@ -122,6 +129,12 @@ Screens:
             Height: =40
             Items: =Filter(colDilci, proces_kod = cmb_Proces.Selected.Title)
             SearchFields: =["nazev"]
+            SearchItems: |-
+              =Search(
+                  Filter(colDilci, proces_kod = cmb_Proces.Selected.Title),
+                  Self.SearchText,
+                  nazev
+              )
             SelectMultiple: =false
             Size: =13
             Width: =620

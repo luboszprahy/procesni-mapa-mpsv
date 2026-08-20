@@ -127,25 +127,87 @@ def doplnit_sablony(cesta_msapp):
     return doplnene
 
 
+def vymen_zdroje_bez_pac(cesta_msapp):
+    """Vymění Src/*.pa.yaml přímo v .msapp, bez pac.
+
+    Balík zabalený z YAML má v packed.json LoadFromYaml=true, takže Studio čte
+    Src/*.pa.yaml a Controls/*.json si dogeneruje samo — výměna zdrojů je pak
+    obyčejná úprava zipu. Na stroji bez pac je to jediná cesta, jak vydat opravu.
+    Nefunguje na balíku exportovaném ze Studia (ten YAML nenese).
+    """
+    with zipfile.ZipFile(cesta_msapp) as balik:
+        polozky = {n: balik.read(n) for n in balik.namelist()}
+
+    def klic_koncici(pripona):
+        nalezene = [n for n in polozky if n.replace("\\", "/").endswith(pripona)]
+        if len(nalezene) != 1:
+            raise SystemExit(f"CHYBA: v .msapp není právě jeden {pripona} (nalezeno {len(nalezene)})")
+        return nalezene[0]
+
+    packed = json.loads(polozky[klic_koncici("packed.json")].decode("utf-8-sig"))
+    if packed.get("LoadConfiguration", {}).get("LoadFromYaml") is not True:
+        raise SystemExit(
+            "CHYBA: balík nemá LoadFromYaml=true — Studio by četlo Controls/*.json,\n"
+            "       ne vyměněné YAML. Bez pac se dá upravit jen balík už zabalený z YAML."
+        )
+
+    for nazev in ["App"] + OBRAZOVKY:
+        polozky[klic_koncici(f"Src/{nazev}.pa.yaml")] = (APP_SRC / f"{nazev}.pa.yaml").read_bytes()
+
+    stav = polozky[klic_koncici("Src/_EditorState.pa.yaml")].decode("utf-8-sig")
+    for obrazovka in OBRAZOVKY:
+        if obrazovka not in stav:
+            raise SystemExit(f"CHYBA: _EditorState neuvádí obrazovku {obrazovka}")
+
+    with zipfile.ZipFile(cesta_msapp, "w", zipfile.ZIP_DEFLATED) as balik:
+        for jmeno, data in polozky.items():
+            balik.writestr(jmeno, data)
+    return len(OBRAZOVKY) + 1
+
+
+def dokonci(solution_dir, verze):
+    """Přepíše verzi v manifestu a složí solution zip."""
+    manifest = solution_dir / "solution.xml"
+    text = manifest.read_text(encoding="utf-8-sig")
+    novy, pocet = re.subn(r"<Version>[^<]+</Version>", f"<Version>{verze}</Version>", text, count=1)
+    if pocet != 1:
+        raise SystemExit("CHYBA: verzi v solution.xml se nepodařilo přepsat")
+    manifest.write_text(novy, encoding="utf-8")
+
+    VYSTUP.mkdir(parents=True, exist_ok=True)
+    vystupni_zip = VYSTUP / f"procesnimapa_{verze.replace('.', '_')}.zip"
+    zabal(solution_dir, vystupni_zip)
+
+    print(f"\nHOTOVO: {vystupni_zip}  ({vystupni_zip.stat().st_size} B), verze {verze}")
+    print("Import: Power Apps > Solutions > Import solution (upgrade). Po importu appku")
+    print("jednou otevřít v Power Apps Studiu — z YAML zabalená appka se validuje až tam.")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", default=str(VYCHOZI_SOLUTION), help="vstupní solution zip z Power Apps")
     parser.add_argument("--verze", default="1.0.0.2", help="verze výsledné solution")
     parser.add_argument("--pac", default=None, help="cesta k pac.exe")
+    parser.add_argument("--bez-pac", action="store_true",
+                        help="vyměnit YAML přímo v už zabaleném balíku (stroj bez pac)")
     argumenty = parser.parse_args()
 
     vstupni_zip = Path(argumenty.solution)
     if not vstupni_zip.exists():
         raise SystemExit(f"CHYBA: solution {vstupni_zip} neexistuje")
 
-    pac = najdi_pac(argumenty.pac)
-    if pac is None or not pac.exists():
-        raise SystemExit(
-            "CHYBA: pac.exe nenalezen. Nainstaluj rozšíření Power Platform Tools do VS Code\n"
-            "       (code --install-extension microsoft-IsvExpTools.powerplatform-vscode)\n"
-            "       nebo předej cestu přes --pac / PAC_EXE."
-        )
-    print(f"pac: {pac}")
+    pac = None
+    if not argumenty.bez_pac:
+        pac = najdi_pac(argumenty.pac)
+        if pac is None or not pac.exists():
+            raise SystemExit(
+                "CHYBA: pac.exe nenalezen. Nainstaluj rozšíření Power Platform Tools do VS Code\n"
+                "       (code --install-extension microsoft-IsvExpTools.powerplatform-vscode)\n"
+                "       nebo předej cestu přes --pac / PAC_EXE.\n"
+                "       Máš-li balík už zabalený z YAML, jde použít --bez-pac."
+            )
+        print(f"pac: {pac}")
 
     if PRACOVNI.exists():
         for polozka in PRACOVNI.iterdir():
@@ -161,6 +223,14 @@ def main():
         raise SystemExit(f"CHYBA: čekal jsem právě jeden .msapp, našel {len(msappy)}")
     msapp = msappy[0]
     print(f"canvas app: {msapp.name}")
+
+    if argumenty.bez_pac:
+        vlozeno = vymen_zdroje_bez_pac(msapp)
+        print(f"vloženo zdrojů (bez pac): {vlozeno}")
+        doplneno = doplnit_sablony(msapp)
+        if doplneno:
+            print(f"doplněné šablony controlů: {', '.join(doplneno)}")
+        return dokonci(solution_dir, argumenty.verze)
 
     zdroje = PRACOVNI / "sources"
     spust([str(pac), "canvas", "unpack", "--msapp", str(msapp),
@@ -193,21 +263,7 @@ def main():
 
     shutil.copy(novy_msapp, msapp)
 
-    manifest = solution_dir / "solution.xml"
-    text = manifest.read_text(encoding="utf-8-sig")
-    novy, pocet = re.subn(r"<Version>[^<]+</Version>", f"<Version>{argumenty.verze}</Version>", text, count=1)
-    if pocet != 1:
-        raise SystemExit("CHYBA: verzi v solution.xml se nepodařilo přepsat")
-    manifest.write_text(novy, encoding="utf-8")
-
-    VYSTUP.mkdir(parents=True, exist_ok=True)
-    vystupni_zip = VYSTUP / f"procesnimapa_{argumenty.verze.replace('.', '_')}.zip"
-    zabal(solution_dir, vystupni_zip)
-
-    print(f"\nHOTOVO: {vystupni_zip}  ({vystupni_zip.stat().st_size} B), verze {argumenty.verze}")
-    print("Import: Power Apps > Solutions > Import solution (upgrade). Po importu appku")
-    print("jednou otevřít v Power Apps Studiu — z YAML zabalená appka se validuje až tam.")
-    return 0
+    return dokonci(solution_dir, argumenty.verze)
 
 
 if __name__ == "__main__":

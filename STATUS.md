@@ -1,6 +1,66 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-19 16:14 (konec dne)
+Aktualizováno: 2026-08-20 (dopoledne)
+
+## F2 — 67 chyb ve Studiu diagnostikováno, balík 1.0.0.6 k importu (20.08.2026)
+
+Ze snímků v `input/` (Studio, panel Formulas): **67 chyb, z toho 38 na `scr_Detail`**.
+Dvě příčiny, obě dohledané v balíku, ne odhadnuté:
+
+1. **Appka běží s `supportcolumnnamesasidentifiers = True`** (`Properties.json`
+   v `.msapp`) — názvy sloupců se předávají jako **identifikátory, ne řetězce**.
+   `ShowColumns(Agendy, "Title", …)` v `App.OnStart` tedy neprošel, kolekce
+   `colAgendy`/`colProcesy`/`colDilci` zůstaly bez schématu a od toho se odvíjí
+   celá kaskáda „Name isn't valid. 'Title' isn't recognized" a „Incompatible
+   types for comparison" v `DefaultSelectedItems`. Stejná past ve `scr_Vazby`
+   (`Search(colDilci, …, "Title", "nazev")`).
+2. **Nenastavená vlastnost si bere výchozí hodnotu ze šablony controlu.**
+   `Classic/ComboBox` má `SearchItems` = `Search(ComboBoxSample, Self.SearchText, Value1)`,
+   a protože ji YAML nenastavoval, zdědily ji všechny tři comboboxy — odtud
+   trojice chyb „ComboBoxSample" / „Value1" / „function 'Search' has some
+   invalid arguments" u každého z nich.
+
+**Opraveno v `src/app_src/`:** identifikátory v `ShowColumns` i `Search`,
+explicitní `SearchItems` u `cmb_Agenda` / `cmb_Proces` / `cmb_Dilci`
+(hledá se podle `nazev` nad toutéž filtrovanou množinou jako `Items`).
+
+**Aby se past nemohla vrátit — dvě nové offline kontroly v `src/check_app.py`,
+obě ověřené mutací** (vrácení právě opravené chyby je shodí):
+- řetězec na místě sloupce v `ShowColumns`/`Search`/`SortByColumns`/`AddColumns`/…,
+- nenastavená vlastnost, jejíž výchozí hodnota v šabloně míří na vzorová data.
+`src/check_solution.py` navíc hlídá, že balík příznak
+`supportcolumnnamesasidentifiers` nese (90 kontrol, 0 chyb).
+
+**`deploy/procesnimapa_1_0_0_6.zip` — připraveno k importu jako upgrade.**
+Ověřeno v balíku: `testzip` obou zipů čistý, v YAML žádný `ComboBoxSample`,
+`ShowColumns` a `Search` s identifikátory, 3× `SearchItems`, verze 1.0.0.6.
+
+**Pozor — na tomhle stroji (5CG5210MB2) `pac` není.** Přebalení proto proběhlo
+novou větví `build_app.py --bez-pac`, která vymění `Src/*.pa.yaml` přímo
+v hotovém `.msapp`. Jde to jen u balíku, který už z YAML zabalený je
+(`packed.json` → `LoadFromYaml: true`) — na exportu ze Studia to selže a skript
+to sám ohlásí.
+
+**Nedořešeno:** že po importu bude chyb opravdu 0, se offline dokázat nedá —
+kontroly pokrývají obě nalezené příčiny, ne zbytek seznamu, který na snímku
+nebyl vidět. Po importu projít panel Formulas; pokud něco zůstane, poslat
+seznam a doopravím.
+
+**Publikace:** první snímek ukazuje přehrávanou appku ve staré verzi s hláškou
+„A new version of this app is coming" — naimportovaná verze se hráčům ukáže
+až po **Save & Publish** ve Studiu.
+
+## F3 rozpracované: pojistné flow nad `nazev_kratky` (krok 9b)
+
+`src/check_zkraceni_flow.py` — ověřuje, že řetěz Compose akcí, který flow
+`AktualizaceKratkehoNazvu` použije (bez regulárních výrazů: kolaps mezer
+opakovaným `replace`, řez na 149, hranice slova přes `lastIndexOf`, tři
+průchody ořezu koncových `,;.`), dává **týž výsledek jako kanonická
+`zkratit()`** z `check_schema.py`. 106 vzorků (reálná i anonymizovaná data
++ 14 hraničních), shoda ve všech; mutačně ověřeno (bez ořezu, jen dva
+průchody, jiná hranice slova, řez na 150 → test padá).
+
+**Zbývá:** sepsat klikací návod `deploy/flow_AktualizaceKratkehoNazvu.md`.
 
 ## F2 — APPKA SE OTEVŘELA (19.08.2026 večer)
 
@@ -122,19 +182,23 @@ Zadavatelka není k dispozici (stav 19.08.2026), takže se pracuje podle best
 practice. Otevřené otázky mají prozatímní rozhodnutí v `PRD.md` §9 — všechna
 jsou volená tak, aby se dala revidovat bez ztráty dat.
 
-1. **Teď hned nic.**
-2. **Až bude zadavatelka k dispozici:** projít `PRD.md` §9 (5 otázek) a potvrdit
+1. **Naimportovat `deploy/procesnimapa_1_0_0_6.zip`** jako upgrade, otevřít appku
+   ve Studiu a podívat se do panelu **Formulas**. Zbyde-li nějaká chyba, poslat
+   její seznam (stačí snímek s rozbalenými skupinami) — doopravím.
+2. **Až bude appka bez chyb:** projít 6 testů ze sekce „Jak se to ověří"
+   v `deploy/app_navrh.md`. Test delegace (>2 000 aktivit) neodkládat.
+3. **Save & Publish** ve Studiu, jinak hráči vidí pořád starou verzi.
+4. **Až bude zadavatelka k dispozici:** projít `PRD.md` §9 (5 otázek) a potvrdit
    nebo změnit prozatímní rozhodnutí. Ukázat jí `viz/mapa_prototyp.html`.
-3. **Před nasazením na MPSV, ne dřív:** nechat potvrdit výchozí číslování kódů
+5. **Před nasazením na MPSV, ne dřív:** nechat potvrdit výchozí číslování kódů
    (viz sekce „Identifikační kódy" níže).
-4. **Hotovo** — provisioning i import proběhly (viz sekce nahoře).
-5. **Hotovo** — druhý běh potvrdil idempotenci.
-6. **Zítra: dodat solution zip s canvas appkou** do `input/` — podrobnosti
-   v sekci „KONEC DNE" nahoře.
+6. **Hotovo** — provisioning, import i solution zip s appkou.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**F1 hotová a nasazená.** F2 čeká na solution zip (viz sekce „KONEC DNE").
+**F2 čeká na výsledek importu 1.0.0.6** (viz sekce nahoře). Mezitím F3 krok 9b —
+klikací návod `deploy/flow_AktualizaceKratkehoNazvu.md`; ověřovací skript
+`src/check_zkraceni_flow.py` už hotový a mutačně ověřený.
 
 Dělba práce u canvas apps je zavedená a zapsaná ve skillu `power-Apps-skill`
 i v paměti projektu: uživatel založí appku ve Studiu a pošle solution,
