@@ -203,6 +203,62 @@ def kontrola_vzorovych_dat(soubory, typy, vzorova):
                             )
 
 
+def kontrola_razeni(vzorce):
+    """Pořadí řazení musí být kvalifikované — holé Descending Studio nezná."""
+    for cesta, prop, text in vzorce:
+        for funkce in ("Sort", "SortByColumns"):
+            for shoda in re.finditer(rf"\b{funkce}\s*\(", text):
+                zavorka = text.index("(", shoda.start())
+                for argument in rozdel_argumenty(argumenty_volani(text, zavorka)):
+                    if argument in ("Ascending", "Descending"):
+                        chyby.append(
+                            f"{cesta}.{prop}: {funkce}() dostává '{argument}' bez kvalifikace — "
+                            f"musí být SortOrder.{argument}, jinak Studio hlásí "
+                            f"„Name isn't valid\""
+                        )
+
+
+def kontrola_obsahovych_vychozich(soubory, typy, lokalizovane):
+    """Obsahová vlastnost s lokalizovanou výchozí hodnotou musí být nastavená.
+
+    Nenastavený `Default` u textového pole se vyplní překladem
+    ##Text_DefaultValue_Default## = „Text input". Vypadá to jako placeholder,
+    ale je to skutečná hodnota: filtr nad takovým polem pak nic nenajde
+    a appka tvrdí, že data nejsou.
+    """
+    for cesta in soubory:
+        dokument = yaml.safe_load(io.open(cesta, encoding="utf-8"))
+        for koren, obsah in (dokument or {}).items():
+            if koren != "Screens":
+                continue
+            for _obrazovka, telo in obsah.items():
+                for jmeno, definice, typ in prvky_se_typem(telo):
+                    sablona = typy.get(typ)
+                    nastavene = set(definice.get("Properties") or {})
+                    for vlastnost in lokalizovane.get(sablona, ()):
+                        if vlastnost not in nastavene:
+                            chyby.append(
+                                f"{jmeno}.{vlastnost}: nenastaveno — doplní se překlad "
+                                f"(u textového pole „Text input“), který se chová jako "
+                                f"zadaná hodnota a tiše rozbije filtry"
+                            )
+
+
+def nacti_lokalizovane_vychozi():
+    """Obsahové vlastnosti, jejichž výchozí hodnota je lokalizační token ##…##."""
+    data = json.loads(SABLONY.read_text(encoding="utf-8"))
+    nalezene = {}
+    for sablona in data["sablony"]:
+        jmena = set()
+        for shoda in re.finditer(r'<property name="(Default|Text|Items)"([^>]*)>', sablona["Template"]):
+            vychozi = re.search(r'defaultValue="(##[^"]*##)"', shoda.group(2))
+            if vychozi:
+                jmena.add(shoda.group(1))
+        if jmena:
+            nalezene[sablona["Name"]] = jmena
+    return nalezene
+
+
 def nacti_vzorova_data():
     """Pro každou šablonu vrátí vlastnosti, jejichž výchozí hodnota míří na vzorová data."""
     data = json.loads(SABLONY.read_text(encoding="utf-8"))
@@ -421,8 +477,10 @@ def main():
     kontrola_navigace(vzorce, obrazovky)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
+    kontrola_razeni(vzorce)
     kontrola_vlastnosti(soubory, nacti_povolene_vlastnosti(), nacti_typy())
     kontrola_vzorovych_dat(soubory, nacti_typy(), nacti_vzorova_data())
+    kontrola_obsahovych_vychozich(soubory, nacti_typy(), nacti_lokalizovane_vychozi())
 
     print(f"souborů: {len(soubory)}   obrazovek: {len(obrazovky)}   prvků: {len(controly)}   vzorců: {len(vzorce)}")
     for obrazovka in sorted(obrazovky):

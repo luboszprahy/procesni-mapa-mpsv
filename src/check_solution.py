@@ -99,6 +99,17 @@ def main():
         overit(puvodni == nove,
                "GUIDy připojených listů se proti vstupní solution změnily")
 
+    # --- flow ze vstupní solution nesmí přebalením zmizet ---
+    # Kdyby se stavělo ze staršího balíku, flow by ve výstupu nebylo a upgrade
+    # by ho z prostředí odstranil. Tichá ztráta, proto explicitní kontrola.
+    def workflows(balik):
+        return {Path(n.replace("\\", "/")).name for n in balik.namelist()
+                if n.replace("\\", "/").startswith("Workflows/")}
+
+    overit(workflows(vstupni) <= workflows(vystupni),
+           f"ve výstupu chybí flow ze vstupní solution: "
+           f"{sorted(workflows(vstupni) - workflows(vystupni))}")
+
     # --- obsah canvas appky ---
     msapp, pocet = nacti_msapp(VYSTUP)
     overit(msapp is not None, f"ve výstupu není právě jeden .msapp (nalezeno {pocet})")

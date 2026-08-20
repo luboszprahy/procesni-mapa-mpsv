@@ -2,6 +2,51 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## Balík 1.0.0.9 — appka bez chyb + hotové flow (20.08.2026)
+
+**Appka se po importu 1.0.0.7 otevřela**, zbyly 2 chyby a dvě funkční vady:
+
+1. `Sort(…, Descending)` — enum musí být `SortOrder.Descending`. Obě chyby
+   ve Studiu byly z tohohle jediného místa v `btn_Ulozit`.
+2. **„Zobrazeno 0 aktivit"** — filtrační pole neměla nastavený `Default`,
+   takže se do nich doplnil překlad `##Text_DefaultValue_Default##` = **„Text
+   input"**. To není placeholder, ale skutečná hodnota: `StartsWith(nazev_kratky,
+   "Text input")` nenašel nic. Doplněno `Default: =""` u `txt_Hledat`,
+   `txt_Sekce`, `txt_Utvar` a `txt_HledatDp`.
+3. **Prázdné číselníky u procesu a dílčího procesu** nebyly rozbité — kaskáda
+   je plní až po výběru nadřazené úrovně. Vypadalo to ale jako porucha, proto
+   jsou teď **zašedlé** (`DisplayMode`), dokud nadřazený výběr nepadne.
+
+**Dvě nové offline kontroly (mutačně ověřené):** holý `Ascending`/`Descending`
+v `Sort()`; obsahová vlastnost s lokalizovanou výchozí hodnotou, která se
+nenastaví (přesně past „Text input").
+
+## Flow AktualizaceKratkehoNazvu — hotové
+
+Uživatel dodal v `input/procesnimapa_1_0_0_8.zip` kostru (trigger nad
+`Aktivity` + jedna Compose), `src/build_flow.py` doplnil zbytek: osm Compose
+akcí, podmínku a `Update item` (`PatchItem`, jen `item/nazev_kratky`, GUID
+listu natvrdo).
+
+**Klíčové rozhodnutí:** `if()` v Logic Apps vyhodnocuje **obě** větve, takže
+každý podvýraz musí být platný pro libovolný vstup — proto `min`/`max` kolem
+každého `substring`. Ověřeno mutací: bez `min` v akci `Rez` spadne výpočet
+na 87 vzorcích ze 104.
+
+`src/check_flow.py` — **vytáhne výrazy z hotového balíku a vyhodnotí je**
+mini-interpretem (hladově, jako Logic Apps), porovná s kanonickou `zkratit()`
+a ověří i idempotenci (druhý průchod nad vlastním výstupem nesmí chtít zápis).
+16 kontrol, 104 vzorků, 0 chyb. Mutačně ověřeno na šesti scénářích.
+Nahrazuje `check_zkraceni_flow.py`, který modeloval logiku vedle balíku —
+ten je smazaný.
+
+`check_solution.py` nově hlídá, že **flow ze vstupní solution přebalením
+nezmizí** (past „build ze staršího základu"); ověřeno mutací. 91 kontrol.
+
+**`deploy/procesnimapa_1_0_0_9.zip`** — appka i flow, postaveno ze základu
+`input/procesnimapa_1_0_0_8.zip`. Po importu **flow zapnout**, pokud import
+hlásí „one or more flows may not have turned on".
+
 ## F2 — import 1.0.0.6 spadl na PA2108, opraveno v 1.0.0.7 (20.08.2026)
 
 Appka se po importu 1.0.0.6 **neotevřela**:

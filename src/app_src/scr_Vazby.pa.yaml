@@ -147,6 +147,7 @@ Screens:
       - txt_HledatDp:
           Control: Classic/TextInput@2.3.2
           Properties:
+            Default: =""
             Font: =Font.'Open Sans'
             Height: =40
             HintText: ="Hledat v názvu nebo kódu"

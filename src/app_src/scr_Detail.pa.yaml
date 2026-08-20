@@ -89,6 +89,7 @@ Screens:
           Control: Classic/DropDown@2.3.1
           Properties:
             AllowEmptySelection: =true
+            DisplayMode: =If(IsBlank(drp_Agenda.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
             Default: =If(varNova, "", LookUp(colProcesy, Title = Left(varDpKod, 5), Title & " · " & nazev))
             Font: =Font.'Open Sans'
             Height: =40
@@ -117,6 +118,7 @@ Screens:
           Control: Classic/DropDown@2.3.1
           Properties:
             AllowEmptySelection: =true
+            DisplayMode: =If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
             Default: =If(varNova, "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
             Font: =Font.'Open Sans'
             Height: =40
@@ -389,7 +391,7 @@ Screens:
                           varPrefix & Right(
                               "000" & (Value(
                                   Right(
-                                      First(Sort(Filter(Aktivity, StartsWith(Title, varPrefix)), Title, Descending)).Title,
+                                      First(Sort(Filter(Aktivity, StartsWith(Title, varPrefix)), Title, SortOrder.Descending)).Title,
                                       4
                                   )
                               ) + 1),
