@@ -1,6 +1,22 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 18:40
+Aktualizováno: 2026-08-20 18:45 (konec dne)
+
+## Konec dne 20.08.2026 — 1.0.0.23 nevyzkoušený, projekt uklizený
+
+Uživatel ztratil přístup do virtuálu dřív, než stihl balík naimportovat.
+**1.0.0.23 je proto ověřený jen offline branami, ne během ve Studiu**;
+poslední ověřeně běžící verze v prostředí je 1.0.0.22. Zítra se začíná
+importem, ne další prací na zdrojích — neověřené změny se opravují nejlevněji
+dřív, než se na ně navrství další.
+
+**Úklid:** `runs/app_build` (179 MB rozbalený `pac` a mezibuildy) smazaný,
+`src/__pycache__` taky; projekt ze 183 MB na 4 MB. Kořen drží jen `.md`,
+`kody.json` a adresáře podle konvence. Náhledový http server na portu 8765
+zastavený. Pracovní strom čistý, vše pushnuté.
+
+`pac` se při příštím buildu rozbalí sám z rozšíření VS Code — stojí to pár
+sekund, nic se nastavovat nemusí.
 
 ## Fulltext, mazání s potvrzením, datum vytvoření — 1.0.0.23 (20.08.2026 18:40)
 

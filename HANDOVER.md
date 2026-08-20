@@ -1,13 +1,36 @@
-# HANDOVER — stav k restartu konverzace (20.08.2026 18:40)
+# HANDOVER — stav k restartu konverzace (20.08.2026 18:45, konec dne)
 
 Tenhle soubor je vstupní bod pro novou session. Nejdřív si přečti `STATUS.md`
 (chronologie a odůvodnění rozhodnutí), pak tohle (co se má udělat teď).
 Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 
+> **STAV K ZAVŘENÍ DNE 20.08.2026:** uživatel ztratil přístup do virtuálu,
+> takže **balík 1.0.0.23 NENÍ naimportovaný ani vyzkoušený**. Pět věcí v něm
+> (fulltext, mazání s potvrzením, sloupec VYTVOŘENO, viditelná šipka řazení,
+> drobnější filtry) je ověřených **jen offline branami**, ne během ve Studiu.
+> Zítra proto **začni importem a vyzkoušením**, ne další prací na zdrojích —
+> kdyby se něco z toho ve Studiu nechytlo, opravuje se to nejlevněji dřív,
+> než se na to navrství další změny.
+>
+> Poslední ověřeně běžící verze v prostředí je **1.0.0.22**.
+>
+> Pracovní strom je čistý a vše je pushnuté (`2c08b88`). `runs/app_build`
+> smazaný (179 MB); příště se `pac` rozbalí sám, build tím jen o pár sekund
+> déle. Náhledový http server zastavený.
+
 ## 1. CO JE NA TOBĚ (uživateli) — v tomto pořadí
 
 1. **Importovat `deploy/procesnimapa_1_0_0_23.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
+   **Tohle je nejdůležitější krok dne** — viz rámeček výše.
+   Na co se u nových věcí dívat:
+   - klik na **ikonu koše** otevře dialog a **nesmaže hned** (ikony jsou nově
+     nad překryvnou vrstvou řádku — kdyby koš místo dialogu otevíral detail,
+     chová se pořadí potomků ve Studiu jinak, než ukazuje balík, a je to
+     první věc, kterou mi řekni),
+   - **šipka ▲/▼** u aktivního sloupce je vidět a hlavička je modrá,
+   - **VYTVOŘENO** ukazuje datum, ne prázdno (bere se vestavěný `Created`),
+   - **hledání** najde řetězec i uprostřed názvu.
 2. **Vyzkoušet tlačítko „Zobrazit v HTML"** — od 1.0.0.22 míří na náhled
    knihovny (`AllItems.aspx?id=…`), ne na soubor, takže se má zobrazit,
    ne stáhnout.
