@@ -1,4 +1,4 @@
-# HANDOVER — stav k restartu konverzace (20.08.2026 15:00)
+# HANDOVER — stav k restartu konverzace (20.08.2026 15:25)
 
 Tenhle soubor je vstupní bod pro novou session. Nejdřív si přečti `STATUS.md`
 (chronologie a odůvodnění rozhodnutí), pak tohle (co se má udělat teď).
@@ -6,14 +6,11 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 
 ## 1. CO JE NA TOBĚ (uživateli) — v tomto pořadí
 
-1. **Importovat `deploy/procesnimapa_1_0_0_21.zip`** jako upgrade a appku
+1. **Importovat `deploy/procesnimapa_1_0_0_22.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-2. **Zjistit adresu, kterou se mapa zobrazí** — dnešní tlačítko
-   „Zobrazit v HTML" soubor **stáhne**, protože `Launch()` míří na přímou
-   cestu k souboru. Buď zkopíruj adresu z adresního řádku, když ti mapa
-   běží po kliknutí v knihovně, nebo vlož do konzole `src/zjisti_url_mapy.js`
-   (změří to u šesti kandidátních adres). **Pošli mi ji** — dosadí se do
-   `varMapaUrl` v `App.OnStart`. Podrobně `deploy/navod_publikace_mapy.md` krok 2.
+2. **Vyzkoušet tlačítko „Zobrazit v HTML"** — od 1.0.0.22 míří na náhled
+   knihovny (`AllItems.aspx?id=…`), ne na soubor, takže se má zobrazit,
+   ne stáhnout.
 3. **Zapnout a ručně spustit `MapaPublishFlow`** (import stav zapnutí nemění).
    Kontrolní body po běhu jsou v témže návodu; nejdůležitější: krok
    `Nacti_DilciProcesy` musí vrátit **250 položek, ne 100**.
@@ -23,7 +20,7 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 5. **Úklid v prostředí (odloženo vědomě):** odpojit z appky datové zdroje
    `Documents` a `CustomGallerySample` a odebrat ze solution connection
    reference `ppf_sharedsharepointonline_12718` („SharePoint Pruvodnilist-12718",
-   zbytek z jiného projektu). **Až po tom, co 1.0.0.21 běží** — obě flow na ní
+   zbytek z jiného projektu). **Až po tom, co 1.0.0.22 běží** — obě flow na ní
    dnes visí, takže odebrání je nutné udělat pro obě naráz, a míchat to
    s velkou funkční změnou by znamenalo, že při selhání importu nepoznáš,
    co ho shodilo.
@@ -35,8 +32,9 @@ Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 - **Mapa se v tenantu ZOBRAZÍ** (klik na soubor v knihovně) — hlavní riziko
   projektu padlo, publikační flow má smysl. Opravuje to závěr z FloorPlanu,
   že `.html` ze Site Assets se v PPF stahuje vždy.
-- **Tlačítko v appce ale soubor stáhne**, protože `Launch()` míří na přímou
-  cestu. Čeká se na funkční adresu, viz bod 2 výše.
+- **Tlačítko v appce soubor stáhlo**, protože `Launch()` mířil na přímou
+  cestu; od 1.0.0.22 míří na náhled knihovny (`AllItems.aspx?id=…`).
+  Nová brána `kontrola_adresy_mapy` hlídá, aby se to nevrátilo.
 - **Grafika odsouhlasena jako lepší**, další kolo úprav odloženo.
 
 ### Opraveno v 1.0.0.21
@@ -97,7 +95,7 @@ co otevřít dřív, než flow poprvé proběhne.
 | věc | kde |
 |---|---|
 | základ pro build (nejnovější export ze Studia) | `input/procesnimapa_1_0_0_18.zip` |
-| poslední vydaný balík | `deploy/procesnimapa_1_0_0_21.zip` |
+| poslední vydaný balík | `deploy/procesnimapa_1_0_0_22.zip` |
 | k nahrání do Site Assets | `deploy/mapa_template.html`, `deploy/procesni_mapa.html` |
 | nasazovací návod | `deploy/navod_publikace_mapy.md` |
 | datový kontrakt mapy + klikací fallback | `deploy/flow_MapaPublish.md` |
@@ -118,12 +116,12 @@ $env:PYTHONIOENCODING = "utf-8"
 $py = ".venv/Scripts/python.exe"
 
 & $py src/check_app.py                       # brána nad zdroji appky
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.22
-& $py src/build_flow.py      --solution deploy/procesnimapa_1_0_0_21.zip
-& $py src/build_mapa_flow.py --solution deploy/procesnimapa_1_0_0_21.zip
-& $py src/check_flow.py      --solution deploy/procesnimapa_1_0_0_21.zip
-& $py src/check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_21.zip
-& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_18.zip" --vystup deploy/procesnimapa_1_0_0_21.zip
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.23
+& $py src/build_flow.py      --solution deploy/procesnimapa_1_0_0_22.zip
+& $py src/build_mapa_flow.py --solution deploy/procesnimapa_1_0_0_22.zip
+& $py src/check_flow.py      --solution deploy/procesnimapa_1_0_0_22.zip
+& $py src/check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_22.zip
+& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_18.zip" --vystup deploy/procesnimapa_1_0_0_22.zip
 
 # HTML mapa z dat
 & $py src/build_mapa.py --model runs/anonym/model.json --out deploy/procesni_mapa.html
@@ -140,7 +138,7 @@ přepisuje od základu, takže by doplněné akce zahodil.
   kódů, vazby M:N, filtry z číselníku `Útvary`, řazení klikem na hlavičku.
 - Flow `AktualizaceKratkehoNazvu`: hotové, ověřené mini-interpretem (104 vzorků).
 - Flow `MapaPublishFlow`: hotové, 129 kontrol, 13 mutací ověřených.
-- Brány: `check_app` (8 tříd), `check_flow` (19), `check_mapa_flow` (129),
+- Brány: `check_app` (9 tříd), `check_flow` (19), `check_mapa_flow` (129),
   `check_solution` (125), node testy provisioningu a importu.
   **Všechny kontroly jsou mutačně ověřené.**
 

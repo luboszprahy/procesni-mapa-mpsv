@@ -3,6 +3,13 @@
 # varMapaUrl je JEDINÉ místo s adresou publikované mapy. Canvas app umí číst
 # jen datasetové proměnné prostředí, textové ne — dokud nevznikne list
 # Nastaveni (F3), musí adresa být tady. Při přenosu na MPSV se mění tady.
+#
+# Adresa MUSÍ být náhled knihovny (AllItems.aspx?id=<cesta k souboru>), NE přímý
+# odkaz na .html. Ověřeno 20.08.2026: na přímou cestu k souboru pošle SharePoint
+# kvůli Strict browser file handling `Content-Disposition: attachment` a mapa se
+# místo zobrazení stáhne do Downloads. Klik v knihovně používá právě tenhle tvar.
+# `viewid` určuje jen podkladové zobrazení knihovny; adresa je z reálného kliknutí,
+# a proto se přebírá celá — zkracovat ji bez ověření v prostředí nemá cenu.
 # Nabídky útvarů a sekcí se plní z číselníku 'Útvary', ne z hodnot v aktivitách:
 # číselník je malý a načte se celý, takže nabídka je úplná bez ohledu na to,
 # kolik aktivit v rejstříku je. Položka nabídky má tvar "kód · název".
@@ -19,7 +26,7 @@ App:
       Collect(colUtvarNabidka, Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev));
       ClearCollect(colSekceNabidka, { Value: "(vše)" });
       Collect(colSekceNabidka, Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev));
-      Set(varMapaUrl, "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/procesni_mapa.html");
+      Set(varMapaUrl, "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/Forms/AllItems.aspx?viewid=4a3b2f8d%2D3719%2D4669%2D856a%2D21cf49ae628e&id=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets%2Fprocesni%5Fmapa%2Ehtml&parent=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets");
       Set(stylPrimarni, RGBA(0, 18, 107, 1));
       Set(stylAkce, RGBA(0, 90, 181, 1));
       Set(stylAkceHover, RGBA(0, 70, 145, 1));

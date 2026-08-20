@@ -646,6 +646,33 @@ def porovnej(jmeno_obrazovky, obdelniky):
             )
 
 
+def kontrola_adresy_mapy(vzorce):
+    """varMapaUrl nesmí být přímý odkaz na soubor v knihovně.
+
+    Ověřeno 20.08.2026: na přímou cestu `…/SiteAssets/procesni_mapa.html`
+    pošle SharePoint kvůli Strict browser file handling
+    `Content-Disposition: attachment` a mapa se místo zobrazení stáhne.
+    Zobrazí ji až náhled knihovny (`AllItems.aspx?id=<cesta>`) nebo stránka
+    s web partem Vložit. Chyba je tichá — appka běží, tlačítko funguje,
+    jen výsledek skončí v Downloads.
+    """
+    for cesta, prop, text in vzorce:
+        for adresa in re.findall(r'Set\(\s*varMapaUrl\s*,\s*"([^"]*)"', text):
+            if not adresa:
+                continue
+            bez_dotazu = adresa.split("?", 1)[0]
+            if bez_dotazu.lower().endswith((".html", ".htm")):
+                chyby.append(
+                    f"{cesta}.{prop}: varMapaUrl míří přímo na soubor "
+                    f"({bez_dotazu.rsplit('/', 1)[-1]}) — SharePoint ho pošle jako "
+                    "přílohu a mapa se stáhne místo zobrazení. Použij adresu "
+                    "náhledu knihovny (AllItems.aspx?id=…) nebo stránky s web "
+                    "partem Vložit."
+                )
+            if not adresa.lower().startswith("https://"):
+                chyby.append(f"{cesta}.{prop}: varMapaUrl není https adresa")
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -667,6 +694,7 @@ def main():
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
     kontrola_prekryvu(soubory)
+    kontrola_adresy_mapy(vzorce)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
     kontrola_syntaxe(vzorce)

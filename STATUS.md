@@ -1,6 +1,33 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 15:15
+Aktualizováno: 2026-08-20 15:25
+
+## Tlačítko „Zobrazit v HTML" míří na náhled knihovny — 1.0.0.22 (20.08.2026 15:25)
+
+Uživatel dodal adresu z reálného kliknutí v knihovně. Je to **náhled knihovny**,
+ne přímý odkaz na soubor:
+
+```
+…/SiteAssets/Forms/AllItems.aspx?viewid=<GUID zobrazení>&id=<cesta k souboru>&parent=<cesta ke složce>
+```
+
+Rozdíl, na kterém to celé stálo: na přímou cestu `…/SiteAssets/procesni_mapa.html`
+pošle SharePoint kvůli *Strict browser file handling* `Content-Disposition:
+attachment` a soubor skončí v Downloads. Přes `AllItems.aspx?id=…` ho servíruje
+náhledem, který ho zobrazí. Adresa se přebírá **celá včetně `viewid`** — pochází
+z ověřeného kliknutí a zkracovat ji bez ověření v prostředí by znamenalo hádat.
+
+**Nová kontrola `kontrola_adresy_mapy`** hlídá, že `varMapaUrl` nekončí `.html`
+(ani před dotazovacím řetězcem) a je `https`. Je to regresní pojistka přesně na
+tuhle chybu: appka běží, tlačítko funguje, jen výsledek skončí v Downloads —
+žádná jiná brána takové selhání nezachytí. Mutačně ověřeno 3 mutacemi.
+
+Sonda `src/zjisti_url_mapy.js` v repu zůstává — bude potřeba znovu při přenosu
+na tenant MPSV, kde bude adresa jiná.
+
+### Další krok
+Import 1.0.0.22 a vyzkoušet tlačítko. Pak zbývá připojit `MapaPublishFlow`
+k appce ve Studiu (tlačítko „Obnovit mapu") a úklid cizí connection reference.
 
 ## Hlavní riziko projektu padlo — mapa se v tenantu ZOBRAZÍ (20.08.2026 15:15)
 
