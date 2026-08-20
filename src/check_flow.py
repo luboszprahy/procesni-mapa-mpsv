@@ -249,8 +249,18 @@ def main():
                "zápisová akce má web jako runtime výraz")
         overit(parametry.get("item/nazev_kratky") == "@outputs('Cil')",
                "zápis neplní nazev_kratky výstupem Cil")
-        overit(set(k for k in parametry if k.startswith("item/")) == {"item/nazev_kratky"},
-               "zápis sahá i na jiné sloupce než nazev_kratky")
+        # povinné sloupce musí v těle být (jinak flow nejde aktivovat), ale smí
+        # se posílat jen beze změny z triggeru — měnit se smí výhradně nazev_kratky
+        polozky = {k: v for k, v in parametry.items() if k.startswith("item/")}
+        overit(set(polozky) == {"item/Title", "item/nazev", "item/dilci_proces_kod",
+                                "item/nazev_kratky"},
+               f"zápis nemá právě povinné sloupce + nazev_kratky: {sorted(polozky)}")
+        for sloupec, hodnota in polozky.items():
+            if sloupec == "item/nazev_kratky":
+                continue
+            ocekavano = "@triggerBody()?['%s']" % sloupec.split("/", 1)[1]
+            overit(hodnota == ocekavano,
+                   f"{sloupec} se nevrací beze změny z triggeru (je tam '{hodnota}')")
 
     podminka = json.dumps(akce.get("Lisi_se", {}).get("expression", {}), ensure_ascii=False)
     overit("not" in podminka and "Cil" in podminka and "nazev_kratky" in podminka,

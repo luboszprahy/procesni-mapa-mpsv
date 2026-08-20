@@ -49,9 +49,22 @@ Filter(
 )
 ```
 
-Sekce a útvar jsou **textová pole**, ne nabídky: `Distinct()` nad `Aktivity`
-delegovatelný není, takže by nabídka nad 2 000 aktivitami tiše ztratila hodnoty.
-Stav je nabídka, protože jeho hodnoty jsou dané schématem (`Choice`).
+Sekce, útvar i stav jsou **rozbalovací nabídky**, hledání podle názvu zůstává
+textové pole (hledá se od začátku názvu, jinak by se ztratila delegace).
+Nabídky sekce a útvaru plní `App.OnStart` z `Distinct(Aktivity, …)` do kolekcí
+`colSekce` a `colUtvary`, první položka je `(vše)`.
+
+**Vědomý ústupek:** `Distinct` nad `Aktivity` delegovatelný není — nad 2 000
+aktivitami přestane být nabídka úplná. Jiný zdroj hodnot dnes neexistuje
+(útvary ani sekce nemají číselník), takže je to nejlevnější řešení do doby,
+než rejstřík naroste; pak je potřeba založit číselník útvarů. Výjimka je
+zapsaná v `src/check_app.py` (`VYJIMKY_DELEGACE`) a kontrola ji při každém
+běhu vypíše jako varování, aby se na ni nezapomnělo.
+
+Řazení řeší nabídka „Řadit podle" (kód / název / útvar) přes `SortByColumns`
+nad indexovanými sloupci — zůstává delegovatelné. Proto je filtr ve vzorci
+třikrát: název sloupce musí být identifikátor, takže se nedá dosadit
+proměnnou a každá varianta má vlastní větev `Switch`.
 
 Hledání je tedy **od začátku názvu**, ne „obsahuje". Popisek pole to musí říct
 („Název začíná na…"), jinak uživatel nabude dojmu, že hledání nefunguje.

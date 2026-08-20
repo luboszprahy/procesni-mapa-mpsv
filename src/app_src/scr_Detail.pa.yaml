@@ -145,6 +145,7 @@ Screens:
       - txt_Nazev:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HintText: ="Znění činnosti tak, jak má být v organizačním řádu"
             Default: =If(varNova, "", varAktivita.nazev)
             Font: =Font.'Open Sans'
             Height: =88
@@ -167,6 +168,7 @@ Screens:
       - txt_Spolupracuje:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HintText: ="Útvary, které se na aktivitě podílejí — např. 712; 721"
             Default: =If(varNova, "", varAktivita.spolupracuje)
             Font: =Font.'Open Sans'
             Height: =64
@@ -189,6 +191,7 @@ Screens:
       - txt_TextOR:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HintText: ="Nepovinné, plní se až pro generování organizačního řádu"
             Default: =If(varNova, "", varAktivita.text_pro_or)
             Font: =Font.'Open Sans'
             Height: =64
@@ -216,7 +219,15 @@ Screens:
             Height: =40
             PaddingLeft: =12
             Size: =13
-            Text: =LookUp(colAgendy, Title = Left(drp_Agenda.Selected.Value, 2), vlastnik)
+            Text: |-
+              =If(
+                  IsBlank(drp_Agenda.Selected.Value),
+                  "",
+                  Coalesce(
+                      LookUp(colAgendy, Title = Left(drp_Agenda.Selected.Value, 2), vlastnik),
+                      "— v rejstříku nevyplněno —"
+                  )
+              )
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =700
@@ -240,7 +251,15 @@ Screens:
             Height: =40
             PaddingLeft: =12
             Size: =13
-            Text: =LookUp(colProcesy, Title = Left(drp_Proces.Selected.Value, 5), vlastnik)
+            Text: |-
+              =If(
+                  IsBlank(drp_Proces.Selected.Value),
+                  "",
+                  Coalesce(
+                      LookUp(colProcesy, Title = Left(drp_Proces.Selected.Value, 5), vlastnik),
+                      "— v rejstříku nevyplněno —"
+                  )
+              )
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =700
@@ -264,7 +283,15 @@ Screens:
             Height: =40
             PaddingLeft: =12
             Size: =13
-            Text: =LookUp(colDilci, Title = Left(drp_Dilci.Selected.Value, 9), vlastnik)
+            Text: |-
+              =If(
+                  IsBlank(drp_Dilci.Selected.Value),
+                  "",
+                  Coalesce(
+                      LookUp(colDilci, Title = Left(drp_Dilci.Selected.Value, 9), vlastnik),
+                      "— v rejstříku nevyplněno —"
+                  )
+              )
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =700
@@ -283,6 +310,7 @@ Screens:
       - txt_UtvarDetail:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HintText: ="Oddělení, které aktivitu vykonává — např. 711"
             Default: =If(varNova, "", varAktivita.vykonava)
             Font: =Font.'Open Sans'
             Height: =40
@@ -304,6 +332,7 @@ Screens:
       - txt_SekceDetail:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HintText: ="Číslo sekce — např. 7"
             Default: =If(varNova, "", varAktivita.sekce)
             Font: =Font.'Open Sans'
             Height: =40
@@ -325,6 +354,7 @@ Screens:
       - txt_Predpis:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HintText: ="Víc předpisů oddělte středníkem — např. SP 10/2021; VP 02/2016"
             Default: =If(varNova, "", varAktivita.vnitrni_predpis)
             Font: =Font.'Open Sans'
             Height: =64
@@ -354,6 +384,19 @@ Screens:
             Size: =13
             Width: =300
             X: =700
+            Y: =548
+      - lbl_l_Vazby:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =36
+            Size: =10
+            Text: |-
+              ="Aktivita patří primárně do dílčího procesu vybraného výše. Pokud ji vykonáváte i v jiných dílčích procesech, přiřaďte ji tlačítkem vpravo."
+            Visible: =!varNova
+            Width: =740
+            X: =40
             Y: =548
       - btn_Vazby:
           Control: Classic/Button@2.2.0

@@ -4,7 +4,7 @@ Hlídá, aby `nazev_kratky` v listu `Aktivity` vždy odpovídal sloupci `nazev`.
 Řeší zápisy, které neprošly pořizovací appkou — ruční editaci přímo v listu,
 hromadný import z Excelu, opravu přes datové zobrazení.
 
-**Stav: flow je hotové a je součástí `deploy/procesnimapa_1_0_0_9.zip`.**
+**Stav: flow je hotové a je součástí `deploy/procesnimapa_1_0_0_10.zip`.**
 Kostru (trigger + jedna akce Compose) vyrobil uživatel v designeru, zbytek
 doplnil skript `src/build_flow.py` do exportovaného balíku. Tenhle dokument
 proto popisuje, **co v tom flow je a proč** — ne postup na naklikání.
@@ -46,7 +46,7 @@ Trigger: **`When an item is created or modified`** nad listem `Aktivity`
 | `Orez_1` … `Orez_3` | `@if(contains(' ,;.', substring(X, max(0, sub(length(X), 1)), min(1, length(X)))), substring(X, 0, max(0, sub(length(X), 1))), X)`, kde `X` = výstup předchozí akce |
 | `Cil` | `@if(lessOrEquals(length(outputs('Bez_bilych_znaku')), 150), outputs('Bez_bilych_znaku'), concat(outputs('Orez_3'), decodeUriComponent('%E2%80%A6')))` |
 | `Lisi_se` (If) | `not(equals(coalesce(triggerBody()?['nazev_kratky'], ''), outputs('Cil')))` |
-| `Zapsat_kratky_nazev` (v *If yes*) | `Update item` (`PatchItem`) — `id` z triggeru, `item/nazev_kratky` = `@outputs('Cil')` |
+| `Zapsat_kratky_nazev` (v *If yes*) | `Update item` (`PatchItem`) — `id` z triggeru, povinné sloupce `Title`/`nazev`/`dilci_proces_kod` beze změny z triggeru, `item/nazev_kratky` = `@outputs('Cil')` |
 
 ### Proč všude `min` a `max`
 
@@ -59,10 +59,14 @@ Ověřeno mutací: bez `min` v akci `Rez` spadne výpočet na 87 vzorcích ze 10
 Tři průchody `'  '` → `' '` složí až osm mezer za sebou na jednu. Delší shluk
 v datech není a nic nerozbije — jen by zůstal.
 
-### Proč se zapisuje jediný sloupec
+### Proč jsou v zápisu i sloupce, které se nemění
 
-`PatchItem` je částečná změna: pošle se `id` a `item/nazev_kratky`, nic víc.
-Zbylé sloupce se nedotknou, takže flow nemůže přepsat cizí úpravu.
+`PatchItem` sice mění jen poslané sloupce, ale **povinné sloupce listu musí
+v těle být vždy**, jinak se flow nedá aktivovat. Import 1.0.0.9 to ukázal:
+*„The API operation 'PatchItem' is missing required property 'item/Title'."*
+Posílají se proto i `Title`, `nazev` a `dilci_proces_kod` — **beze změny
+z triggeru**, takže nic nepřepíšou. Že se opravdu vracejí nezměněné,
+hlídá `check_flow.py`; měnit se smí jedině `nazev_kratky`.
 
 ### Proč to necyklí
 
@@ -79,7 +83,7 @@ ty běhy skončí větví If no.
 ## Ověření
 
 ```powershell
-& .venv/Scripts/python.exe src/check_flow.py --solution deploy/procesnimapa_1_0_0_9.zip
+& .venv/Scripts/python.exe src/check_flow.py --solution deploy/procesnimapa_1_0_0_10.zip
 ```
 
 Skript nečte tenhle dokument ani kopii logiky — **vytáhne výrazy z balíku,

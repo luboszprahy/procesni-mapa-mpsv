@@ -43,6 +43,18 @@ Screens:
             Width: =900
             X: =76
             Y: =16
+      - lbl_l_Vysvetleni:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =52
+            Size: =10
+            Text: |-
+              ="Táž aktivita se může vykonávat ve víc dílčích procesech. Vlevo je seznam, kam už je zařazená; „primární" je ta z detailu aktivity a odebrat ji tady nelze. Vpravo vyberte další dílčí proces tlačítkem +."
+            Width: =1220
+            X: =40
+            Y: =84
       - lbl_l_Prirazene:
           Control: Label@2.5.1
           Properties:

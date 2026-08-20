@@ -42,6 +42,17 @@ Screens:
             Width: =176
             X: =Parent.Width - Self.Width - 40
             Y: =16
+      - lbl_l_Filtry:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Hledání a filtry — prázdná nabídka „(vše)" znamená bez omezení"
+            Width: =700
+            X: =40
+            Y: =76
       - txt_Hledat:
           Control: Classic/TextInput@2.3.2
           Properties:
@@ -53,37 +64,60 @@ Screens:
             Width: =380
             X: =40
             Y: =96
-      - txt_Sekce:
-          Control: Classic/TextInput@2.3.2
+      - drp_Sekce:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            Default: =""
+            Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
-            HintText: ="Sekce"
+            Items: =colSekce
             Size: =13
             Width: =140
             X: =436
             Y: =96
-      - txt_Utvar:
-          Control: Classic/TextInput@2.3.2
+      - drp_Utvar:
+          Control: Classic/DropDown@2.3.1
           Properties:
-            Default: =""
+            Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
-            HintText: ="Vykonává útvar"
+            Items: =colUtvary
             Size: =13
-            Width: =200
+            Width: =180
             X: =592
             Y: =96
       - drp_Stav:
           Control: Classic/DropDown@2.3.1
           Properties:
+            Default: ="(vše)"
             Font: =Font.'Open Sans'
             Height: =40
             Items: =["(vše)", "pracovní", "schváleno"]
             Size: =13
-            Width: =200
-            X: =808
+            Width: =180
+            X: =788
+            Y: =96
+      - lbl_l_Razeni:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(96, 94, 92, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="Řadit podle"
+            Width: =180
+            X: =984
+            Y: =76
+      - drp_Razeni:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: ="kód"
+            Font: =Font.'Open Sans'
+            Height: =40
+            Items: =["kód", "název", "útvar"]
+            Size: =13
+            Width: =180
+            X: =984
             Y: =96
       - lbl_Pocet:
           Control: Label@2.5.1
@@ -104,14 +138,33 @@ Screens:
           Properties:
             Height: =Parent.Height - Self.Y - 24
             Items: |-
-              =Filter(
-                  Aktivity,
-                  IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
-                  IsBlank(txt_Sekce.Text) || sekce = txt_Sekce.Text,
-                  IsBlank(txt_Utvar.Text) || vykonava = txt_Utvar.Text,
-                  drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+              =Switch(
+                  drp_Razeni.Selected.Value,
+                  "název",
+                  SortByColumns(Filter(
+                      Aktivity,
+                      IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
+                      drp_Sekce.Selected.Value = "(vše)" || sekce = drp_Sekce.Selected.Value,
+                      drp_Utvar.Selected.Value = "(vše)" || vykonava = drp_Utvar.Selected.Value,
+                      drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                  ), nazev_kratky, SortOrder.Ascending),
+                  "útvar",
+                  SortByColumns(Filter(
+                      Aktivity,
+                      IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
+                      drp_Sekce.Selected.Value = "(vše)" || sekce = drp_Sekce.Selected.Value,
+                      drp_Utvar.Selected.Value = "(vše)" || vykonava = drp_Utvar.Selected.Value,
+                      drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                  ), vykonava, SortOrder.Ascending),
+                  SortByColumns(Filter(
+                      Aktivity,
+                      IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
+                      drp_Sekce.Selected.Value = "(vše)" || sekce = drp_Sekce.Selected.Value,
+                      drp_Utvar.Selected.Value = "(vše)" || vykonava = drp_Utvar.Selected.Value,
+                      drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                  ), Title, SortOrder.Ascending)
               )
-            TemplateSize: =72
+            TemplateSize: =96
             Width: =Parent.Width - 80
             X: =40
             Y: =184
@@ -133,11 +186,12 @@ Screens:
                 Control: Label@2.5.1
                 Properties:
                   Font: =Font.'Open Sans'
-                  Height: =24
+                  Height: =52
                   OnSelect: =Select(Parent)
                   Size: =13
                   Text: =ThisItem.nazev_kratky
-                  Width: =Parent.TemplateWidth - 660
+                  VerticalAlign: =VerticalAlign.Top
+                  Width: =Parent.TemplateWidth - 620
                   X: =184
                   Y: =12
             - lbl_Utvar:
@@ -150,9 +204,9 @@ Screens:
                   Size: =10
                   Text: |-
                     ="vykonává: " & ThisItem.vykonava & "   ·   sekce " & ThisItem.sekce
-                  Width: =Parent.TemplateWidth - 660
+                  Width: =Parent.TemplateWidth - 620
                   X: =184
-                  Y: =38
+                  Y: =66
             - lbl_Stav:
                 Control: Label@2.5.1
                 Properties:

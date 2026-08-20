@@ -2,6 +2,47 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## Balík 1.0.0.10 — UI podle připomínek + oprava aktivace flow (20.08.2026)
+
+**Import 1.0.0.9 prošel, ale aktivace flow selhala:**
+`PatchItem is missing required property 'item/Title'`. Konektor trvá na tom,
+aby **povinné sloupce listu byly v těle zápisu**, i když se nemění. Doplněny
+`Title`, `nazev`, `dilci_proces_kod` — posílají se beze změny z triggeru.
+`check_flow.py` nově hlídá obojí: že tam ty sloupce jsou a že se **nemění**
+(mutačně ověřeno, 19 kontrol).
+
+**Appka po importu funguje** — seznam ukazuje 47 aktivit, kaskáda vybírá,
+vazby fungují (uživatel si založil testovací aktivitu `02-04-002-0001`).
+Připomínky z provozu vyřešeny takto:
+
+1. **Dlouhé názvy se v seznamu ořezávaly** — řádek zvýšen na 96 px, název
+   má dva řádky, meta informace posunuty pod něj.
+2. **Filtry sekce a útvar jsou teď rozbalovací nabídky** plněné v `App.OnStart`
+   z `Distinct(Aktivity, …)` (kolekce `colSekce`, `colUtvary`, první položka
+   `(vše)`). Přidána nabídka **Řadit podle** (kód / název / útvar) přes
+   `SortByColumns` nad indexovanými sloupci — zůstává delegovatelné.
+   Filtr je ve vzorci třikrát: název sloupce musí být identifikátor, takže
+   ho nelze dosadit proměnnou.
+3. **Nápovědy** (`HintText`) do všech textových polí detailu i seznamu,
+   vysvětlující popisky nad filtry, u tlačítka „Další dílčí procesy" a nahoře
+   na obrazovce vazeb.
+4. **Vlastníci se nezobrazovali, protože v rejstříku nejsou** — vyplněné jsou
+   jen u 2 ze 7 agend, 7 ze 46 procesů a 23 z 250 dílčích procesů. Pole teď
+   místo prázdna píše „— v rejstříku nevyplněno —", aby to nevypadalo jako
+   porucha.
+5. **Vykonává útvar / sekce / vnitřní předpis zůstávají volným textem** —
+   číselník pro ně neexistuje ani v podkladech. Mají aspoň nápovědu s příkladem.
+
+**Vědomý ústupek z delegace:** `Distinct` nad `Aktivity` delegovatelný není,
+nad 2 000 aktivitami přestane být nabídka filtru úplná. Zapsáno jako výjimka
+v `check_app.py` (`VYJIMKY_DELEGACE`) — kontrola ji **vypisuje jako varování**,
+takže nezapadne; jinde `Distinct` nad velkým listem dál shodí kontrolu
+(ověřeno mutací). Až rejstřík naroste, bude potřeba číselník útvarů.
+
+**`deploy/procesnimapa_1_0_0_10.zip`** — brány: `check_app` čistý,
+`check_flow` 19 kontrol / 104 vzorků, `check_solution` 91 kontrol.
+Po importu **flow zapnout** (po neúspěšné aktivaci zůstalo vypnuté).
+
 ## Balík 1.0.0.9 — appka bez chyb + hotové flow (20.08.2026)
 
 **Appka se po importu 1.0.0.7 otevřela**, zbyly 2 chyby a dvě funkční vady:

@@ -80,6 +80,14 @@ def akce():
                         "dataset": DATASET,
                         "table": LIST_AKTIVITY,
                         "id": "@triggerBody()?['ID']",
+                        # Povinné sloupce listu musí v těle být, i když se nemění.
+                        # Bez nich aktivace flow spadne na
+                        # OpenApiOperationParameterValidationFailed (ověřeno importem
+                        # 1.0.0.9: "missing required property 'item/Title'").
+                        # Posílají se beze změny z triggeru, takže nic nepřepíšou.
+                        "item/Title": "@triggerBody()?['Title']",
+                        "item/nazev": "@triggerBody()?['nazev']",
+                        "item/dilci_proces_kod": "@triggerBody()?['dilci_proces_kod']",
                         "item/nazev_kratky": "@outputs('Cil')",
                     },
                     "host": {

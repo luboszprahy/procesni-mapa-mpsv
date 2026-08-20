@@ -40,6 +40,15 @@ NEDELEGOVATELNE = ["Search", "Distinct", "CountRows", "CountIf", "Sum", "Max", "
 # Listy, u kterých na delegaci opravdu záleží (rostou do tisíců).
 VELKE_LISTY = ["Aktivity", "Vazba aktivita–dílčí proces"]
 
+# Vědomé ústupky z delegace: (control, vlastnost, funkce) -> proč se to smí.
+# Hlásí se jako varování, ne chyba — ale nesmí zmizet z výstupu, aby se na ně
+# při růstu dat přišlo dřív, než začnou tiše ořezávat.
+VYJIMKY_DELEGACE = {
+    ("App", "OnStart", "Distinct"):
+        "nabídky filtrů útvaru a sekce; jiný zdroj hodnot než Aktivity neexistuje. "
+        "Nad 2 000 aktivitami přestane být nabídka úplná — pak založit číselník útvarů",
+}
+
 # Appka běží s příznakem supportcolumnnamesasidentifiers = True (Properties.json
 # v .msapp), takže názvy sloupců se těmto funkcím předávají jako identifikátory.
 # Řetězec na místě sloupce = chyba "Name isn't valid" / "invalid arguments".
@@ -347,9 +356,16 @@ def kontrola_delegace(vzorce):
                     # výjimka: CountRows nad gal_*.AllItems pracuje s už načtenou stránkou
                     if funkce == "CountRows" and "AllItems" in text:
                         continue
-                    chyby.append(
-                        f"{cesta}.{prop}: {funkce}() nad '{list_nazev}' není delegovatelné"
-                    )
+                    duvod = VYJIMKY_DELEGACE.get((cesta, prop, funkce))
+                    if duvod:
+                        varovani.append(
+                            f"{cesta}.{prop}: {funkce}() nad '{list_nazev}' není "
+                            f"delegovatelné — povolená výjimka: {duvod}"
+                        )
+                    else:
+                        chyby.append(
+                            f"{cesta}.{prop}: {funkce}() nad '{list_nazev}' není delegovatelné"
+                        )
         if prop == "Items" and cesta.startswith("gal_") and re.search(r"\bSort\s*\(", text):
             varovani.append(f"{cesta}.Items: Sort v Items se přepočítá při každém překreslení")
 
