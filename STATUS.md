@@ -235,6 +235,32 @@ Co má obsahovat, aby stačilo jedno kolo:
 Napojení přes environment variables řeším já při přebalení — listy stačí
 připojit normálně.
 
+## Flow: dělba práce (dohodnuto 20.08.2026)
+
+Stejná jako u canvas appky — **kostru udělá uživatel v designeru, dokončí ji
+asistent v exportovaném zipu.** Generovat flow zip od nuly se v PPF opakovaně
+nepovedlo; úprava exportu a import jako upgrade je ověřená cesta.
+
+Co má uživatel v Power Automate vyrobit (flow `AktualizaceKratkehoNazvu`,
+uvnitř solution `procesnimapa`, hned se správným názvem):
+
+1. **Trigger** „When an item is created or modified" nad listem `Aktivity`
+   — web i list vybrat z nabídky, **ne** jako proměnnou prostředí.
+2. Jedna akce **Compose** (obsah nerozhoduje) — asistent si z ní naklonuje zbytek.
+3. **Condition** a v jeho větvi *If yes* akce **Update item** nad `Aktivity`
+   s vyplněnými poli `Id`, `Title`, `nazev`, `dilci_proces_kod`, `nazev_kratky`
+   (hodnoty z výstupu triggeru). Tuhle akci musí založit designer — tělo
+   požadavku si odvozuje ze schématu listu a ručně psané JSON je tu nejrizikovější.
+4. Flow **uložit** (musí projít bez chyby) a solution **exportovat unmanaged**.
+
+**Past, na kterou si dát pozor:** jakmile solution obsahuje i flow, musí být
+základem každého dalšího přebalení **nejnovější export z prostředí**
+(`build_app.py --solution <ten export>`). Kdyby se stavělo ze staršího balíku,
+flow by v něm nebyl a upgrade by ho z prostředí odstranil.
+
+Po importu upravené verze flow **ručně zapnout**, pokud import hlásí
+„one or more flows may not have turned on" — import stav zapnutí nemění.
+
 ## CO JE NA TOBĚ
 
 Zadavatelka není k dispozici (stav 19.08.2026), takže se pracuje podle best
