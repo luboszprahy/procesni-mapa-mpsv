@@ -69,8 +69,6 @@ a příkaz, který vypíše, co má v poli být.
 výraz (flow by po importu nešlo zapnout), takže se na tenantu MPSV staví
 podle návodu znovu — proměnnou prostředí to nevyřeší.
 
-
-
 `src/check_zkraceni_flow.py` — ověřuje, že řetěz Compose akcí, který flow
 `AktualizaceKratkehoNazvu` použije (bez regulárních výrazů: kolaps mezer
 opakovaným `replace`, řez na 149, hranice slova přes `lastIndexOf`, tři
