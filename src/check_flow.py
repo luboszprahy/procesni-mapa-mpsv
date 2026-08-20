@@ -216,8 +216,10 @@ def main():
     argumenty = parser.parse_args()
 
     with zipfile.ZipFile(argumenty.solution) as balik:
-        workflow = [n for n in balik.namelist() if n.replace("\\", "/").startswith("Workflows/")]
-        overit(len(workflow) == 1, f"v balíku není právě jedno flow (nalezeno {len(workflow)})")
+        workflow = [n for n in balik.namelist()
+                    if n.replace("\\", "/").startswith("Workflows/AktualizaceKratkehoNazvu")]
+        overit(len(workflow) == 1,
+               f"v balíku není právě jedno flow AktualizaceKratkehoNazvu (nalezeno {len(workflow)})")
         if not workflow:
             print("CHYBA: flow v balíku chybí")
             return 1

@@ -2,6 +2,39 @@
 
 Aktualizováno: 2026-08-20 (dopoledne)
 
+## Grafika sjednocena + úklid — 1.0.0.19 (20.08.2026 odpoledne)
+
+**Styl je nově na jednom místě.** `App.OnStart` drží 16 proměnných
+(`stylPrimarni`, `stylAkce`, `stylRadekHover`, `stylUspech`, …) a obrazovky
+už žádnou barvu nemají natvrdo — 63 zapsaných hodnot nahrazeno proměnnými.
+Změna palety je tím na jeden řádek.
+
+**Reakce na myš** (`HoverFill` / `HoverColor` / `PressedFill` /
+`FocusedBorderColor`) doplněny na 68 míst: tlačítka ve třech úrovních
+(primární / druhotné / nebezpečné), ikony, nabídky, textová pole i **řádky
+všech tří galerií** — u vazeb přes podkladový obdélník, protože klasická
+galerie hover na řádku sama neumí. Fokus má modrý dvoubodový okraj kvůli
+ovládání klávesnicí.
+
+**Seznam**: filtry sedí v bílé kartě s linkou, pod ní hlavička sloupců
+a řádky s podbarvením při najetí i výběru.
+
+**Skripty**: `build_flow.py` i `check_flow.py` vybírají flow **podle jména** —
+od základu 1.0.0.18 jsou v solution dvě (naše hotové + nové `MapaPublishFlow`
+s ručním triggerem a jednou akcí, čeká na doplnění).
+
+**Úklid složky:** `runs/` ze 179 MB na 344 kB (rozbalené `pac` a staré buildy
+pryč), `deploy/` drží jen poslední balík, starší solution zipy v `input/archiv/`,
+snímky obrazovky v `input/snimky/`.
+
+**Skill doplněn** — `power-Apps-skill/reference/pa-yaml-uskali.md`: pět tříd
+chyb, které dnes shodily import nebo otevření appky, a poznámka, že
+`pac canvas pack` nevaliduje vůbec nic.
+
+### Další krok
+`MapaPublishFlow` doplnit (načíst 6 listů → zapéct do `mapa_template.html` →
+uložit do Site Assets) a přidat do appky tlačítko, které ho spustí.
+
 ## Galerie ve stylu notifikací — 1.0.0.17 (20.08.2026)
 
 Seznam aktivit přestavěn podle vzoru z MessageCenterDashboard: hlavička

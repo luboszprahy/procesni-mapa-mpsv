@@ -4,8 +4,8 @@
 Screens:
   scr_Detail:
     Properties:
-      Fill: =RGBA(248, 249, 250, 1)
-      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      Fill: =stylPlocha
+      LoadingSpinnerColor: =stylAkce
       OnVisible: |-
         =Set(varNapovedaKod, false);
         Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
@@ -16,7 +16,7 @@ Screens:
       - rec_HlavickaDetail:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(0, 18, 107, 1)
+            Fill: =stylPrimarni
             Height: =72
             Width: =Parent.Width
             X: =0
@@ -24,6 +24,8 @@ Screens:
       - ico_Zpet:
           Control: Classic/Icon@2.5.0
           Properties:
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
             Tooltip: '="Zpět na seznam aktivit. Neuložené změny se zahodí."'
             Color: =RGBA(255, 255, 255, 1)
             Height: =40
@@ -53,7 +55,7 @@ Screens:
       - lbl_l_Agenda:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -64,6 +66,9 @@ Screens:
       - drp_Agenda:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem, vlastníkem je sekce. Výběr agendy určuje, které procesy se nabídnou níž. Když agendu změníš, proces i dílčí proces se vynulují — kombinace z různých agend neexistuje."'
             AllowEmptySelection: =true
             Default: =If(varNova, "", LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev))
@@ -80,7 +85,7 @@ Screens:
       - lbl_l_Proces:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -91,6 +96,9 @@ Screens:
       - drp_Proces:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem, vlastníkem je odbor. Nabízejí se jen procesy vybrané agendy. Dokud není vybraná agenda, je pole zašedlé — to není chyba, jen kaskáda čeká na nadřazenou úroveň."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Agenda.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
@@ -110,7 +118,7 @@ Screens:
       - lbl_l_Dilci:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -121,6 +129,9 @@ Screens:
       - drp_Dilci:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…“."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
@@ -139,7 +150,7 @@ Screens:
       - lbl_l_Nazev:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -150,6 +161,9 @@ Screens:
       - txt_Nazev:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Znění činnosti tak, jak má stát v organizačním řádu — celá věta, ne heslo. Toto je nejnižší úroveň hierarchie a vykonává ji oddělení. Pole je bez omezení délky (nejdelší aktivita v datech má 220 znaků); pro řazení v seznamu se z něj automaticky odvozuje zkrácená verze na 150 znaků."'
             HintText: ="Znění činnosti tak, jak má být v organizačním řádu"
             Default: =If(varNova, "", varAktivita.nazev)
@@ -163,7 +177,7 @@ Screens:
       - lbl_l_Spolupracuje:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -174,6 +188,9 @@ Screens:
       - txt_Spolupracuje:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Útvary, které se na aktivitě podílejí, ale nejsou za ni odpovědné. Víc útvarů odděl středníkem (712; 721). Odpovědný útvar patří do pole „Vykonává útvar“, ne sem."'
             HintText: ="Útvary, které se na aktivitě podílejí — např. 712; 721"
             Default: =If(varNova, "", varAktivita.spolupracuje)
@@ -187,7 +204,7 @@ Screens:
       - lbl_l_TextOR:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -198,6 +215,9 @@ Screens:
       - txt_TextOR:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Nepovinné. Místo pro formulaci, která půjde doslova do organizačního řádu, pokud se má lišit od znění aktivity. Dokud je prázdné, použije se při generování organizačního řádu znění aktivity. Generování samo je až druhá fáze projektu."'
             HintText: ="Nepovinné, plní se až pro generování organizačního řádu"
             Default: =If(varNova, "", varAktivita.text_pro_or)
@@ -211,7 +231,7 @@ Screens:
       - lbl_l_VlastnikAgendy:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -222,7 +242,7 @@ Screens:
       - lbl_VlastnikAgendy:
           Control: Label@2.5.1
           Properties:
-            Fill: =RGBA(237, 235, 233, 1)
+            Fill: =stylOkraj
             Font: =Font.'Open Sans'
             Height: =40
             PaddingLeft: =12
@@ -243,7 +263,7 @@ Screens:
       - lbl_l_VlastnikProcesu:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -254,7 +274,7 @@ Screens:
       - lbl_VlastnikProcesu:
           Control: Label@2.5.1
           Properties:
-            Fill: =RGBA(237, 235, 233, 1)
+            Fill: =stylOkraj
             Font: =Font.'Open Sans'
             Height: =40
             PaddingLeft: =12
@@ -275,7 +295,7 @@ Screens:
       - lbl_l_VlastnikDilci:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -286,7 +306,7 @@ Screens:
       - lbl_VlastnikDilci:
           Control: Label@2.5.1
           Properties:
-            Fill: =RGBA(237, 235, 233, 1)
+            Fill: =stylOkraj
             Font: =Font.'Open Sans'
             Height: =40
             PaddingLeft: =12
@@ -307,7 +327,7 @@ Screens:
       - lbl_l_Utvar:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -318,6 +338,9 @@ Screens:
       - drp_UtvarDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Útvar, který aktivitu vykonává a nese za ni odpovědnost. Vybírá se z číselníku útvarů, aby se do evidence nedostaly překlepy — podle tohoto pole se filtruje seznam a jednou z něj bude sestavený text organizačního řádu. Chybí-li útvar v nabídce, doplní ho správce do listu Útvary."'
             AllowEmptySelection: =true
             Default: |-
@@ -336,7 +359,7 @@ Screens:
       - lbl_l_Sekce:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -347,6 +370,9 @@ Screens:
       - drp_SekceDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Sekce, pod kterou vykonávající útvar patří. Vybírá se z číselníku útvarů (úroveň sekce). Podle sekce se dělí evidence mezi sekční správce procesního rámce a filtruje se seznam aktivit."'
             AllowEmptySelection: =true
             Default: |-
@@ -365,7 +391,7 @@ Screens:
       - lbl_l_Predpis:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -376,6 +402,9 @@ Screens:
       - txt_Predpis:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Vnitřní předpis, o který se aktivita opírá — např. SP 10/2021. Víc předpisů odděl středníkem. Slouží jako doklad, proč se činnost vykonává; při revizi předpisu je podle tohoto pole vidět, kterých aktivit se změna týká."'
             HintText: ="Víc předpisů oddělte středníkem — např. SP 10/2021; VP 02/2016"
             Default: =If(varNova, "", varAktivita.vnitrni_predpis)
@@ -389,7 +418,7 @@ Screens:
       - lbl_l_Stav:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -400,6 +429,9 @@ Screens:
       - drp_StavDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Pracovní = rozpracováno, schváleno = potvrzené znění pro organizační řád. Přepnutím na „schváleno“ dáváš najevo, že formulace prošla vlastníkem procesu. Automatické schvalování s notifikacemi součástí této fáze není."'
             Default: =If(varNova, "pracovní", varAktivita.stav.Value)
             Font: =Font.'Open Sans'
@@ -412,7 +444,7 @@ Screens:
       - lbl_l_Vazby:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =36
             Size: =10
@@ -425,8 +457,14 @@ Screens:
       - btn_Vazby:
           Control: Classic/Button@2.2.0
           Properties:
+            HoverFill: =stylRadekHover
+            PressedFill: =stylRadekVybrany
+            HoverColor: =stylAkce
+            BorderColor: =stylOkraj
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Otevře přiřazení aktivity do DALŠÍCH dílčích procesů. Standardně aktivita patří do jednoho (vybraného výše) — ale metodika připouští, že tutéž činnost vykonává útvar ve víc dílčích procesech. Pak ji přidej i tam a v mapě se objeví v obou větvích, aniž by vznikl duplicitní záznam."'
-            Color: =RGBA(0, 18, 107, 1)
+            Color: =stylPrimarni
             Fill: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
             Height: =40
@@ -440,8 +478,14 @@ Screens:
       - btn_Ulozit:
           Control: Classic/Button@2.2.0
           Properties:
+            HoverFill: =stylAkceHover
+            PressedFill: =stylAkceStisk
+            HoverColor: =RGBA(255, 255, 255, 1)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderColor: =stylPrimarni
+            FocusedBorderThickness: =2
             Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód (první volné čtyřčíslí ve vybraném dílčím procesu) a založí se primární vazba do rejstříku. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku — stačí uložit znovu."'
-            Fill: =RGBA(0, 120, 212, 1)
+            Fill: =stylAkce
             Font: =Font.'Open Sans'
             Height: =44
             OnSelect: |-
@@ -518,8 +562,14 @@ Screens:
       - btn_Smazat:
           Control: Classic/Button@2.2.0
           Properties:
+            HoverFill: =stylNebezpeci
+            HoverColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylNebezpeci
+            BorderColor: =stylNebezpeci
+            FocusedBorderColor: =stylNebezpeci
+            FocusedBorderThickness: =2
             Tooltip: '="Smaže aktivitu i všechna její zařazení do dílčích procesů. Nevratné. Číselník agend, procesů a dílčích procesů zůstane nedotčený — maže se jen tato jedna aktivita."'
-            Color: =RGBA(168, 0, 0, 1)
+            Color: =stylNebezpeci
             Fill: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
             Height: =44
@@ -540,6 +590,8 @@ Screens:
       - ico_InfoDetail:
           Control: Classic/Icon@2.5.0
           Properties:
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
             Color: =RGBA(255, 255, 255, 1)
             Height: =28
             Icon: =Icon.Information
@@ -560,7 +612,7 @@ Screens:
       - rec_NapovedaOkrajDetail:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(0, 18, 107, 1)
+            Fill: =stylPrimarni
             Height: =340
             Visible: =varNapovedaKod
             Width: =4
@@ -569,7 +621,7 @@ Screens:
       - lbl_NapovedaDetail:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(50, 49, 48, 1)
+            Color: =stylText
             Font: =Font.'Open Sans'
             Height: =300
             Size: =11
@@ -594,7 +646,9 @@ Screens:
       - ico_ZavritNapoveduDetail:
           Control: Classic/Icon@2.5.0
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
+            Color: =stylTextSlaby
             Height: =32
             Icon: =Icon.Cancel
             OnSelect: =Set(varNapovedaKod, false)

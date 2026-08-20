@@ -3,13 +3,13 @@
 Screens:
   scr_Seznam:
     Properties:
-      Fill: =RGBA(248, 249, 250, 1)
-      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      Fill: =stylPlocha
+      LoadingSpinnerColor: =stylAkce
     Children:
       - rec_Hlavicka:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(0, 18, 107, 1)
+            Fill: =stylPrimarni
             Height: =72
             Width: =Parent.Width
             X: =0
@@ -30,8 +30,14 @@ Screens:
       - btn_Nova:
           Control: Classic/Button@2.2.0
           Properties:
+            HoverFill: =stylAkceHover
+            PressedFill: =stylAkceStisk
+            HoverColor: =RGBA(255, 255, 255, 1)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderColor: =stylPrimarni
+            FocusedBorderThickness: =2
             Tooltip: '="Založí novou aktivitu. Kód se nezadává — přidělí se sám při uložení podle vybraného dílčího procesu. Povinné je znění aktivity a dílčí proces; ostatní pole jde doplnit později."'
-            Fill: =RGBA(0, 120, 212, 1)
+            Fill: =stylAkce
             Font: =Font.'Open Sans'
             Height: =40
             OnSelect: |-
@@ -43,10 +49,26 @@ Screens:
             Width: =176
             X: =Parent.Width - Self.Width - 40
             Y: =16
+      - rec_FiltrPanel:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =96
+            Width: =Parent.Width - 80
+            X: =40
+            Y: =72
+      - rec_FiltrOkraj:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylOkraj
+            Height: =1
+            Width: =Parent.Width - 80
+            X: =40
+            Y: =167
       - lbl_l_Filtry:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -57,6 +79,9 @@ Screens:
       - txt_Hledat:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Hledá podle ZAČÁTKU názvu aktivity, ne kdekoli uvnitř. Napíšeš-li „Tvorba“, najde „Tvorba Služebního řádu“, ale ne „Roční tvorba plánu“. Je to daň za rychlost: takový dotaz umí vyřídit SharePoint sám i nad tisíci aktivitami. Fulltext přes celý rejstřík nabízí publikovaná HTML mapa. Prázdné pole = bez omezení."'
             Default: =""
             Font: =Font.'Open Sans'
@@ -69,6 +94,9 @@ Screens:
       - drp_Sekce:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Filtruje podle sekce, pod kterou vykonávající útvar patří. Nabídka se plní z číselníku útvarů, takže je úplná bez ohledu na to, kolik aktivit v rejstříku je. „(vše)“ vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
@@ -90,6 +118,9 @@ Screens:
       - drp_Utvar:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Filtruje podle útvaru, který aktivitu vykonává. Nabídka je z číselníku útvarů ve tvaru „kód · název“ a obsahuje odbory i oddělení. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)“."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
@@ -111,6 +142,9 @@ Screens:
       - drp_Stav:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Pracovní = rozpracovaný záznam, na kterém se ještě pracuje. Schváleno = potvrzené znění, které smí jít do organizačního řádu. Stav se přepíná v detailu aktivity; schvalovací kolečko s notifikacemi zatím není součástí řešení."'
             Default: ="(vše)"
             Font: =Font.'Open Sans'
@@ -123,7 +157,7 @@ Screens:
       - lbl_l_Razeni:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
@@ -134,6 +168,9 @@ Screens:
       - drp_Razeni:
           Control: Classic/DropDown@2.3.1
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Mění pořadí seznamu. Kód = pořadí v rejstříku (agenda, proces, dílčí proces, aktivita) — nejlepší pro procházení celé struktury. Název = abecedně. Útvar = seskupí aktivity jednoho oddělení za sebe. Řazení neovlivňuje filtry ani počet zobrazených aktivit."'
             Default: ="kód"
             Font: =Font.'Open Sans'
@@ -146,7 +183,7 @@ Screens:
       - lbl_Pocet:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =32
             Size: =11
@@ -159,7 +196,7 @@ Screens:
       - rec_HlavickaTabulky:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(240, 243, 249, 1)
+            Fill: =stylPlocha
             Height: =32
             Width: =Parent.Width - 80
             X: =40
@@ -168,7 +205,7 @@ Screens:
           Control: Label@2.5.1
           Properties:
             Align: =Align.Center
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =32
@@ -181,7 +218,7 @@ Screens:
       - lbl_h_Nazev:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =32
@@ -195,7 +232,7 @@ Screens:
           Control: Label@2.5.1
           Properties:
             Align: =Align.Center
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =32
@@ -249,9 +286,11 @@ Screens:
                   Fill: |-
                     =If(
                         ThisItem.IsSelected,
-                        RGBA(232, 240, 254, 1),
+                        stylRadekVybrany,
                         RGBA(255, 255, 255, 1)
                     )
+                  HoverFill: =stylRadekHover
+                  PressedFill: =stylRadekVybrany
                   Height: =Parent.TemplateHeight - 8
                   OnSelect: =Select(Parent)
                   Width: =Parent.TemplateWidth
@@ -263,8 +302,8 @@ Screens:
                   Fill: |-
                     =If(
                         ThisItem.stav.Value = "schváleno",
-                        RGBA(16, 124, 16, 1),
-                        RGBA(0, 18, 107, 1)
+                        stylUspech,
+                        stylPrimarni
                     )
                   Height: =Parent.TemplateHeight - 8
                   OnSelect: =Select(Parent)
@@ -274,7 +313,7 @@ Screens:
             - rec_KodPozadi:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: =RGBA(240, 243, 249, 1)
+                  Fill: =stylPlocha
                   Height: =32
                   OnSelect: =Select(Parent)
                   Width: =148
@@ -284,7 +323,7 @@ Screens:
                 Control: Label@2.5.1
                 Properties:
                   Align: =Align.Center
-                  Color: =RGBA(0, 18, 107, 1)
+                  Color: =stylPrimarni
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
                   Height: =32
@@ -298,7 +337,7 @@ Screens:
             - lbl_NazevKratky:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(32, 31, 30, 1)
+                  Color: =stylText
                   Font: =Font.'Open Sans'
                   FontWeight: |-
                     =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
@@ -315,7 +354,7 @@ Screens:
             - lbl_Utvar:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(96, 94, 92, 1)
+                  Color: =stylTextSlaby
                   Font: =Font.'Open Sans'
                   Height: =20
                   OnSelect: =Select(Parent)
@@ -332,8 +371,8 @@ Screens:
                   Fill: |-
                     =If(
                         ThisItem.stav.Value = "schváleno",
-                        RGBA(223, 244, 223, 1),
-                        RGBA(253, 243, 226, 1)
+                        stylUspechSvetle,
+                        stylPozorSvetle
                     )
                   Height: =28
                   OnSelect: =Select(Parent)
@@ -347,8 +386,8 @@ Screens:
                   Color: |-
                     =If(
                         ThisItem.stav.Value = "schváleno",
-                        RGBA(16, 124, 16, 1),
-                        RGBA(161, 96, 0, 1)
+                        stylUspech,
+                        stylPozor
                     )
                   Font: =Font.'Open Sans'
                   Height: =28
@@ -362,8 +401,10 @@ Screens:
             - ico_Detail:
                 Control: Classic/Icon@2.5.0
                 Properties:
+                  HoverColor: =stylAkce
+                  PressedColor: =stylAkceStisk
                   Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
-                  Color: =RGBA(96, 94, 92, 1)
+                  Color: =stylTextSlaby
                   Height: =40
                   Icon: =Icon.ChevronRight
                   OnSelect: |-
@@ -381,6 +422,8 @@ Screens:
       - ico_Mapa:
           Control: Classic/Icon@2.5.0
           Properties:
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
             Color: =RGBA(255, 255, 255, 1)
             Height: =28
             Icon: =Icon.Globe
@@ -393,6 +436,8 @@ Screens:
       - ico_InfoSeznam:
           Control: Classic/Icon@2.5.0
           Properties:
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
             Color: =RGBA(255, 255, 255, 1)
             Height: =28
             Icon: =Icon.Information
@@ -413,7 +458,7 @@ Screens:
       - rec_NapovedaOkrajSeznam:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(0, 18, 107, 1)
+            Fill: =stylPrimarni
             Height: =340
             Visible: =varNapovedaKod
             Width: =4
@@ -422,7 +467,7 @@ Screens:
       - lbl_NapovedaSeznam:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(50, 49, 48, 1)
+            Color: =stylText
             Font: =Font.'Open Sans'
             Height: =300
             Size: =11
@@ -447,7 +492,9 @@ Screens:
       - ico_ZavritNapoveduSeznam:
           Control: Classic/Icon@2.5.0
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
+            Color: =stylTextSlaby
             Height: =32
             Icon: =Icon.Cancel
             OnSelect: =Set(varNapovedaKod, false)

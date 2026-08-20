@@ -4,13 +4,13 @@
 Screens:
   scr_Vazby:
     Properties:
-      Fill: =RGBA(248, 249, 250, 1)
-      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      Fill: =stylPlocha
+      LoadingSpinnerColor: =stylAkce
     Children:
       - rec_HlavickaV:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(0, 18, 107, 1)
+            Fill: =stylPrimarni
             Height: =72
             Width: =Parent.Width
             X: =0
@@ -18,6 +18,8 @@ Screens:
       - ico_ZpetV:
           Control: Classic/Icon@2.5.0
           Properties:
+            HoverColor: =stylAkce
+            PressedColor: =stylAkceStisk
             Tooltip: '="Zpět na detail aktivity. Přiřazení dílčích procesů se ukládá hned při kliknutí, takže se odchodem nic neztratí."'
             Color: =RGBA(255, 255, 255, 1)
             Height: =40
@@ -47,7 +49,7 @@ Screens:
       - lbl_l_Vysvetleni:
           Control: Label@2.5.1
           Properties:
-            Color: =RGBA(96, 94, 92, 1)
+            Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =52
             Size: =10
@@ -79,10 +81,21 @@ Screens:
             X: =40
             Y: =128
           Children:
+            - rec_RadekVazby:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  HoverFill: =stylRadekHover
+                  PressedFill: =stylRadekVybrany
+                  Height: =Parent.TemplateHeight
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
             - lbl_VazbaKod:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(0, 18, 107, 1)
+                  Color: =stylPrimarni
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
                   Height: =20
@@ -107,7 +120,7 @@ Screens:
             - lbl_VazbaPrimarni:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(16, 124, 16, 1)
+                  Color: =stylUspech
                   Font: =Font.'Open Sans'
                   Height: =20
                   OnSelect: =Select(Parent)
@@ -120,8 +133,10 @@ Screens:
             - ico_Odebrat:
                 Control: Classic/Icon@2.5.0
                 Properties:
+                  HoverColor: =stylAkce
+                  PressedColor: =stylAkceStisk
                   Tooltip: '="Odebere aktivitu z tohoto dílčího procesu. Samotná aktivita zůstane — mizí jen její zařazení do této větve mapy. Primární zařazení (označené „primární“) tímto způsobem odebrat nelze; to se mění výběrem dílčího procesu v detailu aktivity."'
-                  Color: =RGBA(168, 0, 0, 1)
+                  Color: =stylNebezpeci
                   Height: =36
                   Icon: =Icon.Trash
                   OnSelect: |-
@@ -141,7 +156,7 @@ Screens:
             - sep_Vazba:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: =RGBA(237, 235, 233, 1)
+                  Fill: =stylOkraj
                   Height: =1
                   OnSelect: =Select(Parent)
                   Width: =Parent.TemplateWidth
@@ -160,6 +175,9 @@ Screens:
       - txt_HledatDp:
           Control: Classic/TextInput@2.3.2
           Properties:
+            HoverBorderColor: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Tooltip: '="Hledá v kódu i v názvu dílčího procesu, kdekoli uvnitř textu. Prázdné pole zobrazí celý číselník (250 dílčích procesů), takže je rychlejší napsat kus názvu než scrollovat."'
             Default: =""
             Font: =Font.'Open Sans'
@@ -185,10 +203,21 @@ Screens:
             X: =700
             Y: =180
           Children:
+            - rec_RadekNabidka:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  HoverFill: =stylRadekHover
+                  PressedFill: =stylRadekVybrany
+                  Height: =Parent.TemplateHeight
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
             - lbl_DpKod:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(0, 18, 107, 1)
+                  Color: =stylPrimarni
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
                   Height: =20
@@ -212,8 +241,10 @@ Screens:
             - ico_Pridat:
                 Control: Classic/Icon@2.5.0
                 Properties:
+                  HoverColor: =stylAkce
+                  PressedColor: =stylAkceStisk
                   Tooltip: '="Přiřadí aktivitu i do tohoto dílčího procesu. Nevzniká kopie: je to pořád tatáž aktivita s jedním kódem, jen se v procesní mapě objeví ve víc větvích. Používá se, když tutéž činnost útvar vykonává v několika dílčích procesech."'
-                  Color: =RGBA(0, 120, 212, 1)
+                  Color: =stylAkce
                   Height: =36
                   Icon: =Icon.Add
                   OnSelect: |-
@@ -245,7 +276,7 @@ Screens:
             - sep_Dp:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: =RGBA(237, 235, 233, 1)
+                  Fill: =stylOkraj
                   Height: =1
                   OnSelect: =Select(Parent)
                   Width: =Parent.TemplateWidth

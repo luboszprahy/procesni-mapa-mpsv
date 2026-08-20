@@ -114,9 +114,13 @@ def main():
     with zipfile.ZipFile(cesta) as balik:
         polozky = {n: balik.read(n) for n in balik.namelist()}
 
-    workflow = [n for n in polozky if n.replace("\\", "/").startswith("Workflows/")]
+    # Solution obsahuje víc flow, vybíráme podle jména — pořadí ani počet
+    # se spoléhat nedá (od 1.0.0.18 je v balíku i MapaPublishFlow).
+    workflow = [n for n in polozky
+                if n.replace("\\", "/").startswith("Workflows/AktualizaceKratkehoNazvu")]
     if len(workflow) != 1:
-        raise SystemExit(f"CHYBA: čekám právě jedno flow, našel jsem {len(workflow)}")
+        raise SystemExit(
+            f"CHYBA: čekám právě jedno flow AktualizaceKratkehoNazvu, našel jsem {len(workflow)}")
     klic = workflow[0]
 
     flow = json.loads(polozky[klic].decode("utf-8-sig"))
