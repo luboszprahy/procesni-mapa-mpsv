@@ -4,6 +4,16 @@ Vezme šablonu `mapa_template.html`, zapeče do ní aktuální data z pěti
 SharePoint listů a uloží výsledek do Site Assets. Mapa tak nemusí nic
 stahovat za běhu.
 
+> **Od 20.08.2026 je flow vygenerované, ne klikané.** Akce doplňuje
+> `src/build_mapa_flow.py` do kostry, kterou uživatel založil v designeru
+> (úprava exportovaného zipu, ne stavba od nuly — to je postup, který se
+> u druhého flow osvědčil). Kontroluje ho `src/check_mapa_flow.py`
+> (126 kontrol, 12 mutačně ověřených). Nasazení řeší
+> `deploy/navod_publikace_mapy.md`.
+>
+> Tenhle dokument dál platí jako **datový kontrakt** (sekce níže) a jako
+> **klikací fallback**, kdyby se generovaný zip nepodařilo naimportovat.
+
 Návod je **klikací, pro designer**. Generované zipy flow se opakovaně
 ukázaly jako nespolehlivé — importují se, ale nejdou otevřít nebo zapnout.
 Postavit flow ručně je rychlejší než hledat, proč zip neprošel.

@@ -7,8 +7,7 @@ Screens:
       Fill: =stylPlocha
       LoadingSpinnerColor: =stylAkce
       OnVisible: |-
-        =Set(varNapovedaKod, false);
-        Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
+        =Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
         Reset(drp_Agenda);
         Reset(drp_Proces);
         Reset(drp_Dilci)
@@ -484,7 +483,7 @@ Screens:
             PressedColor: =RGBA(255, 255, 255, 1)
             FocusedBorderColor: =stylPrimarni
             FocusedBorderThickness: =2
-            Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód (první volné čtyřčíslí ve vybraném dílčím procesu) a založí se primární vazba do rejstříku. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku — stačí uložit znovu."'
+            Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód AA-BB-CCC-DDDD: AA agenda, BB proces, CCC dílčí proces, DDDD první volné čtyřčíslí v tom dílčím procesu. Zároveň se založí primární vazba do rejstříku. Jednou přidělený kód se už nikdy nemění, ani při přesunu do jiného dílčího procesu - vazby v rejstříku i v mapě na něm stojí. Vlastník součástí kódu není, eviduje se zvlášť. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu."'
             Fill: =stylAkce
             Font: =Font.'Open Sans'
             Height: =44
@@ -587,76 +586,3 @@ Screens:
             Width: =160
             X: =920
             Y: =664
-      - ico_InfoDetail:
-          Control: Classic/Icon@2.5.0
-          Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Color: =RGBA(255, 255, 255, 1)
-            Height: =28
-            Icon: =Icon.Information
-            OnSelect: =Set(varNapovedaKod, !varNapovedaKod)
-            Tooltip: '="Jak se tvoří identifikační kód"'
-            Width: =28
-            X: =Parent.Width - 80
-            Y: =22
-      - rec_NapovedaDetail:
-          Control: Rectangle@2.3.0
-          Properties:
-            Fill: =RGBA(255, 255, 255, 1)
-            Height: =340
-            Visible: =varNapovedaKod
-            Width: =640
-            X: =280
-            Y: =120
-      - rec_NapovedaOkrajDetail:
-          Control: Rectangle@2.3.0
-          Properties:
-            Fill: =stylPrimarni
-            Height: =340
-            Visible: =varNapovedaKod
-            Width: =4
-            X: =280
-            Y: =120
-      - lbl_NapovedaDetail:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylText
-            Font: =Font.'Open Sans'
-            Height: =300
-            Size: =11
-            Text: |-
-              ="Identifikační kód aktivity: AA-BB-CCC-DDDD
-
-              AA     agenda (např. 07)
-              BB     proces uvnitř agendy (07-04)
-              CCC    dílčí proces (07-04-006)
-              DDDD   pořadí aktivity v dílčím procesu (07-04-006-0001)
-
-              Kód se skládá z výběru agenda → proces → dílčí proces a přiděluje se sám při prvním uložení: aktivita dostane první volné čtyřčíslí ve svém dílčím procesu.
-
-              Jednou přidělený kód se už nikdy nemění — ani když se aktivita přesune do jiného dílčího procesu, ani když se před ní něco smaže. Vazby v rejstříku i v mapě na něm stojí.
-
-              Vlastník (sekce, odbor, oddělení) součástí kódu není. Eviduje se zvlášť, aby organizační změny kódy nepřečíslovaly."
-            VerticalAlign: =VerticalAlign.Top
-            Visible: =varNapovedaKod
-            Width: =570
-            X: =308
-            Y: =140
-      - ico_ZavritNapoveduDetail:
-          Control: Classic/Icon@2.5.0
-          Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Color: =stylTextSlaby
-            Height: =32
-            Icon: =Icon.Cancel
-            OnSelect: =Set(varNapovedaKod, false)
-            PaddingBottom: =8
-            PaddingLeft: =8
-            PaddingRight: =8
-            PaddingTop: =8
-            Visible: =varNapovedaKod
-            Width: =32
-            X: =880
-            Y: =128

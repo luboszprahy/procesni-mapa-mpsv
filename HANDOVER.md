@@ -1,64 +1,78 @@
-# HANDOVER — stav k restartu konverzace (20.08.2026 13:48)
+# HANDOVER — stav k restartu konverzace (20.08.2026 14:15)
 
 Tenhle soubor je vstupní bod pro novou session. Nejdřív si přečti `STATUS.md`
 (chronologie a odůvodnění rozhodnutí), pak tohle (co se má udělat teď).
 Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
 
-## 1. Zadané, ale NEUDĚLANÉ (priorita shora dolů)
+## 1. CO JE NA TOBĚ (uživateli) — v tomto pořadí
 
-1. **Grafika seznamu podle Správy notifikací.** Předloha:
-   `input/snimky/vzor-notifikace-2.png` (jak to má vypadat) a
-   `input/snimky/vzor-notifikace-1.png` (jak to vypadá teď u nás).
-   Zdrojové vzory: `C:\projekty-Claude\powerApps-správaNotifikací\src\canvas_vzory\`
-   (`gallery.json`, `templates_gallery.json`, `container.json`, `navbar.json`).
-   Co z předlohy převzít:
-   - **navbar** nahoře: tmavý pruh, vlevo název aplikace / sekce jako záložka
-     s podtržením aktivní položky, vpravo identita uživatele,
-   - **souhrnná karta** pod ním: vlevo nadpis, uprostřed pár čísel
-     (celkem aktivit / zmapováno / nezmapováno), vpravo primární tlačítko,
-   - **řádek hledání** a vpravo informační „chipy" (např. „47 ze 47 aktivit"),
-   - **tabulková galerie**: hlavička sloupců s možností řadit (šipka u aktivně
-     řazeného sloupce), řádky jako světlé karty s tenkým oddělením,
-     akční ikony vpravo,
-   - vzhled je plochý, hodně bílé, tenké linky, žádné výrazné bloky.
-2. **Celý řádek první galerie musí být klikací** (dnes otevírá detail jen
-   šipka vpravo). Řešení: `OnSelect` na podkladovém obdélníku i na labelech
-   → `Set(varNova, false); Set(varAktivita, ThisItem); Navigate(scr_Detail, …)`,
-   ne `Select(Parent)`.
-3. **Zrušit informační panel „i"** na `scr_Seznam` i `scr_Detail`
-   (`ico_Info*`, `rec_Napoveda*`, `lbl_Napoveda*`, `ico_ZavritNapovedu*`,
-   proměnná `varNapovedaKod`). Text o stavbě kódu `AA-BB-CCC-DDDD` přesunout
-   **do tooltipu tlačítka „+ Nová aktivita"** (a případně tlačítka Uložit).
-4. **Místo ikony globusu tlačítko s popiskem „Zobrazit v HTML"** — styl
-   druhotného tlačítka, `OnSelect: =Launch(varMapaUrl, {}, LaunchTarget.New)`.
-5. **Dokončit `MapaPublishFlow`** (v základu je kostra: ruční trigger + jedna
-   akce `Compose`) a přidat do appky tlačítko, které ho spustí:
-   načíst 6 listů → složit JSON podle kontraktu v `deploy/flow_MapaPublish.md`
-   → nahradit kotvy `__DATA_JSON__` a `__GEN__` v `mapa_template.html`
-   → uložit `procesni_mapa.html` do Site Assets.
-   Šablonu je předtím potřeba nahrát do Site Assets (konzolový skript).
+1. **Importovat `deploy/procesnimapa_1_0_0_20.zip`** jako upgrade a appku
+   jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
+2. **Nahrát `deploy/mapa_template.html` a `deploy/procesni_mapa.html`
+   do Site Assets** a kliknutím ověřit, jestli tenant HTML **zobrazí, nebo
+   stáhne**. To je jediná neověřená věc celého řešení — postup a co dělat
+   v obou případech má `deploy/navod_publikace_mapy.md`.
+3. **Zapnout a ručně spustit `MapaPublishFlow`** (import stav zapnutí nemění).
+   Kontrolní body po běhu jsou v témže návodu; nejdůležitější: krok
+   `Nacti_DilciProcesy` musí vrátit **250 položek, ne 100**.
+4. **Připojit `MapaPublishFlow` k appce** ve Studiu (Power Automate → Add flow)
+   a exportovat solution — teprve pak jde do appky dát tlačítko „Obnovit mapu".
+   Vzorec tlačítka je připravený v `deploy/navod_publikace_mapy.md`.
+5. **Úklid v prostředí (odloženo vědomě):** odpojit z appky datové zdroje
+   `Documents` a `CustomGallerySample` a odebrat ze solution connection
+   reference `ppf_sharedsharepointonline_12718` („SharePoint Pruvodnilist-12718",
+   zbytek z jiného projektu). **Až po tom, co 1.0.0.20 běží** — obě flow na ní
+   dnes visí, takže odebrání je nutné udělat pro obě naráz, a míchat to
+   s velkou funkční změnou by znamenalo, že při selhání importu nepoznáš,
+   co ho shodilo.
 
-## 2. Poznámka k solution od uživatele
+## 2. CO DĚLÁM JÁ (asistent) — hotovo v 1.0.0.20
 
-Balík obsahuje **dvě SharePoint connection reference**:
+**Grafika seznamu přestavěná podle vzoru Správy notifikací**
+(`input/snimky/vzor-notifikace-2.png`):
 
-- `ppf_sharedsharepointonline_12718` = **„SharePoint Pruvodnilist-12718"** —
-  zbytek z jiného projektu, **uživatel ji chce příště pryč**,
-- `ppf_sharedsharepointonline_bec33` = ta správná, kterou uživatel přidal.
+- **navbar** 64 px: vlevo název aplikace, vedle záložka „Seznam aktivit"
+  s bílým podtržením, vpravo jméno a e-mail přihlášeného,
+- **souhrnná karta**: nadpis, tři čísla (zobrazeno / schváleno / pracovní)
+  a vpravo dvě tlačítka — druhotné „Zobrazit v HTML" a primární „+ Nová aktivita",
+- **řádek hledání a filtrů** s popisky, vpravo dva informační chipy
+  (počet zobrazených aktivit, „Bez filtru — celý rejstřík" / „Filtrováno"),
+- **tabulková galerie** s pěti sloupci (KÓD / AKTIVITA / VYKONÁVÁ / SEKCE /
+  STAV); hlavička prvních tří je **klikací a řadí**, u aktivního sloupce je
+  šipka směru. `drp_Razeni` tím zanikl.
+- Vzhled je plochý: bílé řádky, oddělení linkou 1 px, žádné barevné pruhy
+  ani chipy uvnitř řádku. Barva zůstala jen u stavu a u čísel v souhrnu.
 
-Při dalším exportu ověřit, že zůstala jen ta druhá; do `check_solution.py`
-se hodí kontrola, že v balíku není connection reference s cizím názvem.
-Do appky se ve Studiu připojily i datové zdroje `Documents`
-a `CustomGallerySample` — před předáním odpojit.
+**Ostatní zadané body:**
+
+- **celý řádek je klikací** — `OnSelect` s `Navigate` má podklad i všech pět
+  labelů a ikona (ne `Select(Parent)`, ten jen vybíral řádek),
+- **info panel „i" zrušen** na obou obrazovkách i s proměnnou `varNapovedaKod`;
+  text o stavbě kódu `AA-BB-CCC-DDDD` je v tooltipech „+ Nová aktivita"
+  a „Uložit",
+- **globus nahradilo tlačítko „Zobrazit v HTML"** (druhotný styl, `Launch`).
+
+**`MapaPublishFlow` dokončené** — 14 akcí: šablona ze Site Assets, pět dotazů
+do listů se zapnutým stránkováním, pět `Select` na datový kontrakt, `Model`,
+zapečení do HTML a `Create file`. Generuje `src/build_mapa_flow.py`
+(GUID listů i adresu webu čte z balíku, ne natvrdo), kontroluje
+`src/check_mapa_flow.py`.
+
+**HTML mapa vygenerovaná** — `deploy/procesni_mapa.html` (94 kB, 7 agend,
+46 procesů, 250 dílčích procesů, 46 aktivit) z anonymizovaných dat, aby bylo
+co otevřít dřív, než flow poprvé proběhne.
 
 ## 3. Kde co je
 
 | věc | kde |
 |---|---|
 | základ pro build (nejnovější export ze Studia) | `input/procesnimapa_1_0_0_18.zip` |
-| poslední vydaný balík | `deploy/procesnimapa_1_0_0_19.zip` |
+| poslední vydaný balík | `deploy/procesnimapa_1_0_0_20.zip` |
+| k nahrání do Site Assets | `deploy/mapa_template.html`, `deploy/procesni_mapa.html` |
+| nasazovací návod | `deploy/navod_publikace_mapy.md` |
+| datový kontrakt mapy + klikací fallback | `deploy/flow_MapaPublish.md` |
 | zdroje appky | `src/app_src/*.pa.yaml` (App + 3 obrazovky) |
-| styl (16 proměnných) | `src/app_src/App.pa.yaml`, `App.OnStart` |
+| styl (18 proměnných) | `src/app_src/App.pa.yaml`, `App.OnStart` |
 | schéma listů (6 listů / 37 sloupců) | `src/schema.json` |
 | data pro vývoj (anonymizovaná) | `runs/anonym/*.csv` |
 | snímky obrazovek a předlohy | `input/snimky/` |
@@ -74,32 +88,41 @@ $env:PYTHONIOENCODING = "utf-8"
 $py = ".venv/Scripts/python.exe"
 
 & $py src/check_app.py                       # brána nad zdroji appky
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.20
-& $py src/build_flow.py --solution deploy/procesnimapa_1_0_0_20.zip
-& $py src/check_flow.py --solution deploy/procesnimapa_1_0_0_20.zip
-& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_18.zip" --vystup deploy/procesnimapa_1_0_0_20.zip
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.21
+& $py src/build_flow.py      --solution deploy/procesnimapa_1_0_0_21.zip
+& $py src/build_mapa_flow.py --solution deploy/procesnimapa_1_0_0_21.zip
+& $py src/check_flow.py      --solution deploy/procesnimapa_1_0_0_21.zip
+& $py src/check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_21.zip
+& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_18.zip" --vystup deploy/procesnimapa_1_0_0_21.zip
+
+# HTML mapa z dat
+& $py src/build_mapa.py --model runs/anonym/model.json --out deploy/procesni_mapa.html
+& $py -m http.server 8765 --bind 127.0.0.1   # náhled: http://127.0.0.1:8765/deploy/procesni_mapa.html
 ```
 
-`build_flow.py` doplňuje **jen** flow `AktualizaceKratkehoNazvu`
-(vybírá podle jména, v balíku jsou dvě). `MapaPublishFlow` zatím nikdo neplní.
+**Oba build skripty flow se pouštějí až po `build_app.py`** — ten balík
+přepisuje od základu, takže by doplněné akce zahodil.
 
 ## 5. Co je hotové a nemá se rozbít
 
 - SharePoint: 6 listů založených a naplněných (7 / 46 / 250 / 46 / 46 / 7).
 - Appka: 3 obrazovky, kaskáda agenda → proces → dílčí proces, přidělování
-  kódů, vazby M:N, filtry z číselníku `Útvary`, řazení, tooltipy.
-- Flow `AktualizaceKratkehoNazvu`: hotové, ověřené mini-interpretem
-  (104 vzorků), zapisuje jen `nazev_kratky`.
-- Brány: `check_app` (7 tříd kontrol), `check_flow` (19), `check_solution` (107),
-  node testy provisioningu a importu. **Všechny kontroly jsou mutačně ověřené.**
+  kódů, vazby M:N, filtry z číselníku `Útvary`, řazení klikem na hlavičku.
+- Flow `AktualizaceKratkehoNazvu`: hotové, ověřené mini-interpretem (104 vzorků).
+- Flow `MapaPublishFlow`: hotové, 126 kontrol, 12 mutací ověřených.
+- Brány: `check_app` (7 tříd), `check_flow` (19), `check_mapa_flow` (126),
+  `check_solution` (124), node testy provisioningu a importu.
+  **Všechny kontroly jsou mutačně ověřené.**
 
-## 6. Co se dnes stálo nejvíc času (ať se to neopakuje)
+## 6. Otevřená rizika
 
-Podrobně v `power-Apps-skill/reference/pa-yaml-uskali.md`. Zkráceně:
-**`pac canvas pack` nevaliduje nic** — hidden vlastnost, duplicitní klíč,
-řetězec místo identifikátoru, neuzavřená uvozovka i překlep v `RGBA` projdou
-až do Studia. Před každým vydáním pouštět `check_app.py`; když spadne import
-nebo otevření, **nejdřív doplnit kontrolu**, teprve pak opravit výskyt.
-
-Neznámý dopad má pořád **delegace nad 2 000 aktivitami** — test se odkládá
-od začátku a je to jediný bod, kde se může ukázat, že seznam tiše ořezává.
+- **Zobrazí tenant HTML ze Site Assets?** Neověřeno. Když ne, publikační flow
+  propadne a zobrazení se musí přesunout do canvas appky. Viz krok 2 výše.
+- **Delegace nad 2 000 aktivitami.** Test se odkládá od začátku a je to
+  jediný bod, kde se může ukázat, že seznam tiše ořezává. Čísla v souhrnné
+  kartě jsou proto počítaná z galerie, ne z listu, a popisek říká „zobrazeno".
+- **`pac canvas pack` nevaliduje nic** — hidden vlastnost, duplicitní klíč,
+  řetězec místo identifikátoru, neuzavřená uvozovka i překlep v `RGBA` projdou
+  až do Studia. Před každým vydáním pouštět `check_app.py`; když spadne import
+  nebo otevření, **nejdřív doplnit kontrolu**, teprve pak opravit výskyt.
+  Podrobně v `power-Apps-skill/reference/pa-yaml-uskali.md`.

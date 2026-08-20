@@ -7,9 +7,9 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 | # | Fáze | Stav |
 |---|---|---|
 | F0 | Normalizace podkladů + prototyp mapy | **hotovo** |
-| F1 | SharePoint rejstřík — schéma, provisioning, import dat | další |
-| F2 | Canvas app pro pořizování aktivit | čeká na F1 |
-| F3 | Publikační flow: data → HTML mapa v Site Assets | čeká na F1 |
+| F1 | SharePoint rejstřík — schéma, provisioning, import dat | **hotovo** |
+| F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.20, čeká na import) |
+| F3 | Publikační flow: data → HTML mapa v Site Assets | **flow hotové**, zbývá krok 10 |
 | F4 | Přenos na tenant MPSV | čeká na F2+F3 |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
@@ -199,17 +199,32 @@ ani `https://` mimo komentáře (zákaz CDN), počty uzlů v zapečeném JSON = 
 `</script>` v názvech aktivit musí být escapované, aby nerozbily `<script>` blok.
 **risk:** žádný nový — postup je ověřený z F0.
 
-### 9. Flow `MapaPublish` — co: `deploy/flow_MapaPublish.md` (klikací návod) + zip
+### 9. Flow `MapaPublish` — HOTOVO v 1.0.0.20 (20.08.2026)
 
-Trigger plánovaný (1× denně) + ruční. Get file content šablony → Get items z pěti
-listů → Compose JSON → nahradit kotvu → Create file do Site Assets.
+Trigger **ruční** (PowerApps V2, tak ho založil uživatel v designeru); plánovaný
+běh 1× denně přijde až po ověření kroku 10, a protože trigger může být jen jeden,
+znamená to druhé flow se stejnými akcemi, ne úpravu tohoto.
 
-**verify:** ruční spuštění flow, stažení výsledného HTML, kontrola že obsahuje
-aktuální počet aktivit; změna jednoho názvu v listu → další běh → změna je v HTML.
-**edge cases:** `Get items` vrací max 5 000, default 100 → nastavit pagination;
-servisní účet potřebuje **Contribute na Site Assets**.
-**risk:** generované flow zipy jsou nespolehlivé → primárně klikací návod v designeru,
-zip jen jako doplněk. Definice flow musí mít `"contentVersion": "1.0.0.0"`.
+14 akcí: `Sablona` (Get file content ze Site Assets) → 5× `Nacti_*` (Get items,
+`$top` 5 000 + pagination) → 5× `Map_*` (Select na datový kontrakt) → `Model`
+(Compose) → `Stranka` (dvojí `replace` kotev nad `base64ToString`) → `Uloz_mapu`
+(Create file). Generuje `src/build_mapa_flow.py` do exportované kostry — úprava
+exportu, ne stavba zipu od nuly.
+
+**verify (hotovo):** `src/check_mapa_flow.py` — 126 kontrol; výraz kroku `Stranka`
+se vytáhne z balíku, vyhodnotí nad skutečnou šablonou a projde stejným sítem jako
+`build_mapa.py`. **12 mutací, všechny chycené.**
+**verify (na uživateli, `deploy/navod_publikace_mapy.md`):** ruční spuštění →
+`Nacti_DilciProcesy` vrátí **250 položek, ne 100**; ve staženém HTML nezbyly kotvy
+a jsou v něm všechny klíče modelu; změna názvu v listu se po dalším běhu propíše.
+**edge cases:** `Get items` default 100 → pagination zapnutá a hlídaná bránou;
+Choice sloupce potřebují `?['Value']`; servisní účet potřebuje **Contribute
+na Site Assets**; `Create file` nad existujícím souborem musí přepsat, ne založit
+`procesni_mapa1.html`.
+**risk:** kostra ze Studia nenesla **žádnou connection reference** — doplňuje se
+ta, kterou už v balíku používá druhé flow. Import stav zapnutí nemění, flow je
+proto po importu nutné **ručně zapnout**. `contentVersion` musí být `"1.0.0.0"`;
+s `"undefined"` z kostry import projde, ale flow nejde otevřít v designeru.
 
 ### 9b. Flow `AktualizaceKratkehoNazvu` — pojistka nad `nazev_kratky`
 

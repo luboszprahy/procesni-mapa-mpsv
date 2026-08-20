@@ -1,106 +1,291 @@
 # Obrazovka 1 — seznam aktivit. Všechny filtry jsou delegovatelné
 # (=, StartsWith nad indexovanými sloupci Title, nazev_kratky, sekce, vykonava, stav).
+#
+# Rozvržení podle vzoru ze Správy notifikací (input/snimky/vzor-notifikace-2.png):
+# tmavý navbar s identitou → bílá souhrnná karta s čísly a akcemi → řádek
+# hledání s chipy → tabulková galerie s řaditelnou hlavičkou. Plocha je světlá,
+# oddělení tenkými linkami, žádné barevné bloky.
+#
+# Čísla v souhrnné kartě se počítají z gal_Aktivity.AllItems, ne z listu:
+# CountRows nad SharePointem se nedeleguje a nad 2 000 aktivitami by tiše lhal.
+# Popisky proto říkají „zobrazeno", ne „celkem".
+#
+# Řazení drží varRazeni (kod / nazev / utvar) a varRazeniAsc; přepíná se klikem
+# na hlavičku sloupce. Sort je uvnitř každé větve Switch zvlášť, aby dotaz
+# zůstal delegovatelný — Sort s vypočítaným výrazem by delegaci shodil.
 Screens:
   scr_Seznam:
     Properties:
       Fill: =stylPlocha
       LoadingSpinnerColor: =stylAkce
     Children:
-      - rec_Hlavicka:
+      # ---------- navbar ----------
+      - rec_Navbar:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPrimarni
-            Height: =72
+            Height: =64
             Width: =Parent.Width
             X: =0
             Y: =0
-      - lbl_Nadpis:
+      - lbl_AppNazev:
           Control: Label@2.5.1
           Properties:
             Color: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
-            Height: =40
-            Size: =18
-            Text: ="Rejstřík agend a procesů — aktivity"
+            Height: =64
+            Size: =15
+            Text: ="Procesní mapa MPSV"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =600
+            Width: =240
             X: =40
-            Y: =16
-      - btn_Nova:
-          Control: Classic/Button@2.2.0
+            Y: =0
+      - lbl_Zalozka:
+          Control: Label@2.5.1
           Properties:
-            HoverFill: =stylAkceHover
-            PressedFill: =stylAkceStisk
-            HoverColor: =RGBA(255, 255, 255, 1)
-            PressedColor: =RGBA(255, 255, 255, 1)
-            FocusedBorderColor: =stylPrimarni
-            FocusedBorderThickness: =2
-            Tooltip: '="Založí novou aktivitu. Kód se nezadává — přidělí se sám při uložení podle vybraného dílčího procesu. Povinné je znění aktivity a dílčí proces; ostatní pole jde doplnit později."'
-            Fill: =stylAkce
+            Align: =Align.Center
+            Color: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
-            Height: =40
-            OnSelect: |-
-              =Set(varNova, true);
-              Set(varAktivita, Blank());
-              Navigate(scr_Detail, ScreenTransition.Cover)
+            FontWeight: =FontWeight.Semibold
+            Height: =64
             Size: =13
-            Text: ="+ Nová aktivita"
-            Width: =176
-            X: =Parent.Width - Self.Width - 40
-            Y: =16
-      - rec_FiltrPanel:
+            Text: ="Seznam aktivit"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =160
+            X: =300
+            Y: =0
+      - rec_ZalozkaPodtrzeni:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =3
+            Width: =160
+            X: =300
+            Y: =58
+      - lbl_Uzivatel:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =24
+            Size: =12
+            Text: =User().FullName
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =320
+            X: =Parent.Width - 360
+            Y: =10
+      - lbl_UzivatelMail:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(214, 220, 234, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: =User().Email
+            VerticalAlign: =VerticalAlign.Top
+            Width: =320
+            X: =Parent.Width - 360
+            Y: =34
+      # ---------- souhrnná karta ----------
+      - rec_Souhrn:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =96
+            Height: =84
             Width: =Parent.Width - 80
             X: =40
-            Y: =72
-      - rec_FiltrOkraj:
+            Y: =80
+      - rec_SouhrnOkraj:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylOkraj
             Height: =1
             Width: =Parent.Width - 80
             X: =40
-            Y: =167
-      - lbl_l_Filtry:
+            Y: =163
+      - lbl_SouhrnNadpis:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =84
+            Size: =15
+            Text: ="Aktivity"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =180
+            X: =64
+            Y: =80
+      - lbl_l_Zobrazeno:
           Control: Label@2.5.1
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
-            Height: =20
+            Height: =18
             Size: =10
-            Text: ="Hledání a filtry — prázdná nabídka „(vše)“ znamená bez omezení"
-            Width: =700
+            Text: ="Zobrazeno"
+            Width: =120
+            X: =264
+            Y: =98
+      - lbl_v_Zobrazeno:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =15
+            Text: =CountRows(gal_Aktivity.AllItems)
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =264
+            Y: =118
+      - lbl_l_Schvaleno:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =18
+            Size: =10
+            Text: ="Schváleno"
+            Width: =120
+            X: =404
+            Y: =98
+      - lbl_v_Schvaleno:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylUspech
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =15
+            Text: |-
+              =CountRows(Filter(gal_Aktivity.AllItems, stav.Value = "schváleno"))
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =404
+            Y: =118
+      - lbl_l_Pracovni:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =18
+            Size: =10
+            Text: ="Pracovní"
+            Width: =120
+            X: =544
+            Y: =98
+      - lbl_v_Pracovni:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylPozor
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =15
+            Text: |-
+              =CountRows(Filter(gal_Aktivity.AllItems, stav.Value = "pracovní"))
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =544
+            Y: =118
+      - btn_Mapa:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =40
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: =Launch(varMapaUrl, {}, LaunchTarget.New)
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =13
+            Text: ="Zobrazit v HTML"
+            Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
+            Visible: =!IsBlank(varMapaUrl)
+            Width: =176
+            X: =Parent.Width - 296 - Self.Width - 12
+            Y: =102
+      - btn_Nova:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Fill: =stylAkce
+            FocusedBorderColor: =stylPrimarni
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =40
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylAkceHover
+            OnSelect: |-
+              =Set(varNova, true);
+              Set(varAktivita, Blank());
+              Navigate(scr_Detail, ScreenTransition.Cover)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =13
+            Text: ="+ Nová aktivita"
+            Tooltip: '="Založí novou aktivitu. Kód AA-BB-CCC-DDDD se nezadává - přidělí se sám při uložení: AA agenda, BB proces, CCC dílčí proces, DDDD pořadí aktivity v tom dílčím procesu. Aktivita dostane první volné čtyřčíslí. Jednou přidělený kód se už nikdy nemění, ani při přesunu do jiného dílčího procesu, ani když se před ní něco smaže - vazby v rejstříku i v mapě na něm stojí. Vlastník (sekce, odbor, oddělení) součástí kódu není, eviduje se zvlášť, aby organizační změny kódy nepřečíslovaly. Povinné je znění aktivity a dílčí proces, ostatní pole jde doplnit později."'
+            Width: =176
+            X: =Parent.Width - 296
+            Y: =102
+      # ---------- hledání a filtry ----------
+      - lbl_f_Hledat:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =16
+            Size: =9
+            Text: ="Hledat v názvu"
+            Width: =200
             X: =40
-            Y: =76
+            Y: =180
       - txt_Hledat:
           Control: Classic/TextInput@2.3.2
           Properties:
-            HoverBorderColor: =stylAkce
+            Default: =""
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Hledá podle ZAČÁTKU názvu aktivity, ne kdekoli uvnitř. Napíšeš-li „Tvorba“, najde „Tvorba Služebního řádu“, ale ne „Roční tvorba plánu“. Je to daň za rychlost: takový dotaz umí vyřídit SharePoint sám i nad tisíci aktivitami. Fulltext přes celý rejstřík nabízí publikovaná HTML mapa. Prázdné pole = bez omezení."'
-            Default: =""
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =36
             HintText: ="Název začíná na…"
-            Size: =13
-            Width: =380
+            HoverBorderColor: =stylAkce
+            Size: =12
+            Tooltip: '="Hledá podle ZAČÁTKU názvu aktivity, ne kdekoli uvnitř. Napíšeš-li Tvorba, najde Tvorba Služebního řádu, ale ne Roční tvorba plánu. Je to daň za rychlost: takový dotaz umí vyřídit SharePoint sám i nad tisíci aktivitami. Fulltext přes celý rejstřík nabízí publikovaná HTML mapa. Prázdné pole znamená bez omezení."'
+            Width: =300
             X: =40
-            Y: =96
+            Y: =198
+      - lbl_f_Sekce:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =16
+            Size: =9
+            Text: ="Sekce"
+            Width: =160
+            X: =352
+            Y: =180
       - drp_Sekce:
           Control: Classic/DropDown@2.3.1
           Properties:
-            HoverBorderColor: =stylAkce
+            Default: ="(vše)"
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Filtruje podle sekce, pod kterou vykonávající útvar patří. Nabídka se plní z číselníku útvarů, takže je úplná bez ohledu na to, kolik aktivit v rejstříku je. „(vše)“ vypne filtr. Filtry se sčítají: sekce + útvar + stav + hledání platí najednou."'
-            Default: ="(vše)"
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =36
+            HoverBorderColor: =stylAkce
             Items: =colSekceNabidka
             OnChange: |-
               =Set(
@@ -111,20 +296,31 @@ Screens:
                       Left(drp_Sekce.Selected.Value, Find(" ·", drp_Sekce.Selected.Value & " ·") - 1)
                   )
               )
-            Size: =13
-            Width: =140
-            X: =436
-            Y: =96
+            Size: =12
+            Tooltip: '="Filtruje podle sekce, pod kterou vykonávající útvar patří. Nabídka se plní z číselníku útvarů, takže je úplná bez ohledu na to, kolik aktivit v rejstříku je. Volba (vše) filtr vypne. Filtry se sčítají: sekce, útvar, stav i hledání platí najednou."'
+            Width: =160
+            X: =352
+            Y: =198
+      - lbl_f_Utvar:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =16
+            Size: =9
+            Text: ="Vykonává útvar"
+            Width: =200
+            X: =524
+            Y: =180
       - drp_Utvar:
           Control: Classic/DropDown@2.3.1
           Properties:
-            HoverBorderColor: =stylAkce
+            Default: ="(vše)"
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Filtruje podle útvaru, který aktivitu vykonává. Nabídka je z číselníku útvarů ve tvaru „kód · název“ a obsahuje odbory i oddělení. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na „(vše)“."'
-            Default: ="(vše)"
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =36
+            HoverBorderColor: =stylAkce
             Items: =colUtvarNabidka
             OnChange: |-
               =Set(
@@ -135,113 +331,181 @@ Screens:
                       Left(drp_Utvar.Selected.Value, Find(" ·", drp_Utvar.Selected.Value & " ·") - 1)
                   )
               )
-            Size: =13
-            Width: =180
-            X: =592
-            Y: =96
+            Size: =12
+            Tooltip: '="Filtruje podle útvaru, který aktivitu vykonává. Nabídka je z číselníku útvarů ve tvaru kód · název a obsahuje odbory i oddělení. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na (vše)."'
+            Width: =200
+            X: =524
+            Y: =198
+      - lbl_f_Stav:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =16
+            Size: =9
+            Text: ="Stav"
+            Width: =160
+            X: =736
+            Y: =180
       - drp_Stav:
           Control: Classic/DropDown@2.3.1
           Properties:
-            HoverBorderColor: =stylAkce
-            FocusedBorderColor: =stylAkce
-            FocusedBorderThickness: =2
-            Tooltip: '="Pracovní = rozpracovaný záznam, na kterém se ještě pracuje. Schváleno = potvrzené znění, které smí jít do organizačního řádu. Stav se přepíná v detailu aktivity; schvalovací kolečko s notifikacemi zatím není součástí řešení."'
             Default: ="(vše)"
-            Font: =Font.'Open Sans'
-            Height: =40
-            Items: =["(vše)", "pracovní", "schváleno"]
-            Size: =13
-            Width: =180
-            X: =788
-            Y: =96
-      - lbl_l_Razeni:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylTextSlaby
-            Font: =Font.'Open Sans'
-            Height: =20
-            Size: =10
-            Text: ="Řadit podle"
-            Width: =180
-            X: =984
-            Y: =76
-      - drp_Razeni:
-          Control: Classic/DropDown@2.3.1
-          Properties:
-            HoverBorderColor: =stylAkce
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Mění pořadí seznamu. Kód = pořadí v rejstříku (agenda, proces, dílčí proces, aktivita) — nejlepší pro procházení celé struktury. Název = abecedně. Útvar = seskupí aktivity jednoho oddělení za sebe. Řazení neovlivňuje filtry ani počet zobrazených aktivit."'
-            Default: ="kód"
             Font: =Font.'Open Sans'
-            Height: =40
-            Items: =["kód", "název", "útvar"]
-            Size: =13
-            Width: =180
-            X: =984
-            Y: =96
-      - lbl_Pocet:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylTextSlaby
-            Font: =Font.'Open Sans'
-            Height: =32
-            Size: =11
-            Text: |-
-              ="Zobrazeno " & CountRows(gal_Aktivity.AllItems) & " aktivit"
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =400
-            X: =40
-            Y: =148
-      - rec_HlavickaTabulky:
+            Height: =36
+            HoverBorderColor: =stylAkce
+            Items: =["(vše)", "pracovní", "schváleno"]
+            Size: =12
+            Tooltip: '="Pracovní je rozpracovaný záznam, na kterém se ještě pracuje. Schváleno je potvrzené znění, které smí jít do organizačního řádu. Stav se přepíná v detailu aktivity; schvalovací kolečko s notifikacemi zatím není součástí řešení."'
+            Width: =160
+            X: =736
+            Y: =198
+      - rec_ChipPocet:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPlocha
-            Height: =32
-            Width: =Parent.Width - 80
-            X: =40
-            Y: =180
-      - lbl_h_Kod:
+            Height: =36
+            Width: =200
+            X: =Parent.Width - 452
+            Y: =198
+      - lbl_ChipPocet:
           Control: Label@2.5.1
           Properties:
             Align: =Align.Center
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
-            FontWeight: =FontWeight.Semibold
-            Height: =32
-            Size: =10
-            Text: ="KÓD"
+            Height: =36
+            Size: =11
+            Text: |-
+              =CountRows(gal_Aktivity.AllItems) & " zobrazených aktivit"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =148
-            X: =60
-            Y: =180
+            Width: =200
+            X: =Parent.Width - 452
+            Y: =198
+      - rec_ChipFiltr:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPlocha
+            Height: =36
+            Width: =200
+            X: =Parent.Width - 240
+            Y: =198
+      - lbl_ChipFiltr:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =36
+            Size: =11
+            Text: |-
+              =If(
+                  IsBlank(txt_Hledat.Text) && IsBlank(varSekceKod) && IsBlank(varUtvarKod) && drp_Stav.Selected.Value = "(vše)",
+                  "Bez filtru — celý rejstřík",
+                  "Filtrováno"
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =200
+            X: =Parent.Width - 240
+            Y: =198
+      # ---------- hlavička tabulky (klik = řazení) ----------
+      - lbl_h_Kod:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            HoverColor: =stylAkce
+            OnSelect: |-
+              =Set(varRazeniAsc, If(varRazeni = "kod", !varRazeniAsc, true));
+              Set(varRazeni, "kod")
+            PressedColor: =stylAkceStisk
+            Size: =10
+            Text: |-
+              ="KÓD" & If(varRazeni = "kod", If(varRazeniAsc, " ↑", " ↓"), "")
+            Tooltip: '="Seřadí podle identifikačního kódu, tedy v pořadí rejstříku. Další klik obrátí směr."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =140
+            X: =56
+            Y: =246
       - lbl_h_Nazev:
           Control: Label@2.5.1
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
-            Height: =32
+            Height: =28
+            HoverColor: =stylAkce
+            OnSelect: |-
+              =Set(varRazeniAsc, If(varRazeni = "nazev", !varRazeniAsc, true));
+              Set(varRazeni, "nazev")
+            PressedColor: =stylAkceStisk
             Size: =10
-            Text: ="AKTIVITA"
+            Text: |-
+              ="AKTIVITA" & If(varRazeni = "nazev", If(varRazeniAsc, " ↑", " ↓"), "")
+            Tooltip: '="Seřadí abecedně podle názvu aktivity. Další klik obrátí směr."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =400
-            X: =224
-            Y: =180
-      - lbl_h_Stav:
+            Width: =300
+            X: =208
+            Y: =246
+      - lbl_h_Utvar:
           Control: Label@2.5.1
           Properties:
-            Align: =Align.Center
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
-            Height: =32
+            Height: =28
+            HoverColor: =stylAkce
+            OnSelect: |-
+              =Set(varRazeniAsc, If(varRazeni = "utvar", !varRazeniAsc, true));
+              Set(varRazeni, "utvar")
+            PressedColor: =stylAkceStisk
+            Size: =10
+            Text: |-
+              ="VYKONÁVÁ" & If(varRazeni = "utvar", If(varRazeniAsc, " ↑", " ↓"), "")
+            Tooltip: '="Seskupí za sebe aktivity téhož útvaru. Další klik obrátí směr."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =Parent.Width - 502
+            Y: =246
+      - lbl_h_Sekce:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10
+            Text: ="SEKCE"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =100
+            X: =Parent.Width - 370
+            Y: =246
+      - lbl_h_Stav:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
             Size: =10
             Text: ="STAV"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =112
-            X: =Parent.Width - 240
-            Y: =180
+            Width: =110
+            X: =Parent.Width - 258
+            Y: =246
+      - rec_HlavickaLinka:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylOkraj
+            Height: =1
+            Width: =Parent.Width - 80
+            X: =40
+            Y: =274
+      # ---------- galerie ----------
       - gal_Aktivity:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -249,260 +513,162 @@ Screens:
             Height: =Parent.Height - Self.Y - 24
             Items: |-
               =Switch(
-                  drp_Razeni.Selected.Value,
-                  "název",
+                  varRazeni,
+                  "nazev",
                   Sort(Filter(
                       Aktivity,
                       IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
                       IsBlank(varSekceKod) || sekce = varSekceKod,
                       IsBlank(varUtvarKod) || vykonava = varUtvarKod,
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                  ), nazev_kratky, SortOrder.Ascending),
-                  "útvar",
+                  ), nazev_kratky, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
+                  "utvar",
                   Sort(Filter(
                       Aktivity,
                       IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
                       IsBlank(varSekceKod) || sekce = varSekceKod,
                       IsBlank(varUtvarKod) || vykonava = varUtvarKod,
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                  ), vykonava, SortOrder.Ascending),
+                  ), vykonava, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
                   Sort(Filter(
                       Aktivity,
                       IsBlank(txt_Hledat.Text) || StartsWith(nazev_kratky, txt_Hledat.Text),
                       IsBlank(varSekceKod) || sekce = varSekceKod,
                       IsBlank(varUtvarKod) || vykonava = varUtvarKod,
                       drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                  ), Title, SortOrder.Ascending)
+                  ), Title, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending))
               )
             TemplatePadding: =0
-            TemplateSize: =96
+            TemplateSize: =56
             Width: =Parent.Width - 80
             X: =40
-            Y: =216
+            Y: =276
           Children:
             - rec_RadekPozadi:
                 Control: Rectangle@2.3.0
                 Properties:
                   Fill: |-
-                    =If(
-                        ThisItem.IsSelected,
-                        stylRadekVybrany,
-                        RGBA(255, 255, 255, 1)
-                    )
+                    =If(ThisItem.IsSelected, stylRadekVybrany, stylKarta)
+                  Height: =Parent.TemplateHeight - 1
                   HoverFill: =stylRadekHover
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
                   PressedFill: =stylRadekVybrany
-                  Height: =Parent.TemplateHeight - 8
-                  OnSelect: =Select(Parent)
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =0
-            - rec_Pruh:
+            - rec_RadekLinka:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: |-
-                    =If(
-                        ThisItem.stav.Value = "schváleno",
-                        stylUspech,
-                        stylPrimarni
-                    )
-                  Height: =Parent.TemplateHeight - 8
-                  OnSelect: =Select(Parent)
-                  Width: =4
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =Parent.TemplateWidth
                   X: =0
-                  Y: =0
-            - rec_KodPozadi:
-                Control: Rectangle@2.3.0
-                Properties:
-                  Fill: =stylPlocha
-                  Height: =32
-                  OnSelect: =Select(Parent)
-                  Width: =148
-                  X: =20
-                  Y: =(Parent.TemplateHeight - 8) / 2 - 16
+                  Y: =Parent.TemplateHeight - 1
             - lbl_Kod:
                 Control: Label@2.5.1
                 Properties:
-                  Align: =Align.Center
-                  Color: =stylPrimarni
+                  Color: =stylText
                   Font: =Font.'Open Sans'
-                  FontWeight: =FontWeight.Semibold
-                  Height: =32
-                  OnSelect: =Select(Parent)
+                  Height: =Parent.TemplateHeight - 1
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
                   Size: =11
                   Text: =ThisItem.Title
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =148
-                  X: =20
-                  Y: =(Parent.TemplateHeight - 8) / 2 - 16
-            - lbl_NazevKratky:
+                  Width: =140
+                  X: =16
+                  Y: =0
+            - lbl_Nazev:
                 Control: Label@2.5.1
                 Properties:
                   Color: =stylText
                   Font: =Font.'Open Sans'
                   FontWeight: |-
                     =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                  Height: =44
-                  OnSelect: =Select(Parent)
+                  Height: =Parent.TemplateHeight - 1
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
                   PaddingBottom: =0
                   PaddingTop: =0
-                  Size: =13
+                  Size: =12
                   Text: =ThisItem.nazev_kratky
-                  VerticalAlign: =VerticalAlign.Top
-                  Width: =Parent.TemplateWidth - 500
-                  X: =184
-                  Y: =16
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.TemplateWidth - 638
+                  X: =168
+                  Y: =0
             - lbl_Utvar:
                 Control: Label@2.5.1
                 Properties:
                   Color: =stylTextSlaby
                   Font: =Font.'Open Sans'
-                  Height: =20
-                  OnSelect: =Select(Parent)
-                  PaddingTop: =0
-                  Size: =10
-                  Text: |-
-                    ="vykonává " & ThisItem.vykonava & "   ·   sekce " & ThisItem.sekce
-                  Width: =Parent.TemplateWidth - 500
-                  X: =184
-                  Y: =62
-            - rec_StavPozadi:
-                Control: Rectangle@2.3.0
+                  Height: =Parent.TemplateHeight - 1
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
+                  Size: =11
+                  Text: =ThisItem.vykonava
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =120
+                  X: =Parent.TemplateWidth - 462
+                  Y: =0
+            - lbl_Sekce:
+                Control: Label@2.5.1
                 Properties:
-                  Fill: |-
-                    =If(
-                        ThisItem.stav.Value = "schváleno",
-                        stylUspechSvetle,
-                        stylPozorSvetle
-                    )
-                  Height: =28
-                  OnSelect: =Select(Parent)
-                  Width: =112
-                  X: =Parent.TemplateWidth - 200
-                  Y: =(Parent.TemplateHeight - 8) / 2 - 14
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =Parent.TemplateHeight - 1
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
+                  Size: =11
+                  Text: =ThisItem.sekce
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =100
+                  X: =Parent.TemplateWidth - 330
+                  Y: =0
             - lbl_Stav:
                 Control: Label@2.5.1
                 Properties:
-                  Align: =Align.Center
                   Color: |-
-                    =If(
-                        ThisItem.stav.Value = "schváleno",
-                        stylUspech,
-                        stylPozor
-                    )
+                    =If(ThisItem.stav.Value = "schváleno", stylUspech, stylPozor)
                   Font: =Font.'Open Sans'
-                  Height: =28
-                  OnSelect: =Select(Parent)
-                  Size: =10
+                  Height: =Parent.TemplateHeight - 1
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, ThisItem);
+                    Navigate(scr_Detail, ScreenTransition.Cover)
+                  Size: =11
                   Text: =ThisItem.stav.Value
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =112
-                  X: =Parent.TemplateWidth - 200
-                  Y: =(Parent.TemplateHeight - 8) / 2 - 14
+                  Width: =110
+                  X: =Parent.TemplateWidth - 218
+                  Y: =0
             - ico_Detail:
                 Control: Classic/Icon@2.5.0
                 Properties:
-                  HoverColor: =stylAkce
-                  PressedColor: =stylAkceStisk
-                  Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
                   Color: =stylTextSlaby
-                  Height: =40
+                  Height: =32
+                  HoverColor: =stylAkce
                   Icon: =Icon.ChevronRight
                   OnSelect: |-
                     =Set(varNova, false);
                     Set(varAktivita, ThisItem);
                     Navigate(scr_Detail, ScreenTransition.Cover)
-                  PaddingBottom: =12
-                  PaddingLeft: =12
-                  PaddingRight: =12
-                  PaddingTop: =12
-                  Width: =40
-                  X: =Parent.TemplateWidth - Self.Width - 16
-                  Y: =(Parent.TemplateHeight - 8) / 2 - 20
-
-      - ico_Mapa:
-          Control: Classic/Icon@2.5.0
-          Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Color: =RGBA(255, 255, 255, 1)
-            Height: =28
-            Icon: =Icon.Globe
-            OnSelect: =Launch(varMapaUrl, {}, LaunchTarget.New)
-            Tooltip: '="Otevřít procesní mapu (HTML) v novém okně"'
-            Visible: =!IsBlank(varMapaUrl)
-            Width: =28
-            X: =Parent.Width - 288
-            Y: =26
-      - ico_InfoSeznam:
-          Control: Classic/Icon@2.5.0
-          Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Color: =RGBA(255, 255, 255, 1)
-            Height: =28
-            Icon: =Icon.Information
-            OnSelect: =Set(varNapovedaKod, !varNapovedaKod)
-            Tooltip: '="Jak se tvoří identifikační kód"'
-            Width: =28
-            X: =Parent.Width - 240
-            Y: =26
-      - rec_NapovedaSeznam:
-          Control: Rectangle@2.3.0
-          Properties:
-            Fill: =RGBA(255, 255, 255, 1)
-            Height: =340
-            Visible: =varNapovedaKod
-            Width: =640
-            X: =280
-            Y: =120
-      - rec_NapovedaOkrajSeznam:
-          Control: Rectangle@2.3.0
-          Properties:
-            Fill: =stylPrimarni
-            Height: =340
-            Visible: =varNapovedaKod
-            Width: =4
-            X: =280
-            Y: =120
-      - lbl_NapovedaSeznam:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylText
-            Font: =Font.'Open Sans'
-            Height: =300
-            Size: =11
-            Text: |-
-              ="Identifikační kód aktivity: AA-BB-CCC-DDDD
-
-              AA     agenda (např. 07)
-              BB     proces uvnitř agendy (07-04)
-              CCC    dílčí proces (07-04-006)
-              DDDD   pořadí aktivity v dílčím procesu (07-04-006-0001)
-
-              Kód se skládá z výběru agenda → proces → dílčí proces a přiděluje se sám při prvním uložení: aktivita dostane první volné čtyřčíslí ve svém dílčím procesu.
-
-              Jednou přidělený kód se už nikdy nemění — ani když se aktivita přesune do jiného dílčího procesu, ani když se před ní něco smaže. Vazby v rejstříku i v mapě na něm stojí.
-
-              Vlastník (sekce, odbor, oddělení) součástí kódu není. Eviduje se zvlášť, aby organizační změny kódy nepřečíslovaly."
-            VerticalAlign: =VerticalAlign.Top
-            Visible: =varNapovedaKod
-            Width: =570
-            X: =308
-            Y: =140
-      - ico_ZavritNapoveduSeznam:
-          Control: Classic/Icon@2.5.0
-          Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Color: =stylTextSlaby
-            Height: =32
-            Icon: =Icon.Cancel
-            OnSelect: =Set(varNapovedaKod, false)
-            PaddingBottom: =8
-            PaddingLeft: =8
-            PaddingRight: =8
-            PaddingTop: =8
-            Visible: =varNapovedaKod
-            Width: =32
-            X: =880
-            Y: =128
+                  PaddingBottom: =9
+                  PaddingLeft: =9
+                  PaddingRight: =9
+                  PaddingTop: =9
+                  PressedColor: =stylAkceStisk
+                  Tooltip: '="Otevře detail aktivity: úplné znění, vykonávající útvar, spolupráci, vnitřní předpis a zařazení do dílčích procesů. Odtud se aktivita také maže."'
+                  Width: =32
+                  X: =Parent.TemplateWidth - 56
+                  Y: =(Parent.TemplateHeight - 1) / 2 - 16

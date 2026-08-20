@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Procesní mapa MPSV</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#fff; --ink:#16202c; --muted:#5d6b7a; --line:#dde3ea;
+    --a:#1f4e79; --p:#2e6da4; --d:#3f8f6f; --k:#8a6d1f;
+    --chip:#eef2f6; --hit:#fff3bf; --shadow:0 1px 3px rgba(16,32,48,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 "Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--a);color:#fff;padding:14px 20px}
+  header h1{margin:0;font-size:19px;font-weight:600}
+  header .meta{margin-top:4px;font-size:12.5px;opacity:.85}
+  .counts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .counts b{background:rgba(255,255,255,.15);border-radius:4px;padding:3px 9px;font-weight:600;font-size:12px}
+  .bar{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 20px;
+       display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5}
+  .bar input[type=search],.bar select{font:inherit;padding:6px 9px;border:1px solid var(--line);
+       border-radius:5px;background:#fff;color:inherit}
+  .bar input[type=search]{min-width:260px;flex:1 1 260px}
+  .bar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+  .bar button{font:inherit;padding:6px 11px;border:1px solid var(--line);border-radius:5px;
+       background:#fff;cursor:pointer;color:var(--a)}
+  .bar button:hover{background:var(--chip)}
+  main{display:flex;gap:16px;align-items:flex-start;padding:16px 20px 40px}
+  #tree{flex:1 1 auto;min-width:0;background:var(--panel);border:1px solid var(--line);
+        border-radius:8px;box-shadow:var(--shadow);padding:8px 10px}
+  #detail{flex:0 0 330px;position:sticky;top:64px;background:var(--panel);border:1px solid var(--line);
+        border-radius:8px;box-shadow:var(--shadow);padding:14px 16px;max-height:calc(100vh - 90px);overflow:auto}
+  #detail h2{margin:0 0 10px;font-size:14px;color:var(--a)}
+  #detail dt{font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:10px}
+  #detail dd{margin:2px 0 0}
+  .node{border-radius:5px}
+  .row{display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:5px;cursor:default}
+  .row:hover{background:var(--chip)}
+  .tw{flex:0 0 16px;width:16px;text-align:center;color:var(--muted);cursor:pointer;
+      user-select:none;font-size:11px;line-height:21px}
+  .tw.leaf{cursor:default;opacity:.35}
+  .kod{flex:0 0 auto;font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--muted);
+       background:var(--chip);border-radius:3px;padding:1px 5px;margin-top:1px}
+  .nm{flex:1 1 auto;min-width:0}
+  .lvl-a>.row>.nm{font-weight:600;color:var(--a);font-size:15px}
+  .lvl-p>.row>.nm{font-weight:600;color:var(--p)}
+  .lvl-d>.row>.nm{color:var(--d)}
+  .lvl-k>.row>.nm{color:var(--ink)}
+  .lvl-k>.row{cursor:pointer}
+  .kids{margin-left:17px;border-left:1px solid var(--line);padding-left:9px}
+  .hide{display:none}
+  .badge{flex:0 0 auto;font-size:11px;border-radius:9px;padding:1px 7px;background:var(--chip);
+         color:var(--muted);margin-top:2px;white-space:nowrap}
+  .badge.no{background:#fdecea;color:#a3352a}
+  .badge.jinde{background:#fff4e0;color:#8a5a12}
+  .node.unmapped > .row > .nm{opacity:.62;font-style:italic}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:8px 20px 0}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+  .legend .g1{background:#3f8f6f}.legend .g2{background:#e0a33c}.legend .g3{background:#c9503f}
+  .badge.ut{background:#e8f0f7;color:var(--p)}
+  mark{background:var(--hit);padding:0 1px}
+  .empty{padding:20px;color:var(--muted);text-align:center}
+  @media (max-width:900px){main{flex-direction:column}#detail{position:static;flex:1 1 auto;width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Procesní mapa MPSV</h1>
+  <div class="meta" id="meta"></div>
+  <div class="counts" id="counts"></div>
+</header>
+
+<div class="bar">
+  <input type="search" id="q" placeholder="Hledat v agendách, procesech, dílčích procesech a aktivitách…" autocomplete="off">
+  <select id="fUtvar"><option value="">Vykonává útvar: vše</option></select>
+  <select id="fStav">
+    <option value="akt">Zobrazit: jen zmapované</option>
+    <option value="vse">Zobrazit: celý rejstřík</option>
+    <option value="ne">Zobrazit: jen nezmapované</option>
+  </select>
+  <button id="bExp">Rozbalit vše</button>
+  <button id="bCol">Sbalit vše</button>
+</div>
+
+<div class="legend">
+  <span><i class="g1"></i>zmapováno — aktivity jsou v evidenci</span>
+  <span><i class="g2"></i>zmapováno jiným útvarem — rejstřík je vede jako využité, aktivity zatím nemáme</span>
+  <span><i class="g3"></i>nezmapováno — v rejstříku existuje, aktivity zatím nikdo nepopsal</span>
+</div>
+
+<main>
+  <div id="tree"></div>
+  <aside id="detail"><h2>Detail</h2><div id="detailBody" class="empty">Klikni na aktivitu.</div></aside>
+</main>
+
+<script>
+const DATA = __DATA_JSON__;
+
+const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+
+/* ---- sestavení stromu z plochých tabulek ---- */
+function buildTree(d){
+  const linksByAkt = {};
+  d.vazby.forEach(v => (linksByAkt[v.aktivita_kod] = linksByAkt[v.aktivita_kod] || []).push(v.dilci_proces_kod));
+  const aktByDp = {};
+  d.aktivity.forEach(a => {
+    const dps = linksByAkt[a.kod] || [a.dilci_proces_kod];
+    dps.forEach(dp => (aktByDp[dp] = aktByDp[dp] || []).push(a));
+  });
+  const dpByProces = {}, procByAgenda = {};
+  d.dilci_procesy.forEach(x => (dpByProces[x.proces_kod] = dpByProces[x.proces_kod] || []).push(x));
+  d.procesy.forEach(x => (procByAgenda[x.agenda_kod] = procByAgenda[x.agenda_kod] || []).push(x));
+
+  return d.agendy.map(a => ({
+    lvl:"a", kod:a.kod, nazev:a.nazev, vlastnik:a.vlastnik, rec:a,
+    kids:(procByAgenda[a.kod]||[]).map(p => ({
+      lvl:"p", kod:p.kod, nazev:p.nazev, vlastnik:p.vlastnik, rec:p,
+      kids:(dpByProces[p.kod]||[]).map(dp => ({
+        lvl:"d", kod:dp.kod, nazev:dp.nazev, vlastnik:dp.vlastnik, stav:dp.stav, rec:dp,
+        kids:(aktByDp[dp.kod]||[]).map(k => ({
+          lvl:"k", kod:k.kod, nazev:k.nazev, utvar:k.vykonava, rec:k, kids:[]
+        }))
+      }))
+    }))
+  }));
+}
+
+const TREE = buildTree(DATA);
+const walk = (ns,f) => ns.forEach(n => { walk(n.kids,f); f(n); });
+walk(TREE, n => { n.aktCount = n.lvl==="k" ? 1 : n.kids.reduce((s,c)=>s+(c.aktCount||0),0); n.hay = norm(n.kod+" "+n.nazev+" "+(n.utvar||"")); });
+
+/* ---- render ---- */
+const elTree = document.getElementById("tree");
+function render(){
+  const q = norm(document.getElementById("q").value.trim());
+  const ut = document.getElementById("fUtvar").value;
+  const stav = document.getElementById("fStav").value;
+  elTree.textContent = "";
+
+  const mk = (n, depth, forced) => {
+    const hit    = forced || !q || n.hay.includes(q);
+    const selfUt = n.lvl !== "k" || !ut || (n.utvar||"").split(/,\s*/).includes(ut);
+    // shoda na uzlu zpristupni celou jeho podstrukturu
+    const kids = n.kids.map(c => mk(c, depth+1, forced || (!!q && n.hay.includes(q)))).filter(Boolean);
+    const stavOk = stav === "vse" ? true : stav === "akt" ? n.aktCount > 0 : n.aktCount === 0;
+    const keepSelf = n.lvl === "k" ? hit && selfUt && stavOk : hit && !ut && stavOk;
+    if (!kids.length && !keepSelf) return null;
+
+    const node = document.createElement("div");
+    node.className = "node lvl-" + n.lvl;
+    const row = document.createElement("div"); row.className = "row";
+
+    const tw = document.createElement("span");
+    tw.className = "tw" + (kids.length ? "" : " leaf");
+    tw.textContent = kids.length ? "▾" : "•";
+    row.appendChild(tw);
+
+    const kod = document.createElement("span"); kod.className = "kod"; kod.textContent = n.kod;
+    row.appendChild(kod);
+
+    const nm = document.createElement("span"); nm.className = "nm";
+    nm.appendChild(hl(n.nazev, q));
+    row.appendChild(nm);
+
+    if (n.lvl === "k" && n.utvar){
+      const b = document.createElement("span"); b.className="badge ut"; b.textContent = n.utvar;
+      row.appendChild(b);
+    } else if (n.lvl !== "k"){
+      const b = document.createElement("span");
+      const jinde = !n.aktCount && (n.rec.stav_mapovani || "").startsWith("zmapováno jiným");
+      b.className = "badge" + (n.aktCount ? "" : jinde ? " jinde" : " no");
+      b.textContent = n.aktCount ? n.aktCount + " akt." : jinde ? "jiný útvar" : "nezmapováno";
+      row.appendChild(b);
+      if (!n.aktCount) node.classList.add("unmapped");
+    }
+    if (n.lvl === "k") row.addEventListener("click", () => detail(n));
+
+    node.appendChild(row);
+    if (kids.length){
+      const box = document.createElement("div"); box.className = "kids";
+      kids.forEach(k => box.appendChild(k));
+      if (depth >= 1 && !q) box.classList.add("hide"), tw.textContent = "▸";
+      node.appendChild(box);
+      tw.addEventListener("click", () => {
+        box.classList.toggle("hide");
+        tw.textContent = box.classList.contains("hide") ? "▸" : "▾";
+      });
+    }
+    return node;
+  };
+
+  TREE.map(n => mk(n, 0, false)).filter(Boolean).forEach(n => elTree.appendChild(n));
+  if (!elTree.children.length){
+    const e = document.createElement("div"); e.className="empty";
+    e.textContent = "Nic neodpovídá zadanému filtru."; elTree.appendChild(e);
+  }
+}
+
+function hl(text, q){
+  const frag = document.createDocumentFragment();
+  if (!q){ frag.appendChild(document.createTextNode(text)); return frag; }
+  const h = norm(text); let i = 0, p;
+  while ((p = h.indexOf(q, i)) !== -1){
+    frag.appendChild(document.createTextNode(text.slice(i, p)));
+    const m = document.createElement("mark"); m.textContent = text.slice(p, p+q.length);
+    frag.appendChild(m); i = p + q.length;
+  }
+  frag.appendChild(document.createTextNode(text.slice(i)));
+  return frag;
+}
+
+function detail(n){
+  const k = n.rec, body = document.getElementById("detailBody");
+  body.className = ""; body.textContent = "";
+  const dl = document.createElement("dl");
+  const put = (t, v) => {
+    if (!v) return;
+    const dt = document.createElement("dt"); dt.textContent = t;
+    const dd = document.createElement("dd"); dd.textContent = v;
+    dl.appendChild(dt); dl.appendChild(dd);
+  };
+  put("Aktivita", k.nazev);
+  put("Identifikační kód", k.kod);
+  const dp = DATA.dilci_procesy.find(x => x.kod === k.dilci_proces_kod);
+  const pr = dp && DATA.procesy.find(x => x.kod === dp.proces_kod);
+  const ag = pr && DATA.agendy.find(x => x.kod === pr.agenda_kod);
+  put("Dílčí proces", dp && dp.nazev + " (" + dp.kod + ")");
+  put("Proces", pr && pr.nazev + " (" + pr.kod + ")");
+  put("Agenda", ag && ag.nazev + " (" + ag.kod + ")");
+  put("Vykonává útvar", k.vykonava);
+  put("Spolupracuje", k.spolupracuje);
+  put("Vnitřní předpis", k.vnitrni_predpis);
+  const vaz = DATA.vazby.filter(v => v.aktivita_kod === k.kod);
+  if (vaz.length > 1) put("Další dílčí procesy", vaz.map(v => v.dilci_proces_kod).join(", "));
+  put("Zdroj", "sekce " + k.sekce + ", řádek karty " + k.zdroj_radek);
+  body.appendChild(dl);
+}
+
+/* ---- init ---- */
+document.getElementById("meta").textContent =
+  "Sekce " + DATA.meta.sekce + " · sekční správce " + DATA.meta.spravce + " · " + __GEN__;
+const c = document.getElementById("counts");
+[["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
+ ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
+ .forEach(([t,v]) => { const b = document.createElement("b"); b.textContent = v + " " + t; c.appendChild(b); });
+
+const utvary = [...new Set(DATA.aktivity.flatMap(a => (a.vykonava||"").split(/,\s*/)).filter(Boolean))].sort();
+const sel = document.getElementById("fUtvar");
+utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
+
+["q","fUtvar","fStav"].forEach(id => document.getElementById(id)
+  .addEventListener(id === "q" ? "input" : "change", render));
+document.getElementById("bExp").addEventListener("click", () => {
+  elTree.querySelectorAll(".kids").forEach(b => b.classList.remove("hide"));
+  elTree.querySelectorAll(".tw:not(.leaf)").forEach(t => t.textContent = "▾");
+});
+document.getElementById("bCol").addEventListener("click", () => {
+  elTree.querySelectorAll(".node:not(.lvl-a) .kids").forEach(b => b.classList.add("hide"));
+  elTree.querySelectorAll(".node:not(.lvl-a) > .row > .tw:not(.leaf)").forEach(t => t.textContent = "▸");
+});
+render();
+</script>
+</body>
+</html>

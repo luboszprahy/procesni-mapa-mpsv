@@ -37,5 +37,7 @@ App:
       Set(stylPozorSvetle, RGBA(253, 243, 226, 1));
       Set(stylNebezpeci, RGBA(168, 32, 32, 1));
       Set(varNova, false);
-      Set(varAktivita, Blank())
+      Set(varAktivita, Blank());
+      Set(varRazeni, "kod");
+      Set(varRazeniAsc, true)
     Theme: =PowerAppsTheme

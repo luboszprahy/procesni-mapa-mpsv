@@ -1,12 +1,62 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 (dopoledne)
+Aktualizováno: 2026-08-20 14:15
 
-> **RESTART KONVERZACE 20.08.2026 13:48 — začni souborem `HANDOVER.md`.**
-> Je v něm pět zadaných a zatím neudělaných věcí (grafika podle Správy
-> notifikací, klikací celý řádek, zrušení info panelu ve prospěch tooltipu,
-> tlačítko „Zobrazit v HTML" místo globusu, dokončení `MapaPublishFlow`),
-> předlohy v `input/snimky/vzor-notifikace-*.png` a všechny příkazy.
+## Grafika podle vzoru + publikační flow — 1.0.0.20 (20.08.2026 14:15)
+
+**Seznam přestavěn podle Správy notifikací.** Tmavý pruh s tlačítkem uvnitř
+nahradil navbar (název aplikace, záložka s podtržením, identita uživatele),
+pod ním bílá souhrnná karta s třemi čísly a dvěma tlačítky, pak řádek filtrů
+s chipy a plochá tabulková galerie. Z řádku zmizel barevný pruh i chip kolem
+kódu — zbyla bílá karta oddělená linkou 1 px, jak vzor chce.
+
+**Řazení je v hlavičce, ne v nabídce.** Klik na KÓD / AKTIVITA / VYKONÁVÁ
+přepne sloupec, další klik obrátí směr; u aktivního je šipka. Drží to
+`varRazeni` a `varRazeniAsc`, `drp_Razeni` zanikl. `Sort` zůstal uvnitř
+každé větve `Switch` zvlášť — vypočítaný výraz v `Sort` by delegaci shodil.
+
+**Čísla v souhrnu se počítají z galerie, ne z listu.** `CountRows` nad
+SharePointem se nedeleguje a nad 2 000 aktivitami by tiše lhal, takže popisek
+říká „Zobrazeno", ne „Celkem". Je to vědomý ústupek, ne opomenutí.
+
+**Celý řádek otevírá detail** (dřív jen šipka) — `Navigate` má podklad
+i všech pět labelů. `Select(Parent)` řádek jen vybíral, nenavigoval.
+
+**Info panel „i" zrušen** na obou obrazovkách i s `varNapovedaKod`; výklad
+kódu `AA-BB-CCC-DDDD` je v tooltipech „+ Nová aktivita" a „Uložit".
+**Globus nahradilo tlačítko „Zobrazit v HTML".**
+
+**`MapaPublishFlow` dokončené — 14 akcí.** Generuje `src/build_mapa_flow.py`
+do kostry z designeru: šablona ze Site Assets → pět `Get items` se zapnutým
+stránkováním → pět `Select` na kontrakt → `Model` → zapečení kotev →
+`Create file`. Kostra neměla žádnou connection reference (Studio ji u prázdného
+flow nezaloží), takže se bere ta, kterou už v balíku používá druhé flow.
+GUID listů a adresa webu se čtou z `customizations.xml`, ne natvrdo — kdyby
+uživatel appku přepojil jinam, natvrdo zapsané GUID by ukazovaly do prázdna
+a mapa by se publikovala ze špatných dat, aniž by cokoli spadlo.
+
+**Nová brána `check_mapa_flow.py`** — 126 kontrol ve třech vrstvách: struktura
+(trigger beze změny, spojení, viditelnost odkazů v runAfter cestě), kontrakt
+(klíče každého `Select`, `?['Value']` u Choice, pagination, GUID místo runtime
+výrazu) a význam (výraz kroku `Stranka` se vytáhne z balíku, vyhodnotí nad
+skutečnou šablonou a výsledek projde stejným sítem jako `build_mapa.py`).
+**12 mutací, všechny chycené** — mj. vypnuté stránkování, `kod` z jiného
+sloupce, Choice bez `?['Value']`, `contentVersion: undefined` a `__GEN__`
+bez uvozovek.
+
+**Tlačítko „Obnovit mapu" v appce v balíku není** a je to zjištění, ne
+opomenutí: `MapaPublishFlow` není v `.msapp` mezi datovými zdroji, takže
+`MapaPublishFlow.Run()` by Studio odmítlo. Musí ho ve Studiu připojit uživatel
+(Power Automate → Add flow); vzorec je připravený v návodu.
+
+**Úklid connection reference `…_12718` vědomě odložen.** Obě flow na ní visí,
+takže odebrání je změna pro obě naráz — mísit ji s velkou funkční změnou by
+znamenalo, že při selhání importu nepůjde poznat, co ho shodilo.
+
+### Další krok
+Ověřit, jestli tenant HTML ze Site Assets **zobrazí, nebo stáhne**
+(`deploy/navod_publikace_mapy.md`, krok 2). Na tom stojí, jestli publikační
+flow má smysl, nebo se zobrazení musí přesunout do canvas appky.
 
 ## Grafika sjednocena + úklid — 1.0.0.19 (20.08.2026 odpoledne)
 
