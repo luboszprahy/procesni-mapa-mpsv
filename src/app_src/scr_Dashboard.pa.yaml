@@ -689,7 +689,7 @@ Screens:
             Height: =28
             Size: =10
             Text: ="VLASTNÍK / VYKONÁVÁ"
-            Tooltip: '="U agendy, procesu a dílčího procesu je to vlastník (sekce u agendy, odbor u procesu a dílčího procesu). U aktivity je to útvar, který ji vykonává. Vypisuje se kód útvaru z číselníku."'
+            Tooltip: '="Kód útvaru z číselníku Útvary - u agendy, procesu a dílčího procesu je to jejich vlastník (sekce u agendy, odbor u procesu a dílčího procesu), u aktivity útvar, který ji vykonává. Vlastníků může být víc, pak jsou kódy oddělené středníkem (například 72; 71). Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =220
             X: =Parent.Width - 460

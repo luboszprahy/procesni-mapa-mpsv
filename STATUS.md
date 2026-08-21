@@ -2,11 +2,11 @@
 
 Aktualizováno: 2026-08-21 15:00 (připomínky z provozu k dashboardu a seznamu)
 
-## Připomínky z provozu k dashboardu a seznamu (21.08.2026 15:00) — balík 1.0.0.29
+## Připomínky z provozu k dashboardu a seznamu (21.08.2026 15:00) — balík 1.0.0.30
 
-Uživatel poslal snímek dashboardu (nahraný ve 12:14, tedy **čtyřsloupcová**
-verze z 1.0.0.26) a tři připomínky. Čtyři sloupce už ve 12:30 nahradil strom
-v řádcích, takže se řešilo, co platí i pro něj:
+Uživatel poslal dva snímky dashboardu: ve 12:14 ještě **čtyřsloupcovou**
+verzi z 1.0.0.26, ve 14:35 už **strom** z naimportovaného 1.0.0.28 — a právě
+ten druhý patří k připomínkám. Žlutě v něm označil sloupec vlastníka.
 
 1. **„Klikání na řádky nefunguje"** — platilo i pro strom a byla to skutečná
    vada. Popisky (kód, název, útvar, počet) ležely nad podkladovým obdélníkem,
