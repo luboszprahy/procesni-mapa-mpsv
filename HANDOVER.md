@@ -4,10 +4,12 @@ Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má d
 teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
 Zadání drží `PRD.md`.
 
-> **Stav:** appka i publikační flow **běží v provozu**. Balík
-> **`deploy/procesnimapa_1_0_0_27.zip`** (přestavěný dashboard) je hotový
-> a ověřený offline branami, ale **ještě nebyl naimportovaný** — poslední
-> ověřeně běžící verze v prostředí je **1.0.0.26**.
+> **Stav:** appka i publikační flow **běží v provozu**. Aktuální balík
+> k importu je **`deploy/procesnimapa_1_0_0_29.zip`** (strom na dashboardu,
+> klikací řádky, filtr stavu, „Zobrazit vše" v seznamu) — hotový a ověřený
+> offline branami, ale **ještě nenaimportovaný**. Poslední ověřeně běžící
+> verze v prostředí je **1.0.0.26**; balíky 27 a 28 jsou mezistupně, které
+> 29 nahrazuje.
 >
 > Pracovní strom je čistý a vše je pushnuté. `runs/app_build` (179 MB
 > rozbalený `pac`) i `runs/mapa_beh` smazané, náhledový http server zastavený,
@@ -29,16 +31,23 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_27.zip`** jako upgrade a appku
+1. **Naimportovat `deploy/procesnimapa_1_0_0_29.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
    Na co se dívat na obrazovce **Přehled**:
    - strom se ve výchozím stavu ukáže s rozbalenými agendami (úroveň 2),
-   - tlačítka **„jen agendy / + procesy / + dílčí procesy / vše"** rozbalí
-     celou úroveň naráz,
-   - **šipka ▸ u řádku** rozbalí jen tu jednu větev; popisek vpravo se přepne
-     na „vlastní rozbalení" a zvýrazněné tlačítko zhasne,
-   - klik na řádek **aktivity** otevře detail,
+   - tlačítka **„jen agendy / + procesy / + dílčí procesy / + aktivity"**
+     rozbalí celou úroveň naráz,
+   - **klik kamkoli do řádku** rozbalí větev, u aktivity otevře detail —
+     tohle byla hlášená vada, klikat musí jít i na text, ne jen mezi popisky,
+   - najetí myší řádek **podbarví** (modrý nádech), řádek se neposouvá,
+   - chipy **vše / schváleno / pracovní** zúží strom na aktivity daného stavu
+     a na větve, které aspoň jednu takovou obsahují; číslo vpravo se přepne
+     na počet takových aktivit a hlavička sloupce to říká,
+   - hlavičky **VLASTNÍK / VYKONÁVÁ** a **POLOŽEK UVNITŘ** mají tooltip
+     s vysvětlením po úrovních,
    - názvy nesmí podlézat sloupec „vykonává" (v 1.0.0.26 to dělaly, opraveno).
+   Na obrazovce **Seznam aktivit**: tlačítko **„Zobrazit vše"** vedle přepínače
+   kódu vynuluje všechny čtyři filtry a bez zapnutého filtru je neaktivní.
 2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
    (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
    21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
@@ -81,7 +90,8 @@ chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
-**F6 skupina D — zadávací obrazovky pro agendu, proces a dílčí proces**
+Rozpracované: **F6 skupina D — zadávací obrazovky pro agendu, proces
+a dílčí proces**
 (`PLAN.md`, sekce F6/D). Dnes jde založit jen aktivita; nově má průvodce vést
 uživatele i na vyšších úrovních a u zanořené úrovně vynutit údaje potřebné pro
 vazbu (proces bez agendy nevznikne). Kódy přiděluje stejný mechanismus jako
@@ -100,7 +110,8 @@ pojistné flow.
 | F3 publikační flow + HTML mapa | **ověřeno v provozu** — mapa se v tenantu zobrazí, flow vrací 250 dílčích procesů |
 | F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
 | F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.26) |
-| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.27) |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.29) |
+| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.29) |
 | F6/D zadávací obrazovky | **zbývá** |
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
@@ -136,13 +147,13 @@ $py = ".venv/Scripts/python.exe"
 
 # --- canvas app ---
 & $py src/check_app.py            # zdroje appky: YAML, sloupce, delegace, překryvy
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_24.zip" --verze 1.0.0.28
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_24.zip" --verze 1.0.0.29
 & $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_24.zip" `
-                            --vystup "deploy/procesnimapa_1_0_0_28.zip"
+                            --vystup "deploy/procesnimapa_1_0_0_29.zip"
 
 # --- flows ---
-& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_28.zip"
-& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_28.zip"
+& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_29.zip"
+& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_29.zip"
 
 # --- náhled mapy v prohlížeči (file:// bývá blokované) ---
 & $py -m http.server 8765 --bind 127.0.0.1

@@ -303,7 +303,7 @@ Screens:
             Height: =14
             Size: =9
             Text: ="Hledat"
-            Width: =200
+            Width: =196
             X: =40
             Y: =182
       - txt_Hledat:
@@ -318,7 +318,7 @@ Screens:
             HoverBorderColor: =stylAkce
             Size: =11
             Tooltip: '="Najde aktivity, které hledaný řetězec obsahují kdekoli v názvu nebo v kódu - nemusí jím začínat. Velikost písmen nerozhoduje. Prázdné pole znamená bez omezení. Pozor: fulltext se počítá až nad tím, co vrátí ostatní filtry, takže nad 2 000 aktivitami prohledá jen první okno. Zúžit sekcí nebo útvarem to spolehlivě vyřeší; fulltext přes celý rejstřík bez omezení nabízí publikovaná HTML mapa."'
-            Width: =240
+            Width: =196
             X: =40
             Y: =198
       - lbl_f_Sekce:
@@ -329,8 +329,8 @@ Screens:
             Height: =14
             Size: =9
             Text: ="Sekce"
-            Width: =140
-            X: =292
+            Width: =124
+            X: =246
             Y: =182
       - drp_Sekce:
           Control: Classic/DropDown@2.3.1
@@ -353,8 +353,8 @@ Screens:
               )
             Size: =11
             Tooltip: '="Filtruje podle sekce, pod kterou vykonávající útvar patří. Nabídka se plní z číselníku útvarů, takže je úplná bez ohledu na to, kolik aktivit v rejstříku je. Volba (vše) filtr vypne. Filtry se sčítají: sekce, útvar, stav i hledání platí najednou."'
-            Width: =140
-            X: =292
+            Width: =124
+            X: =246
             Y: =198
       - lbl_f_Utvar:
           Control: Label@2.5.1
@@ -364,8 +364,8 @@ Screens:
             Height: =14
             Size: =9
             Text: ="Vykonává útvar"
-            Width: =180
-            X: =444
+            Width: =160
+            X: =380
             Y: =182
       - drp_Utvar:
           Control: Classic/DropDown@2.3.1
@@ -388,8 +388,8 @@ Screens:
               )
             Size: =11
             Tooltip: '="Filtruje podle útvaru, který aktivitu vykonává. Nabídka je z číselníku útvarů ve tvaru kód · název a obsahuje odbory i oddělení. Chceš-li vidět všechny aktivity jednoho útvaru pro potřeby organizačního řádu, nastav sem útvar a ostatní filtry nech na (vše)."'
-            Width: =180
-            X: =444
+            Width: =160
+            X: =380
             Y: =198
       - lbl_f_Stav:
           Control: Label@2.5.1
@@ -399,8 +399,8 @@ Screens:
             Height: =14
             Size: =9
             Text: ="Stav"
-            Width: =130
-            X: =636
+            Width: =112
+            X: =550
             Y: =182
       - drp_Stav:
           Control: Classic/DropDown@2.3.1
@@ -414,8 +414,8 @@ Screens:
             Items: =["(vše)", "pracovní", "schváleno"]
             Size: =11
             Tooltip: '="Pracovní je rozpracovaný záznam, na kterém se ještě pracuje. Schváleno je potvrzené znění, které smí jít do organizačního řádu. Stav se přepíná v detailu aktivity; schvalovací kolečko s notifikacemi zatím není součástí řešení."'
-            Width: =130
-            X: =636
+            Width: =112
+            X: =550
             Y: =198
       # Sloupec s kódem jde skrýt. Řazení podle kódu zůstává dostupné i pak —
       # skrývá se zobrazení, ne data.
@@ -439,8 +439,48 @@ Screens:
             Text: |-
               =If(varZobrazitKod, "Kód: zobrazen", "Kód: skrytý")
             Tooltip: '="Skryje nebo zobrazí sloupec s identifikačním kódem. Kód se jen přestane vypisovat - řadit podle něj i hledat v něm jde dál a v detailu aktivity zůstává vidět. Ve výchozím stavu je zobrazený."'
-            Width: =130
-            X: =778
+            Width: =116
+            X: =672
+            Y: =198
+      # Vynuluje všechny čtyři filtry naráz. Reset() vrátí ovládacím prvkům
+      # výchozí hodnotu, ale kódy sekce a útvaru drží proměnné plněné až
+      # v OnChange — a ten se při Resetu nespustí, takže se musí smazat zvlášť.
+      - btn_ZobrazitVse:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: |-
+              =If(
+                  IsBlank(txt_Hledat.Text)
+                  && IsBlank(varSekceKod)
+                  && IsBlank(varUtvarKod)
+                  && drp_Stav.Selected.Value = "(vše)",
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Reset(txt_Hledat);
+              Reset(drp_Sekce);
+              Reset(drp_Utvar);
+              Reset(drp_Stav);
+              Set(varSekceKod, "");
+              Set(varUtvarKod, "")
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Zobrazit vše"
+            Tooltip: '="Vynuluje hledání, sekci, útvar i stav naráz - v galerii zůstane celý rejstřík. Dokud není zapnutý žádný filtr, je tlačítko neaktivní. Zobrazení kódu se tím nemění, to je samostatný přepínač."'
+            Width: =112
+            X: =798
             Y: =198
       - rec_ChipPocet:
           Control: Rectangle@2.3.0

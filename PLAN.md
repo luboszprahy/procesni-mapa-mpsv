@@ -389,14 +389,92 @@ dílčí proces bez aktivit (běžný stav, 250 vs. 46).
 
 ### D. Zadávací obrazovky pro agendu, proces a dílčí proces (po C)
 
-Dnes jde založit jen aktivita. Nově průvodce i pro vyšší úrovně: uživatele vede,
-co vyplnit, a u zanořené úrovně vynutí údaje potřebné pro vazbu (proces bez
-agendy nevznikne). Kódy přiděluje stejný mechanismus jako u aktivit.
+Dnes jde založit jen aktivita (`scr_Detail`). Číselníky agend, procesů a dílčích
+procesů se dají doplnit jedině ručně v SharePointu, což je pro správce rámce
+slepé místo — nový proces musí vzniknout dřív, než pod něj půjde zařadit
+aktivita.
 
-**verify:** založení procesu v agendě → kód `AA-BB` navazuje na poslední volný,
-`kody.json` se nepřečísluje, nová položka se objeví v mapě po publikaci.
-**risk:** kolize kódů při souběžném zakládání dvěma uživateli — vyhodnotit,
-zda stačí kontrola před zápisem, nebo je potřeba pojistné flow.
+**Rozhodnutí (21.08.2026):** jedna obrazovka `scr_Ciselnik` pro všechny tři
+úrovně, ne tři samostatné. Formulář se liší jen počtem nadřazených polí
+(agenda žádné, proces jedno, dílčí proces dvě); tři skoro shodné obrazovky by
+znamenaly trojí údržbu téhož vzorce pro přidělení kódu. Úroveň drží
+`varUrovenTyp` ∈ `agenda` / `proces` / `dilci` a přepíná se segmentovými
+tlačítky nahoře — to je zároveň ten „průvodce": uživatel vidí všechny tři
+možnosti a k nim nápovědu podle Metodiky (kdo je vlastník, co ta úroveň je).
+
+**D1. Nová obrazovka — co: `src/app_src/scr_Ciselnik.pa.yaml`**
+
+- Hlavička jako v `scr_Detail` (tmavý pruh 72 px, šipka zpět na `scr_Dashboard`),
+  nadpis podle `varUrovenTyp`.
+- Segmentová volba úrovně: `btn_UrovenAgenda` / `btn_UrovenProces` /
+  `btn_UrovenDilci`; přepnutí vynuluje rozdělané pole (`Reset` nabídek).
+- Nadřazená pole s `Visible` podle úrovně:
+  `drp_AgendaC` (proces i dílčí proces), `drp_ProcesC` (jen dílčí proces,
+  `Items` filtrované podle vybrané agendy, `OnChange` agendy ho resetuje).
+  U agendy místo nich popisek „nejvyšší úroveň, nadřazený prvek nemá".
+- `txt_NazevC` (povinné), `drp_VlastnikC` (nepovinné) — nabídka podle úrovně:
+  agenda → útvary úrovně `sekce`, proces a dílčí proces → úroveň `odbor`
+  (Metodika: vlastníkem agendy je sekce, procesu a dílčího procesu odbor).
+  Ukládá se **kód útvaru**, ne „kód · název" — stejně jako `vykonava`
+  v `scr_Detail`.
+- Pravý panel `rec_NahledC`: co vznikne — úroveň, nadřazený řetěz a **náhled
+  kódu**, který se přidělí. Kódy se počítají stejným způsobem jako u aktivit:
+  poslední existující v daném prefixu + 1, zleva doplněné nulami
+  (agenda 2 místa, proces 2 za pomlčkou, dílčí proces 3).
+- Uložení `btn_UlozitC`: validace (nadřazená úroveň + název), přepočet kódu
+  nad **zdrojem** (ne nad kolekcí — kvůli čerstvosti), kontrola, že kód mezitím
+  nikdo nezabral, `Patch` do příslušného listu v `IfError`, doplnění nového
+  záznamu do `colAgendy` / `colProcesy` / `colDilci` a `Set(varAktStale, true)`,
+  aby dashboard přepočítal `colStrom`. Pak `Notify` + návrat na dashboard.
+- Zapisované hodnoty: `stav_mapovani = "nezmapováno"` (nová položka aktivity
+  zatím nemá), `zdroj = "karta"` (nevznikla z rejstříku), u dílčího procesu
+  navíc `stav_rejstrik = "využitý"` — do rejstříku ji právě zakládá správce.
+
+**D2. Vstupní bod — co: `src/app_src/scr_Dashboard.pa.yaml`**
+
+Tlačítko `btn_NovaPolozka` v pruhu nad rozpadem: `Set(varUrovenTyp, "agenda")`
+a `Navigate(scr_Ciselnik)`. Dashboard je úvodní obrazovka, takže zakládání
+číselníku je odsud na jedno kliknutí; ze seznamu aktivit se tam chodit nemusí,
+tam se pořizují aktivity.
+
+**D3. Zařazení obrazovky — co: `src/build_app.py`**
+
+`OBRAZOVKY` doplnit o `scr_Ciselnik` na konec — pořadí určuje úvodní obrazovku
+a ta musí zůstat `scr_Dashboard`.
+
+**verify:**
+1. `python src/check_app.py` — projde beze změny počtu chyb; ve výpisu je
+   pět obrazovek a nová obrazovka nepřidá varování o delegaci.
+2. `python src/build_app.py --solution input/procesnimapa_1_0_0_24.zip --verze 1.0.0.29`
+   a `python src/check_solution.py` — balík se postaví, úvodní obrazovka je
+   pořád `scr_Dashboard`, `ScreensOrder` má pět položek.
+3. Ve Studiu po importu: založit **proces** v agendě `01` → náhled kódu ukáže
+   první volné `01-BB`, po uložení se stejný kód objeví v listu `Procesy`
+   a v nabídce procesů na `scr_Detail` **bez restartu appky** (kolekce se
+   doplňuje na místě).
+4. Založit **dílčí proces** pod tím procesem → kód `01-BB-001`, dashboard ho
+   po návratu ukáže ve třetím sloupci s počtem aktivit 0.
+5. Založit **agendu** → kód je o jedno vyšší než dosud nejvyšší, `kody.json`
+   se nemění (appka do něj nesahá, kódy drží SharePoint).
+6. Po publikaci mapy („Obnovit mapu") jsou nové položky ve stromu.
+
+**edge cases:** prázdný číselník v prefixu → první kód `01` / `AA-01` /
+`AA-BB-001`; přepnutí úrovně s rozdělaným formulářem (musí vyčistit, ne
+nechat viset agendu u nově zakládané agendy); vlastník nevyplněný (nepovinný);
+název delší než 255 znaků — SharePoint by ho ořízl, proto `MaxLength` na poli.
+
+**risk a jeho vyhodnocení — kolize kódů při souběžném zakládání:**
+`LookUp` před `Patch` není atomický, takže dva správci zakládající tutéž úroveň
+ve stejnou vteřinu můžou dostat týž kód. Vyhodnoceno jako **přijatelné bez
+pojistného flow**: číselník se mění řádově jednotky případů za měsíc a upravuje
+ho úzký okruh správců rámce, zatímco pojistné flow by přidalo asynchronní krok
+do jinak okamžité operace a vlastní chybové stavy. Stejný optimistický zámek
+má dnes i zakládání aktivit a v provozu se neprojevil.
+**Doporučené zpevnění na později (ne teď):** zapnout na sloupci `Title`
+u všech čtyř listů „Enforce unique values" — SharePoint pak duplicitu odmítne
+a z tiché chyby v datech se stane hláška. Znamená to zásah do `src/schema.json`
+a `make_setup.js` včetně dorovnání už založených listů, což je samostatná
+úloha, ne součást D.
 
 ---
 

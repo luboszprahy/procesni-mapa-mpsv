@@ -15,6 +15,12 @@
 # Nad 2 000 aktivitami je colAkt první okno dat, na což upozorňuje popisek
 # karty; totéž omezení má dnes i seznam aktivit.
 #
+# FILTR STAVU (varDashStav) se neopírá o přepočet při každém překreslení:
+# každý uzel si při stavbě colStrom nese aktC (kolik aktivit je v jeho
+# podstromu) a aktS (kolik z nich je schválených). Filtrování i číslo ve
+# sloupci jsou pak jen porovnání nad hotovou kolekcí, takže přepnutí stavu
+# nesahá na data. Pracovních je aktC - aktS, druhý počet se neukládá.
+#
 # Sloupec aktivit ukazuje PRIMÁRNÍ zařazení (Aktivity.dilci_proces_kod).
 # Aktivita zařazená do dalších dílčích procesů se v mapě objeví ve všech,
 # ale tady je jen pod tím svým hlavním — vazební tabulka by znamenala
@@ -42,7 +48,11 @@ Screens:
                         utvar: a.vlastnik,
                         uroven: 1,
                         rodic: "",
-                        pocet: CountRows(Filter(colProcesy, agenda_kod = a.Title))
+                        pocet: CountRows(Filter(colProcesy, agenda_kod = a.Title)),
+                        aktC: CountRows(Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title)),
+                        aktS: CountRows(
+                            Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title, stav.Value = "schváleno")
+                        )
                     }
                 )
             );
@@ -56,7 +66,11 @@ Screens:
                         utvar: p.vlastnik,
                         uroven: 2,
                         rodic: p.agenda_kod,
-                        pocet: CountRows(Filter(colDilci, proces_kod = p.Title))
+                        pocet: CountRows(Filter(colDilci, proces_kod = p.Title)),
+                        aktC: CountRows(Filter(colAkt, Left(dilci_proces_kod, 5) = p.Title)),
+                        aktS: CountRows(
+                            Filter(colAkt, Left(dilci_proces_kod, 5) = p.Title, stav.Value = "schváleno")
+                        )
                     }
                 )
             );
@@ -70,7 +84,11 @@ Screens:
                         utvar: d.vlastnik,
                         uroven: 3,
                         rodic: d.proces_kod,
-                        pocet: CountRows(Filter(colAkt, dilci_proces_kod = d.Title))
+                        pocet: CountRows(Filter(colAkt, dilci_proces_kod = d.Title)),
+                        aktC: CountRows(Filter(colAkt, dilci_proces_kod = d.Title)),
+                        aktS: CountRows(
+                            Filter(colAkt, dilci_proces_kod = d.Title, stav.Value = "schváleno")
+                        )
                     }
                 )
             );
@@ -84,7 +102,9 @@ Screens:
                         utvar: k.vykonava,
                         uroven: 4,
                         rodic: k.dilci_proces_kod,
-                        pocet: 0
+                        pocet: 0,
+                        aktC: 1,
+                        aktS: If(k.stav.Value = "schváleno", 1, 0)
                     }
                 )
             );
@@ -425,7 +445,7 @@ Screens:
             Size: =12
             Text: ="Rozpad rejstříku"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =180
+            Width: =150
             X: =40
             Y: =180
       - lbl_RozpadPopis:
@@ -437,8 +457,8 @@ Screens:
             Size: =10
             Text: ="Rozbalit:"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =70
-            X: =224
+            Width: =64
+            X: =194
             Y: =180
       - btn_Uroven1:
           Control: Classic/Button@2.2.0
@@ -461,8 +481,8 @@ Screens:
             Size: =10
             Text: ="jen agendy"
             Tooltip: '="Sbalí strom na první úroveň - zůstanou jen agendy."'
-            Width: =110
-            X: =300
+            Width: =92
+            X: =262
             Y: =180
       - btn_Uroven2:
           Control: Classic/Button@2.2.0
@@ -486,8 +506,8 @@ Screens:
             Size: =10
             Text: ="+ procesy"
             Tooltip: '="Rozbalí všechny agendy naráz, takže jsou vidět procesy celé druhé úrovně."'
-            Width: =110
-            X: =418
+            Width: =92
+            X: =358
             Y: =180
       - btn_Uroven3:
           Control: Classic/Button@2.2.0
@@ -512,8 +532,8 @@ Screens:
             Size: =10
             Text: ="+ dílčí procesy"
             Tooltip: '="Rozbalí celou druhou i třetí úroveň - vidět jsou všechny dílčí procesy rejstříku."'
-            Width: =130
-            X: =536
+            Width: =112
+            X: =454
             Y: =180
       - btn_Uroven4:
           Control: Classic/Button@2.2.0
@@ -537,10 +557,88 @@ Screens:
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
-            Text: ="vše až po aktivity"
+            Text: ="+ aktivity"
             Tooltip: '="Rozbalí celý strom. Nad velkým rejstříkem je to hodně řádků - pro hledání konkrétní věci je rychlejší seznam aktivit nebo publikovaná mapa."'
-            Width: =150
-            X: =674
+            Width: =92
+            X: =570
+            Y: =180
+      - lbl_StavPopis:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =28
+            Size: =10
+            Text: ="Stav:"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =40
+            X: =678
+            Y: =180
+      - btn_StavVse:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varDashStav = "", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varDashStav = "", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =If(varDashStav = "", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varDashStav = "", stylAkceHover, stylRadekHover)
+            OnSelect: =Set(varDashStav, "")
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="vše"
+            Tooltip: '="Bez filtru stavu - ve stromu jsou všechny aktivity i větve nad nimi."'
+            Width: =60
+            X: =722
+            Y: =180
+      - btn_StavSchvaleno:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varDashStav = "schváleno", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varDashStav = "schváleno", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =If(varDashStav = "schváleno", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varDashStav = "schváleno", stylAkceHover, stylRadekHover)
+            OnSelect: =Set(varDashStav, "schváleno")
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="schváleno"
+            Tooltip: '="Nechá jen schválené aktivity a nad nimi jen ty agendy, procesy a dílčí procesy, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet schválených aktivit v dané větvi."'
+            Width: =100
+            X: =786
+            Y: =180
+      - btn_StavPracovni:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varDashStav = "pracovní", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varDashStav = "pracovní", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =If(varDashStav = "pracovní", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varDashStav = "pracovní", stylAkceHover, stylRadekHover)
+            OnSelect: =Set(varDashStav, "pracovní")
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="pracovní"
+            Tooltip: '="Nechá jen pracovní aktivity, tedy rozpracované záznamy, a nad nimi jen větve, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet pracovních aktivit v dané větvi."'
+            Width: =92
+            X: =890
             Y: =180
       - lbl_RozpadPocet:
           Control: Label@2.5.1
@@ -552,10 +650,11 @@ Screens:
             Size: =10
             Text: |-
               =CountRows(gal_Strom.AllItems) & " řádků" &
-              If(varDashUroven = 0, " · vlastní rozbalení", "")
+              If(varDashUroven = 0, " · vlastní rozbalení", "") &
+              If(varDashStav = "", "", " · jen " & varDashStav)
             VerticalAlign: =VerticalAlign.Middle
-            Width: =260
-            X: =Parent.Width - 300
+            Width: =280
+            X: =Parent.Width - 320
             Y: =180
       - rec_StromKarta:
           Control: Rectangle@2.3.0
@@ -578,6 +677,23 @@ Screens:
             Width: =300
             X: =56
             Y: =222
+      # Sloupec vlastníka hlavičku dosud neměl a číslo vpravo taky ne, takže
+      # z obrazovky nešlo poznat, co ta čísla znamenají (hlášeno 21.08.2026).
+      - lbl_h_StromUtvar:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10
+            Text: ="VLASTNÍK / VYKONÁVÁ"
+            Tooltip: '="U agendy, procesu a dílčího procesu je to vlastník (sekce u agendy, odbor u procesu a dílčího procesu). U aktivity je to útvar, který ji vykonává. Vypisuje se kód útvaru z číselníku."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =220
+            X: =Parent.Width - 460
+            Y: =222
       - lbl_h_StromPocet:
           Control: Label@2.5.1
           Properties:
@@ -587,10 +703,12 @@ Screens:
             FontWeight: =FontWeight.Semibold
             Height: =28
             Size: =10
-            Text: ="OBSAHUJE"
+            Text: |-
+              =If(varDashStav = "", "POLOŽEK UVNITŘ", "AKTIVIT " & Upper(varDashStav))
+            Tooltip: '="Bez filtru stavu je to počet položek o úroveň níž: u agendy procesy, u procesu dílčí procesy, u dílčího procesu aktivity. U aktivity zůstává prázdné - nižší úroveň už nemá. Nula u dílčího procesu znamená, že v rejstříku je, ale žádná aktivita k němu zatím není popsaná. Se zapnutým filtrem stavu se číslo přepne na počet aktivit toho stavu v celé větvi."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =120
-            X: =Parent.Width - 200
+            Width: =180
+            X: =Parent.Width - 260
             Y: =222
       - gal_Strom:
           Control: Gallery@2.15.0
@@ -613,7 +731,9 @@ Screens:
                           && !IsBlank(LookUp(colOtevrene, Kod = rodic))
                           && !IsBlank(LookUp(colOtevrene, Kod = Left(kod, 5)))
                           && !IsBlank(LookUp(colOtevrene, Kod = Left(kod, 2)))
-                      )
+                      ),
+                      varDashStav = ""
+                      || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
                   ),
                   kod,
                   SortOrder.Ascending
@@ -625,9 +745,10 @@ Screens:
             X: =40
             Y: =252
           Children:
-            # Podklad nese i klik: u větve rozbaluje, u aktivity otevírá detail.
-            # varDashUroven = 0 znamená „ručně rozbalené", aby zvýrazněné
-            # tlačítko netvrdilo něco, co už neplatí.
+            # Podklad jen barví vrstvu. Klik i hover nese lbl_StromPrekryv
+            # jako poslední prvek řádku — popisky nad podkladem by jinak
+            # kliknutí spolkly a řádek by reagoval jen na mezerách mezi nimi
+            # (hlášeno z provozu 21.08.2026: „klikání na řádky nefunguje").
             - rec_StromPozadi:
                 Control: Rectangle@2.3.0
                 Properties:
@@ -640,21 +761,6 @@ Screens:
                         stylKarta
                     )
                   Height: =Parent.TemplateHeight - 1
-                  HoverFill: =stylRadekHover
-                  OnSelect: |-
-                    =If(
-                        ThisItem.uroven = 4,
-                        Set(varNova, false);
-                        Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
-                        Navigate(scr_Detail, ScreenTransition.Cover),
-                        If(
-                            IsBlank(LookUp(colOtevrene, Kod = ThisItem.kod)),
-                            Collect(colOtevrene, { Kod: ThisItem.kod }),
-                            RemoveIf(colOtevrene, Kod = ThisItem.kod)
-                        );
-                        Set(varDashUroven, 0)
-                    )
-                  PressedFill: =stylRadekVybrany
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =0
@@ -721,14 +827,6 @@ Screens:
                   Height: =Parent.TemplateHeight - 1
                   Size: =11
                   Text: =ThisItem.nazev
-                  Tooltip: |-
-                    =Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ", "Aktivita ") &
-                    ThisItem.kod & Char(10) & ThisItem.nazev & Char(10) &
-                    If(
-                        ThisItem.uroven = 4,
-                        "Klikni pro detail",
-                        "Obsahuje " & ThisItem.pocet & " položek na další úrovni - klikni pro rozbalení"
-                    )
                   VerticalAlign: =VerticalAlign.Middle
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
                   # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
@@ -757,13 +855,27 @@ Screens:
                 Properties:
                   Align: =Align.Right
                   Color: |-
-                    =If(ThisItem.uroven = 3 && ThisItem.pocet = 0, stylTextSlaby, stylAkce)
+                    =If(
+                        ThisItem.uroven = 3 && ThisItem.pocet = 0,
+                        stylTextSlaby,
+                        stylAkce
+                    )
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
                   Height: =Parent.TemplateHeight - 1
                   Size: =10
                   Text: |-
-                    =If(ThisItem.uroven = 4, "", Text(ThisItem.pocet))
+                    =If(
+                        ThisItem.uroven = 4,
+                        "",
+                        Text(
+                            If(
+                                varDashStav = "",
+                                ThisItem.pocet,
+                                If(varDashStav = "schváleno", ThisItem.aktS, ThisItem.aktC - ThisItem.aktS)
+                            )
+                        )
+                    )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =120
                   X: =Parent.TemplateWidth - 160
@@ -776,3 +888,42 @@ Screens:
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =Parent.TemplateHeight - 1
+            # Průhledná vrstva přes celý řádek: nese klik i podbarvení při
+            # najetí. Musí být POSLEDNÍ, aby ležela nad popisky. Stejný vzor
+            # jako lbl_RadekPrekryv v seznamu aktivit; check_app.py má obojí
+            # v PREKRYV_POVOLEN, protože překryv je tady záměr.
+            - lbl_StromPrekryv:
+                Control: Label@2.5.1
+                Properties:
+                  BorderThickness: =0
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =Parent.TemplateHeight - 1
+                  HoverFill: =RGBA(0, 90, 181, 0.14)
+                  OnSelect: |-
+                    =If(
+                        ThisItem.uroven = 4,
+                        Set(varNova, false);
+                        Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
+                        Navigate(scr_Detail, ScreenTransition.Cover),
+                        If(
+                            IsBlank(LookUp(colOtevrene, Kod = ThisItem.kod)),
+                            Collect(colOtevrene, { Kod: ThisItem.kod }),
+                            RemoveIf(colOtevrene, Kod = ThisItem.kod)
+                        );
+                        Set(varDashUroven, 0)
+                    )
+                  PressedFill: =RGBA(0, 90, 181, 0.22)
+                  Text: =""
+                  Tooltip: |-
+                    =Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ", "Aktivita ") &
+                    ThisItem.kod & Char(10) & ThisItem.nazev & Char(10) &
+                    If(
+                        ThisItem.uroven = 4,
+                        "Klikni pro otevření detailu aktivity.",
+                        "Číslo vpravo = počet položek o úroveň níž (" &
+                        Switch(ThisItem.uroven, 1, "procesů v agendě", 2, "dílčích procesů v procesu", "aktivit v dílčím procesu") &
+                        "): " & ThisItem.pocet & ". Klikni pro rozbalení."
+                    )
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0

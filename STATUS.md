@@ -1,6 +1,44 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-21 12:45 (přechod na jiný stroj)
+Aktualizováno: 2026-08-21 15:00 (připomínky z provozu k dashboardu a seznamu)
+
+## Připomínky z provozu k dashboardu a seznamu (21.08.2026 15:00) — balík 1.0.0.29
+
+Uživatel poslal snímek dashboardu (nahraný ve 12:14, tedy **čtyřsloupcová**
+verze z 1.0.0.26) a tři připomínky. Čtyři sloupce už ve 12:30 nahradil strom
+v řádcích, takže se řešilo, co platí i pro něj:
+
+1. **„Klikání na řádky nefunguje"** — platilo i pro strom a byla to skutečná
+   vada. Popisky (kód, název, útvar, počet) ležely nad podkladovým obdélníkem,
+   který nesl `OnSelect`, a klik i hover spolkly. Řádek tak reagoval jen na
+   mezerách mezi popisky. Opraveno průhlednou vrstvou `lbl_StromPrekryv` přes
+   celý řádek jako **posledním** prvkem šablony — stejný vzor, jaký seznam
+   aktivit používá od začátku (`lbl_RadekPrekryv`). Nese klik i podbarvení
+   při najetí (`RGBA(0, 90, 181, 0.14)`), řádky se nikam neposouvají.
+   `check_app.py` má nově obojí v `PREKRYV_POVOLEN`.
+2. **„Netuším, co znamenají ta čísla"** — sloupec vlastníka hlavičku vůbec
+   neměl a číslo vpravo mělo jen „OBSAHUJE". Doplněny hlavičky
+   `VLASTNÍK / VYKONÁVÁ` a `POLOŽEK UVNITŘ`, obě s tooltipem po úrovních;
+   tooltip celého řádku číslo vysvětluje taky.
+3. **Seznam aktivit: tlačítko „Zobrazit vše"** — vynuluje hledání, sekci,
+   útvar i stav naráz. Bez zapnutého filtru je neaktivní, takže je z něj vidět
+   i to, jestli vůbec nějaký filtr běží. `Reset()` vrací ovládacím prvkům
+   výchozí hodnotu, ale `varSekceKod` / `varUtvarKod` se plní až v `OnChange`,
+   který se při Resetu nespustí — proto se mažou zvlášť. Filtrační řádek se
+   kvůli místu zúžil (hledání 240→196, sekce 140→124, útvar 180→160,
+   stav 130→112, kód 130→116).
+
+Dodatečně zadaný **filtr stavu na dashboardu** (chipy vše / schváleno /
+pracovní): filtruje celý strom, ne jen řádky aktivit — zůstanou aktivity
+daného stavu a nad nimi jen ty větve, které aspoň jednu takovou obsahují.
+Číslo ve sloupci se přepne na počet aktivit toho stavu ve větvi a hlavička
+to říká (`AKTIVIT SCHVÁLENO`). Aby přepnutí filtru nesahalo na data ani
+nepočítalo nic per řádek, nese si každý uzel `colStrom` už při stavbě
+`aktC` (aktivit v podstromu) a `aktS` (z toho schválených); pracovních je
+rozdíl, druhý počet se neukládá.
+
+Brány: `check_app` 170 prvků / 1690 vzorců, `check_solution` 196 kontrol,
+`check_mapa_flow` 129, `check_flow` 19 — vše bez chyb, beze změny výjimek.
 
 ## Publish se neprojevoval — chybela mikro-zmena pred Save (21.08.2026 13:07)
 

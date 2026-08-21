@@ -609,7 +609,7 @@ def kontrola_unikatnosti(soubory):
 
 # Prvky, které se překrývat SMĚJÍ: podklady (rec_) leží pod popisky z definice
 # a překryvná vrstva galerie leží nad celým řádkem záměrně.
-PREKRYV_POVOLEN = {"lbl_RadekPrekryv"}
+PREKRYV_POVOLEN = {"lbl_RadekPrekryv", "lbl_StromPrekryv"}
 
 
 def kontrola_prekryvu(soubory):
