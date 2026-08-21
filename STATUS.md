@@ -2,6 +2,26 @@
 
 Aktualizováno: 2026-08-21 12:45 (přechod na jiný stroj)
 
+## Publish se neprojevoval — chybela mikro-zmena pred Save (21.08.2026 13:07)
+
+Po importu videly ostatni ucty **starou verzi**, prestoze ve Versions byla
+nejnovejsi verze Live a pri spusteni naskocil zluty pruh „A new version of
+this app is coming". **Vyreseno:** publikovany dokument vznika pri Save +
+Publish ze Studia, ne importem solution — a po importu Studio appku nepovazuje
+za rozpracovanou, takze **neni co ulozit**. Publish pak zverejni stary
+dokument. Pomohla umela mikro-zmena (posun prvku o pixel a zpet), ktera Save
+odemkne.
+
+Postup po kazdem importu je v `HANDOVER.md` §1b a v skillu `power-Apps-skill`
+(sekce u delby prace u canvas apps) — je to obecna past workflow „build zipu
+mimo Studio", ne specifikum tohoto projektu.
+
+Pri hledani opravena i souvisejici vada: **`AppVersion` v `customizations.xml`**
+zustavala z puvodniho exportu, takze se appka netvarila jako zmenena. Build ji
+ted prepisuje aktualnim UTC razitkem a bez nalezeni tagu skonci chybou
+(`dokonci()` v `src/build_app.py`) — od baliku **1.0.0.28**. Samo o sobe to
+publish neopravilo, ale spravne to tak byt ma.
+
 ## PŘECHOD NA JINÝ STROJ — 21.08.2026 12:45
 
 Návod k rozjezdu, rozdělení práce a otevřené věci drží **`HANDOVER.md`**,

@@ -48,33 +48,36 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
    nápovědu při najetí na řádek.
 4. **Save & Publish** ve Studiu, jinak uživatelé vidí starou verzi.
 
-## 1b. OTEVŘENÝ PROBLÉM: publish se nepropisuje hráčům (21.08.2026 13:00)
+## 1b. VYŘEŠENO: po importu je nutná mikro-změna, jinak Save neproběhne
 
-Druhý účet vidí po importu i publishi **starou verzi** appky. Ve Studiu je nový
-obsah, ve Versions je nejnovější verze **Live**, odkaz i prohlížeč vyloučeny
-(stejné chování v jiném prohlížeči). Po spuštění se nahoře objeví žlutý pruh
-**„A new version of this app is coming. We'll let you know when it's
-available."** — platforma tedy o nové verzi ví, ale player dostává starou
-binárku.
+**Ověřeno 21.08.2026 v provozu.** Po importu solution vidí ostatní účty dál
+starou verzi, i když je ve Versions nejnovější verze **Live** a při spuštění
+naskočí žlutý pruh *„A new version of this app is coming. We'll let you know
+when it's available."*
 
-Co už je vyloučené / opravené:
-- **`AppVersion` v `customizations.xml`** zůstávala z původního exportu, takže
-  se appka netvářila jako změněná. Opraveno v `build_app.py` (`dokonci()` píše
-  aktuální UTC razítko a bez nalezení tagu skončí chybou) — balík **1.0.0.28**.
-  Samo o sobě to problém neodstranilo.
-- cache prohlížeče, špatný odkaz, chybějící Live verze.
+Příčina: **publikovaný dokument vzniká při Save + Publish ze Studia, ne
+importem solution.** Po importu ale Studio appku nepovažuje za rozpracovanou,
+takže **není co uložit** — Publish pak zveřejní pořád ten starý publikovaný
+dokument. Žlutý pruh přitom tvrdí, že nová verze existuje, což svádí hledat
+chybu v cache nebo v odkazu.
 
-Nevyzkoušené kroky, kterými pokračovat (v tomhle pořadí):
-1. Ve Studiu **mikro-změna → Save → Publish**. Publikovaný dokument vzniká při
-   Publish ze Studia, ne z importu solution; když se Save vynechá, můžou se
-   importovaný a publikovaný dokument rozejít.
-2. U druhého účtu zavřít **všechny** běžící session appky (žlutý pruh znamená
-   „až při příštím spuštění").
-3. **Apps → Details → Versions →** na nejnovější verzi **Restore**, pak Publish.
-   Obejde rozpor mezi importovaným a publikovaným dokumentem.
+**Postup po KAŽDÉM importu (dát do předávacího návodu):**
+1. Otevřít appku ve Studiu.
+2. Udělat **umělou mikro-změnu** — posunout libovolný prvek o pixel a vrátit
+   ho zpět. Tím se appka stane rozpracovanou a Save se odemkne.
+3. **Save**, počkat na dokončení.
+4. **Publish**.
+5. U ostatních účtů zavřít běžící session appky (žlutý pruh znamená „až při
+   příštím spuštění").
 
-Až se ukáže, co zabralo, patří to do skillu `power-Apps-skill` — je to obecná
-past workflow „build zipu mimo Studio", ne specifikum tohoto projektu.
+Vedlejší nález, opravený při hledání: **`AppVersion` v `customizations.xml`**
+zůstávala z původního exportu, takže se appka netvářila jako změněná. Build ji
+teď přepisuje aktuálním UTC razítkem (`dokonci()` v `build_app.py`, bez nálezu
+tagu skončí chybou) — od balíku **1.0.0.28**. Samo o sobě to problém
+neodstranilo, ale správně to být má.
+
+Vyloučeno: cache prohlížeče (stejné chování v jiném prohlížeči), špatný odkaz,
+chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
