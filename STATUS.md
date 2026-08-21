@@ -24,7 +24,45 @@ Pracuje se dál v PPF DEV.
 **Návod pro správce (`deploy/navod_sprava.md`, krok 13) se zatím nepíše** —
 rozhodnuto 21.08.2026, až podle finální podoby appky.
 
-## Další krok: tlačítko „Obnovit mapu" (1.0.0.24)
+## Tlačítko „Obnovit mapu" hotové — 1.0.0.25 k importu (21.08.2026 11:20)
+
+Uživatel dodal přes git `input/procesnimapa_1_0_0_24.zip` s provedeným
+**Add flow**: v `.msapp` → `References/DataSources.json` je nově
+`MapaPublishFlow` jako `ServiceInfo` nad `shared_logicflows`. Tím šlo tlačítko
+zabalit.
+
+**`deploy/procesnimapa_1_0_0_25.zip`** — souhrnná karta má tři tlačítka:
+„Obnovit mapu" | „Zobrazit v HTML" | „+ Nová aktivita".
+
+Brány (offline; prostředí balík zatím nevidělo):
+
+| brána | výsledek |
+|---|---|
+| `check_app.py` | 113 prvků, 1110 vzorců, 3 známé výjimky — OK |
+| `check_solution.py` | **137 kontrol, 0 chyb** |
+| `check_mapa_flow.py` | 129 kontrol — OK |
+| `check_flow.py` | 19 kontrol, 104 vzorků — OK |
+
+Nová kontrola „`.Run()` musí mít datový zdroj" **mutačně ověřena**: po záměně
+`MapaPublishFlow` za neexistující jméno brána spadla s adresnou hláškou.
+
+**Úklid connection reference `…_12718` zůstává odložený i teď.** Obě flow na ní
+visí (`MapaPublishFlow` i `AktualizaceKratkehoNazvu`) a výměna za
+`ppf_sharedsharepointonline_bec33` znamená při importu přemapování připojení.
+Kdyby se to přibalilo k tlačítku a import selhal, nepůjde poznat, co za to může.
+Půjde samostatně jako 1.0.0.26.
+
+### Ověření po importu 1.0.0.25 (na uživateli)
+1. Appka se otevře ve Studiu bez chyb ve Formulas.
+2. Klik na **Obnovit mapu** → hlášení „Publikace mapy spuštěna…", tlačítko na
+   okamžik zšedne.
+3. V Power Automate má `MapaPublishFlow` nový běh, zeleně, `Nacti_DilciProcesy`
+   = 250 položek.
+4. `procesni_mapa.html` v Site Assets má **čerstvý čas úpravy** a razítko
+   „vygenerováno" v hlavičce mapy odpovídá.
+5. Save & Publish, jinak uživatelé uvidí starou verzi.
+
+## Zadání kroku (splněno 21.08.2026 v 1.0.0.25)
 
 `MapaPublishFlow` **je** v balíku jako `Workflows/MapaPublishFlow-60E67E42-….json`,
 ale v `.msapp` → `References/DataSources.json` jsou jen SharePoint listy — flow
