@@ -1,191 +1,149 @@
-# HANDOVER — stav k restartu konverzace (20.08.2026 18:45, konec dne)
+# HANDOVER — přechod na jiný stroj (21.08.2026 12:45)
 
-Tenhle soubor je vstupní bod pro novou session. Nejdřív si přečti `STATUS.md`
-(chronologie a odůvodnění rozhodnutí), pak tohle (co se má udělat teď).
-Postup a fáze drží `PLAN.md`, zadání `PRD.md`.
+Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má dělat
+teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
+Zadání drží `PRD.md`.
 
-> **STAV K ZAVŘENÍ DNE 20.08.2026:** uživatel ztratil přístup do virtuálu,
-> takže **balík 1.0.0.23 NENÍ naimportovaný ani vyzkoušený**. Pět věcí v něm
-> (fulltext, mazání s potvrzením, sloupec VYTVOŘENO, viditelná šipka řazení,
-> drobnější filtry) je ověřených **jen offline branami**, ne během ve Studiu.
-> Zítra proto **začni importem a vyzkoušením**, ne další prací na zdrojích —
-> kdyby se něco z toho ve Studiu nechytlo, opravuje se to nejlevněji dřív,
-> než se na to navrství další změny.
+> **Stav:** appka i publikační flow **běží v provozu**. Balík
+> **`deploy/procesnimapa_1_0_0_27.zip`** (přestavěný dashboard) je hotový
+> a ověřený offline branami, ale **ještě nebyl naimportovaný** — poslední
+> ověřeně běžící verze v prostředí je **1.0.0.26**.
 >
-> Poslední ověřeně běžící verze v prostředí je **1.0.0.22**.
->
-> Pracovní strom je čistý a vše je pushnuté (`2c08b88`). `runs/app_build`
-> smazaný (179 MB); příště se `pac` rozbalí sám, build tím jen o pár sekund
-> déle. Náhledový http server zastavený.
+> Pracovní strom je čistý a vše je pushnuté. `runs/app_build` (179 MB
+> rozbalený `pac`) i `runs/mapa_beh` smazané, náhledový http server zastavený,
+> projekt z 259 MB na ~81 MB (z toho 59 MB `.git`, 18 MB `.venv`).
 
-## 1. CO JE NA TOBĚ (uživateli) — v tomto pořadí
+## Rozjezd na novém stroji
 
-1. **Importovat `deploy/procesnimapa_1_0_0_23.zip`** jako upgrade a appku
+```powershell
+git pull
+# venv se nepřenáší — pokud v projektu není, založit a doinstalovat:
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install openpyxl pyyaml
+```
+
+`pac` CLI se při prvním buildu appky rozbalí samo z rozšíření Power Platform
+Tools ve VS Code (pár sekund navíc, nic se nenastavuje). Node je potřeba jen
+pro `check_setup.js` / `check_import.js` a pro syntaktickou část brány mapy.
+Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
+
+## 1. CO JE NA TOBĚ (uživateli)
+
+1. **Naimportovat `deploy/procesnimapa_1_0_0_27.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-   **Tohle je nejdůležitější krok dne** — viz rámeček výše.
-   Na co se u nových věcí dívat:
-   - klik na **ikonu koše** otevře dialog a **nesmaže hned** (ikony jsou nově
-     nad překryvnou vrstvou řádku — kdyby koš místo dialogu otevíral detail,
-     chová se pořadí potomků ve Studiu jinak, než ukazuje balík, a je to
-     první věc, kterou mi řekni),
-   - **šipka ▲/▼** u aktivního sloupce je vidět a hlavička je modrá,
-   - **VYTVOŘENO** ukazuje datum, ne prázdno (bere se vestavěný `Created`),
-   - **hledání** najde řetězec i uprostřed názvu.
-2. **Vyzkoušet tlačítko „Zobrazit v HTML"** — od 1.0.0.22 míří na náhled
-   knihovny (`AllItems.aspx?id=…`), ne na soubor, takže se má zobrazit,
-   ne stáhnout.
-3. **Zapnout a ručně spustit `MapaPublishFlow`** (import stav zapnutí nemění).
-   Kontrolní body po běhu jsou v témže návodu; nejdůležitější: krok
-   `Nacti_DilciProcesy` musí vrátit **250 položek, ne 100**.
-4. **Připojit `MapaPublishFlow` k appce** ve Studiu (Power Automate → Add flow)
-   a exportovat solution — teprve pak jde do appky dát tlačítko „Obnovit mapu".
-   Vzorec tlačítka je připravený v `deploy/navod_publikace_mapy.md`.
-5. **Úklid v prostředí (odloženo vědomě):** odpojit z appky datové zdroje
-   `Documents` a `CustomGallerySample` a odebrat ze solution connection
-   reference `ppf_sharedsharepointonline_12718` („SharePoint Pruvodnilist-12718",
-   zbytek z jiného projektu). **Až po tom, co 1.0.0.23 běží** — obě flow na ní
-   dnes visí, takže odebrání je nutné udělat pro obě naráz, a míchat to
-   s velkou funkční změnou by znamenalo, že při selhání importu nepoznáš,
-   co ho shodilo.
+   Na co se dívat na obrazovce **Přehled**:
+   - strom se ve výchozím stavu ukáže s rozbalenými agendami (úroveň 2),
+   - tlačítka **„jen agendy / + procesy / + dílčí procesy / vše"** rozbalí
+     celou úroveň naráz,
+   - **šipka ▸ u řádku** rozbalí jen tu jednu větev; popisek vpravo se přepne
+     na „vlastní rozbalení" a zvýrazněné tlačítko zhasne,
+   - klik na řádek **aktivity** otevře detail,
+   - názvy nesmí podlézat sloupec „vykonává" (v 1.0.0.26 to dělaly, opraveno).
+2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
+   (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
+   21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
+   mapa neměla nové ovládací prvky. Teď je generuje `build_mapa.py`.
+3. **Spustit „Obnovit mapu"** v appce a v mapě zkontrolovat: přepínač stupně
+   rozbalení, zatržítko „Zobrazit kód", čtyři velikosti písma (tlačítka A),
+   nápovědu při najetí na řádek.
+4. **Save & Publish** ve Studiu, jinak uživatelé vidí starou verzi.
 
-## 2. CO DĚLÁM JÁ (asistent)
+## 2. CO DĚLÁM JÁ (další krok)
 
-### Nové v 1.0.0.23
+**F6 skupina D — zadávací obrazovky pro agendu, proces a dílčí proces**
+(`PLAN.md`, sekce F6/D). Dnes jde založit jen aktivita; nově má průvodce vést
+uživatele i na vyšších úrovních a u zanořené úrovně vynutit údaje potřebné pro
+vazbu (proces bez agendy nevznikne). Kódy přiděluje stejný mechanismus jako
+u aktivit, `kody.json` se nesmí přečíslovat.
 
-- **Hledání najde řetězec kdekoli** v názvu i kódu (`Search` místo `StartsWith`).
-  Není delegovatelný, běží proto až nad výsledkem filtrů — do 2 000 aktivit
-  úplné, nad tím chip oranžově upozorní.
-- **Mazání aktivity ze seznamu** ikonou koše, ale jen přes potvrzovací dialog.
-- **Sloupec VYTVOŘENO** (SharePointí `Created`) a řazení podle něj.
-- **Šipka řazení je vidět** — aktivní sloupec je modrý a nese ▲/▼.
-- **Filtry zdrobněly.**
-- Otevřené: `btn_Smazat` v detailu maže **bez potvrzení**, nekonzistence proti
-  seznamu. Sjednotit = přidat týž dialog i na `scr_Detail`.
+Otevřené riziko k rozmyšlení: kolize kódů při souběžném zakládání dvěma
+uživateli — posoudit, zda stačí kontrola před zápisem, nebo je potřeba
+pojistné flow.
 
-### Zjištěno 20.08.2026
+## 3. Co je hotové (21.08.2026)
 
-- **Mapa se v tenantu ZOBRAZÍ** (klik na soubor v knihovně) — hlavní riziko
-  projektu padlo, publikační flow má smysl. Opravuje to závěr z FloorPlanu,
-  že `.html` ze Site Assets se v PPF stahuje vždy.
-- **Tlačítko v appce soubor stáhlo**, protože `Launch()` mířil na přímou
-  cestu; od 1.0.0.22 míří na náhled knihovny (`AllItems.aspx?id=…`).
-  Nová brána `kontrola_adresy_mapy` hlídá, aby se to nevrátilo.
-- **Grafika odsouhlasena jako lepší**, další kolo úprav odloženo.
-
-### Opraveno v 1.0.0.21
-
-- **Řádek reaguje na najetí myší.** Hover dostane jen control přímo pod
-  kurzorem a řádek je ze čtyř pětin pokrytý labely, takže podkladový obdélník
-  se ho nikdy nedočkal. Přes celý řádek je teď průhledná vrstva
-  `lbl_RadekPrekryv` (Label, ne Rectangle — jen Label umí `HoverBorderColor`)
-  s 10% modrým podbarvením a modrým rámečkem. Pohyb řádku zapíná
-  `Gallery.Transition = Transition.Push`.
-- **Překryvy popisků.** `lbl_l_Vazby` zasahoval do nabídky Stav a seděl na téže
-  pozici jako `lbl_l_TextOR`; je z něj krátký popisek nad tlačítkem, plný
-  výklad zůstal v jeho tooltipu. Nová brána `kontrola_prekryvu` rovnou našla
-  tři další překryvy na `scr_Vazby` — opraveny.
-- **Flow spadlo na typu obsahu šablony.** `Get file content using path`
-  s `inferContentType=true` vrací u `.html` rovnou řetězec, ne objekt s base64,
-  takže `body('Sablona')?['$content']` běh shodilo. Výraz i brána opraveny,
-  mutační test má na tuhle chybu regresi.
-
-### Hotovo v 1.0.0.20
-
-**Grafika seznamu přestavěná podle vzoru Správy notifikací**
-(`input/snimky/vzor-notifikace-2.png`):
-
-- **navbar** 64 px: vlevo název aplikace, vedle záložka „Seznam aktivit"
-  s bílým podtržením, vpravo jméno a e-mail přihlášeného,
-- **souhrnná karta**: nadpis, tři čísla (zobrazeno / schváleno / pracovní)
-  a vpravo dvě tlačítka — druhotné „Zobrazit v HTML" a primární „+ Nová aktivita",
-- **řádek hledání a filtrů** s popisky, vpravo dva informační chipy
-  (počet zobrazených aktivit, „Bez filtru — celý rejstřík" / „Filtrováno"),
-- **tabulková galerie** s pěti sloupci (KÓD / AKTIVITA / VYKONÁVÁ / SEKCE /
-  STAV); hlavička prvních tří je **klikací a řadí**, u aktivního sloupce je
-  šipka směru. `drp_Razeni` tím zanikl.
-- Vzhled je plochý: bílé řádky, oddělení linkou 1 px, žádné barevné pruhy
-  ani chipy uvnitř řádku. Barva zůstala jen u stavu a u čísel v souhrnu.
-
-**Ostatní zadané body:**
-
-- **celý řádek je klikací** — `OnSelect` s `Navigate` má podklad i všech pět
-  labelů a ikona (ne `Select(Parent)`, ten jen vybíral řádek),
-- **info panel „i" zrušen** na obou obrazovkách i s proměnnou `varNapovedaKod`;
-  text o stavbě kódu `AA-BB-CCC-DDDD` je v tooltipech „+ Nová aktivita"
-  a „Uložit",
-- **globus nahradilo tlačítko „Zobrazit v HTML"** (druhotný styl, `Launch`).
-
-**`MapaPublishFlow` dokončené** — 14 akcí: šablona ze Site Assets, pět dotazů
-do listů se zapnutým stránkováním, pět `Select` na datový kontrakt, `Model`,
-zapečení do HTML a `Create file`. Generuje `src/build_mapa_flow.py`
-(GUID listů i adresu webu čte z balíku, ne natvrdo), kontroluje
-`src/check_mapa_flow.py`.
-
-**HTML mapa vygenerovaná** — `deploy/procesni_mapa.html` (94 kB, 7 agend,
-46 procesů, 250 dílčích procesů, 46 aktivit) z anonymizovaných dat, aby bylo
-co otevřít dřív, než flow poprvé proběhne.
-
-## 3. Kde co je
-
-| věc | kde |
+| oblast | stav |
 |---|---|
-| základ pro build (nejnovější export ze Studia) | `input/procesnimapa_1_0_0_18.zip` |
-| poslední vydaný balík | `deploy/procesnimapa_1_0_0_23.zip` |
-| k nahrání do Site Assets | `deploy/mapa_template.html`, `deploy/procesni_mapa.html` |
-| nasazovací návod | `deploy/navod_publikace_mapy.md` |
-| datový kontrakt mapy + klikací fallback | `deploy/flow_MapaPublish.md` |
-| zdroje appky | `src/app_src/*.pa.yaml` (App + 3 obrazovky) |
-| styl (18 proměnných) | `src/app_src/App.pa.yaml`, `App.OnStart` |
-| schéma listů (6 listů / 37 sloupců) | `src/schema.json` |
-| data pro vývoj (anonymizovaná) | `runs/anonym/*.csv` |
-| snímky obrazovek a předlohy | `input/snimky/` |
-| starší solution zipy | `input/archiv/` |
+| F1 SharePoint rejstřík | hotovo, provisioning i import dat |
+| F2 canvas app | **ověřeno v provozu** (1.0.0.25) |
+| F3 publikační flow + HTML mapa | **ověřeno v provozu** — mapa se v tenantu zobrazí, flow vrací 250 dílčích procesů |
+| F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
+| F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.26) |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.27) |
+| F6/D zadávací obrazovky | **zbývá** |
+| F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
+| F5 generování textu OŘ | fáze 2 (po 06/2028) |
 
-**Základ pro `build_app.py` musí být vždy nejnovější export z prostředí** —
-jinak by se z balíku ztratila flow nebo připojení listů.
+## 4. Odložené a otevřené věci
 
-## 4. Příkazy
+- **Úklid connection reference `ppf_sharedsharepointonline_12718`**
+  („SharePoint Pruvodnilist-12718" — cizí, z jiného projektu). Visí na ní obě
+  flow, takže výměna za `ppf_sharedsharepointonline_bec33` znamená při importu
+  přemapování připojení. Odloženo dvakrát, aby se při selhání importu dalo
+  poznat, co ho shodilo. Půjde samostatně, bez jiných změn.
+- **Brána `/audit`** (`powerplatform-auditor`) před transportem na MPSV —
+  krok 11 v `PLAN.md`. Zatím neproběhla, protože transport je blokovaný.
+- **`deploy/navod_sprava.md`** (krok 13) — rozhodnuto 21.08.2026 psát ho až
+  podle finální podoby appky, tedy po F6/D.
+- **Adresa mapy `varMapaUrl`** je v `App.pa.yaml` natvrdo (canvas app umí číst
+  jen datasetové env proměnné, textové ne). Při přenosu na MPSV se mění tam —
+  je to jediné místo a `check_solution.py` na to upozorňuje varováním.
+- **Delegace nad 2 000 aktivitami**: fulltext v seznamu a `colAkt` na přehledu
+  pracují s prvním oknem dat. Dnes 49 aktivit, takže úplné; popisky to říkají.
+
+## 5. Příkazy
 
 ```powershell
 $env:PYTHONIOENCODING = "utf-8"
 $py = ".venv/Scripts/python.exe"
 
-& $py src/check_app.py                       # brána nad zdroji appky
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_18.zip" --verze 1.0.0.24
-& $py src/build_flow.py      --solution deploy/procesnimapa_1_0_0_23.zip
-& $py src/build_mapa_flow.py --solution deploy/procesnimapa_1_0_0_23.zip
-& $py src/check_flow.py      --solution deploy/procesnimapa_1_0_0_23.zip
-& $py src/check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_23.zip
-& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_18.zip" --vystup deploy/procesnimapa_1_0_0_23.zip
+# --- data a mapa ---
+& $py src/normalize.py            # podklady -> runs/normalize/
+& $py src/build_mapa.py           # šablona -> viz/mapa_prototyp.html + deploy kopie
+& $py src/check_mapa_html.py      # 31 statických kontrol šablony a výstupu
+& $py src/check_mapa_beh.py       # 18 kontrol v headless Edge/Chrome
 
-# HTML mapa z dat
-& $py src/build_mapa.py --model runs/anonym/model.json --out deploy/procesni_mapa.html
-& $py -m http.server 8765 --bind 127.0.0.1   # náhled: http://127.0.0.1:8765/deploy/procesni_mapa.html
+# --- canvas app ---
+& $py src/check_app.py            # zdroje appky: YAML, sloupce, delegace, překryvy
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_24.zip" --verze 1.0.0.28
+& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_24.zip" `
+                            --vystup "deploy/procesnimapa_1_0_0_28.zip"
+
+# --- flows ---
+& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_28.zip"
+& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_28.zip"
+
+# --- náhled mapy v prohlížeči (file:// bývá blokované) ---
+& $py -m http.server 8765 --bind 127.0.0.1
+# http://127.0.0.1:8765/viz/mapa_prototyp.html
 ```
 
-**Oba build skripty flow se pouštějí až po `build_app.py`** — ten balík
-přepisuje od základu, takže by doplněné akce zahodil.
+**Vstupní solution pro build je `input/procesnimapa_1_0_0_24.zip`** — je to
+poslední export ze Studia a jako jediný nese `MapaPublishFlow` mezi datovými
+zdroji appky (Add flow). Stavět z něj, dokud uživatel nedodá novější export.
 
-## 5. Co je hotové a nemá se rozbít
+## 6. Dělba práce u canvas appky
 
-- SharePoint: 6 listů založených a naplněných (7 / 46 / 250 / 46 / 46 / 7).
-- Appka: 3 obrazovky, kaskáda agenda → proces → dílčí proces, přidělování
-  kódů, vazby M:N, filtry z číselníku `Útvary`, řazení klikem na hlavičku.
-- Flow `AktualizaceKratkehoNazvu`: hotové, ověřené mini-interpretem (104 vzorků).
-- Flow `MapaPublishFlow`: hotové, 129 kontrol, 13 mutací ověřených.
-- Brány: `check_app` (10 tříd), `check_flow` (19), `check_mapa_flow` (129),
-  `check_solution` (125), node testy provisioningu a importu.
-  **Všechny kontroly jsou mutačně ověřené.**
+Zavedený postup, ne výjimka: **uživatel** založí/upraví appku ve Studiu
+(zejména připojení datových zdrojů a flow) a pošle **export unmanaged
+solution**; **asistent** vymění `Src/*.pa.yaml`, přebalí přes `pac` a vrátí zip
+k importu jako upgrade. `.msapp` nejde postavit od nuly.
 
-## 6. Otevřená rizika
+Z toho plyne: cokoli, co vzniká **jen ve Studiu** (connection reference,
+registrace flow jako datového zdroje), musí udělat uživatel — a pak dodat nový
+export, jinak ho další build přepíše.
 
-- ~~Zobrazí tenant HTML ze Site Assets?~~ **Ověřeno 20.08.2026: ano.**
-  Zbývá jen najít adresu, na kterou má mířit `Launch()` z appky.
-- **Delegace nad 2 000 aktivitami.** Test se odkládá od začátku a je to
-  jediný bod, kde se může ukázat, že seznam tiše ořezává. Čísla v souhrnné
-  kartě jsou proto počítaná z galerie, ne z listu, a popisek říká „zobrazeno".
-- **`pac canvas pack` nevaliduje nic** — hidden vlastnost, duplicitní klíč,
-  řetězec místo identifikátoru, neuzavřená uvozovka i překlep v `RGBA` projdou
-  až do Studia. Před každým vydáním pouštět `check_app.py`; když spadne import
-  nebo otevření, **nejdřív doplnit kontrolu**, teprve pak opravit výskyt.
-  Podrobně v `power-Apps-skill/reference/pa-yaml-uskali.md`.
+## 7. Brány (všechny mutačně ověřené)
+
+| brána | rozsah | co hlídá |
+|---|---|---|
+| `check_app.py` | 163 prvků, 1584 vzorců | YAML bez duplicit, sloupce proti schématu **i proti vlastním kolekcím**, delegace podle argumentů volání, překryvy, mazání v galerii, adresa mapy |
+| `check_solution.py` | 189 kontrol | publisher, verze, GUID listů, flow nezmizelo, `.Run()` má datový zdroj, **úvodní obrazovka**, žádné externí URL |
+| `check_mapa_html.py` | 31 kontrol | id v JS vs. HTML, syntaxe skriptu šablony i výstupu, žádná velikost v px mimo přepínač, **shoda deploy kopií se zdrojem** |
+| `check_mapa_beh.py` | 18 kontrol | proklik ovládacích prvků mapy v headless prohlížeči |
+| `check_mapa_flow.py` | 129 kontrol | kontrakt publikačního flow, pagination, zapékání kotev |
+| `check_flow.py` | 19 kontrol | flow nad `nazev_kratky` počítá totéž co `zkratit()` |
+| `check_setup.js` / `check_import.js` | 32 + 26 | provisioning a import proti falešnému SharePointu |
+
+Když brána spadne na něčem, co je vědomý ústupek, patří to do jejího seznamu
+výjimek s odůvodněním — ne do obcházení kontroly.

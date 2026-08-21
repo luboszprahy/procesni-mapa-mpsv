@@ -1,6 +1,23 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-21 10:50
+Aktualizováno: 2026-08-21 12:45 (přechod na jiný stroj)
+
+## PŘECHOD NA JINÝ STROJ — 21.08.2026 12:45
+
+Návod k rozjezdu, rozdělení práce a otevřené věci drží **`HANDOVER.md`**,
+tenhle soubor chronologii a odůvodnění rozhodnutí.
+
+Krátce: appka i publikační flow **běží v provozu** (poslední ověřená verze
+v prostředí **1.0.0.26**), hotový a offline ověřený balík k importu je
+**`deploy/procesnimapa_1_0_0_27.zip`** s přestavěným dashboardem. Další krok
+asistenta je **F6/D — zadávací obrazovky pro agendu, proces a dílčí proces**.
+
+**Úklid:** `runs/app_build` (179 MB rozbalený `pac`) i `runs/mapa_beh`
+(generovaný výstup headless brány, nově v `.gitignore`) smazané, `__pycache__`
+pryč, náhledový http server na portu 8765 zastavený, z `deploy/` odstraněné
+nahrazené balíky 1.0.0.23 a 1.0.0.25 — zůstává poslední ověřený (26)
+a aktuální (27). Projekt z 259 MB na ~81 MB, z toho 59 MB `.git`
+a 18 MB `.venv` (ani jedno se nepřenáší jinak než klonem).
 
 ## F3 OVĚŘENA V PROVOZU — 1.0.0.23 běží (21.08.2026 10:47)
 
