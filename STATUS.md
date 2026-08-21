@@ -2,7 +2,7 @@
 
 Aktualizováno: 2026-08-21 15:00 (připomínky z provozu k dashboardu a seznamu)
 
-## Připomínky z provozu k dashboardu a seznamu (21.08.2026 15:00) — balík 1.0.0.30
+## Připomínky z provozu k dashboardu a seznamu (21.08.2026 15:00) — balík 1.0.0.31
 
 Uživatel poslal dva snímky dashboardu: ve 12:14 ještě **čtyřsloupcovou**
 verzi z 1.0.0.26, ve 14:35 už **strom** z naimportovaného 1.0.0.28 — a právě
@@ -36,6 +36,18 @@ to říká (`AKTIVIT SCHVÁLENO`). Aby přepnutí filtru nesahalo na data ani
 nepočítalo nic per řádek, nese si každý uzel `colStrom` už při stavbě
 `aktC` (aktivit v podstromu) a `aktS` (z toho schválených); pracovních je
 rozdíl, druhý počet se neukládá.
+
+Na přání doplněno: **tooltip řádku rozepisuje kódy útvarů na „kód · název"**
+z číselníku Útvary, i pro víc vlastníků oddělených středníkem. Do sloupce se
+to nevejde (160 px, u dvou vlastníků teprve ne), proto tooltip.
+
+Při tom **skill zachytil past, kterou by brána nechytila**: `Split()` vrací
+sloupec **`Value`**, ne `Result` — `Result` je starý název a Správa notifikací
+na něm spálila tři buildy. Napsaná je proto nová kontrola
+`kontrola_stareho_result` v `check_app.py` (mutačně ověřená), protože packer
+ani import to nechytí a chyba se projeví až neotevřením appky ve Studiu.
+Ve vzorci je navíc pojmenovaný rozsah `Split(...) As u`, aby holé `Value`
+nebylo dvojznačné vůči `ThisItem` galerie.
 
 Brány: `check_app` 170 prvků / 1690 vzorců, `check_solution` 196 kontrol,
 `check_mapa_flow` 129, `check_flow` 19 — vše bez chyb, beze změny výjimek.

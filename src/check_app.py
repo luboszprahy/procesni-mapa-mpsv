@@ -773,6 +773,23 @@ def kontrola_adresy_mapy(vzorce):
                 chyby.append(f"{cesta}.{prop}: varMapaUrl není https adresa")
 
 
+def kontrola_stareho_result(vzorce):
+    """`Split` i `Distinct` vracejí sloupec `Value`, ne `Result`.
+
+    `Result` je starý název, který dnešní Power Fx neuzná — appka se pak
+    neotevře a chyba se projeví až ve Studiu, protože packer ji nechytí.
+    Správa notifikací na tom spálila tři buildy (1.0.0.30), proto to hlídá
+    brána. Řetězce se vyhazují, aby popisek se slovem Result neplašil.
+    """
+    for cesta, prop, syrovy in vzorce:
+        if re.search(r"\bResult\b", bez_retezcu(syrovy)):
+            chyby.append(
+                f"{cesta}.{prop}: identifikátor 'Result' — Split() i Distinct() "
+                f"vracejí sloupec 'Value'. 'Result' je starý název, appka se "
+                f"s ním ve Studiu neotevře"
+            )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -793,6 +810,7 @@ def main():
     kontrola_odkazu(vzorce, controly)
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
+    kontrola_stareho_result(vzorce)
     kontrola_prekryvu(soubory)
     kontrola_adresy_mapy(vzorce)
     kontrola_potvrzeni_mazani(soubory)

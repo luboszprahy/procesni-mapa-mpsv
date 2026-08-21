@@ -918,6 +918,21 @@ Screens:
                     =Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ", "Aktivita ") &
                     ThisItem.kod & Char(10) & ThisItem.nazev & Char(10) &
                     If(
+                        IsBlank(ThisItem.utvar),
+                        Switch(ThisItem.uroven, 4, "Vykonávající útvar není vyplněný.", "Vlastník není vyplněný.") & Char(10),
+                        Switch(ThisItem.uroven, 4, "Vykonává: ", "Vlastník: ") &
+                        Concat(
+                            Split(ThisItem.utvar, ";") As u,
+                            Trim(u.Value) &
+                            If(
+                                IsBlank(LookUp(colUtvary, Title = Trim(u.Value))),
+                                "",
+                                " · " & LookUp(colUtvary, Title = Trim(u.Value), nazev)
+                            ),
+                            "; "
+                        ) & Char(10)
+                    ) &
+                    If(
                         ThisItem.uroven = 4,
                         "Klikni pro otevření detailu aktivity.",
                         "Číslo vpravo = počet položek o úroveň níž (" &
