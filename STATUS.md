@@ -24,7 +24,71 @@ Pracuje se dál v PPF DEV.
 **Návod pro správce (`deploy/navod_sprava.md`, krok 13) se zatím nepíše** —
 rozhodnuto 21.08.2026, až podle finální podoby appky.
 
-## F6 skupiny A–C hotové — mapa upravená, dashboard postavený (21.08.2026 12:05)
+## Dashboard prestaven na strom, deploy kopie mapy opravena (21.08.2026 12:40)
+
+Uzivatel naimportoval 1.0.0.26 a poslal dve pripominky.
+
+### 1. Deploy kopie mapy se rozesla se zdrojem — MOJE CHYBA
+Upravy sly do `src/mapa_template.html`, ale do Site Assets se nahrava
+`deploy/mapa_template.html` a ta zustala z 20.08. Kopie se delala rucne.
+Publikovana mapa proto vypadala nezmenene a uzivatel se spravne ptal, jestli
+se uprava vubec nahrala.
+
+Naprava, aby se to nemohlo opakovat:
+- `src/build_mapa.py` zapisuje **i deploy kopie** (`mapa_template.html`
+  i `procesni_mapa.html`) — clovek uz je nekopiruje,
+- `src/check_mapa_html.py` porovnava deploy sablonu se zdrojem a hlida, ze
+  `deploy/procesni_mapa.html` obsahuje nove ovladaci prvky (31 kontrol).
+
+**Do Site Assets nahrat `deploy/mapa_template.html` A `deploy/procesni_mapa.html`
+znovu** — obe jsou nove.
+
+### 2. Dashboard mel byt strom, ne ctyri sloupce
+Sloupcovy rozpad (Miller columns) uzivateli nevyhovoval. Prestaveno na
+**strom v radcich** s postupnym rozpadem, jak to ma mapa:
+
+- jedna galerie nad plochou kolekci `colStrom` (agendy + procesy + dilci
+  procesy + aktivity v jedne tabulce, sloupce kod/nazev/utvar/uroven/rodic/pocet),
+- **razeni resi kod**: `AA-BB-CCC-DDDD` se lexikograficky radi presne stromove,
+  takze jediny `Sort(kod)` da spravne poradi bez rekurze,
+- rozbalene uzly drzi kolekce `colOtevrene`; radek je videt, kdyz jsou otevreni
+  vsichni jeho predci,
+- **ctyri tlacitka rozpadu** (jen agendy / + procesy / + dilci procesy / vse)
+  rozbali celou uroven naraz, klik na sipku u radku rozbali jednu vetev;
+  po rucnim rozbaleni se zvyraznene tlacitko zhasne a popisek rekne
+  „vlastni rozbaleni",
+- odsazeni, barevny pruh a barva pisma odlisuji urovne, klik na aktivitu
+  otevira detail, prepinac „Kod" ze seznamu plati i tady.
+
+Vychozi stav pri prvnim otevreni: rozbalene agendy (uroven 2).
+
+### Dve opravene brany (obe mutacne overene)
+`check_app.py` hlasil dva falesne poplachy nad novou obrazovkou:
+- `ThisItem.<sloupec>` se overoval jen proti listum, takze kazdy sloupec
+  vlastni kolekce vypadal jako preklep → kontrola nove zna i sloupce, ktere
+  si appka vyrabi sama v `Collect`/`ClearCollect`,
+- `RemoveIf(colOtevrene, …)` v galerii se hlasil jako „mazani bez potvrzeni",
+  prestoze jde o stav rozbaleni v pameti → kontrola ted rozlisuje datovy zdroj
+  od lokalni kolekce.
+
+Mutace `ThisItem.kodX` i `RemoveIf(Aktivity, …)` dal padaji, vyjimka ve
+`scr_Vazby` se dal hlasi.
+
+**`deploy/procesnimapa_1_0_0_27.zip`** — `check_app` OK (163 prvku, 1584
+vzorcu), `check_solution` **189 kontrol, 0 chyb**, oba flow OK.
+
+### Overeni po importu 1.0.0.27 (na uzivateli)
+1. Prehled ukaze strom, ve vychozim stavu rozbalene agendy s procesy.
+2. Tlacitka rozpadu: „+ dilci procesy" rozbali celou treti uroven, „vse"
+   i aktivity, „jen agendy" sbali.
+3. Klik na sipku u jedne vetve rozbali jen ji; popisek vpravo prepne na
+   „vlastni rozbaleni".
+4. Klik na radek aktivity otevre detail.
+5. **Nahrat obe HTML z `deploy/` do Site Assets** a dat „Obnovit mapu" —
+   teprve pak bude publikovana mapa mit nove ovladaci prvky.
+6. Save & Publish.
+
+## F6 skupiny A–C — prvni podoba (21.08.2026 12:05)
 
 1.0.0.25 uživatel naimportoval a **všechno v prostředí funguje**: appka bez chyb,
 tlačítko „Obnovit mapu" spustí flow, mapa se přegeneruje, `Nacti_DilciProcesy`

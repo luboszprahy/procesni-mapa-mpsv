@@ -395,9 +395,26 @@ def nacti_vzorova_data():
     return nalezene
 
 
+def sloupce_kolekci(vzorce):
+    """Sloupce, které si appka vyrábí sama — record literály v Collect nad col*.
+
+    Galerie nad vlastní kolekcí (colStrom na přehledu) má sloupce, které v žádném
+    SharePoint listu nejsou. Bez tohohle by kontrola ThisItem.* hlásila každý
+    z nich jako překlep.
+    """
+    nalezene = set()
+    for _cesta, _prop, syrovy in vzorce:
+        text = bez_retezcu(syrovy)
+        for shoda in re.finditer(r"\b(?:Clear)?Collect\s*\(\s*(col[A-Za-z0-9_]*)", text):
+            zavorka = text.index("(", shoda.start())
+            argumenty = argumenty_volani(text, zavorka)
+            nalezene |= set(re.findall(r"[{,]\s*([A-Za-z][A-Za-z0-9_]*)\s*:", argumenty))
+    return nalezene
+
+
 def kontrola_sloupcu(vzorce, schema):
     """Sloupce v Patch záznamech a ve filtrech musí existovat ve schématu cílového listu."""
-    vsechny_sloupce = set().union(*schema.values()) | VESTAVENE_SLOUPCE
+    vsechny_sloupce = set().union(*schema.values()) | VESTAVENE_SLOUPCE | sloupce_kolekci(vzorce)
 
     for cesta, prop, syrovy in vzorce:
         text = bez_retezcu(syrovy)
@@ -438,7 +455,8 @@ def kontrola_sloupcu(vzorce, schema):
             if sloupec in ("IsSelected", "Value"):
                 continue
             if sloupec not in vsechny_sloupce:
-                chyby.append(f"{cesta}.{prop}: ThisItem.{sloupec} — takový sloupec nemá žádný list")
+                chyby.append(f"{cesta}.{prop}: ThisItem.{sloupec} — takový sloupec nemá "
+                             f"žádný list ani kolekce")
 
 
 def kontrola_odkazu(vzorce, controly):
@@ -707,7 +725,12 @@ def kontrola_potvrzeni_mazani(soubory):
             for jmeno_obrazovky, telo in obsah.items():
                 for jmeno, definice in uvnitr_galerie(telo.get("Children")):
                     for prop, text in (definice.get("Properties") or {}).items():
-                        if not re.search(r"\bRemove(If)?\s*\(", str(text)):
+                        # Maže se jen to, co míří na datový zdroj. RemoveIf nad
+                        # lokální kolekcí (colOtevrene drží, co je ve stromu
+                        # rozbalené) žádná data neztratí a dialog by u ní byl
+                        # nesmysl.
+                        if not re.search(r"\bRemove(If)?\s*\(\s*(?!col[A-Za-z0-9_]*\s*[,)])",
+                                         str(text)):
                             continue
                         duvod = VYJIMKY_MAZANI.get((jmeno_obrazovky, jmeno))
                         if duvod:

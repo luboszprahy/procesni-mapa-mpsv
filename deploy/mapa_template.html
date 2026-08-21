@@ -9,53 +9,77 @@
     --bg:#f4f6f8; --panel:#fff; --ink:#16202c; --muted:#5d6b7a; --line:#dde3ea;
     --a:#1f4e79; --p:#2e6da4; --d:#3f8f6f; --k:#8a6d1f;
     --chip:#eef2f6; --hit:#fff3bf; --shadow:0 1px 3px rgba(16,32,48,.08);
+    /* podklady a linky jednotlivých vrstev stromu */
+    --a-bg:#e7eff7; --p-bg:#eef5fb; --d-bg:#eef7f2; --k-bg:transparent;
+    /* jediné místo, které řídí velikost písma celé stránky (viz #fVelikost) */
+    --fs:14px;
   }
   *{box-sizing:border-box}
-  body{margin:0;font:14px/1.5 "Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  html{font-size:var(--fs)}
+  body{margin:0;font:1rem/1.5 "Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
   header{background:var(--a);color:#fff;padding:14px 20px}
-  header h1{margin:0;font-size:19px;font-weight:600}
-  header .meta{margin-top:4px;font-size:12.5px;opacity:.85}
+  header h1{margin:0;font-size:1.36rem;font-weight:600}
+  header .meta{margin-top:4px;font-size:.89rem;opacity:.85}
   .counts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .counts b{background:rgba(255,255,255,.15);border-radius:4px;padding:3px 9px;font-weight:600;font-size:12px}
+  .counts b{background:rgba(255,255,255,.15);border-radius:4px;padding:3px 9px;font-weight:600;font-size:.86rem}
   .bar{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 20px;
        display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5}
   .bar input[type=search],.bar select{font:inherit;padding:6px 9px;border:1px solid var(--line);
        border-radius:5px;background:#fff;color:inherit}
   .bar input[type=search]{min-width:260px;flex:1 1 260px}
-  .bar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+  .bar label{display:flex;align-items:center;gap:6px;font-size:.93rem;color:var(--muted);white-space:nowrap}
   .bar button{font:inherit;padding:6px 11px;border:1px solid var(--line);border-radius:5px;
        background:#fff;cursor:pointer;color:var(--a)}
   .bar button:hover{background:var(--chip)}
+  .fs{display:flex;gap:0;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .fs button{border:0;border-left:1px solid var(--line);border-radius:0;padding:6px 10px}
+  .fs button:first-child{border-left:0}
+  .fs button[aria-pressed=true]{background:var(--a);color:#fff}
+  /* velikosti v px, ne rem — přepínač musí zůstat stejně velký po celou dobu */
+  .fs button[data-fs="12"]{font-size:11px}
+  .fs button[data-fs="14"]{font-size:13px}
+  .fs button[data-fs="16"]{font-size:15px}
+  .fs button[data-fs="19"]{font-size:18px}
   main{display:flex;gap:16px;align-items:flex-start;padding:16px 20px 40px}
   #tree{flex:1 1 auto;min-width:0;background:var(--panel);border:1px solid var(--line);
         border-radius:8px;box-shadow:var(--shadow);padding:8px 10px}
   #detail{flex:0 0 330px;position:sticky;top:64px;background:var(--panel);border:1px solid var(--line);
         border-radius:8px;box-shadow:var(--shadow);padding:14px 16px;max-height:calc(100vh - 90px);overflow:auto}
-  #detail h2{margin:0 0 10px;font-size:14px;color:var(--a)}
-  #detail dt{font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:10px}
+  #detail h2{margin:0 0 10px;font-size:1rem;color:var(--a)}
+  #detail dt{font-size:.82rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:10px}
   #detail dd{margin:2px 0 0}
   .node{border-radius:5px}
-  .row{display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:5px;cursor:default}
+  .row{display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:5px;cursor:default;
+       border-left:3px solid transparent}
   .row:hover{background:var(--chip)}
   .tw{flex:0 0 16px;width:16px;text-align:center;color:var(--muted);cursor:pointer;
-      user-select:none;font-size:11px;line-height:21px}
+      user-select:none;font-size:.79rem;line-height:1.9}
   .tw.leaf{cursor:default;opacity:.35}
-  .kod{flex:0 0 auto;font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--muted);
+  .kod{flex:0 0 auto;font-family:Consolas,"Courier New",monospace;font-size:.86rem;color:var(--muted);
        background:var(--chip);border-radius:3px;padding:1px 5px;margin-top:1px}
+  body.bez-kodu .kod{display:none}
   .nm{flex:1 1 auto;min-width:0}
-  .lvl-a>.row>.nm{font-weight:600;color:var(--a);font-size:15px}
+  /* vrstvy se liší podkladem řádku a barvou svislé linky, ne jen barvou písma */
+  .lvl-a>.row{background:var(--a-bg);border-left-color:var(--a)}
+  .lvl-p>.row{background:var(--p-bg);border-left-color:var(--p)}
+  .lvl-d>.row{background:var(--d-bg);border-left-color:var(--d)}
+  .lvl-k>.row{border-left-color:var(--line)}
+  .lvl-a>.row>.nm{font-weight:600;color:var(--a);font-size:1.07rem}
   .lvl-p>.row>.nm{font-weight:600;color:var(--p)}
   .lvl-d>.row>.nm{color:var(--d)}
   .lvl-k>.row>.nm{color:var(--ink)}
   .lvl-k>.row{cursor:pointer}
   .kids{margin-left:17px;border-left:1px solid var(--line);padding-left:9px}
+  .lvl-a>.kids{border-left-color:var(--a)}
+  .lvl-p>.kids{border-left-color:var(--p)}
+  .lvl-d>.kids{border-left-color:var(--d)}
   .hide{display:none}
-  .badge{flex:0 0 auto;font-size:11px;border-radius:9px;padding:1px 7px;background:var(--chip);
+  .badge{flex:0 0 auto;font-size:.79rem;border-radius:9px;padding:1px 7px;background:var(--chip);
          color:var(--muted);margin-top:2px;white-space:nowrap}
   .badge.no{background:#fdecea;color:#a3352a}
   .badge.jinde{background:#fff4e0;color:#8a5a12}
   .node.unmapped > .row > .nm{opacity:.62;font-style:italic}
-  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:8px 20px 0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);padding:8px 20px 0}
   .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
   .legend .g1{background:#3f8f6f}.legend .g2{background:#e0a33c}.legend .g3{background:#c9503f}
   .badge.ut{background:#e8f0f7;color:var(--p)}
@@ -79,8 +103,19 @@
     <option value="vse">Zobrazit: celý rejstřík</option>
     <option value="ne">Zobrazit: jen nezmapované</option>
   </select>
-  <button id="bExp">Rozbalit vše</button>
-  <button id="bCol">Sbalit vše</button>
+  <select id="fUroven" title="Do které vrstvy se strom rozbalí">
+    <option value="1">Rozbalit: jen agendy</option>
+    <option value="2" selected>Rozbalit: + procesy</option>
+    <option value="3">Rozbalit: + dílčí procesy</option>
+    <option value="4">Rozbalit: vše až po aktivity</option>
+  </select>
+  <label title="Skryje identifikační kódy ve stromu. Hledat podle kódu jde dál."><input type="checkbox" id="cKod" checked> Zobrazit kód</label>
+  <span class="fs" id="fVelikost" title="Velikost písma celé stránky">
+    <button type="button" data-fs="12">A</button>
+    <button type="button" data-fs="14" aria-pressed="true">A</button>
+    <button type="button" data-fs="16">A</button>
+    <button type="button" data-fs="19">A</button>
+  </span>
 </div>
 
 <div class="legend">
@@ -131,6 +166,10 @@ const walk = (ns,f) => ns.forEach(n => { walk(n.kids,f); f(n); });
 walk(TREE, n => { n.aktCount = n.lvl==="k" ? 1 : n.kids.reduce((s,c)=>s+(c.aktCount||0),0); n.hay = norm(n.kod+" "+n.nazev+" "+(n.utvar||"")); });
 
 /* ---- render ---- */
+const TYPY = {a:"Agenda", p:"Proces", d:"Dílčí proces", k:"Aktivita"};
+const sklonAkt = n => n === 1 ? "aktivitu" : n >= 2 && n <= 4 ? "aktivity" : "aktivit";
+/* hloubka, do které se strom rozbaluje: 1 = jen agendy … 4 = i aktivity */
+const uroven = () => +document.getElementById("fUroven").value;
 const elTree = document.getElementById("tree");
 function render(){
   const q = norm(document.getElementById("q").value.trim());
@@ -159,6 +198,12 @@ function render(){
     const kod = document.createElement("span"); kod.className = "kod"; kod.textContent = n.kod;
     row.appendChild(kod);
 
+    row.title = TYPY[n.lvl] + " " + n.kod
+      + (n.nazev ? " — " + n.nazev : "")
+      + (n.lvl === "k"
+          ? (n.utvar ? "\nVykonává: " + n.utvar : "") + "\nKlikni pro detail"
+          : "\nObsahuje " + n.aktCount + " " + sklonAkt(n.aktCount));
+
     const nm = document.createElement("span"); nm.className = "nm";
     nm.appendChild(hl(n.nazev, q));
     row.appendChild(nm);
@@ -180,7 +225,8 @@ function render(){
     if (kids.length){
       const box = document.createElement("div"); box.className = "kids";
       kids.forEach(k => box.appendChild(k));
-      if (depth >= 1 && !q) box.classList.add("hide"), tw.textContent = "▸";
+      // box uzlu v hloubce d drží děti hloubky d+1; hledání rozbaluje vždy
+      if (!q && uroven() < depth + 2) box.classList.add("hide"), tw.textContent = "▸";
       node.appendChild(box);
       tw.addEventListener("click", () => {
         box.classList.toggle("hide");
@@ -249,16 +295,37 @@ const utvary = [...new Set(DATA.aktivity.flatMap(a => (a.vykonava||"").split(/,\
 const sel = document.getElementById("fUtvar");
 utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
 
-["q","fUtvar","fStav"].forEach(id => document.getElementById(id)
+["q","fUtvar","fStav","fUroven"].forEach(id => document.getElementById(id)
   .addEventListener(id === "q" ? "input" : "change", render));
-document.getElementById("bExp").addEventListener("click", () => {
-  elTree.querySelectorAll(".kids").forEach(b => b.classList.remove("hide"));
-  elTree.querySelectorAll(".tw:not(.leaf)").forEach(t => t.textContent = "▾");
+
+/* volby, které se jen přepnou třídou nebo proměnnou — strom se nepřekresluje */
+const pamet = {
+  read(k, kdyzNic){ try { return localStorage.getItem(k) ?? kdyzNic; } catch(e){ return kdyzNic; } },
+  write(k, v){ try { localStorage.setItem(k, v); } catch(e){ /* náhled bez úložiště */ } }
+};
+
+const cKod = document.getElementById("cKod");
+function pouzijKod(){
+  document.body.classList.toggle("bez-kodu", !cKod.checked);
+  pamet.write("mapa.kod", cKod.checked ? "1" : "0");
+}
+cKod.checked = pamet.read("mapa.kod", "1") === "1";
+cKod.addEventListener("change", pouzijKod);
+pouzijKod();
+
+const fs = document.getElementById("fVelikost");
+function pouzijVelikost(px){
+  document.documentElement.style.setProperty("--fs", px + "px");
+  fs.querySelectorAll("button").forEach(b =>
+    b.setAttribute("aria-pressed", b.dataset.fs === String(px) ? "true" : "false"));
+  pamet.write("mapa.fs", px);
+}
+fs.addEventListener("click", e => {
+  const b = e.target.closest("button[data-fs]");
+  if (b) pouzijVelikost(+b.dataset.fs);
 });
-document.getElementById("bCol").addEventListener("click", () => {
-  elTree.querySelectorAll(".node:not(.lvl-a) .kids").forEach(b => b.classList.add("hide"));
-  elTree.querySelectorAll(".node:not(.lvl-a) > .row > .tw:not(.leaf)").forEach(t => t.textContent = "▸");
-});
+pouzijVelikost(+pamet.read("mapa.fs", "14") || 14);
+
 render();
 </script>
 </body>

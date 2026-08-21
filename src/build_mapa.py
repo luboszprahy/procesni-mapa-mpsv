@@ -48,6 +48,17 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     io.open(out, "w", encoding="utf-8", newline="\n").write(html)
 
+    # Do Site Assets se nahrava deploy/, ne src/ a viz/. Kopie se driv delala
+    # rucne a 21.08.2026 se rozesla: sablona v src/ mela nove ovladaci prvky,
+    # ta v deploy/ (a tim i publikovana mapa) byla o den stara. Proto ji
+    # prepisuje build, ne clovek.
+    if args.template == "src/mapa_template.html":
+        deploy = Path("deploy")
+        deploy.mkdir(exist_ok=True)
+        io.open(deploy / "mapa_template.html", "w", encoding="utf-8", newline="\n").write(tpl)
+        io.open(deploy / "procesni_mapa.html", "w", encoding="utf-8", newline="\n").write(html)
+        print("deploy/mapa_template.html + deploy/procesni_mapa.html aktualizovany")
+
     print("%s  (%.1f kB)" % (out, out.stat().st_size / 1024))
     print("agendy=%d procesy=%d dílčí=%d aktivity=%d vazby=%d"
           % tuple(len(model[k]) for k in
