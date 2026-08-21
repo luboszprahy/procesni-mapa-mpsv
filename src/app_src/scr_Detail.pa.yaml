@@ -20,23 +20,39 @@ Screens:
             Width: =Parent.Width
             X: =0
             Y: =0
+      # Celý čtvereček je klikací a při najetí zesvětlá — samotná šipka je
+      # malý cíl. Vrací se tam, odkud se na detail přišlo: varDetailZpet
+      # nastavuje seznam i strom na přehledu, jinak by proklik z přehledu
+      # skončil v seznamu aktivit.
       - ico_Zpet:
           Control: Classic/Icon@2.5.0
           Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Tooltip: '="Zpět na seznam aktivit. Neuložené změny se zahodí."'
             Color: =RGBA(255, 255, 255, 1)
-            Height: =40
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =56
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.18)
             Icon: =Icon.ChevronLeft
-            OnSelect: =Navigate(scr_Seznam, ScreenTransition.UnCover)
-            PaddingBottom: =10
-            PaddingLeft: =10
-            PaddingRight: =10
-            PaddingTop: =10
-            Width: =40
-            X: =24
-            Y: =16
+            OnSelect: |-
+              =If(
+                  varDetailZpet = "dashboard",
+                  Navigate(scr_Dashboard, ScreenTransition.UnCover),
+                  Navigate(scr_Seznam, ScreenTransition.UnCover)
+              )
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            PressedFill: =RGBA(255, 255, 255, 0.28)
+            Tooltip: |-
+              =If(
+                  varDetailZpet = "dashboard",
+                  "Zpět na přehled, na to místo ve stromu, odkud jsi přišel.",
+                  "Zpět na seznam aktivit."
+              ) & " Neuložené změny se zahodí."
+            Width: =56
+            X: =16
+            Y: =8
       - lbl_KodDetail:
           Control: Label@2.5.1
           Properties:
@@ -44,20 +60,90 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =40
-            Size: =16
+            Size: =16 + varFs
             Text: |-
               =If(varNova, "Nová aktivita — kód se přidělí při uložení", varAktivita.Title)
             VerticalAlign: =VerticalAlign.Middle
-            Width: =800
-            X: =76
+            Width: =740
+            X: =88
             Y: =16
+      # Stejný přepínač jako na přehledu a v seznamu, tatáž proměnná —
+      # volba tedy platí napříč appkou. Na detailu mění popisky i obsah
+      # polí; výšky zůstávají, protože se text do stávajících rámečků
+      # vejde i na největším stupni.
+      - btn_PismoT1:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, 0)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =10
+            Text: ="A"
+            Tooltip: '="Nejmenší text, vejde se toho nejvíc."'
+            Width: =34
+            X: =Parent.Width - 502
+            Y: =20
+      - btn_PismoT2:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, 2)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =13
+            Text: ="A"
+            Tooltip: '="Střední text v popiscích i v polích. Výchozí nastavení."'
+            Width: =38
+            X: =Parent.Width - 464
+            Y: =20
+      - btn_PismoT3:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = 4, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 4, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, 4)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =16
+            Text: ="A"
+            Tooltip: '="Největší text. Nejdelší hodnoty se můžou v poli oříznout."'
+            Width: =42
+            X: =Parent.Width - 422
+            Y: =20
       - lbl_l_Agenda:
           Control: Label@2.5.1
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Agenda"
             Width: =620
             X: =40
@@ -77,7 +163,7 @@ Screens:
             OnChange: |-
               =Reset(drp_Proces);
               Reset(drp_Dilci)
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =40
             Y: =120
@@ -87,7 +173,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Proces"
             Width: =620
             X: =40
@@ -110,7 +196,7 @@ Screens:
                   Title & " · " & nazev
               )
             OnChange: =Reset(drp_Dilci)
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =40
             Y: =196
@@ -120,7 +206,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Dílčí proces"
             Width: =620
             X: =40
@@ -142,7 +228,7 @@ Screens:
                   Filter(colDilci, proces_kod = Left(drp_Proces.Selected.Value, 5)),
                   Title & " · " & nazev
               )
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =40
             Y: =272
@@ -152,7 +238,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Aktivita — znění pro organizační řád"
             Width: =620
             X: =40
@@ -169,7 +255,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =88
             Mode: =TextMode.MultiLine
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =40
             Y: =348
@@ -179,7 +265,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Spolupracuje"
             Width: =620
             X: =40
@@ -196,7 +282,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =64
             Mode: =TextMode.MultiLine
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =40
             Y: =472
@@ -206,7 +292,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Text pro OŘ"
             Width: =620
             X: =40
@@ -223,7 +309,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =64
             Mode: =TextMode.MultiLine
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =40
             Y: =572
@@ -233,7 +319,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Vlastník agendy (z číselníku)"
             Width: =620
             X: =700
@@ -245,7 +331,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             PaddingLeft: =12
-            Size: =13
+            Size: =13 + varFs
             Text: |-
               =If(
                   IsBlank(drp_Agenda.Selected.Value),
@@ -265,7 +351,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Vlastník procesu (z číselníku)"
             Width: =620
             X: =700
@@ -277,7 +363,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             PaddingLeft: =12
-            Size: =13
+            Size: =13 + varFs
             Text: |-
               =If(
                   IsBlank(drp_Proces.Selected.Value),
@@ -297,7 +383,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Vlastník dílčího procesu (z číselníku)"
             Width: =620
             X: =700
@@ -309,7 +395,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             PaddingLeft: =12
-            Size: =13
+            Size: =13 + varFs
             Text: |-
               =If(
                   IsBlank(drp_Dilci.Selected.Value),
@@ -329,7 +415,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Vykonává útvar"
             Width: =300
             X: =700
@@ -351,7 +437,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             Items: =Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev)
-            Size: =13
+            Size: =13 + varFs
             Width: =300
             X: =700
             Y: =348
@@ -361,7 +447,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Sekce"
             Width: =300
             X: =1020
@@ -383,7 +469,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             Items: =Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev)
-            Size: =13
+            Size: =13 + varFs
             Width: =300
             X: =1020
             Y: =348
@@ -393,7 +479,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Vnitřní předpis"
             Width: =620
             X: =700
@@ -410,7 +496,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =64
             Mode: =TextMode.MultiLine
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =700
             Y: =448
@@ -420,7 +506,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: ="Stav"
             Width: =300
             X: =700
@@ -436,7 +522,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             Items: =["pracovní", "schváleno"]
-            Size: =13
+            Size: =13 + varFs
             Width: =300
             X: =700
             Y: =548
@@ -446,7 +532,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =20
-            Size: =10
+            Size: =10 + varFs
             Text: |-
               ="Zařazení do dílčích procesů (" & CountRows(gal_Zarazeni.AllItems) & ")"
             Visible: =!varNova
@@ -468,7 +554,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             OnSelect: =Navigate(scr_Vazby, ScreenTransition.Cover)
-            Size: =13
+            Size: =13 + varFs
             Text: ="Další dílčí procesy…"
             Visible: =!varNova
             Width: =240
@@ -588,12 +674,16 @@ Screens:
                           );
                           Set(varAktStale, true);
                           Notify("Uloženo jako " & varNovyKod & ".", NotificationType.Success);
-                          Navigate(scr_Seznam, ScreenTransition.UnCover),
+                          If(
+                              varDetailZpet = "dashboard",
+                              Navigate(scr_Dashboard, ScreenTransition.UnCover),
+                              Navigate(scr_Seznam, ScreenTransition.UnCover)
+                          ),
                           Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
                       )
                   )
               )
-            Size: =14
+            Size: =14 + varFs
             Text: ="Uložit"
             Width: =200
             X: =700
@@ -621,7 +711,7 @@ Screens:
                   Navigate(scr_Seznam, ScreenTransition.UnCover),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
               )
-            Size: =14
+            Size: =14 + varFs
             Text: ="Smazat"
             Visible: =!varNova
             Width: =160

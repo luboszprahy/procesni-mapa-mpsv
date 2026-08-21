@@ -1,6 +1,30 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-21 15:45 (ikona editace, velikost písma, denní publikace)
+Aktualizováno: 2026-08-21 16:10 (připomínky ke stromu a detailu)
+
+## Připomínky z provozu ke stromu a detailu (21.08.2026 16:10) — balík 1.0.0.34
+
+- **Aaa přesunuto vpravo k identitě uživatele**, popisek „Písmo" zrušený —
+  symboly mluví samy. Volba nově platí i na **detailu aktivity** a na
+  **obrazovce vazeb**, tedy napříč appkou; **výchozí je střední stupeň**
+  (`varFs = 2`), ne nejmenší.
+- Na detailu se výšky polí měnit nemusely: popisek 20 px unese 14 pt (~19 px)
+  a pole 40 px unese 17 pt (~23 px). Na obrazovce vazeb ano — kód a název jsou
+  v řádku pod sebou s pevným Y, takže kód dostal `Height = 20 + varFs` a název
+  `Y = 28 + varFs`, jinak by se kód na největším stupni ořízl.
+- **Šipka zpět je celý čtvereček** (56 px, `Fill` průhledný, `HoverFill`
+  bílá 18 %) — samotná šipka byl malý cíl. Classic/Icon `Fill`/`HoverFill` má,
+  takže na to nebylo potřeba nic obcházet.
+- **Návrat z detailu jde tam, odkud se přišlo.** `varDetailZpet` nastavuje
+  seznam („seznam") i tužka ve stromu („dashboard"); šipka i návrat po uložení
+  se podle toho rozhodnou. Do té doby proklik z přehledu končil v seznamu
+  aktivit. `Navigate(If(...))` se schválně nepoužilo — brána `kontrola_navigace`
+  čte jméno obrazovky hned za `Navigate(`, takže se větví If a uvnitř jsou dva
+  samostatné `Navigate`.
+- **Klik do řádku stromu detail neotevírá**, jen rozbaluje; detail je jedině
+  přes tužku. Dokud dělalo obojí totéž, nebylo poznat, co která akce udělá.
+  Tužka je větší (36 px) a odsazená od kraje (`TemplateWidth - 84`), sloupce
+  útvaru i počtu se o to posunuly doleva včetně hlaviček.
 
 ## Ikona editace, velikost písma, denní publikace mapy (21.08.2026 15:45) — balík 1.0.0.33
 

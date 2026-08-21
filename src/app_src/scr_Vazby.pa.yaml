@@ -18,20 +18,22 @@ Screens:
       - ico_ZpetV:
           Control: Classic/Icon@2.5.0
           Properties:
-            HoverColor: =stylAkce
-            PressedColor: =stylAkceStisk
-            Tooltip: '="Zpět na detail aktivity. Přiřazení dílčích procesů se ukládá hned při kliknutí, takže se odchodem nic neztratí."'
             Color: =RGBA(255, 255, 255, 1)
-            Height: =40
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =56
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.18)
             Icon: =Icon.ChevronLeft
             OnSelect: =Navigate(scr_Detail, ScreenTransition.UnCover)
-            PaddingBottom: =10
-            PaddingLeft: =10
-            PaddingRight: =10
-            PaddingTop: =10
-            Width: =40
-            X: =24
-            Y: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            PressedFill: =RGBA(255, 255, 255, 0.28)
+            Tooltip: '="Zpět na detail aktivity. Přiřazení dílčích procesů se ukládá hned při kliknutí, takže se odchodem nic neztratí."'
+            Width: =56
+            X: =16
+            Y: =8
       - lbl_NadpisV:
           Control: Label@2.5.1
           Properties:
@@ -39,12 +41,12 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =40
-            Size: =16
+            Size: =16 + varFs
             Text: |-
               ="Dílčí procesy aktivity " & varAktivita.Title
             VerticalAlign: =VerticalAlign.Middle
             Width: =900
-            X: =76
+            X: =88
             Y: =16
       - lbl_l_Vysvetleni:
           Control: Label@2.5.1
@@ -52,7 +54,7 @@ Screens:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             Height: =40
-            Size: =10
+            Size: =10 + varFs
             Text: |-
               ="Táž aktivita se může vykonávat ve víc dílčích procesech. Vlevo je seznam, kam už je zařazená; „primární“ je ta z detailu aktivity a odebrat ji tady nelze. Vpravo vyberte další dílčí proces tlačítkem +."
             Width: =1220
@@ -64,7 +66,7 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =24
-            Size: =13
+            Size: =13 + varFs
             Text: ="Přiřazeno"
             Width: =620
             X: =40
@@ -76,7 +78,7 @@ Screens:
             Height: =Parent.Height - Self.Y - 40
             Items: |-
               =Filter('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title)
-            TemplateSize: =64
+            TemplateSize: =64 + varFs * 4
             Width: =620
             X: =40
             Y: =164
@@ -98,9 +100,9 @@ Screens:
                   Color: =stylPrimarni
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
-                  Height: =20
+                  Height: =20 + varFs
                   OnSelect: =Select(Parent)
-                  Size: =11
+                  Size: =11 + varFs
                   Text: =ThisItem.dilci_proces_kod
                   Width: =140
                   X: =16
@@ -111,12 +113,12 @@ Screens:
                   Font: =Font.'Open Sans'
                   Height: =36
                   OnSelect: =Select(Parent)
-                  Size: =11
+                  Size: =11 + varFs
                   Text: |-
                     =LookUp(colDilci, Title = ThisItem.dilci_proces_kod).nazev
                   Width: =Parent.TemplateWidth - 240
                   X: =16
-                  Y: =28
+                  Y: =28 + varFs
             - lbl_VazbaPrimarni:
                 Control: Label@2.5.1
                 Properties:
@@ -124,7 +126,7 @@ Screens:
                   Font: =Font.'Open Sans'
                   Height: =20
                   OnSelect: =Select(Parent)
-                  Size: =10
+                  Size: =10 + varFs
                   Text: |-
                     =If(ThisItem.primarni.Value = "ano", "primární", "")
                   Width: =100
@@ -167,7 +169,7 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =24
-            Size: =13
+            Size: =13 + varFs
             Text: ="Přidat další dílčí proces"
             Width: =620
             X: =700
@@ -183,7 +185,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =40
             HintText: ="Hledat v názvu nebo kódu"
-            Size: =13
+            Size: =13 + varFs
             Width: =620
             X: =700
             Y: =164
@@ -198,7 +200,7 @@ Screens:
                   colDilci,
                   Search(colDilci, txt_HledatDp.Text, Title, nazev)
               )
-            TemplateSize: =64
+            TemplateSize: =64 + varFs * 4
             Width: =620
             X: =700
             Y: =216
@@ -220,9 +222,9 @@ Screens:
                   Color: =stylPrimarni
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
-                  Height: =20
+                  Height: =20 + varFs
                   OnSelect: =Select(Parent)
-                  Size: =11
+                  Size: =11 + varFs
                   Text: =ThisItem.Title
                   Width: =140
                   X: =16
@@ -233,11 +235,11 @@ Screens:
                   Font: =Font.'Open Sans'
                   Height: =36
                   OnSelect: =Select(Parent)
-                  Size: =11
+                  Size: =11 + varFs
                   Text: =ThisItem.nazev
                   Width: =Parent.TemplateWidth - 120
                   X: =16
-                  Y: =28
+                  Y: =28 + varFs
             - ico_Pridat:
                 Control: Classic/Icon@2.5.0
                 Properties:

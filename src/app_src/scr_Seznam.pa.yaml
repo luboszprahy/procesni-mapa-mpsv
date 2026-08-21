@@ -88,24 +88,12 @@ Screens:
             Width: =160
             X: =428
             Y: =58
-      # Velikost písma galerií (varFs = 0 / 2 / 4). Mění se jen text
+      # Velikost písma (varFs = 0 / 2 / 4) vpravo u jména uživatele.
+      # Mění se text
       # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
       # Height = TemplateHeight - 1, takže rostou s řádkem a neořežou se.
       # Sloupec kódu se rozšiřuje spolu s písmem, jinak by se při XL
       # oříznulo AA-BB-CCC-DDDD.
-      - lbl_PismoS:
-          Control: Label@2.5.1
-          Properties:
-            Color: =RGBA(214, 220, 234, 1)
-            Font: =Font.'Open Sans'
-            Height: =32
-            Size: =9
-            Text: ="Písmo"
-            Tooltip: '="Mění velikost textu v seznamu a ve stromu na přehledu, včetně výšky řádků. Ostatní části appky zůstávají stejné. Volba platí pro obě obrazovky a drží do zavření appky."'
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =44
-            X: =596
-            Y: =16
       - btn_PismoS1:
           Control: Classic/Button@2.2.0
           Properties:
@@ -124,9 +112,9 @@ Screens:
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =10
             Text: ="A"
-            Tooltip: '="Menší text, nejvíc řádků na obrazovku. Výchozí nastavení."'
+            Tooltip: '="Nejmenší text, nejvíc řádků na obrazovku."'
             Width: =34
-            X: =640
+            X: =Parent.Width - 502
             Y: =16
       - btn_PismoS2:
           Control: Classic/Button@2.2.0
@@ -146,9 +134,9 @@ Screens:
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =13
             Text: ="A"
-            Tooltip: '="Větší text a vyšší řádky - méně řádků na obrazovku."'
+            Tooltip: '="Střední text a vyšší řádky. Výchozí nastavení."'
             Width: =38
-            X: =678
+            X: =Parent.Width - 464
             Y: =16
       - btn_PismoS3:
           Control: Classic/Button@2.2.0
@@ -170,7 +158,7 @@ Screens:
             Text: ="A"
             Tooltip: '="Největší text. Nejlépe se čte, ale na jednu obrazovku se vejde nejmíň řádků a nejdelší názvy se můžou oříznout."'
             Width: =42
-            X: =720
+            X: =Parent.Width - 422
             Y: =16
       - lbl_Uzivatel:
           Control: Label@2.5.1
@@ -367,7 +355,8 @@ Screens:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylAkceHover
             OnSelect: |-
-              =Set(varNova, true);
+              =Set(varDetailZpet, "seznam");
+              Set(varNova, true);
               Set(varAktivita, Blank());
               Navigate(scr_Detail, ScreenTransition.Cover)
             PressedColor: =RGBA(255, 255, 255, 1)
@@ -902,7 +891,8 @@ Screens:
                   HoverBorderColor: =stylAkce
                   HoverFill: =RGBA(0, 90, 181, 0.10)
                   OnSelect: |-
-                    =Set(varNova, false);
+                    =Set(varDetailZpet, "seznam");
+                    Set(varNova, false);
                     Set(varAktivita, ThisItem);
                     Navigate(scr_Detail, ScreenTransition.Cover)
                   PressedFill: =RGBA(0, 90, 181, 0.20)

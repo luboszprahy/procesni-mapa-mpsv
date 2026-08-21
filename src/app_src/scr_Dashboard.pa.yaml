@@ -182,24 +182,12 @@ Screens:
             Width: =160
             X: =428
             Y: =0
-      # Velikost písma galerií (varFs = 0 / 2 / 4). Mění se jen text
+      # Velikost písma (varFs = 0 / 2 / 4) vpravo u jména uživatele.
+      # Mění se text
       # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
       # Height = TemplateHeight - 1, takže rostou s řádkem a neořežou se.
       # Sloupec kódu se rozšiřuje spolu s písmem, jinak by se při XL
       # oříznulo AA-BB-CCC-DDDD.
-      - lbl_PismoD:
-          Control: Label@2.5.1
-          Properties:
-            Color: =RGBA(214, 220, 234, 1)
-            Font: =Font.'Open Sans'
-            Height: =32
-            Size: =9
-            Text: ="Písmo"
-            Tooltip: '="Mění velikost textu v seznamu a ve stromu na přehledu, včetně výšky řádků. Ostatní části appky zůstávají stejné. Volba platí pro obě obrazovky a drží do zavření appky."'
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =44
-            X: =596
-            Y: =16
       - btn_PismoD1:
           Control: Classic/Button@2.2.0
           Properties:
@@ -218,9 +206,9 @@ Screens:
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =10
             Text: ="A"
-            Tooltip: '="Menší text, nejvíc řádků na obrazovku. Výchozí nastavení."'
+            Tooltip: '="Nejmenší text, nejvíc řádků na obrazovku."'
             Width: =34
-            X: =640
+            X: =Parent.Width - 502
             Y: =16
       - btn_PismoD2:
           Control: Classic/Button@2.2.0
@@ -240,9 +228,9 @@ Screens:
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =13
             Text: ="A"
-            Tooltip: '="Větší text a vyšší řádky - méně řádků na obrazovku."'
+            Tooltip: '="Střední text a vyšší řádky. Výchozí nastavení."'
             Width: =38
-            X: =678
+            X: =Parent.Width - 464
             Y: =16
       - btn_PismoD3:
           Control: Classic/Button@2.2.0
@@ -264,7 +252,7 @@ Screens:
             Text: ="A"
             Tooltip: '="Největší text. Nejlépe se čte, ale na jednu obrazovku se vejde nejmíň řádků a nejdelší názvy se můžou oříznout."'
             Width: =42
-            X: =720
+            X: =Parent.Width - 422
             Y: =16
       - lbl_UzivatelD:
           Control: Label@2.5.1
@@ -776,7 +764,7 @@ Screens:
             Tooltip: '="Kód útvaru z číselníku Útvary - u agendy, procesu a dílčího procesu je to jejich vlastník (sekce u agendy, odbor u procesu a dílčího procesu), u aktivity útvar, který ji vykonává. Vlastníků může být víc, pak jsou kódy oddělené středníkem (například 72; 71). Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =220
-            X: =Parent.Width - 460
+            X: =Parent.Width - 480
             Y: =222
       - lbl_h_StromPocet:
           Control: Label@2.5.1
@@ -792,7 +780,7 @@ Screens:
             Tooltip: '="Bez filtru stavu je to počet položek o úroveň níž: u agendy procesy, u procesu dílčí procesy, u dílčího procesu aktivity. U aktivity zůstává prázdné - nižší úroveň už nemá. Nula u dílčího procesu znamená, že v rejstříku je, ale žádná aktivita k němu zatím není popsaná. Se zapnutým filtrem stavu se číslo přepne na počet aktivit toho stavu v celé větvi."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =180
-            X: =Parent.Width - 260
+            X: =Parent.Width - 314
             Y: =222
       - gal_Strom:
           Control: Gallery@2.15.0
@@ -915,7 +903,7 @@ Screens:
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
                   # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
                   # útvaru (ten začíná na TemplateWidth - 360).
-                  Width: =Parent.TemplateWidth - 380 - Self.X
+                  Width: =Parent.TemplateWidth - 400 - Self.X
                   X: |-
                     =If(varZobrazitKod, 191 + varFs * 12, 51) + (ThisItem.uroven - 1) * 28
                   Y: =0
@@ -930,7 +918,7 @@ Screens:
                   Text: =ThisItem.utvar
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =160
-                  X: =Parent.TemplateWidth - 360
+                  X: =Parent.TemplateWidth - 380
                   Y: =0
             # Nula je u dílčího procesu důležitá informace (v rejstříku je,
             # ale nikdo k němu ještě nepopsal činnosti), proto se vypisuje.
@@ -961,8 +949,8 @@ Screens:
                         )
                     )
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =120
-                  X: =Parent.TemplateWidth - 160
+                  Width: =110
+                  X: =Parent.TemplateWidth - 204
                   Y: =0
             - rec_StromLinka:
                 Control: Rectangle@2.3.0
@@ -983,12 +971,12 @@ Screens:
                   Fill: =RGBA(0, 0, 0, 0)
                   Height: =Parent.TemplateHeight - 1
                   HoverFill: =RGBA(0, 90, 181, 0.14)
+                  # Klik do řádku POUZE rozbaluje. Detail otevírá jedině tužka
+                  # vpravo — dokud detail otevíral i celý řádek, nebylo poznat,
+                  # co která akce udělá.
                   OnSelect: |-
                     =If(
-                        ThisItem.uroven = 4,
-                        Set(varNova, false);
-                        Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
-                        Navigate(scr_Detail, ScreenTransition.Cover),
+                        ThisItem.uroven <> 4,
                         If(
                             IsBlank(LookUp(colOtevrene, Kod = ThisItem.kod)),
                             Collect(colOtevrene, { Kod: ThisItem.kod }),
@@ -1018,7 +1006,7 @@ Screens:
                     ) &
                     If(
                         ThisItem.uroven = 4,
-                        "Klikni pro otevření detailu aktivity.",
+                        "Detail otevřeš tužkou vpravo.",
                         "Číslo vpravo = počet položek o úroveň níž (" &
                         Switch(ThisItem.uroven, 1, "procesů v agendě", 2, "dílčích procesů v procesu", "aktivit v dílčím procesu") &
                         "): " & ThisItem.pocet & ". Klikni pro rozbalení."
@@ -1035,12 +1023,15 @@ Screens:
                 Properties:
                   Color: |-
                     =If(ThisItem.uroven = 4, stylAkce, stylOkraj)
-                  Height: =28
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =36
                   HoverColor: =stylAkceHover
+                  HoverFill: =stylRadekVybrany
                   Icon: =Icon.Edit
                   OnSelect: |-
                     =If(
                         ThisItem.uroven = 4,
+                        Set(varDetailZpet, "dashboard");
                         Set(varNova, false);
                         Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
                         Navigate(scr_Detail, ScreenTransition.Cover),
@@ -1051,10 +1042,10 @@ Screens:
                             NotificationType.Information
                         )
                     )
-                  PaddingBottom: =7
-                  PaddingLeft: =7
-                  PaddingRight: =7
-                  PaddingTop: =7
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
                   PressedColor: =stylAkceStisk
                   Tooltip: |-
                     =If(
@@ -1063,6 +1054,6 @@ Screens:
                         "Úprava " & Switch(ThisItem.uroven, 1, "agendy", 2, "procesu", "dílčího procesu") &
                         " zatím vlastní obrazovku nemá, připravuje se. Dnes se mění přímo v SharePoint seznamu."
                     )
-                  Width: =28
-                  X: =Parent.TemplateWidth - 34
-                  Y: =(Parent.TemplateHeight - 1) / 2 - 14
+                  Width: =36
+                  X: =Parent.TemplateWidth - 84
+                  Y: =(Parent.TemplateHeight - 1) / 2 - 18
