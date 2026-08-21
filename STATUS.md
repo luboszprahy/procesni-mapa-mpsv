@@ -1,6 +1,69 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-20 18:45 (konec dne)
+Aktualizováno: 2026-08-21 10:50
+
+## F3 OVĚŘENA V PROVOZU — 1.0.0.23 běží (21.08.2026 10:47)
+
+Uživatel naimportoval 1.0.0.23, appka je **bez chyb ve Formulas** a čtyři
+kontroly z `deploy/navod_publikace_mapy.md` dopadly dobře:
+
+| co | výsledek |
+|---|---|
+| soubory v Site Assets, mapa jde spustit z appky | ano |
+| `Nacti_DilciProcesy` v běhu MapaPublishFlow | **250 položek** (pagination drží) |
+| tlačítko „Zobrazit v HTML" | **zobrazí stránku**, nestahuje |
+| fulltext hledání (1.0.0.23) | funguje |
+
+Tím padla i poslední známá vada z 1.0.0.22 — adresa přes náhled knihovny
+(`AllItems.aspx?id=…`) je správná a `kontrola_adresy_mapy` ji hlídá proti regresi.
+**F3 je hotová.**
+
+**F4 se odkládá:** uživatel nemá přístup k tenantu MPSV (stav 21.08.2026).
+Pracuje se dál v PPF DEV.
+
+**Návod pro správce (`deploy/navod_sprava.md`, krok 13) se zatím nepíše** —
+rozhodnuto 21.08.2026, až podle finální podoby appky.
+
+## Další krok: tlačítko „Obnovit mapu" (1.0.0.24)
+
+`MapaPublishFlow` **je** v balíku jako `Workflows/MapaPublishFlow-60E67E42-….json`,
+ale v `.msapp` → `References/DataSources.json` jsou jen SharePoint listy — flow
+mezi datovými zdroji appky **není**. `MapaPublishFlow.Run()` by proto Studio
+odmítlo („Name isn't valid"). Dělba práce:
+
+1. **Uživatel ve Studiu:** Power Automate → **Add flow** → `MapaPublishFlow`
+   → Uložit → Publikovat → export unmanaged solution → dodá zip.
+2. **Asistent:** doauthoruje `btn_ObnovitMapu` do souhrnné karty na `scr_Seznam`
+   (vzorec připravený v `deploy/navod_publikace_mapy.md`), přibalí odložený
+   **úklid connection reference `…_12718`**, vrátí 1.0.0.24.
+
+Bez kroku 1 nemá smysl stavět — z exportu bez Add flow vznikne totéž, co je dnes.
+
+**Připraveno předem (21.08.2026 11:05), čeká jen na zip:**
+
+- `btn_ObnovitMapu` v `src/app_src/scr_Seznam.pa.yaml` — třetí tlačítko souhrnné
+  karty vlevo od „Zobrazit v HTML" (`X = btn_Mapa.X - Self.Width - 12`, žádná nová
+  magická čísla). `DisplayMode` proti dvojímu kliku, `IfError` kolem `.Run()`.
+  Notifikace záměrně říká „**spuštěna**", ne „hotovo": `MapaPublishFlow` nemá akci
+  Respond to a PowerApp, takže se `.Run()` vrátí po odstartování, ne po doběhu —
+  hlásit dokončení by lhalo.
+- Nová kontrola v `src/check_solution.py`: každý identifikátor volaný jako `.Run()`
+  ve vzorcích musí být v `.msapp` → `References/DataSources.json`. Regresní pojistka
+  přesně na tenhle případ (flow je v solution, ale k appce není připojené).
+- `src/check_app.py` nad upravenými zdroji prochází (113 prvků, 1110 vzorců,
+  3 známé výjimky).
+
+Pracovní strom čistý, `git pull` dotáhl commit z večera 20.08. (22:07):
+**schematický obrázek datového modelu** `viz/db_schema.html`, generovaný
+`src/build_schema_diagram.py` ze `src/schema.json` a počtů z `runs/normalize/`.
+Kreslí 6 SharePoint listů včetně vazeb, typů a příznaků; self-contained,
+bez CDN. Do dokumentace se hodí jako doprovod k `deploy/sharepoint_schema.md`.
+
+**Blokující krok je na uživateli:** naimportovat `deploy/procesnimapa_1_0_0_23.zip`
+jako upgrade a otevřít appku ve Studiu (panel Formulas). 1.0.0.23 je zatím
+ověřený jen offline branami; poslední ověřeně běžící verze v prostředí je
+1.0.0.22. Do výsledku importu se na zdrojích appky nepracuje.
+
 
 ## Konec dne 20.08.2026 — 1.0.0.23 nevyzkoušený, projekt uklizený
 
@@ -771,7 +834,7 @@ Zadavatelka není k dispozici (stav 19.08.2026), takže se pracuje podle best
 practice. Otevřené otázky mají prozatímní rozhodnutí v `PRD.md` §9 — všechna
 jsou volená tak, aby se dala revidovat bez ztráty dat.
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_6.zip`** jako upgrade, otevřít appku
+1. **Naimportovat `deploy/procesnimapa_1_0_0_23.zip`** jako upgrade, otevřít appku
    ve Studiu a podívat se do panelu **Formulas**. Zbyde-li nějaká chyba, poslat
    její seznam (stačí snímek s rozbalenými skupinami) — doopravím.
 2. **Až bude appka bez chyb:** projít 6 testů ze sekce „Jak se to ověří"

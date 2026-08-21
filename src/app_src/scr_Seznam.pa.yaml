@@ -202,6 +202,36 @@ Screens:
             Width: =120
             X: =544
             Y: =118
+      - btn_ObnovitMapu:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varPublikuji, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =40
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varPublikuji, true);
+              IfError(
+                  MapaPublishFlow.Run();
+                  Notify("Publikace mapy spuštěna. Přegenerování chvíli trvá - pak mapu otevři tlačítkem Zobrazit v HTML.", NotificationType.Information),
+                  Notify("Publikace selhala: " & FirstError.Message, NotificationType.Error)
+              );
+              Set(varPublikuji, false)
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =13
+            Text: ="Obnovit mapu"
+            Tooltip: '="Přegeneruje publikovanou HTML mapu z dnešního obsahu rejstříku. Mapa data nečte živě - ukazuje stav k okamžiku poslední publikace, takže po každé dávce úprav ji je potřeba obnovit. Běh trvá několik sekund a probíhá na pozadí; hlášení potvrzuje spuštění, ne dokončení. Výsledek se ukáže po chvíli tlačítkem Zobrazit v HTML."'
+            Width: =176
+            X: =btn_Mapa.X - Self.Width - 12
+            Y: =102
       - btn_Mapa:
           Control: Classic/Button@2.2.0
           Properties:

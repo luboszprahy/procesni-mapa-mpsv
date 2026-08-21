@@ -8,9 +8,9 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 |---|---|---|
 | F0 | Normalizace podkladů + prototyp mapy | **hotovo** |
 | F1 | SharePoint rejstřík — schéma, provisioning, import dat | **hotovo** |
-| F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.20, čeká na import) |
-| F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo**, zbývá adresa pro tlačítko |
-| F4 | Přenos na tenant MPSV | čeká na F2+F3 |
+| F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.23 ověřeno v provozu 21.08.) |
+| F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo** (ověřeno v provozu 21.08.) |
+| F4 | Přenos na tenant MPSV | **blokováno** — bez přístupu k tenantu MPSV (21.08.) |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
 Brány s `/audit` (agent `powerplatform-auditor`): před importem do DEV (konec F1),

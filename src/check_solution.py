@@ -159,6 +159,19 @@ def main():
             overit(OCEKAVANE_LISTY <= jmena,
                    f"v appce chybí datové zdroje: {sorted(OCEKAVANE_LISTY - jmena)}")
 
+        # flow volané z appky musí být mezi jejími datovými zdroji. Samotné
+        # Workflows/*.json v solution nestačí — dokud se flow ve Studiu nepřipojí
+        # (Power Automate → Add flow), Studio vzorec odmítne „Name isn't valid".
+        volana = set()
+        for polozka in polozky:
+            if polozka.endswith(".pa.yaml"):
+                text = cti(msapp, Path(polozka).name) or ""
+                volana |= set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\.Run\(", text))
+        if datasources:
+            overit(volana <= jmena,
+                   f"appka volá .Run() na neexistující datový zdroj: {sorted(volana - jmena)} "
+                   f"— chybí Add flow ve Studiu")
+
         # každý použitý control musí mít definici šablony, jinak Studio appku
         # neotevře a ohlásí to jako chybu YAML (past z importu 1.0.0.2)
         typy = json.loads(Path("src/control_templates.json").read_text(encoding="utf-8"))["typy"]
