@@ -48,6 +48,34 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
    nápovědu při najetí na řádek.
 4. **Save & Publish** ve Studiu, jinak uživatelé vidí starou verzi.
 
+## 1b. OTEVŘENÝ PROBLÉM: publish se nepropisuje hráčům (21.08.2026 13:00)
+
+Druhý účet vidí po importu i publishi **starou verzi** appky. Ve Studiu je nový
+obsah, ve Versions je nejnovější verze **Live**, odkaz i prohlížeč vyloučeny
+(stejné chování v jiném prohlížeči). Po spuštění se nahoře objeví žlutý pruh
+**„A new version of this app is coming. We'll let you know when it's
+available."** — platforma tedy o nové verzi ví, ale player dostává starou
+binárku.
+
+Co už je vyloučené / opravené:
+- **`AppVersion` v `customizations.xml`** zůstávala z původního exportu, takže
+  se appka netvářila jako změněná. Opraveno v `build_app.py` (`dokonci()` píše
+  aktuální UTC razítko a bez nalezení tagu skončí chybou) — balík **1.0.0.28**.
+  Samo o sobě to problém neodstranilo.
+- cache prohlížeče, špatný odkaz, chybějící Live verze.
+
+Nevyzkoušené kroky, kterými pokračovat (v tomhle pořadí):
+1. Ve Studiu **mikro-změna → Save → Publish**. Publikovaný dokument vzniká při
+   Publish ze Studia, ne z importu solution; když se Save vynechá, můžou se
+   importovaný a publikovaný dokument rozejít.
+2. U druhého účtu zavřít **všechny** běžící session appky (žlutý pruh znamená
+   „až při příštím spuštění").
+3. **Apps → Details → Versions →** na nejnovější verzi **Restore**, pak Publish.
+   Obejde rozpor mezi importovaným a publikovaným dokumentem.
+
+Až se ukáže, co zabralo, patří to do skillu `power-Apps-skill` — je to obecná
+past workflow „build zipu mimo Studio", ne specifikum tohoto projektu.
+
 ## 2. CO DĚLÁM JÁ (další krok)
 
 **F6 skupina D — zadávací obrazovky pro agendu, proces a dílčí proces**
