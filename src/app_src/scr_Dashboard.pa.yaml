@@ -730,8 +730,10 @@ Screens:
                         "Obsahuje " & ThisItem.pocet & " položek na další úrovni - klikni pro rozbalení"
                     )
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: |-
-                    =Parent.TemplateWidth - 240 - If(varZobrazitKod, 140, 10) - (ThisItem.uroven - 1) * 28
+                  # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
+                  # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
+                  # útvaru (ten začíná na TemplateWidth - 360).
+                  Width: =Parent.TemplateWidth - 380 - Self.X
                   X: |-
                     =If(varZobrazitKod, 191, 51) + (ThisItem.uroven - 1) * 28
                   Y: =0
