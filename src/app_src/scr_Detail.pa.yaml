@@ -447,9 +447,10 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10
-            Text: ="Zařazení do dílčích procesů"
+            Text: |-
+              ="Zařazení do dílčích procesů (" & CountRows(gal_Zarazeni.AllItems) & ")"
             Visible: =!varNova
-            Width: =240
+            Width: =300
             X: =1020
             Y: =524
       - btn_Vazby:
@@ -472,7 +473,46 @@ Screens:
             Visible: =!varNova
             Width: =240
             X: =1020
+            Y: =616
+      # Výška na dva řádky se schválně nedopočítává z počtu položek: má být
+      # vidět, že seznam pokračuje pod okrajem, a to ustálená výška se
+      # svislým posuvníkem ukáže líp než karta, která se roztáhne.
+      - gal_Zarazeni:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
+          Properties:
+            Height: =60
+            Items: |-
+              =Filter('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title)
+            ShowScrollbar: =true
+            TemplatePadding: =0
+            TemplateSize: =30
+            Visible: =!varNova
+            Width: =300
+            X: =1020
             Y: =548
+          Children:
+            - lbl_ZarazeniText:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =If(ThisItem.primarni.Value = "ano", stylText, stylTextSlaby)
+                  Font: =Font.'Open Sans'
+                  FontWeight: |-
+                    =If(ThisItem.primarni.Value = "ano", FontWeight.Semibold, FontWeight.Normal)
+                  Height: =Parent.TemplateHeight
+                  PaddingLeft: =0
+                  Size: =10
+                  Text: |-
+                    =ThisItem.dilci_proces_kod & " · " &
+                    LookUp(colDilci, Title = ThisItem.dilci_proces_kod, nazev)
+                  Tooltip: |-
+                    =ThisItem.dilci_proces_kod & " · " &
+                    LookUp(colDilci, Title = ThisItem.dilci_proces_kod, nazev) &
+                    If(ThisItem.primarni.Value = "ano", " (primární zařazení — určuje kód aktivity)", "")
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.TemplateWidth - 8
+                  X: =0
+                  Y: =0
       - btn_Ulozit:
           Control: Classic/Button@2.2.0
           Properties:
@@ -546,6 +586,7 @@ Screens:
                                   }
                               )
                           );
+                          Set(varAktStale, true);
                           Notify("Uloženo jako " & varNovyKod & ".", NotificationType.Success);
                           Navigate(scr_Seznam, ScreenTransition.UnCover),
                           Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
@@ -575,6 +616,7 @@ Screens:
               =IfError(
                   RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title);
                   Remove(Aktivity, varAktivita);
+                  Set(varAktStale, true);
                   Notify("Aktivita " & varAktivita.Title & " smazána i s vazbami.", NotificationType.Success);
                   Navigate(scr_Seznam, ScreenTransition.UnCover),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)

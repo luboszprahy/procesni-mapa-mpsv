@@ -22,7 +22,8 @@ _a = _p.parse_args()
 VSTUP = Path(_a.vstup)
 VYSTUP = Path(_a.vystup)
 
-OCEKAVANE_OBRAZOVKY = {"scr_Seznam", "scr_Detail", "scr_Vazby"}
+OCEKAVANE_OBRAZOVKY = {"scr_Dashboard", "scr_Seznam", "scr_Detail", "scr_Vazby"}
+UVODNI_OBRAZOVKA = "scr_Dashboard"
 OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces",
                    "Útvary"}
 
@@ -151,6 +152,12 @@ def main():
         if stav:
             for obrazovka in OCEKAVANE_OBRAZOVKY:
                 overit(obrazovka in stav, f"ScreensOrder neobsahuje {obrazovka}")
+            # první obrazovka v ScreensOrder je ta, kterou appka po startu ukáže
+            radky = stav.splitlines()
+            index = next((i for i, r in enumerate(radky) if r.strip() == "ScreensOrder:"), None)
+            prvni = radky[index + 1].strip().lstrip("- ") if index is not None else "?"
+            overit(prvni == UVODNI_OBRAZOVKA,
+                   f"úvodní obrazovka je '{prvni}', čekal jsem '{UVODNI_OBRAZOVKA}'")
 
         # datové zdroje musí zůstat připojené i uvnitř appky
         datasources = cti(msapp, "References/DataSources.json")

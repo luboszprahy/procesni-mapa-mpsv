@@ -28,7 +28,8 @@ VYSTUP = Path("deploy")
 PRACOVNI = Path("runs/app_build")
 SABLONY = Path("src/control_templates.json")
 
-OBRAZOVKY = ["scr_Seznam", "scr_Detail", "scr_Vazby"]
+# pořadí rozhoduje: první je úvodní obrazovka appky
+OBRAZOVKY = ["scr_Dashboard", "scr_Seznam", "scr_Detail", "scr_Vazby"]
 
 
 

@@ -45,6 +45,8 @@ App:
       Set(stylNebezpeci, RGBA(168, 32, 32, 1));
       Set(varNova, false);
       Set(varAktivita, Blank());
+      Set(varAktStale, true);
+      Set(varZobrazitKod, true);
       Set(varRazeni, "kod");
       Set(varRazeniAsc, true);
       Set(varSmazat, Blank())

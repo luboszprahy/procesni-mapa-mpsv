@@ -463,9 +463,16 @@ def kontrola_delegace(vzorce):
                 continue
             for funkce in NEDELEGOVATELNE:
                 # Sort je delegovatelný, Search není; hlídáme jen skutečné volání funkce.
-                if re.search(rf"\b{funkce}\s*\(", text):
+                for shoda in re.finditer(rf"\b{funkce}\s*\(", text):
+                    # Rozhoduje, co dostane TOHLE volání, ne co je jinde ve vzorci:
+                    # CountRows(Filter(colAkt, …)) ve stejném OnVisible, kde se
+                    # kolekce plní ze SharePointu, s delegací nemá nic společného.
+                    zavorka = text.index("(", shoda.start())
+                    uvnitr = argumenty_volani(text, zavorka)
+                    if list_nazev not in uvnitr:
+                        continue
                     # výjimka: CountRows nad gal_*.AllItems pracuje s už načtenou stránkou
-                    if funkce == "CountRows" and "AllItems" in text:
+                    if funkce == "CountRows" and "AllItems" in uvnitr:
                         continue
                     duvod = VYJIMKY_DELEGACE.get((cesta, prop, funkce))
                     if duvod:

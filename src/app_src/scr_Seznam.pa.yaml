@@ -49,6 +49,23 @@ Screens:
             Width: =240
             X: =40
             Y: =0
+      - lbl_ZalozkaPrehled:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(214, 220, 234, 1)
+            Font: =Font.'Open Sans'
+            Height: =64
+            HoverColor: =RGBA(255, 255, 255, 1)
+            OnSelect: =Navigate(scr_Dashboard, ScreenTransition.None)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            Size: =13
+            Text: ="Přehled"
+            Tooltip: '="Zpět na přehled s rozpadem rejstříku."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =300
+            Y: =0
       - lbl_Zalozka:
           Control: Label@2.5.1
           Properties:
@@ -61,7 +78,7 @@ Screens:
             Text: ="Seznam aktivit"
             VerticalAlign: =VerticalAlign.Middle
             Width: =160
-            X: =300
+            X: =428
             Y: =0
       - rec_ZalozkaPodtrzeni:
           Control: Rectangle@2.3.0
@@ -69,7 +86,7 @@ Screens:
             Fill: =RGBA(255, 255, 255, 1)
             Height: =3
             Width: =160
-            X: =300
+            X: =428
             Y: =58
       - lbl_Uzivatel:
           Control: Label@2.5.1
@@ -400,6 +417,31 @@ Screens:
             Width: =130
             X: =636
             Y: =198
+      # Sloupec s kódem jde skrýt. Řazení podle kódu zůstává dostupné i pak —
+      # skrývá se zobrazení, ne data.
+      - btn_Kod:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varZobrazitKod, stylAkce, stylTextSlaby)
+            Fill: =If(varZobrazitKod, stylRadekVybrany, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: =Set(varZobrazitKod, !varZobrazitKod)
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: |-
+              =If(varZobrazitKod, "Kód: zobrazen", "Kód: skrytý")
+            Tooltip: '="Skryje nebo zobrazí sloupec s identifikačním kódem. Kód se jen přestane vypisovat - řadit podle něj i hledat v něm jde dál a v detailu aktivity zůstává vidět. Ve výchozím stavu je zobrazený."'
+            Width: =130
+            X: =778
+            Y: =198
       - rec_ChipPocet:
           Control: Rectangle@2.3.0
           Properties:
@@ -474,6 +516,7 @@ Screens:
               ="KÓD" & If(varRazeni = "kod", If(varRazeniAsc, " ▲", " ▼"), "")
             Tooltip: '="Seřadí podle identifikačního kódu, tedy v pořadí rejstříku. Výchozí řazení. Další klik obrátí směr."'
             VerticalAlign: =VerticalAlign.Middle
+            Visible: =varZobrazitKod
             Width: =140
             X: =56
             Y: =242
@@ -495,7 +538,7 @@ Screens:
             Tooltip: '="Seřadí abecedně podle názvu aktivity. Další klik obrátí směr."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =300
-            X: =208
+            X: =If(varZobrazitKod, 208, 56)
             Y: =242
       - lbl_h_Utvar:
           Control: Label@2.5.1
@@ -650,6 +693,7 @@ Screens:
                   Size: =11
                   Text: =ThisItem.Title
                   VerticalAlign: =VerticalAlign.Middle
+                  Visible: =varZobrazitKod
                   Width: =140
                   X: =16
                   Y: =0
@@ -666,8 +710,8 @@ Screens:
                   Size: =12
                   Text: =ThisItem.nazev_kratky
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =Parent.TemplateWidth - 712
-                  X: =168
+                  Width: =If(varZobrazitKod, Parent.TemplateWidth - 712, Parent.TemplateWidth - 560)
+                  X: =If(varZobrazitKod, 168, 16)
                   Y: =0
             - lbl_Utvar:
                 Control: Label@2.5.1
@@ -743,26 +787,6 @@ Screens:
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =0
-            - ico_Detail:
-                Control: Classic/Icon@2.5.0
-                Properties:
-                  Color: =stylTextSlaby
-                  Height: =32
-                  HoverColor: =stylAkce
-                  Icon: =Icon.ChevronRight
-                  OnSelect: |-
-                    =Set(varNova, false);
-                    Set(varAktivita, ThisItem);
-                    Navigate(scr_Detail, ScreenTransition.Cover)
-                  PaddingBottom: =9
-                  PaddingLeft: =9
-                  PaddingRight: =9
-                  PaddingTop: =9
-                  PressedColor: =stylAkceStisk
-                  Tooltip: '="Otevře detail aktivity."'
-                  Width: =32
-                  X: =Parent.TemplateWidth - 96
-                  Y: =(Parent.TemplateHeight - 1) / 2 - 16
             - ico_Smazat:
                 Control: Classic/Icon@2.5.0
                 Properties:
@@ -878,6 +902,7 @@ Screens:
               =IfError(
                   RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varSmazat.Title);
                   Remove(Aktivity, varSmazat);
+                  Set(varAktStale, true);
                   Notify("Aktivita " & varSmazat.Title & " smazána i s vazbami.", NotificationType.Success);
                   Set(varSmazat, Blank()),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error);

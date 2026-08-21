@@ -1,0 +1,861 @@
+# Obrazovka 0 — přehled (úvodní obrazovka appky).
+#
+# Rozvržení podle vzoru powerApps-MessageCenterDashboard: tmavý navbar se
+# záložkami → řada karet s čísly → pod nimi plocha s rozpadem.
+#
+# ROZPAD je čtyři sloupce vedle sebe (agendy → procesy → dílčí procesy →
+# aktivity). Klik v levějším sloupci zúží ten napravo; sloupce vpravo od
+# posledního výběru zůstanou prázdné s výzvou, aby bylo poznat, že se čeká
+# na volbu, ne že tam nic není. Klik na aktivitu otevře její detail.
+#
+# POČTY se počítají z kolekcí, ne z listu: CountRows nad SharePointem se
+# nedeleguje. colAgendy/colProcesy/colDilci plní App.OnStart (číselníky jsou
+# malé a načtou se celé), aktivity se načítají tady do colAkt — a jen když
+# je potřeba, tedy při prvním zobrazení nebo po zápisu (varAktStale).
+# Nad 2 000 aktivitami je colAkt první okno dat, na což upozorňuje popisek
+# karty; totéž omezení má dnes i seznam aktivit.
+#
+# Sloupec aktivit ukazuje PRIMÁRNÍ zařazení (Aktivity.dilci_proces_kod).
+# Aktivita zařazená do dalších dílčích procesů se v mapě objeví ve všech,
+# ale tady je jen pod tím svým hlavním — vazební tabulka by znamenala
+# dohledávání názvu ke každému řádku zvlášť. Kde všude aktivita je, ukazuje
+# její detail.
+Screens:
+  scr_Dashboard:
+    Properties:
+      Fill: =stylPlocha
+      LoadingSpinnerColor: =stylAkce
+      OnVisible: |-
+        =If(
+            IsEmpty(colAkt) || varAktStale,
+            ClearCollect(
+                colAkt,
+                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, stav)
+            );
+            Set(varAktStale, false)
+        );
+        Set(
+            varZmapovanoDp,
+            CountRows(Filter(colDilci As dp, CountRows(Filter(colAkt, dilci_proces_kod = dp.Title)) > 0))
+        )
+    Children:
+      # ---------- navbar ----------
+      - rec_NavbarD:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPrimarni
+            Height: =64
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - lbl_AppNazevD:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =64
+            Size: =15
+            Text: ="Procesní mapa MPSV"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =240
+            X: =40
+            Y: =0
+      - lbl_ZalozkaPrehledD:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =64
+            Size: =13
+            Text: ="Přehled"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =300
+            Y: =0
+      - rec_ZalozkaPodtrzeniD:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =3
+            Width: =120
+            X: =300
+            Y: =58
+      - lbl_ZalozkaSeznamD:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(214, 220, 234, 1)
+            Font: =Font.'Open Sans'
+            Height: =64
+            HoverColor: =RGBA(255, 255, 255, 1)
+            OnSelect: =Navigate(scr_Seznam, ScreenTransition.None)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            Size: =13
+            Text: ="Seznam aktivit"
+            Tooltip: '="Přepne na seznam aktivit, kde se pořizuje a edituje."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =160
+            X: =428
+            Y: =0
+      - lbl_UzivatelD:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =24
+            Size: =12
+            Text: =User().FullName
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =320
+            X: =Parent.Width - 360
+            Y: =10
+      - lbl_UzivatelMailD:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(214, 220, 234, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: =User().Email
+            VerticalAlign: =VerticalAlign.Top
+            Width: =320
+            X: =Parent.Width - 360
+            Y: =34
+      # ---------- karty s čísly ----------
+      - rec_KartaAgendy:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =84
+            Width: =306
+            X: =40
+            Y: =84
+      - rec_PruhAgendy:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPrimarni
+            Height: =84
+            Width: =4
+            X: =40
+            Y: =84
+      - lbl_l_KartaAgendy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =18
+            Size: =9
+            Text: ="AGENDY"
+            Width: =270
+            X: =60
+            Y: =96
+      - lbl_v_KartaAgendy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylPrimarni
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =34
+            Size: =20
+            Text: =CountRows(colAgendy)
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =60
+            Y: =114
+      - lbl_p_KartaAgendy:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="oblastí činnosti"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =150
+            X: =180
+            Y: =128
+      - rec_KartaProcesy:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =84
+            Width: =306
+            X: =366
+            Y: =84
+      - rec_PruhProcesy:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylAkce
+            Height: =84
+            Width: =4
+            X: =366
+            Y: =84
+      - lbl_l_KartaProcesy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =18
+            Size: =9
+            Text: ="PROCESY"
+            Width: =270
+            X: =386
+            Y: =96
+      - lbl_v_KartaProcesy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylAkce
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =34
+            Size: =20
+            Text: =CountRows(colProcesy)
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =386
+            Y: =114
+      - lbl_p_KartaProcesy:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: ="v celém rejstříku"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =150
+            X: =506
+            Y: =128
+      - rec_KartaDilci:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =84
+            Width: =306
+            X: =692
+            Y: =84
+      - rec_PruhDilci:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylUspech
+            Height: =84
+            Width: =4
+            X: =692
+            Y: =84
+      - lbl_l_KartaDilci:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =18
+            Size: =9
+            Text: ="DÍLČÍ PROCESY"
+            Width: =270
+            X: =712
+            Y: =96
+      - lbl_v_KartaDilci:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylUspech
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =34
+            Size: =20
+            Text: =CountRows(colDilci)
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =712
+            Y: =114
+      - lbl_p_KartaDilci:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: |-
+              =varZmapovanoDp & " s aktivitami"
+            Tooltip: '="Kolik dílčích procesů už má v evidenci aspoň jednu aktivitu. Zbytek v rejstříku existuje, ale aktivity k němu zatím nikdo nepopsal."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =150
+            X: =832
+            Y: =128
+      - rec_KartaAktivity:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =84
+            Width: =Parent.Width - 1058
+            X: =1018
+            Y: =84
+      - rec_PruhAktivity:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPozor
+            Height: =84
+            Width: =4
+            X: =1018
+            Y: =84
+      - lbl_l_KartaAktivity:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =18
+            Size: =9
+            Text: ="AKTIVITY"
+            Width: =270
+            X: =1038
+            Y: =96
+      - lbl_v_KartaAktivity:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylPozor
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =34
+            Size: =20
+            Text: =CountRows(colAkt)
+            Tooltip: '="Počet načtených aktivit. Do 2 000 je to celý rejstřík; nad tím Power Apps ze SharePointu víc najednou nepřečte a číslo je počet prvního okna dat - stejné omezení má i seznam aktivit."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =120
+            X: =1038
+            Y: =114
+      - lbl_p_KartaAktivity:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylUspech
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10
+            Text: |-
+              =CountRows(Filter(colAkt, stav.Value = "schváleno")) & " schváleno"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =Parent.Width - 1198
+            X: =1158
+            Y: =128
+      # ---------- rozpad: čtyři sloupce ----------
+      - lbl_RozpadNadpis:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =24
+            Size: =12
+            Text: ="Rozpad rejstříku"
+            Width: =300
+            X: =40
+            Y: =184
+      - lbl_RozpadCesta:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =24
+            Size: =11
+            Text: |-
+              =If(
+                  IsBlank(varDashAgenda),
+                  "Vyber agendu a rozbaluj dál doprava.",
+                  varDashAgenda &
+                  If(IsBlank(varDashProces), "", "  ›  " & varDashProces) &
+                  If(IsBlank(varDashDp), "", "  ›  " & varDashDp)
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =600
+            X: =348
+            Y: =184
+      - btn_RozpadZrusit:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varDashAgenda, Blank());
+              Set(varDashProces, Blank());
+              Set(varDashDp, Blank())
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =10
+            Text: ="Zrušit výběr"
+            Visible: =!IsBlank(varDashAgenda)
+            Width: =120
+            X: =Parent.Width - 160
+            Y: =182
+      # --- sloupec 1: agendy ---
+      - rec_SloupecAgendy:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =Parent.Height - 240
+            Width: =306
+            X: =40
+            Y: =216
+      - lbl_h_SlAgendy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10
+            Text: ="AGENDA"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =280
+            X: =56
+            Y: =222
+      - gal_SlAgendy:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
+          Properties:
+            Height: =Parent.Height - 296
+            Items: =Sort(colAgendy, Title, SortOrder.Ascending)
+            ShowScrollbar: =true
+            TemplatePadding: =0
+            TemplateSize: =56
+            Width: =306
+            X: =40
+            Y: =252
+          Children:
+            - rec_AgPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: |-
+                    =If(ThisItem.Title = varDashAgenda, stylRadekVybrany, stylKarta)
+                  Height: =Parent.TemplateHeight - 1
+                  HoverFill: =stylRadekHover
+                  OnSelect: |-
+                    =Set(varDashAgenda, ThisItem.Title);
+                    Set(varDashProces, Blank());
+                    Set(varDashDp, Blank())
+                  PressedFill: =stylRadekVybrany
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
+            - lbl_AgKod:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =18
+                  Size: =9
+                  Text: =ThisItem.Title
+                  Width: =60
+                  X: =16
+                  Y: =8
+            - lbl_AgNazev:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =28
+                  Size: =11
+                  Text: =ThisItem.nazev
+                  Tooltip: |-
+                    =ThisItem.Title & " · " & ThisItem.nazev &
+                    If(IsBlank(ThisItem.vlastnik), "", Char(10) & "Vlastník: " & ThisItem.vlastnik)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.TemplateWidth - 90
+                  X: =16
+                  Y: =24
+            - lbl_AgPocet:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =stylAkce
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =Parent.TemplateHeight - 1
+                  Size: =11
+                  Text: |-
+                    =CountRows(Filter(colProcesy, agenda_kod = ThisItem.Title))
+                  Tooltip: '="Počet procesů v agendě."'
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =50
+                  X: =Parent.TemplateWidth - 66
+                  Y: =0
+            - rec_AgLinka:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =Parent.TemplateHeight - 1
+      # --- sloupec 2: procesy ---
+      - rec_SloupecProcesy:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =Parent.Height - 240
+            Width: =306
+            X: =366
+            Y: =216
+      - lbl_h_SlProcesy:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10
+            Text: ="PROCES"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =280
+            X: =382
+            Y: =222
+      - lbl_SlProcesyPrazdno:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =60
+            Size: =11
+            Text: ="Vyber agendu vlevo"
+            VerticalAlign: =VerticalAlign.Middle
+            Visible: =IsBlank(varDashAgenda)
+            Width: =306
+            X: =366
+            Y: =300
+      - gal_SlProcesy:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
+          Properties:
+            Height: =Parent.Height - 296
+            Items: |-
+              =Sort(Filter(colProcesy, agenda_kod = varDashAgenda), Title, SortOrder.Ascending)
+            ShowScrollbar: =true
+            TemplatePadding: =0
+            TemplateSize: =56
+            Visible: =!IsBlank(varDashAgenda)
+            Width: =306
+            X: =366
+            Y: =252
+          Children:
+            - rec_PrPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: |-
+                    =If(ThisItem.Title = varDashProces, stylRadekVybrany, stylKarta)
+                  Height: =Parent.TemplateHeight - 1
+                  HoverFill: =stylRadekHover
+                  OnSelect: |-
+                    =Set(varDashProces, ThisItem.Title);
+                    Set(varDashDp, Blank())
+                  PressedFill: =stylRadekVybrany
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
+            - lbl_PrKod:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =18
+                  Size: =9
+                  Text: =ThisItem.Title
+                  Width: =60
+                  X: =16
+                  Y: =8
+            - lbl_PrNazev:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =28
+                  Size: =11
+                  Text: =ThisItem.nazev
+                  Tooltip: |-
+                    =ThisItem.Title & " · " & ThisItem.nazev &
+                    If(IsBlank(ThisItem.vlastnik), "", Char(10) & "Vlastník: " & ThisItem.vlastnik)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.TemplateWidth - 90
+                  X: =16
+                  Y: =24
+            - lbl_PrPocet:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =stylAkce
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =Parent.TemplateHeight - 1
+                  Size: =11
+                  Text: |-
+                    =CountRows(Filter(colDilci, proces_kod = ThisItem.Title))
+                  Tooltip: '="Počet dílčích procesů v procesu."'
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =50
+                  X: =Parent.TemplateWidth - 66
+                  Y: =0
+            - rec_PrLinka:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =Parent.TemplateHeight - 1
+      # --- sloupec 3: dílčí procesy ---
+      - rec_SloupecDilci:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =Parent.Height - 240
+            Width: =306
+            X: =692
+            Y: =216
+      - lbl_h_SlDilci:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10
+            Text: ="DÍLČÍ PROCES"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =280
+            X: =708
+            Y: =222
+      - lbl_SlDilciPrazdno:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =60
+            Size: =11
+            Text: ="Vyber proces vlevo"
+            VerticalAlign: =VerticalAlign.Middle
+            Visible: =IsBlank(varDashProces)
+            Width: =306
+            X: =692
+            Y: =300
+      - gal_SlDilci:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
+          Properties:
+            Height: =Parent.Height - 296
+            Items: |-
+              =Sort(Filter(colDilci, proces_kod = varDashProces), Title, SortOrder.Ascending)
+            ShowScrollbar: =true
+            TemplatePadding: =0
+            TemplateSize: =56
+            Visible: =!IsBlank(varDashProces)
+            Width: =306
+            X: =692
+            Y: =252
+          Children:
+            - rec_DpPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: |-
+                    =If(ThisItem.Title = varDashDp, stylRadekVybrany, stylKarta)
+                  Height: =Parent.TemplateHeight - 1
+                  HoverFill: =stylRadekHover
+                  OnSelect: =Set(varDashDp, ThisItem.Title)
+                  PressedFill: =stylRadekVybrany
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
+            - lbl_SlDpKod:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =18
+                  Size: =9
+                  Text: =ThisItem.Title
+                  Width: =80
+                  X: =16
+                  Y: =8
+            - lbl_SlDpNazev:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =28
+                  Size: =11
+                  Text: =ThisItem.nazev
+                  Tooltip: |-
+                    =ThisItem.Title & " · " & ThisItem.nazev &
+                    If(IsBlank(ThisItem.vlastnik), "", Char(10) & "Vlastník: " & ThisItem.vlastnik)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.TemplateWidth - 90
+                  X: =16
+                  Y: =24
+            # Nula aktivit je běžný a důležitý stav: dílčí proces je v rejstříku,
+            # ale nikdo k němu ještě nepopsal činnosti. Proto se nezobrazuje
+            # prázdno, ale výrazná nula.
+            - lbl_SlDpPocet:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: |-
+                    =If(
+                        CountRows(Filter(colAkt, dilci_proces_kod = ThisItem.Title)) > 0,
+                        stylUspech,
+                        stylTextSlaby
+                    )
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =Parent.TemplateHeight - 1
+                  Size: =11
+                  Text: |-
+                    =CountRows(Filter(colAkt, dilci_proces_kod = ThisItem.Title))
+                  Tooltip: '="Počet aktivit, které mají tenhle dílčí proces jako primární zařazení. Nula znamená, že dílčí proces v rejstříku je, ale činnosti k němu zatím nikdo nepopsal."'
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =50
+                  X: =Parent.TemplateWidth - 66
+                  Y: =0
+            - rec_DpLinka:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =Parent.TemplateHeight - 1
+      # --- sloupec 4: aktivity ---
+      - rec_SloupecAktivity:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =Parent.Height - 240
+            Width: =Parent.Width - 1058
+            X: =1018
+            Y: =216
+      - lbl_h_SlAktivity:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10
+            Text: ="AKTIVITA"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =200
+            X: =1034
+            Y: =222
+      - lbl_SlAktivityPrazdno:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =60
+            Size: =11
+            Text: |-
+              =If(
+                  IsBlank(varDashDp),
+                  "Vyber dílčí proces vlevo",
+                  "K tomuhle dílčímu procesu zatím žádná aktivita není"
+              )
+            Visible: |-
+              =IsBlank(varDashDp) || IsEmpty(Filter(colAkt, dilci_proces_kod = varDashDp))
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =Parent.Width - 1058
+            X: =1018
+            Y: =300
+      - gal_SlAktivity:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
+          Properties:
+            Height: =Parent.Height - 296
+            Items: |-
+              =Sort(Filter(colAkt, dilci_proces_kod = varDashDp), Title, SortOrder.Ascending)
+            ShowScrollbar: =true
+            TemplatePadding: =0
+            TemplateSize: =56
+            Visible: =!IsBlank(varDashDp)
+            Width: =Parent.Width - 1058
+            X: =1018
+            Y: =252
+          Children:
+            # Aktivita je koncová úroveň — klik nevybírá, ale otevírá detail.
+            # varAktivita se plní z listu, ne z colAkt: kolekce nese jen část
+            # sloupců a detail potřebuje celý záznam.
+            - rec_AkPozadi:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylKarta
+                  Height: =Parent.TemplateHeight - 1
+                  HoverFill: =stylRadekHover
+                  OnSelect: |-
+                    =Set(varNova, false);
+                    Set(varAktivita, LookUp(Aktivity, Title = ThisItem.Title));
+                    Navigate(scr_Detail, ScreenTransition.Cover)
+                  PressedFill: =stylRadekVybrany
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =0
+            - lbl_AkKod:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =18
+                  Size: =9
+                  Text: =ThisItem.Title
+                  Width: =120
+                  X: =16
+                  Y: =8
+            - lbl_AkStav:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: |-
+                    =If(ThisItem.stav.Value = "schváleno", stylUspech, stylPozor)
+                  Font: =Font.'Open Sans'
+                  Height: =18
+                  Size: =9
+                  Text: =ThisItem.stav.Value
+                  Width: =100
+                  X: =Parent.TemplateWidth - 116
+                  Y: =8
+            - lbl_AkNazev:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =28
+                  Size: =11
+                  Text: =ThisItem.nazev_kratky
+                  Tooltip: |-
+                    =ThisItem.Title & " · " & ThisItem.nazev_kratky &
+                    If(IsBlank(ThisItem.vykonava), "", Char(10) & "Vykonává: " & ThisItem.vykonava) &
+                    Char(10) & "Klikni pro detail"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.TemplateWidth - 32
+                  X: =16
+                  Y: =24
+            - rec_AkLinka:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =Parent.TemplateWidth
+                  X: =0
+                  Y: =Parent.TemplateHeight - 1

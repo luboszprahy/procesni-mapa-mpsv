@@ -11,6 +11,7 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 | F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.23 ověřeno v provozu 21.08.) |
 | F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo** (ověřeno v provozu 21.08.) |
 | F4 | Přenos na tenant MPSV | **blokováno** — bez přístupu k tenantu MPSV (21.08.) |
+| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky | A–C **hotovo** (1.0.0.26), D zbývá |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
 Brány s `/audit` (agent `powerplatform-auditor`): před importem do DEV (konec F1),

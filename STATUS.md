@@ -24,7 +24,81 @@ Pracuje se dál v PPF DEV.
 **Návod pro správce (`deploy/navod_sprava.md`, krok 13) se zatím nepíše** —
 rozhodnuto 21.08.2026, až podle finální podoby appky.
 
-## Tlačítko „Obnovit mapu" hotové — 1.0.0.25 k importu (21.08.2026 11:20)
+## F6 skupiny A–C hotové — mapa upravená, dashboard postavený (21.08.2026 12:05)
+
+1.0.0.25 uživatel naimportoval a **všechno v prostředí funguje**: appka bez chyb,
+tlačítko „Obnovit mapu" spustí flow, mapa se přegeneruje, `Nacti_DilciProcesy`
+vrací 250 položek, „Zobrazit v HTML" mapu zobrazí (nestahuje), fulltext hledá.
+Tím jsou **F2 i F3 ověřené v provozu**.
+
+Zadání F6 z 21.08.2026 (detail v `PLAN.md`), stav:
+
+### A — HTML mapa: hotovo
+Přepínač **stupně rozbalení** (agendy / +procesy / +dílčí / vše) místo tlačítek
+Rozbalit–Sbalit; **zatržítko „Zobrazit kód"** (výchozí zapnuto, skrývá CSS —
+hledání podle kódu funguje dál); **čtyři stupně velikosti písma** přes jedinou
+proměnnou `--fs` (všechny velikosti přepsané na `rem`, žádná druhá varianta
+stránky se nikam nezapéká); **nápověda na řádku** s typem prvku, kódem, názvem
+a počtem aktivit; **vrstvy odlišené** podkladem řádku, proužkem vlevo a barvou
+linky odsazení. Volby se pamatují v `localStorage` v `try/catch`.
+
+Dvě nové brány, obě mutačně ověřené:
+`src/check_mapa_html.py` (26 statických kontrol, 6/6 mutací) a
+`src/check_mapa_beh.py` (18 kontrol **v headless Edge** — proklikne ovládací
+prvky a čte výsledný DOM, 4/4 mutace). Chrome extension nebyla dostupná;
+headless Edge přes `--dump-dom` je navíc spustitelný opakovaně jako brána.
+
+### B — drobnosti v appce: hotovo
+Šipka `ico_Detail` z řádku pryč (řádek otevírá detail celý od 1.0.0.20);
+**přepínač „Kód: zobrazen / skrytý"** v řádku filtrů (výchozí zobrazen, název
+aktivity se při skrytí posune doleva, řazení podle kódu zůstává); v detailu
+**galerie zařazení** o výšce dvou řádků se svislým posuvníkem, primární
+zařazení tučně, nadpis nese počet.
+
+### C — dashboard: postavený, čeká na import
+Nová obrazovka `scr_Dashboard` je **úvodní** (rozhodnuto 21.08.2026). Navbar má
+záložky Přehled / Seznam aktivit, pod ním čtyři karty s čísly (agendy, procesy,
+dílčí procesy s počtem zmapovaných, aktivity se schválenými) a **rozpad ve
+čtyřech sloupcích** agenda → proces → dílčí proces → aktivita. Klik zúží sloupec
+napravo, sloupce čekající na volbu ukazují výzvu, klik na aktivitu otevře detail.
+
+Vědomá rozhodnutí:
+- **Sloupec aktivit ukazuje primární zařazení** (`Aktivity.dilci_proces_kod`).
+  Aktivita zařazená i jinam se v mapě objeví ve všech větvích, tady je pod tou
+  hlavní — přes vazební tabulku by se ke každému řádku dohledával název zvlášť.
+  Kde všude aktivita je, ukazuje její detail (a nově i s posuvníkem).
+- **Počty se počítají z kolekcí, ne z listu** — `CountRows` nad SharePointem se
+  nedeleguje. Aktivity se načítají do `colAkt` v `OnVisible`, a jen když je
+  potřeba (`varAktStale` se zvedne po každém uložení i smazání aktivity).
+  Nad 2 000 aktivitami je `colAkt` první okno dat, což říká tooltip karty.
+
+`check_app.py` měl u dashboardu **falešný poplach na delegaci**: hlásil
+`CountRows` nad `Aktivity`, přestože šlo o `CountRows(Filter(colAkt, …))`
+v témže vzorci, kde se kolekce plní. Kontrola teď rozhoduje podle argumentů
+konkrétního volání, ne podle výskytu názvu listu kdekoli ve vzorci —
+mutace `CountRows(Aktivity)` dál padá.
+
+**`deploy/procesnimapa_1_0_0_26.zip`** — brány: `check_app` OK (182 prvků,
+1709 vzorců), `check_solution` **208 kontrol, 0 chyb** (nově hlídá i to, že
+úvodní obrazovka je `scr_Dashboard`; mutace prohozeného pořadí chycena).
+
+Úklid connection reference `…_12718` **znovu odložen** — mísit ho s takhle
+velkou změnou by při selhání importu zamlžilo příčinu.
+
+### Ověření po importu 1.0.0.26 (na uživateli)
+1. Appka startuje **Přehledem**, čísla karet sedí (dnes 7 / 46 / 250 / 46).
+2. Rozpad: klik na agendu naplní procesy, pak dílčí procesy, pak aktivity;
+   „Zrušit výběr" vrátí do výchozího stavu; klik na aktivitu otevře detail.
+3. Záložky Přehled ↔ Seznam aktivit přepínají.
+4. Seznam: řádek už nemá šipku, otevírá se klikem kamkoli; „Kód: zobrazen"
+   sloupec skryje a název se posune doleva.
+5. Detail aktivity s víc zařazeními ukáže dva řádky a posuvník.
+6. **Nahrát nový `deploy/mapa_template.html` do Site Assets** a spustit
+   „Obnovit mapu" — jinak publikovaná mapa zůstane v původní podobě. Šablonu
+   čte flow z knihovny, ne z repa.
+7. Save & Publish.
+
+## Tlačítko „Obnovit mapu" hotové — 1.0.0.25 (21.08.2026 11:20, ověřeno v provozu)
 
 Uživatel dodal přes git `input/procesnimapa_1_0_0_24.zip` s provedeným
 **Add flow**: v `.msapp` → `References/DataSources.json` je nově
