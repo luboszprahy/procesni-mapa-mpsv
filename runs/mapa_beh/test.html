@@ -328,5 +328,66 @@ pouzijVelikost(+pamet.read("mapa.fs", "14") || 14);
 
 render();
 </script>
+
+<script id="test-scenar">
+(function(){
+  const out = {};
+  const vidi = el => el && !el.classList.contains("hide");
+  const kids = lvl => document.querySelector(".lvl-" + lvl + " > .kids");
+
+  out.vychoziKod       = !document.body.classList.contains("bez-kodu");
+  out.vychoziUroven    = document.getElementById("fUroven").value;
+  out.vychoziProcesy   = vidi(kids("a"));
+  out.vychoziDilci     = vidi(kids("p"));
+  out.titulekAgendy    = (document.querySelector(".lvl-a > .row") || {}).title || "";
+  out.titulekAktivity  = "";
+  out.pocetKodu        = document.querySelectorAll(".kod").length;
+
+  // 1) stupeň rozbalení 3 = dílčí procesy vidět, aktivity ne
+  const uroven = document.getElementById("fUroven");
+  uroven.value = "3"; uroven.dispatchEvent(new Event("change"));
+  out.u3Dilci    = vidi(kids("p"));
+  out.u3Aktivity = vidi(kids("d"));
+
+  // 2) stupeň 4 = i aktivity
+  uroven.value = "4"; uroven.dispatchEvent(new Event("change"));
+  out.u4Aktivity = vidi(kids("d"));
+
+  // 3) stupeň 1 = sbaleno hned pod agendami
+  uroven.value = "1"; uroven.dispatchEvent(new Event("change"));
+  out.u1Procesy = vidi(kids("a"));
+
+  uroven.value = "4"; uroven.dispatchEvent(new Event("change"));
+  const aktRow = document.querySelector(".lvl-k > .row");
+  out.titulekAktivity = aktRow ? aktRow.title : "";
+
+  // 4) vypnutí kódu
+  const cKod = document.getElementById("cKod");
+  cKod.checked = false; cKod.dispatchEvent(new Event("change"));
+  out.poVypnutiKod = document.body.classList.contains("bez-kodu");
+  out.kodStaleVDom = document.querySelectorAll(".kod").length;   // skrývá se CSS, ne mazáním
+
+  // 5) velikost písma
+  document.querySelector('#fVelikost button[data-fs="19"]').click();
+  out.fs = document.documentElement.style.getPropertyValue("--fs").trim();
+  out.fsPressed = document.querySelector('#fVelikost button[aria-pressed="true"]').dataset.fs;
+
+  // 6) klik na aktivitu naplní detail
+  if (aktRow) aktRow.click();
+  out.detail = document.getElementById("detailBody").textContent.slice(0, 120);
+
+  // 7) hledání rozbaluje bez ohledu na stupeň
+  uroven.value = "1"; uroven.dispatchEvent(new Event("change"));
+  const q = document.getElementById("q");
+  q.value = "informa"; q.dispatchEvent(new Event("input"));
+  out.hledaniRozbalilo = vidi(kids("a"));
+  out.hledaniNaslo = document.querySelectorAll("mark").length;
+
+  const pre = document.createElement("pre");
+  pre.id = "vysledek-testu";
+  pre.textContent = JSON.stringify(out);
+  document.body.appendChild(pre);
+})();
+</script>
 </body>
 </html>

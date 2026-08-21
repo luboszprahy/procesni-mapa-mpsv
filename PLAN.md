@@ -302,6 +302,103 @@ falešného hlášení „appka nefunguje". Musí být v návodu.
 
 ---
 
+## F6 — Připomínky z provozu (zadáno 21.08.2026)
+
+Zadáno po ověření 1.0.0.25 v prostředí. Pořadí je dané závislostmi: skupina A
+je nezávislá na Studiu a jde hned, B je drobná a jede v jednom balíku s C,
+D až po C.
+
+### A. HTML mapa — co: `src/mapa_template.html`, `src/build_mapa.py`
+
+Všechny čtyři úpravy jsou v šabloně; data se nemění, kotvy `__DATA_JSON__`
+a `__GEN__` zůstávají beze změny.
+
+**A1. Zatržítko „Zobrazit kód" v ovládací liště, ve výchozím stavu zapnuté.**
+Vypnuté skryje `span.kod` v celém stromu (CSS třída na `<body>`, ne přerenderování).
+
+**A2. Volba velikosti písma, bez zapékání variant.** Čtyři stupně (S / M / L / XL)
+přepínají jedinou CSS proměnnou `--fs` na `:root`; všechny velikosti v šabloně
+se přepočítají z ní (`em`/`calc`), takže se nikde nezapéká druhá varianta stránky.
+Volba se pamatuje přes `localStorage` v `try/catch` — v sandboxovaném náhledu
+může přístup k úložišti vyhodit výjimku a stránka to nesmí odnést.
+
+**A3. Nápověda při najetí myší.** `title` na řádku: typ prvku (agenda / proces /
+dílčí proces / aktivita), kód a u aktivity vykonávající útvar. `title` je zvolený
+schválně — vlastní tooltip by v náhledovém iframu musel řešit ořezání okrajem.
+
+**A4. Volba stupně rozbalení + barevné odlišení vrstev.** Místo dvou tlačítek
+„Rozbalit / Sbalit vše" přepínač úrovní **1 agendy · 2 procesy · 3 dílčí procesy ·
+4 vše**; každá úroveň rozbalí strom právě po tu vrstvu. Vrstvy dostanou vlastní
+podklad řádku a barvu svislé linky odsazení, ne jen barvu písma jako dnes.
+
+**verify:** `python src/build_mapa.py`, otevřít `viz/mapa_prototyp.html` přes
+`http://127.0.0.1:8765/` a projít: (a) odškrtnutí kódu skryje kódy na všech
+čtyřech úrovních a hledání podle kódu se tím **nerozbije**, (b) čtyři stupně
+písma mění velikost celé stránky včetně detailu, po reloadu drží, (c) najetí
+na řádek každé úrovně ukáže správný typ, (d) stupeň 2 rozbalí procesy a nic
+hlubšího, (e) smoke test `build_mapa.py` (kotvy 1×, žádné `http://` mimo
+komentáře) prochází.
+**edge cases:** filtr útvaru + stupeň rozbalení se nesmí přebíjet — vyhledávání
+už dnes rozbaluje nalezené větve a to má přednost; `localStorage` nedostupný.
+**risk:** `mapa_template.html` čte publikační flow **ze Site Assets**, ne z repa
+— bez nahrání nové šablony do knihovny se úprava v publikované mapě neprojeví.
+Do ověření proto patří i běh flow.
+
+### B. Drobnosti v canvas appce — co: `src/app_src/scr_Seznam.pa.yaml`, `scr_Detail.pa.yaml`
+
+**B1. Zrušit šipku pro otevření detailu** v řádku galerie. Celý řádek detail
+otevírá od 1.0.0.20, šipka je zbytek dřívějšího chování.
+
+**B2. Přepínač „Zobrazit kód" nad seznamem, výchozí zapnuto.** Skrývá sloupec
+kódu v galerii i jeho hlavičku; řazení podle kódu zůstane dostupné.
+
+**B3. Detail — pole dílčích procesů.** Dnes je vidět jedno zařazení. Nově galerie
+o výšce dvou řádků se svislým posuvníkem a popiskem „zařazeno do N dílčích
+procesů", aby bylo poznat, že jich je víc.
+
+**verify:** `python src/check_app.py` (parsuje YAML, hlídá delegaci, překryvy);
+po importu ve Studiu: řádek bez šipky se otevírá klikem, přepínač kódu schová
+sloupec a nezmění počty, aktivita se třemi zařazeními ukáže dvě a posuvník.
+**edge cases:** aktivita s jedním zařazením nesmí mít prázdný druhý řádek;
+skrytí sloupce kódu nesmí posunout ostatní sloupce mimo kartu.
+**risk:** `Visible` na sloupcích galerie mění šířky — hlídá `kontrola_prekryvu`.
+
+### C. Dashboard — co: nová obrazovka `src/app_src/scr_Dashboard.pa.yaml`
+
+Styl podle `powerApps-MessageCenterDashboard`: tmavý pruh s velkými čísly vpravo,
+pod ním karty s podílem, chip filtry, plochý seznam.
+
+Rozhodnuto 21.08.2026: **dashboard je úvodní obrazovka appky** (na seznam
+aktivit se jde tlačítkem) a **rozpad jde po hierarchii A–P–DP–aktivita**;
+pohledy podle útvarů a podle stavu zmapování se teď nestaví.
+
+Obsah: **KPI** (agend, procesů, dílčích procesů, aktivit, z toho schváleno
+a pracovní, podíl zmapovaných dílčích procesů) a hlavně **klikací rozpad** —
+sloupec agend → klik rozbalí procesy dané agendy → dílčí procesy → aktivity,
+s drobečkovou navigací a počty u každé úrovně. Z aktivity vede otevření detailu.
+
+**verify:** `check_app.py` + `check_solution.py` nad novým balíkem; ve Studiu:
+součty KPI sedí na počty v listech (7 / 46 / 250 / 46 dnes), klik na agendu
+zúží druhý sloupec jen na její procesy, drobečková navigace se vrací o úroveň,
+zpět na seznam funguje.
+**edge cases:** delegace — počty nad 2 000 aktivitami; agenda bez procesů;
+dílčí proces bez aktivit (běžný stav, 250 vs. 46).
+**risk:** `CountRows` nad SharePointem se nedeleguje (známé z 1.0.0.20) —
+čísla se musí počítat nad načtenými kolekcemi a popisek to musí říkat.
+
+### D. Zadávací obrazovky pro agendu, proces a dílčí proces (po C)
+
+Dnes jde založit jen aktivita. Nově průvodce i pro vyšší úrovně: uživatele vede,
+co vyplnit, a u zanořené úrovně vynutí údaje potřebné pro vazbu (proces bez
+agendy nevznikne). Kódy přiděluje stejný mechanismus jako u aktivit.
+
+**verify:** založení procesu v agendě → kód `AA-BB` navazuje na poslední volný,
+`kody.json` se nepřečísluje, nová položka se objeví v mapě po publikaci.
+**risk:** kolize kódů při souběžném zakládání dvěma uživateli — vyhodnotit,
+zda stačí kontrola před zápisem, nebo je potřeba pojistné flow.
+
+---
+
 ## F5 — Generování textu OŘ (fáze 2)
 
 Ze schválených aktivit (`stav = schváleno`) sestavit text organizačního řádu
