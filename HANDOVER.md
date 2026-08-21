@@ -1,4 +1,4 @@
-# HANDOVER — přechod na jiný stroj (21.08.2026 12:45)
+# HANDOVER — vstupní bod pro další session (21.08.2026 16:20)
 
 Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má dělat
 teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
@@ -106,8 +106,17 @@ chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
-Rozpracované: **F6 skupina D — zadávací obrazovky pro agendu, proces
-a dílčí proces**
+**F6 skupina D — zadávací obrazovky pro agendu, proces a dílčí proces.**
+Nezačaté — celá session 21.08. odpoledne padla na připomínky z provozu
+(balíky 1.0.0.29 až 34). Podrobný plán včetně rozhodnutí a vyhodnocených rizik
+je rozepsaný v `PLAN.md`, sekce F6/D, a je připravený k realizaci.
+
+Na F6/D visí ještě jedna věc: **ikona tužky ve stromu** dnes na úrovních
+agenda / proces / dílčí proces jen oznámí, že se ta úroveň zatím upravuje
+v SharePointu. Až obrazovka vznikne, přepoj ji tam (`ico_StromEdit.OnSelect`
+v `scr_Dashboard.pa.yaml`).
+
+Původní zadání F6/D
 (`PLAN.md`, sekce F6/D). Dnes jde založit jen aktivita; nově má průvodce vést
 uživatele i na vyšších úrovních a u zanořené úrovně vynutit údaje potřebné pro
 vazbu (proces bez agendy nevznikne). Kódy přiděluje stejný mechanismus jako
@@ -133,6 +142,32 @@ pojistné flow.
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
 
+## 3b. Co se udělalo 21.08. odpoledne (balíky 29–34)
+
+Všechno na základě připomínek z provozu, chronologie a odůvodnění v `STATUS.md`:
+
+| co | proč |
+|---|---|
+| klik do celého řádku stromu + podbarvení při najetí | popisky nad podkladem spolkly klik i hover |
+| hlavičky `VLASTNÍK / VYKONÁVÁ` a `POLOŽEK UVNITŘ` + tooltipy | z obrazovky nešlo poznat, co ta čísla znamenají |
+| tooltip rozepisuje kódy útvarů na „kód · název" | sloupec ukazuje jen kódy, do 160 px se název nevejde |
+| filtr stavu na přehledu (vše / schváleno / pracovní) | zadáno; filtruje celý strom, ne jen řádky aktivit |
+| „Zobrazit vše" v seznamu aktivit | vynuluje všechny čtyři filtry naráz |
+| ikona tužky v řádku stromu | detail na jeden klik; klik do řádku jen rozbaluje |
+| tři velikosti písma napříč appkou (`varFs`, výchozí střední) | čitelnost; jen text a výšky řádků, ne celý layout |
+| šipka zpět jako celý čtvereček, návrat podle původu | proklik z přehledu končil v seznamu aktivit |
+| denní publikace mapy v 7:00 (`MapaPublishScheduled`) | flow má jediný trigger, plán proto řeší klon |
+
+Nové brány: `kontrola_stareho_result` v `check_app.py` (Split vrací `Value`,
+ne `Result`) a kontrola plánovaného dvojčete v `check_mapa_flow.py`
+(129 → 142 kontrol). Obě mutačně ověřené.
+
+Vzory z téhle session jsou zapsané do skillu `power-Apps-skill`
+(`reference/canvas-architecture-patterns.md`, `reference/pa-yaml-uskali.md`,
+`SKILL.md`) — řádková ikona za překryvem, klikací ikona v liště, návrat na
+obrazovku původu, volitelná velikost písma, předpočítané agregace pro filtr
+a „flow má jediný trigger".
+
 ## 4. Odložené a otevřené věci
 
 - **Úklid connection reference `ppf_sharedsharepointonline_12718`**
@@ -147,6 +182,10 @@ pojistné flow.
 - **Adresa mapy `varMapaUrl`** je v `App.pa.yaml` natvrdo (canvas app umí číst
   jen datasetové env proměnné, textové ne). Při přenosu na MPSV se mění tam —
   je to jediné místo a `check_solution.py` na to upozorňuje varováním.
+- **Pozice posuvníku stromu se při návratu z detailu neobnoví.** Rozbalené
+  větve drží `colOtevrene`, takže ty se vrátí, ale scroll galerie si Power Apps
+  řídí sám a z `pa.yaml` ho neovlivníš. Zatím neřešeno — čeká se, jestli to
+  v provozu vadí.
 - **Delegace nad 2 000 aktivitami**: fulltext v seznamu a `colAkt` na přehledu
   pracují s prvním oknem dat. Dnes 49 aktivit, takže úplné; popisky to říkají.
 
