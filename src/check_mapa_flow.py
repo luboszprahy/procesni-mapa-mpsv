@@ -50,6 +50,62 @@ def overit(podminka, popis):
         chyby.append(popis)
 
 
+def dvojce(polozky, rucni_klic, rucni):
+    """Plánované dvojče MapaPublishScheduled musí dělat totéž a lišit se jen triggerem.
+
+    Flow má jen jeden trigger, takže denní běh a ruční spuštění z appky nejdou
+    v jednom. Dvojče je klon; kdyby se jeho akce rozešly s ručním flow, mapa by
+    se v noci publikovala jinak než po stisku tlačítka a nikdo by si toho
+    nevšiml — proto se porovnávají celé.
+    """
+    klice = [n for n in polozky if n.replace("\\", "/").startswith("Workflows/MapaPublishScheduled")]
+    overit(len(klice) == 1, f"čekám právě jedno MapaPublishScheduled, je jich {len(klice)}")
+    if len(klice) != 1:
+        return
+    klic = klice[0]
+    overit(klic != rucni_klic, "dvojče má stejný soubor jako ruční flow")
+
+    flow = json.loads(polozky[klic].decode("utf-8-sig"))
+    definice = flow["properties"]["definition"]
+    rucni_def = rucni["properties"]["definition"]
+
+    overit(definice.get("contentVersion") == "1.0.0.0",
+           f"dvojče má contentVersion {definice.get('contentVersion')!r}; s 'undefined' "
+           "import projde, ale flow nejde otevřít v designeru")
+    overit(definice.get("actions") == rucni_def.get("actions"),
+           "akce dvojčete se liší od ručního flow — mapa by se v noci publikovala jinak")
+    overit(flow["properties"].get("connectionReferences")
+           == rucni["properties"].get("connectionReferences"),
+           "dvojče nemá stejné connection reference, akce by neměly čím běžet")
+
+    triggery = definice.get("triggers") or {}
+    overit(list(triggery) == ["Recurrence"],
+           f"dvojče musí mít jediný trigger Recurrence, má {list(triggery)}")
+    spousteni = (triggery.get("Recurrence") or {}).get("recurrence") or {}
+    overit(spousteni.get("frequency") == "Day" and spousteni.get("interval") == 1,
+           f"dvojče se nespouští denně: {spousteni.get('frequency')} / {spousteni.get('interval')}")
+    overit(spousteni.get("timeZone") == "Central Europe Standard Time",
+           f"dvojče má časové pásmo {spousteni.get('timeZone')!r}; bez něj by UTC posunulo "
+           "běh o hodinu nebo dvě podle letního času")
+    hodiny = (spousteni.get("schedule") or {}).get("hours")
+    overit(hodiny == ["7"], f"dvojče se nespouští v 7:00, ale v {hodiny}")
+
+    # Ruční spuštění z appky nesmí zmizet — appka volá právě tohle flow.
+    overit((rucni_def.get("triggers") or {}).get("manual", {}).get("kind") == "PowerAppV2",
+           "ruční flow přišlo o trigger PowerAppV2, appka by ho nespustila")
+
+    # Bez zápisu v obou XML se flow do prostředí vůbec nedostane.
+    guid = re.search(r"-([0-9A-Fa-f-]{36})\.json$", klic).group(1).lower()
+    customizations = polozky["customizations.xml"].decode("utf-8-sig")
+    overit(f'<Workflow WorkflowId="{{{guid}}}" Name="MapaPublishScheduled">' in customizations,
+           "dvojče chybí v customizations.xml")
+    overit(klic.replace("\\", "/") in customizations.replace("/Workflows", "Workflows"),
+           "customizations.xml neodkazuje na soubor dvojčete")
+    solution = polozky["solution.xml"].decode("utf-8-sig")
+    overit(f'<RootComponent type="29" id="{{{guid}}}"' in solution,
+           "dvojče není v RootComponents solution.xml, do balíku se nezahrne")
+
+
 def viditelne(akce, jmeno):
     """Množina akcí, na které smí akce odkazovat: ona sama ne, ale vše
     v jejím řetězu runAfter směrem nahoru. Odkaz mimo tuto množinu se
@@ -249,6 +305,8 @@ def main():
             overit(html.count('"vygenerováno ') == 1,
                    "razítko __GEN__ se nenahradilo řetězcem v uvozovkách "
                    "(je to JS literál, bez uvozovek se stránka rozbije)")
+
+    dvojce(polozky, klic, flow)
 
     vypis()
     return 1 if chyby else 0

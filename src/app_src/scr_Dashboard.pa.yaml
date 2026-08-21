@@ -942,3 +942,43 @@ Screens:
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =0
+            # Detail zatím existuje jen pro aktivitu. U vyšších úrovní ikona
+            # zůstává, jen tlumeně, a po kliknutí řekne, kde se ta úroveň dnes
+            # edituje — vlastní zadávací obrazovka pro agendu, proces a dílčí
+            # proces je F6/D.
+            - ico_StromEdit:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: |-
+                    =If(ThisItem.uroven = 4, stylAkce, stylOkraj)
+                  Height: =28
+                  HoverColor: =stylAkceHover
+                  Icon: =Icon.Edit
+                  OnSelect: |-
+                    =If(
+                        ThisItem.uroven = 4,
+                        Set(varNova, false);
+                        Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
+                        Navigate(scr_Detail, ScreenTransition.Cover),
+                        Notify(
+                            Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ") &
+                            ThisItem.kod &
+                            " se zatím upravuje přímo v SharePoint seznamu - vlastní zadávací obrazovka se připravuje.",
+                            NotificationType.Information
+                        )
+                    )
+                  PaddingBottom: =7
+                  PaddingLeft: =7
+                  PaddingRight: =7
+                  PaddingTop: =7
+                  PressedColor: =stylAkceStisk
+                  Tooltip: |-
+                    =If(
+                        ThisItem.uroven = 4,
+                        "Otevře detail aktivity " & ThisItem.kod & " k úpravě.",
+                        "Úprava " & Switch(ThisItem.uroven, 1, "agendy", 2, "procesu", "dílčího procesu") &
+                        " zatím vlastní obrazovku nemá, připravuje se. Dnes se mění přímo v SharePoint seznamu."
+                    )
+                  Width: =28
+                  X: =Parent.TemplateWidth - 34
+                  Y: =(Parent.TemplateHeight - 1) / 2 - 14

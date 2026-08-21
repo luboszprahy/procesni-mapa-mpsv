@@ -1,6 +1,39 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-21 15:00 (připomínky z provozu k dashboardu a seznamu)
+Aktualizováno: 2026-08-21 15:30 (ikona editace, denní publikace mapy)
+
+## Ikona editace v řádku a denní publikace mapy (21.08.2026 15:30) — balík 1.0.0.32
+
+**Ikona editace v každém řádku stromu.** Otevře detail dané položky. Detail
+dnes existuje jen pro aktivitu, takže na vyšších úrovních je ikona tlumená
+a po kliknutí řekne, že se agenda/proces/dílčí proces zatím mění přímo
+v SharePoint seznamu — vlastní obrazovka je F6/D. Ikona musí být v šabloně
+řádku **až za** překryvnou vrstvou, jinak by ji překryv zakryl a klik spolkl
+(stejné pořadí jako `ico_Smazat` za `lbl_RadekPrekryv` v seznamu).
+
+**Denní publikace mapy v 7:00.** Power Automate flow má právě **jeden**
+trigger, takže „PowerApps + Recurrence" v jednom flow neexistuje. Ruční
+spuštění z appky (`MapaPublishFlow.Run()`) muselo zůstat, proto vzniklo druhé
+flow **`MapaPublishScheduled`** s triggerem Recurrence (denně 7:00,
+Central Europe Standard Time).
+
+Logika se ale nezdvojuje ve zdroji: `src/add_mapa_schedule.py` **klonuje akce**
+z hotového `MapaPublishFlow` a mění jen trigger, GUID a název — ostatní zůstává
+bajt v bajt. Skript je idempotentní a GUID dvojčete je pevné, aby opakovaný běh
+nezakládal v prostředí sirotky. Ověřeno, že akce se na trigger nikde
+neodkazují (`triggerBody` 0×, žádná Response akce), jinak by klon s Recurrence
+nefungoval.
+
+`check_mapa_flow.py` porovnává **celé** akce obou flow — kdyby se rozešly, mapa
+by se v noci publikovala jinak než po stisku tlačítka a nikdo by si toho
+nevšiml. Dál hlídá Recurrence denně v 7:00 včetně časového pásma (bez něj by
+UTC posunulo běh podle letního času), zápis dvojčete v `customizations.xml`
+i v `RootComponents`, a že ruční flow má pořád `PowerAppV2`. 129 -> 142 kontrol,
+mutačně ověřeno na třech vadách (chybějící dvojče, hodina 8, rozejité akce).
+
+**Po importu je nutné `MapaPublishScheduled` ručně zapnout** — import stav
+zapnutí nemění a nové flow může přijít vypnuté; denní publikace by pak tiše
+neběžela. Je to v `HANDOVER.md` §1 vedle mikro-změny před Save.
 
 ## Připomínky z provozu k dashboardu a seznamu (21.08.2026 15:00) — balík 1.0.0.31
 
