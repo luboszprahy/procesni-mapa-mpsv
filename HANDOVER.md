@@ -5,11 +5,11 @@ teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (f
 Zadání drží `PRD.md`.
 
 > **Stav:** appka i publikační flow **běží v provozu**. Aktuální balík
-> k importu je **`deploy/procesnimapa_1_0_0_32.zip`** (strom na dashboardu,
+> k importu je **`deploy/procesnimapa_1_0_0_33.zip`** (strom na dashboardu,
 > klikací řádky, filtr stavu, „Zobrazit vše" v seznamu) — hotový a ověřený
 > offline branami, ale **ještě nenaimportovaný**. Poslední ověřeně běžící
 > verze v prostředí je **1.0.0.28** (strom na dashboardu, snímek 14:35).
-> Nahrazené balíky 27–31 jsou z `deploy/` smazané.
+> Nahrazené balíky 27–32 jsou z `deploy/` smazané.
 >
 > Pracovní strom je čistý a vše je pushnuté. `runs/app_build` (179 MB
 > rozbalený `pac`) i `runs/mapa_beh` smazané, náhledový http server zastavený,
@@ -31,7 +31,7 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_32.zip`** jako upgrade a appku
+1. **Naimportovat `deploy/procesnimapa_1_0_0_33.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
    Na co se dívat na obrazovce **Přehled**:
    - strom se ve výchozím stavu ukáže s rozbalenými agendami (úroveň 2),
@@ -47,8 +47,13 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
      s vysvětlením po úrovních; tooltip řádku navíc rozepíše kódy útvarů
      na „kód · název" z číselníku, i když jich je víc („72; 71"),
    - názvy nesmí podlézat sloupec „vykonává" (v 1.0.0.26 to dělaly, opraveno).
+   - **ikona tužky** v řádku otevře detail; u aktivity rovnou, u vyšších
+     úrovní je tlumená a řekne, že vlastní obrazovka se teprve chystá.
    Na obrazovce **Seznam aktivit**: tlačítko **„Zobrazit vše"** vedle přepínače
    kódu vynuluje všechny čtyři filtry a bez zapnutého filtru je neaktivní.
+   V tmavé liště obou obrazovek jsou **tři tlačítka A** — mění velikost písma
+   a výšku řádků v seznamu i ve stromu (jinde v appce ne). Na XL zkontrolovat,
+   že se kódy neořezávají a nejdelší názvy zůstávají čitelné.
 2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
    (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
    21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
@@ -116,8 +121,8 @@ pojistné flow.
 | F3b denní publikace mapy | hotovo, čeká na import — druhé flow `MapaPublishScheduled`, Recurrence 7:00 |
 | F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
 | F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.26) |
-| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.32) |
-| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.32) |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.33) |
+| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.33) |
 | F6/D zadávací obrazovky | **zbývá** |
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
@@ -153,15 +158,15 @@ $py = ".venv/Scripts/python.exe"
 
 # --- canvas app ---
 & $py src/check_app.py            # zdroje appky: YAML, sloupce, delegace, překryvy
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_24.zip" --verze 1.0.0.32
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_24.zip" --verze 1.0.0.33
 & $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_24.zip" `
-                            --vystup "deploy/procesnimapa_1_0_0_32.zip"
+                            --vystup "deploy/procesnimapa_1_0_0_33.zip"
 
 # --- flows ---
 # dvojče s denním během; idempotentní, píše zpátky do vstupní solution
 & $py src/add_mapa_schedule.py --solution "input/procesnimapa_1_0_0_24.zip" --hodina 7
-& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_32.zip"
-& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_32.zip"
+& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_33.zip"
+& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_33.zip"
 
 # --- náhled mapy v prohlížeči (file:// bývá blokované) ---
 & $py -m http.server 8765 --bind 127.0.0.1

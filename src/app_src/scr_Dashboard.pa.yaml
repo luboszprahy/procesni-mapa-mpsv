@@ -182,6 +182,90 @@ Screens:
             Width: =160
             X: =428
             Y: =0
+      # Velikost písma galerií (varFs = 0 / 2 / 4). Mění se jen text
+      # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
+      # Height = TemplateHeight - 1, takže rostou s řádkem a neořežou se.
+      # Sloupec kódu se rozšiřuje spolu s písmem, jinak by se při XL
+      # oříznulo AA-BB-CCC-DDDD.
+      - lbl_PismoD:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(214, 220, 234, 1)
+            Font: =Font.'Open Sans'
+            Height: =32
+            Size: =9
+            Text: ="Písmo"
+            Tooltip: '="Mění velikost textu v seznamu a ve stromu na přehledu, včetně výšky řádků. Ostatní části appky zůstávají stejné. Volba platí pro obě obrazovky a drží do zavření appky."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =44
+            X: =596
+            Y: =16
+      - btn_PismoD1:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, 0)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =10
+            Text: ="A"
+            Tooltip: '="Menší text, nejvíc řádků na obrazovku. Výchozí nastavení."'
+            Width: =34
+            X: =640
+            Y: =16
+      - btn_PismoD2:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, 2)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =13
+            Text: ="A"
+            Tooltip: '="Větší text a vyšší řádky - méně řádků na obrazovku."'
+            Width: =38
+            X: =678
+            Y: =16
+      - btn_PismoD3:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = 4, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 4, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, 4)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =16
+            Text: ="A"
+            Tooltip: '="Největší text. Nejlépe se čte, ale na jednu obrazovku se vejde nejmíň řádků a nejdelší názvy se můžou oříznout."'
+            Width: =42
+            X: =720
+            Y: =16
       - lbl_UzivatelD:
           Control: Label@2.5.1
           Properties:
@@ -671,7 +755,7 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =28
-            Size: =10
+            Size: =10 + varFs
             Text: ="ÚROVEŇ A NÁZEV"
             VerticalAlign: =VerticalAlign.Middle
             Width: =300
@@ -687,7 +771,7 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =28
-            Size: =10
+            Size: =10 + varFs
             Text: ="VLASTNÍK / VYKONÁVÁ"
             Tooltip: '="Kód útvaru z číselníku Útvary - u agendy, procesu a dílčího procesu je to jejich vlastník (sekce u agendy, odbor u procesu a dílčího procesu), u aktivity útvar, který ji vykonává. Vlastníků může být víc, pak jsou kódy oddělené středníkem (například 72; 71). Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód."'
             VerticalAlign: =VerticalAlign.Middle
@@ -702,7 +786,7 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =28
-            Size: =10
+            Size: =10 + varFs
             Text: |-
               =If(varDashStav = "", "POLOŽEK UVNITŘ", "AKTIVIT " & Upper(varDashStav))
             Tooltip: '="Bez filtru stavu je to počet položek o úroveň níž: u agendy procesy, u procesu dílčí procesy, u dílčího procesu aktivity. U aktivity zůstává prázdné - nižší úroveň už nemá. Nula u dílčího procesu znamená, že v rejstříku je, ale žádná aktivita k němu zatím není popsaná. Se zapnutým filtrem stavu se číslo přepne na počet aktivit toho stavu v celé větvi."'
@@ -740,7 +824,7 @@ Screens:
               )
             ShowScrollbar: =true
             TemplatePadding: =0
-            TemplateSize: =40
+            TemplateSize: =40 + varFs * 4
             Width: =Parent.Width - 80
             X: =40
             Y: =252
@@ -786,7 +870,7 @@ Screens:
                   Color: =stylTextSlaby
                   Font: =Font.'Open Sans'
                   Height: =Parent.TemplateHeight - 1
-                  Size: =11
+                  Size: =11 + varFs
                   Text: |-
                     =If(
                         ThisItem.pocet = 0,
@@ -803,11 +887,11 @@ Screens:
                   Color: =stylTextSlaby
                   Font: =Font.'Open Sans'
                   Height: =Parent.TemplateHeight - 1
-                  Size: =10
+                  Size: =10 + varFs
                   Text: =ThisItem.kod
                   VerticalAlign: =VerticalAlign.Middle
                   Visible: =varZobrazitKod
-                  Width: =130
+                  Width: =130 + varFs * 12
                   X: =51 + (ThisItem.uroven - 1) * 28
                   Y: =0
             - lbl_StromNazev:
@@ -825,7 +909,7 @@ Screens:
                   FontWeight: |-
                     =If(ThisItem.uroven <= 2, FontWeight.Semibold, FontWeight.Normal)
                   Height: =Parent.TemplateHeight - 1
-                  Size: =11
+                  Size: =11 + varFs
                   Text: =ThisItem.nazev
                   VerticalAlign: =VerticalAlign.Middle
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
@@ -833,7 +917,7 @@ Screens:
                   # útvaru (ten začíná na TemplateWidth - 360).
                   Width: =Parent.TemplateWidth - 380 - Self.X
                   X: |-
-                    =If(varZobrazitKod, 191, 51) + (ThisItem.uroven - 1) * 28
+                    =If(varZobrazitKod, 191 + varFs * 12, 51) + (ThisItem.uroven - 1) * 28
                   Y: =0
             - lbl_StromUtvar:
                 Control: Label@2.5.1
@@ -842,7 +926,7 @@ Screens:
                   Color: =stylTextSlaby
                   Font: =Font.'Open Sans'
                   Height: =Parent.TemplateHeight - 1
-                  Size: =10
+                  Size: =10 + varFs
                   Text: =ThisItem.utvar
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =160
@@ -863,7 +947,7 @@ Screens:
                   Font: =Font.'Open Sans'
                   FontWeight: =FontWeight.Semibold
                   Height: =Parent.TemplateHeight - 1
-                  Size: =10
+                  Size: =10 + varFs
                   Text: |-
                     =If(
                         ThisItem.uroven = 4,

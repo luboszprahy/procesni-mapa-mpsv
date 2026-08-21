@@ -1,8 +1,8 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-21 15:30 (ikona editace, denní publikace mapy)
+Aktualizováno: 2026-08-21 15:45 (ikona editace, velikost písma, denní publikace)
 
-## Ikona editace v řádku a denní publikace mapy (21.08.2026 15:30) — balík 1.0.0.32
+## Ikona editace, velikost písma, denní publikace mapy (21.08.2026 15:45) — balík 1.0.0.33
 
 **Ikona editace v každém řádku stromu.** Otevře detail dané položky. Detail
 dnes existuje jen pro aktivitu, takže na vyšších úrovních je ikona tlumená
@@ -10,6 +10,24 @@ a po kliknutí řekne, že se agenda/proces/dílčí proces zatím mění přím
 v SharePoint seznamu — vlastní obrazovka je F6/D. Ikona musí být v šabloně
 řádku **až za** překryvnou vrstvou, jinak by ji překryv zakryl a klik spolkl
 (stejné pořadí jako `ico_Smazat` za `lbl_RadekPrekryv` v seznamu).
+
+**Velikost písma galerií (tři stupně).** V tmavé liště obou obrazovek jsou
+tlačítka **A / A / A** (`varFs` = 0 / 2 / 4). Mění velikost textu a výšku řádků
+**jen v galeriích** — seznam aktivit a strom na přehledu — a jejich hlavičky;
+zbytek appky zůstává. Rozhodnuto vědomě: Power Apps nemá obdobu CSS proměnné,
+takže globální přepínač by znamenal výraz u `Size` všech ~179 prvků, a hlavně
+by se nezvětšily pevné rozměry a delší texty by se ořezávaly.
+
+Svisle to vychází samo: prvky uvnitř řádku mají `Height = TemplateHeight - 1`
+a `Y = 0`, takže rostou s `TemplateSize` (strom 40 + varFs*4, seznam
+56 + varFs*5). Vodorovně se muselo dopomoct — **sloupec kódu se rozšiřuje
+spolu s písmem** (`140 + varFs * 12`, resp. `130 + varFs * 12`) a název se
+o tolik posouvá, jinak by se při XL oříznulo `AA-BB-CCC-DDDD`.
+
+Cena, kterou to má: `kontrola_prekryvu` v `check_app.py` počítá jen s číselnými
+souřadnicemi, takže u prvků převedených na výraz překryv nehlídá. Uvnitř
+galerií se tím ale nic neztratilo — řádkové prvky měly výšku jako výraz už
+předtím, a proto je kontrola přeskakovala tak jako tak.
 
 **Denní publikace mapy v 7:00.** Power Automate flow má právě **jeden**
 trigger, takže „PowerApps + Recurrence" v jednom flow neexistuje. Ruční

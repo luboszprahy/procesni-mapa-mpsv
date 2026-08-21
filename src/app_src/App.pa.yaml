@@ -47,6 +47,7 @@ App:
       Set(varAktivita, Blank());
       Set(varAktStale, true);
       Set(varZobrazitKod, true);
+      Set(varFs, 0);
       Set(varDashStav, "");
       Set(varRazeni, "kod");
       Set(varRazeniAsc, true);
