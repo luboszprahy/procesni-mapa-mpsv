@@ -20,6 +20,7 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 APP_SRC = Path("src/app_src")
@@ -174,6 +175,23 @@ def dokonci(solution_dir, verze):
     if pocet != 1:
         raise SystemExit("CHYBA: verzi v solution.xml se nepodařilo přepsat")
     manifest.write_text(novy, encoding="utf-8")
+
+    # AppVersion canvas appky musí růst spolu s verzí solution. Když zůstane
+    # z původního exportu, import projde, Studio ukáže nový obsah, ale
+    # PUBLIKOVANÁ verze pro hráče se neaktualizuje — appka se tváří jako
+    # nezměněná. Navenek to vypadá jako „publish nefunguje": ve Versions je
+    # Live, odkaz i cache v pořádku, a přesto se hráčům servíruje stará verze.
+    # (Zjištěno 21.08.2026 na 1.0.0.26.)
+    customizations = solution_dir / "customizations.xml"
+    if customizations.exists():
+        text = customizations.read_text(encoding="utf-8-sig")
+        razitko = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        novy, pocet = re.subn(r"<AppVersion>[^<]+</AppVersion>",
+                              f"<AppVersion>{razitko}</AppVersion>", text, count=1)
+        if pocet != 1:
+            raise SystemExit("CHYBA: AppVersion canvas appky se nepodařilo přepsat")
+        customizations.write_text(novy, encoding="utf-8")
+        print(f"AppVersion canvas appky: {razitko}")
 
     VYSTUP.mkdir(parents=True, exist_ok=True)
     vystupni_zip = VYSTUP / f"procesnimapa_{verze.replace('.', '_')}.zip"
