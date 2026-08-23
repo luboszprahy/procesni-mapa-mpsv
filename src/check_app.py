@@ -907,7 +907,7 @@ def kontrola_rezimu_ciselniku(vzorce):
     formulář v tom, co zbylo po minulé návštěvě — v horším případě uloží
     změnu do cizí položky nebo založí duplicitu.
     """
-    povinne = ("varUrovenTyp", "varCiselnikNova", "varCiselnikKod")
+    povinne = ("varUrovenTyp", "varCiselnikNova", "varCiselnikKod", "varRodicC")
     for cesta, prop, text in vzorce:
         if not re.search(r"Navigate\(\s*scr_Ciselnik", text):
             continue

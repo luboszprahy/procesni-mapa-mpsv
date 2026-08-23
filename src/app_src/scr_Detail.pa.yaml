@@ -7,7 +7,7 @@ Screens:
       Fill: =stylPlocha
       LoadingSpinnerColor: =stylAkce
       OnVisible: |-
-        =Set(varDpKod, If(varNova, "", varAktivita.dilci_proces_kod));
+        =Set(varDpKod, If(varNova, varNovyDpKod, varAktivita.dilci_proces_kod));
         Reset(drp_Agenda);
         Reset(drp_Proces);
         Reset(drp_Dilci)
@@ -37,6 +37,7 @@ Screens:
               =Set(varUrovenTyp, "aktivita");
               Set(varCiselnikNova, varNova);
               Set(varCiselnikKod, If(varNova, "", varAktivita.Title));
+              Set(varRodicC, "");
               If(
                   varDetailZpet = "dashboard",
                   Navigate(scr_Dashboard, ScreenTransition.UnCover),
@@ -159,7 +160,12 @@ Screens:
             FocusedBorderThickness: =2
             Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem, vlastníkem je sekce. Výběr agendy určuje, které procesy se nabídnou níž. Když agendu změníš, proces i dílčí proces se vynulují — kombinace z různých agend neexistuje."'
             AllowEmptySelection: =true
-            Default: =If(varNova, "", LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev))
+            Default: |-
+              =If(
+                  IsBlank(varDpKod),
+                  "",
+                  LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev)
+              )
             Font: =Font.'Open Sans'
             Height: =40
             Items: =Distinct(colAgendy, Title & " · " & nazev)
@@ -190,7 +196,12 @@ Screens:
             Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem, vlastníkem je odbor. Nabízejí se jen procesy vybrané agendy. Dokud není vybraná agenda, je pole zašedlé — to není chyba, jen kaskáda čeká na nadřazenou úroveň."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Agenda.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
-            Default: =If(varNova, "", LookUp(colProcesy, Title = Left(varDpKod, 5), Title & " · " & nazev))
+            Default: |-
+              =If(
+                  IsBlank(varDpKod),
+                  "",
+                  LookUp(colProcesy, Title = Left(varDpKod, 5), Title & " · " & nazev)
+              )
             Font: =Font.'Open Sans'
             Height: =40
             Items: |-
@@ -223,7 +234,8 @@ Screens:
             Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…“."'
             AllowEmptySelection: =true
             DisplayMode: =If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
-            Default: =If(varNova, "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
+            Default: |-
+              =If(IsBlank(varDpKod), "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
             Font: =Font.'Open Sans'
             Height: =40
             Items: |-
@@ -735,6 +747,7 @@ Screens:
                           Set(varUrovenTyp, "aktivita");
                           Set(varCiselnikNova, false);
                           Set(varCiselnikKod, varNovyKod);
+                          Set(varRodicC, "");
                           If(
                               varDetailZpet = "dashboard",
                               Navigate(scr_Dashboard, ScreenTransition.UnCover),
@@ -772,6 +785,7 @@ Screens:
                   Set(varUrovenTyp, "aktivita");
                   Set(varCiselnikNova, true);
                   Set(varCiselnikKod, "");
+                  Set(varRodicC, "");
                   Navigate(scr_Ciselnik, ScreenTransition.UnCover),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
               )

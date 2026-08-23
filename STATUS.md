@@ -1,6 +1,33 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (opravy auditu, tři poruchy po zrušení obrazovky)
+Aktualizováno: 2026-08-23 (zakládání z řádku stromu)
+
+## Zakládání přímo z řádku přehledu (23.08.2026) — balík 1.0.0.44
+
+V řádku stromu přibyla vedle tužky a koše **ikona +**: založí položku
+**o úroveň níž** pod tou, na jejímž řádku stojí. U agendy tedy proces,
+u procesu dílčí proces, u dílčího procesu aktivitu. **U aktivity ikona
+schválně chybí** — je to nejnižší úroveň a pod ní se nic zakládat nedá.
+
+Nadřazený řetěz se předvyplní: co je v kódu nad novým záznamem, uživatel
+znovu nevybírá. Nese to `varRodicC` (kód nadřazené položky pro číselník)
+a `varNovyDpKod` (předvolený dílčí proces pro novou aktivitu). U aktivity
+se otevře rovnou detail, protože formulář v číselníku aktivity needituje.
+
+Kaskáda v detailu se přitom nemusela zdvojovat: plnila se z `varDpKod`,
+takže stačilo ho naplnit i pro novou aktivitu a pole se odvodí sama.
+Podmínky `If(varNova, "", …)` v `Default` se změnily na `If(IsBlank(varDpKod), …)`
+— pro obojí platí totéž pravidlo.
+
+**Kontext se musí zahazovat.** Kdyby po „+" zůstal `varRodicC` viset, další
+ručně založená položka by zdědila rodiče z minula. Zahazují ho segmentová
+tlačítka, „Nová položka", klik na řádek číselníku i všechny návraty z detailu.
+Aby se na některý vstup nezapomnělo, přibyl `varRodicC` mezi povinné
+v bráně `kontrola_rezimu_ciselniku` — mutačně ověřeno.
+
+Ikona je `Icon.Add`, ne `Icon.AddDocument`: první je v appce ověřená od
+začátku (`scr_Vazby`), druhou by Studio vidělo poprvé. Po dnešku, kdy tři
+importy padly na nevyzkoušených konstrukcích, to nestojí za risk.
 
 ## Opravy auditu a poučení ze zrušené obrazovky (23.08.2026) — balík 1.0.0.43
 

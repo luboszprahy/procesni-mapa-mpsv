@@ -51,6 +51,8 @@ App:
       Set(varUrovenTyp, "agenda");
       Set(varCiselnikNova, true);
       Set(varCiselnikKod, "");
+      Set(varRodicC, "");
+      Set(varNovyDpKod, "");
       Set(varChybaC, "");
       Set(varUklidC, false);
       Set(varRazeniC, "kod");

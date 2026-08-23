@@ -184,6 +184,7 @@ Screens:
               =Set(varUrovenTyp, "aktivita");
               Set(varCiselnikNova, true);
               Set(varCiselnikKod, "");
+              Set(varRodicC, "");
               Navigate(scr_Ciselnik, ScreenTransition.None)
             PressedColor: =RGBA(255, 255, 255, 1)
             Size: =13
@@ -905,7 +906,7 @@ Screens:
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
                   # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
                   # útvaru (ten začíná na TemplateWidth - 360).
-                  Width: =Parent.TemplateWidth - 444 - Self.X
+                  Width: =Parent.TemplateWidth - 488 - Self.X
                   X: |-
                     =If(varZobrazitKod, 191 + varFs * 12, 51) + (ThisItem.uroven - 1) * 28
                   Y: =0
@@ -920,7 +921,7 @@ Screens:
                   Text: =ThisItem.utvar
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =160
-                  X: =Parent.TemplateWidth - 424
+                  X: =Parent.TemplateWidth - 468
                   Y: =0
             # Nula je u dílčího procesu důležitá informace (v rejstříku je,
             # ale nikdo k němu ještě nepopsal činnosti), proto se vypisuje.
@@ -952,7 +953,7 @@ Screens:
                     )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =110
-                  X: =Parent.TemplateWidth - 248
+                  X: =Parent.TemplateWidth - 292
                   Y: =0
             - rec_StromLinka:
                 Control: Rectangle@2.3.0
@@ -1009,7 +1010,7 @@ Screens:
                     If(
                         ThisItem.uroven = 4,
                         "Detail otevřeš tužkou vpravo.",
-                        "Tužka vpravo otevře úpravu názvu a vlastníka. Číslo vpravo = počet položek o úroveň níž (" &
+                        "Tužka vpravo otevře úpravu, + založí položku o úroveň níž. Číslo vpravo = počet položek o úroveň níž (" &
                         Switch(ThisItem.uroven, 1, "procesů v agendě", 2, "dílčích procesů v procesu", "aktivit v dílčím procesu") &
                         "): " & ThisItem.pocet & ". Klikni pro rozbalení."
                     )
@@ -1019,6 +1020,47 @@ Screens:
             # Aktivita se otevře na detailu, agenda / proces / dílčí proces
             # na scr_Ciselnik v režimu úpravy (F6/D). Do 1.0.0.34 vyšší úrovně
             # jen hlásily, že se mění přímo v SharePointu.
+            # Aktivita je nejnižší úroveň, takže pod ní se nic zakládat nedá —
+            # tam ikona schválně chybí. U ostatních úrovní otevře zakládání
+            # s předvyplněným nadřazeným řetězem: co je v kódu nad novým
+            # záznamem, uživatel znovu nevybírá.
+            - ico_StromPridat:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =stylUspech
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =36
+                  HoverColor: =stylAkce
+                  HoverFill: =stylRadekVybrany
+                  Icon: =Icon.Add
+                  OnSelect: |-
+                    =If(
+                        ThisItem.uroven = 3,
+                        Set(varDetailZpet, "dashboard");
+                        Set(varNova, true);
+                        Set(varAktivita, Blank());
+                        Set(varNovyDpKod, ThisItem.kod);
+                        Navigate(scr_Detail, ScreenTransition.Cover),
+                        Set(varUrovenTyp, If(ThisItem.uroven = 1, "proces", "dilci"));
+                        Set(varCiselnikNova, true);
+                        Set(varCiselnikKod, "");
+                        Set(varRodicC, ThisItem.kod);
+                        Navigate(scr_Ciselnik, ScreenTransition.Cover)
+                    )
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                  PressedColor: =stylUspech
+                  Tooltip: |-
+                    ="Založí " &
+                    Switch(ThisItem.uroven, 1, "nový proces", 2, "nový dílčí proces", "novou aktivitu") &
+                    " pod " & ThisItem.kod &
+                    ". Nadřazené úrovně budou předvyplněné, zbývá doplnit název a vlastníka."
+                  Visible: =ThisItem.uroven <> 4
+                  Width: =36
+                  X: =Parent.TemplateWidth - 172
+                  Y: =(Parent.TemplateHeight - 1) / 2 - 18
             - ico_StromEdit:
                 Control: Classic/Icon@2.5.0
                 Properties:
@@ -1041,6 +1083,7 @@ Screens:
                         );
                         Set(varCiselnikNova, false);
                         Set(varCiselnikKod, ThisItem.kod);
+                        Set(varRodicC, "");
                         Navigate(scr_Ciselnik, ScreenTransition.Cover)
                     )
                   PaddingBottom: =8

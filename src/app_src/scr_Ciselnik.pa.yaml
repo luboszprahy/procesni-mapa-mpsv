@@ -259,6 +259,7 @@ Screens:
               =Set(varUrovenTyp, "agenda");
               Set(varCiselnikNova, true);
               Set(varCiselnikKod, "");
+              Set(varRodicC, "");
               Set(varChybaC, "");
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
@@ -289,6 +290,7 @@ Screens:
               =Set(varUrovenTyp, "proces");
               Set(varCiselnikNova, true);
               Set(varCiselnikKod, "");
+              Set(varRodicC, "");
               Set(varChybaC, "");
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
@@ -319,6 +321,7 @@ Screens:
               =Set(varUrovenTyp, "dilci");
               Set(varCiselnikNova, true);
               Set(varCiselnikKod, "");
+              Set(varRodicC, "");
               Set(varChybaC, "");
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
@@ -353,6 +356,7 @@ Screens:
               =Set(varUrovenTyp, "aktivita");
               Set(varCiselnikNova, true);
               Set(varCiselnikKod, "");
+              Set(varRodicC, "");
               Set(varChybaC, "");
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
@@ -753,6 +757,7 @@ Screens:
                     =Set(varUrovenTyp, ThisItem.uroven);
                     Set(varCiselnikNova, false);
                     Set(varCiselnikKod, ThisItem.kod);
+                    Set(varRodicC, "");
                     Set(varChybaC, "");
                     Reset(drp_AgendaC);
                     Reset(drp_ProcesC);
@@ -912,9 +917,11 @@ Screens:
             AllowEmptySelection: =true
             Default: |-
               =If(
-                  varCiselnikNova,
+                  !varCiselnikNova,
+                  LookUp(colAgendy, Title = Left(varCiselnikKod, 2), Title & " · " & nazev),
+                  IsBlank(varRodicC),
                   "",
-                  LookUp(colAgendy, Title = Left(varCiselnikKod, 2), Title & " · " & nazev)
+                  LookUp(colAgendy, Title = Left(varRodicC, 2), Title & " · " & nazev)
               )
             DisplayMode: |-
               =If(varCiselnikNova, DisplayMode.Edit, DisplayMode.Disabled)
@@ -950,9 +957,11 @@ Screens:
             AllowEmptySelection: =true
             Default: |-
               =If(
-                  varCiselnikNova,
+                  !varCiselnikNova,
+                  LookUp(colProcesy, Title = Left(varCiselnikKod, 5), Title & " · " & nazev),
+                  Len(varRodicC) < 5,
                   "",
-                  LookUp(colProcesy, Title = Left(varCiselnikKod, 5), Title & " · " & nazev)
+                  LookUp(colProcesy, Title = Left(varRodicC, 5), Title & " · " & nazev)
               )
             DisplayMode: |-
               =If(
@@ -1187,6 +1196,7 @@ Screens:
                   varUrovenTyp = "aktivita",
                   Set(varDetailZpet, "ciselnik");
                   Set(varNova, false);
+                  Set(varNovyDpKod, "");
                   Set(varAktivita, LookUp(Aktivity, Title = varCiselnikKod));
                   Navigate(scr_Detail, ScreenTransition.Cover)
               );
@@ -1503,6 +1513,7 @@ Screens:
                   Set(varDetailZpet, "ciselnik");
                   Set(varNova, true);
                   Set(varAktivita, Blank());
+                  Set(varNovyDpKod, "");
                   Navigate(scr_Detail, ScreenTransition.Cover)
               )
             PressedFill: =stylRadekVybrany
