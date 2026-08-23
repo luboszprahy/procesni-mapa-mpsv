@@ -1047,6 +1047,44 @@ def kontrola_promennych(soubory, vzorce):
             )
 
 
+def kontrola_poradi_nabidek(soubory):
+    """Položky rozbalovací nabídky musí ležet NAD jejím stínem.
+
+    V Power Apps kreslí pořadí definice: co je v souboru dřív, leží níž.
+    Stín, který zavírá nabídku kliknutím mimo ni, tedy musí být zapsaný
+    PŘED položkami — jinak leží nad nimi, spolkne klik a nabídka se jen
+    zavře, aniž by cokoli udělala.
+
+    Přesně tak přestala fungovat nabídka rozbalení na přehledu (1.0.0.41):
+    tlačítka úrovní zůstala na svém původním místě v souboru, zatímco stín
+    přibyl až na konec. Studio nic nehlásí — vypadá to, že tlačítko nereaguje.
+    """
+    for cesta in soubory:
+        radky = io.open(cesta, encoding="utf-8").read().splitlines()
+        poradi, aktualni = {}, None
+        for cislo, radek in enumerate(radky):
+            jmeno = re.match(r"      - ([A-Za-z_][A-Za-z0-9_]*):\s*$", radek)
+            if jmeno:
+                aktualni = jmeno.group(1)
+                poradi.setdefault(aktualni, {"radek": cislo, "visible": ""})
+            elif aktualni and radek.strip().startswith("Visible:"):
+                poradi[aktualni]["visible"] = radek.strip()
+
+        stiny = [j for j, u in poradi.items() if "Stin" in j and "varMenu" in u["visible"]]
+        if not stiny:
+            continue
+        prvni_stin = min(poradi[j]["radek"] for j in stiny)
+        for jmeno, udaje in poradi.items():
+            if "varMenu" not in udaje["visible"] or jmeno in stiny:
+                continue
+            if udaje["radek"] < prvni_stin:
+                chyby.append(
+                    f"{Path(cesta).name}: '{jmeno}' patří do rozbalovací nabídky, "
+                    f"ale je zapsaný PŘED jejím stínem — leží pod ním, takže "
+                    f"stín spolkne klik a položka nereaguje"
+                )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -1071,6 +1109,7 @@ def main():
     kontrola_operatoru_in(vzorce)
     kontrola_dvojiteho_rovnitka(soubory)
     kontrola_promennych(soubory, vzorce)
+    kontrola_poradi_nabidek(soubory)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)

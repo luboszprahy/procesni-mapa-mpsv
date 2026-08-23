@@ -1,6 +1,59 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (F6/G akce nad HTML mapou, rolovací nabídky)
+Aktualizováno: 2026-08-23 (opravy auditu, tři poruchy po zrušení obrazovky)
+
+## Opravy auditu a poučení ze zrušené obrazovky (23.08.2026) — balík 1.0.0.43
+
+**Zrušení jedné obrazovky vyrobilo tři různé poruchy** a stálo tři importy.
+Stojí za to je mít pohromadě, protože každá byla jinde a žádnou brány
+neviděly:
+
+1. **Duch v balíku.** `pac canvas unpack --layout SourceCode` rozbalí jen
+   `Src/*.pa.yaml`; `Controls`, `References` a `Assets` drží v `.msapr`
+   a pack je vrátí beze změny. Zrušená `scr_Seznam` tak v `.msapp` přežila
+   jako `Controls/4.json` o 626 kB s 65 prvky, z toho 30 už neexistujících.
+   Studio ducha načetlo, mrtvé odkazy nahlásilo jako chyby a kvůli nim
+   neprovedlo `App.OnStart` — appka naběhla černá.
+2. **Dvojité rovnítko.** Devět vlastností mělo `Y: ==If(…)`. Vzniklo při
+   generování skriptem: hodnota už rovnítko obsahovala a další se přidalo
+   při skládání řádku. YAML se rozparsuje, packer nenamítne nic, Studio
+   hlásí „Unexpected characters" až po importu.
+3. **Proměnná bez typu.** `Set(varSmazat, Blank())` zůstal v `OnStart` po
+   zrušené obrazovce. `Blank()` typ neurčuje, a když je to jediné přiřazení
+   v celé appce, Studio hlásí „No type found" — zase chyba v OnStart, zase
+   černá appka.
+
+Diagnózu nakonec neurčil seznam chyb, ale **nesrovnalost na kartách**:
+agend 0, procesů 0, dílčích procesů 0, ale aktivit 47. První tři kolekce plní
+`OnStart`, aktivity se načítají až v `OnVisible` obrazovky — to ukázalo, že
+OnStart neproběhl, ještě než přišel App checker.
+
+Na každou z těch tří poruch je teď brána: kontrola duchů v `.msapp`
+(`check_solution.py`), `kontrola_dvojiteho_rovnitka` a `kontrola_promennych`
+(`check_app.py`), všechny mutačně ověřené.
+
+**Opravy auditních nálezů A-01 až A-07** (podrobně v `AUDIT.md`):
+
+| nález | co se změnilo |
+|---|---|
+| A-01 | mazání dílčího procesu uklidí i vazby na něj; zakládání odmítne kód, pod kterým leží osiřelé položky po dřívější položce téhož kódu |
+| A-02 | stará vazba se odebírá podle starého dílčího procesu, ne podle příznaku `primarni`, a napřed se odklidí i neprimární vazba na cíl |
+| A-03 | strop načítaných řádků 500 → 2 000, aby seděl s tím, co appka o sobě tvrdí |
+| A-04 | choice predikát z mazání zmizel; `kontrola_predikatu` hlídá i `RemoveIf` |
+| A-05 | mapa má uzel „Nezařazené" — osiřelé záznamy z ní přestaly mizet beze stopy |
+| A-06 | flow nad krátkým názvem posílá jen to, co samo počítá |
+| A-07 | formulář číselníku se vrátí na zakládání, když vybraná položka zmizela |
+
+**Nefunkční nabídka rozbalení** (hlášeno z provozu): položky zůstaly v souboru
+před stínem nabídky, takže ležely pod ním a stín spolkl klik. V Power Apps
+kreslí pořadí definice — co je dřív, leží níž. Nová brána
+`kontrola_poradi_nabidek` to hlídá.
+
+**Pás s počty na přehledu je poloviční** (84 → 44 px): popisek, číslo
+i vysvětlivka se vejdou na jeden řádek vedle sebe. Uvolněných 40 px dostal
+strom.
+
+
 
 ## Akce nad HTML mapou zpátky na přehledu (23.08.2026) — balík 1.0.0.37
 

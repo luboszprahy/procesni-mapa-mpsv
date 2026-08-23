@@ -182,7 +182,20 @@ def main():
             overit(prvni == UVODNI_OBRAZOVKA,
                    f"úvodní obrazovka je '{prvni}', čekal jsem '{UVODNI_OBRAZOVKA}'")
 
-        # datové zdroje musí zůstat připojené i uvnitř appky
+            # Flow nad krátkým názvem smí přepsat jen to, co samo spočítalo.
+        # Kdyby posílalo i nazev nebo dilci_proces_kod z triggerBody, vrátilo
+        # by opravu uloženou krátce po sobě zpátky na starou hodnotu.
+        for jmeno in vystupni.namelist():
+            if "AktualizaceKratkehoNazvu" not in jmeno.replace("\\", "/"):
+                continue
+            text_flow = vystupni.read(jmeno).decode("utf-8-sig")
+            for pole in ("item/nazev\"", "item/dilci_proces_kod"):
+                overit(pole not in text_flow,
+                       f"flow AktualizaceKratkehoNazvu posílá do PatchItem '{pole}' "
+                       f"z triggerBody — přepsalo by novější hodnotu uloženou "
+                       f"krátce po sobě")
+
+    # datové zdroje musí zůstat připojené i uvnitř appky
         datasources = cti(msapp, "References/DataSources.json")
         if datasources:
             jmena = {d.get("Name") for d in json.loads(datasources).get("DataSources", [])}

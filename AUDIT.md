@@ -16,8 +16,20 @@ tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze zm�
 ## Nálezy — kolo 3 (23.08.2026, appka 1.0.0.37)
 
 Rozsah: všechna mutační místa ve zdrojích appky, referenční integrita vazební
-tabulky, soulad kolekcí se zdrojem, tři flow a šablona mapy. **Žádný nález
-zatím není opraven** — tenhle seznam je zadání, ne hlášení o vyřízení.
+tabulky, soulad kolekcí se zdrojem, tři flow a šablona mapy.
+
+**Stav k 23.08.2026 večer (balík 1.0.0.42): opraveno A-01 až A-07.**
+
+| nález | stav |
+|---|---|
+| A-01 vazby po smazaném dílčím procesu + recyklace kódu | **opraveno** |
+| A-02 duplicitní vazba při změně primárního zařazení | **opraveno** |
+| A-03 strop 500 řádků proti slibovaným 2 000 | **opraveno** |
+| A-04 `RemoveIf` nad velkým listem se nedeleguje | **opraveno** |
+| A-05 publikace osiřelé záznamy tiše zahodí | **opraveno** |
+| A-06 flow přepisuje pole, která nepočítá | **opraveno**; rozdvojené pravidlo zkrácení zůstává jako vědomý kompromis |
+| A-07 `varCiselnikKod` přežije smazání z přehledu | **opraveno** |
+| A-08 zbytky a natvrdo zapsané hodnoty | duchové v `.msapp` opraveni, zbytek otevřený |
 
 Tři nálezy jsem po auditorovi ověřil sám (A-01, A-03 a tvrzení o `check_solution`);
 jeden se nepotvrdil, viz „Zamítnuté nálezy — kolo 3" na konci sekce.
@@ -43,9 +55,12 @@ Scénář:
 `PLAN.md` (F6/F) pokrývá výslovně jen vazby osiřelé po **aktivitě**; vazby
 osiřelé po dílčím procesu nejsou popsané nikde. Není to tedy přijatý kompromis.
 
-**Návrh opravy:** při mazání dílčího procesu uklidit i vazby na něj; a zvážit,
-jestli se kód po smazané položce vůbec smí recyklovat (projekt jinak stojí na
-tom, že se přidělený kód nemění).
+**OPRAVENO (1.0.0.42).** Mazání dílčího procesu v číselníku i na přehledu
+uklidí `RemoveIf('Vazba aktivita–dílčí proces', dilci_proces_kod = …)`.
+Recyklaci kódu řeší kontrola při zakládání: leží-li pod navrženým kódem
+osiřelé položky, uložení se odmítne s vysvětlením, že je potřeba je nejdřív
+uklidit. Odmítnout je tu lepší než tiše přeskočit na další volný kód — v datech
+leží neuklizený zbytek a kdo zakládá, se to má dozvědět.
 
 ### A-02 · VÁŽNÝ · změna primárního dílčího procesu umí vyrobit duplicitní vazbu
 
@@ -60,6 +75,11 @@ aktivita pod `B` dvakrát a počty nadřazených uzlů jsou o jedna vyšší, za
 přehled v appce počítá z `Aktivity.dilci_proces_kod` a ukazuje správně —
 čísla v appce a v mapě se rozejdou.
 
+**OPRAVENO (1.0.0.42).** Stará vazba se odebírá podle **starého dílčího
+procesu**, ne podle příznaku `primarni`, a před zápisem se odebere i případná
+neprimární vazba na cílový dílčí proces. Tím zmizela duplicita i nedelegovatelný
+predikát z A-04 naráz.
+
 ### A-03 · VÁŽNÝ · appka má strop 500 řádků, ale všude tvrdí 2 000
 
 `Properties.json` v `.msapp`: `DefaultConnectedDataSourceMaxGetRowsCount = 500`.
@@ -70,8 +90,8 @@ v `check_app.py` a řada míst v `STATUS.md` i `PLAN.md` tvrdí, že do 2 000
 aktivit je výsledek úplný. Práh se přitom láme už u **501. aktivity**:
 `colAkt`, počty ve stromu, chip osiřelých i fulltext pracují s prvním oknem.
 
-**Návrh opravy:** zvednout hodnotu na 2000 při buildu a přidat na ni kontrolu,
-aby se popisky a skutečnost nemohly znovu rozejít.
+**OPRAVENO (1.0.0.42).** `build_app.py` hodnotu srovnává na 2 000
+(`nastav_limit_radku`), `check_solution.py` to hlídá. Ověřeno v balíku.
 
 ### A-04 · STŘEDNÍ · `RemoveIf` nad velkým listem se nedeleguje a brána mlčí
 
@@ -80,6 +100,12 @@ vazební tabulka je ve `VELKE_LISTY`. Nad ~500 vazbami se `RemoveIf` provede
 jen nad prvním oknem: stará primární vazba se nemusí odstranit a `Patch`
 přidá druhou → aktivita se **dvěma primárními** vazbami. Predikát
 `primarni.Value = "ano"` (choice) delegaci zabíjí sám o sobě.
+
+**OPRAVENO (1.0.0.42).** Choice predikát z mazání zmizel spolu s opravou A-02
+— vybírá se podle textových sloupců `aktivita_kod` a `dilci_proces_kod`, které
+SharePoint deleguje. `kontrola_predikatu` nově hlídá i `RemoveIf`: jak volání
+nedelegovatelné funkce v podmínce, tak rozhodování podle choice sloupce.
+Mutačně ověřeno vrácením původního tvaru.
 
 ### A-05 · STŘEDNÍ · publikace osiřelé záznamy tiše zahodí
 
@@ -90,6 +116,12 @@ Dialog při mazání agendy slibuje „nezmizí, najdeš je přepínačem osiře
 v rejstříku ano, ale z publikované mapy zmizí celá větev včetně desítek
 aktivit a mapa to nijak nepřizná. Texty dialogů o dopadu na mapu mlčí.
 
+**OPRAVENO (1.0.0.42).** `buildTree()` přidá na konec stromu uzel
+**„Nezařazené — chybí nadřazená položka rejstříku"** se všemi třemi druhy
+sirotků (proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího
+procesu). Ověřeno spuštěním `buildTree` nad daty se sirotky: uzel se objeví
+se všemi třemi a živá větev zůstane nedotčená; bez sirotků uzel nevznikne.
+
 ### A-06 · STŘEDNÍ · appka a flow `AktualizaceKratkehoNazvu` počítají zkratku jinak
 
 Appka ukládá `Left(text, 150)`, flow počítá kanonické zkrácení (kolaps mezer,
@@ -98,8 +130,19 @@ znaků tedy appka uloží useknuté slovo a flow ho do minuty přepíše.
 
 Flow navíc patchuje `Title`, `nazev` i `dilci_proces_kod` ze snapshotu
 triggeru, takže může přepsat opravu uloženou do minuty po prvním uložení.
-`STATUS.md` přitom tvrdí „jen `item/nazev_kratky`" — dokumentace se
-rozchází s tím, co flow dělá.
+`STATUS.md` přitom tvrdil „jen `item/nazev_kratky`" — dokumentace se
+rozcházela s tím, co flow dělá.
+
+**Zápis navíc OPRAVEN (1.0.0.42).** `build_app.py` při každém buildu odebere
+`item/nazev` a `item/dilci_proces_kod`; `item/Title` zůstává, protože je to
+kód a ten se z principu nikdy nemění. `check_solution.py` to hlídá.
+
+**Rozdvojené pravidlo zkrácení zůstává jako vědomý kompromis.** Appka zapíše
+`Left(text, 150)` jako provizorium, aby seznam neukazoval prázdno, a flow ho
+do minuty dorovná na kanonický tvar. Liší se to jen u názvů delších než 150
+znaků a jen do doběhnutí flow. Sjednotit by šlo tak, že by appka
+`nazev_kratky` nezapisovala vůbec — za cenu prázdného sloupce v seznamu
+po dobu, než flow doběhne.
 
 ### A-07 · DROBNÝ · `varCiselnikKod` přežije smazání položky z přehledu
 
@@ -107,11 +150,20 @@ rozchází s tím, co flow dělá.
 `varCiselnikKod`. Když se položka načtená ve formuláři smaže z **přehledu**,
 formulář po návratu dál hlásí „Úprava …" nad neexistujícím záznamem. Skončí
 to hláškou z `IfError`, data se nerozbijí. `PLAN.md` (F6/E) tenhle edge case
-vyžaduje ošetřit — ošetřený je jen pro mazání z téže obrazovky.
+vyžaduje ošetřit — ošetřený byl jen pro mazání z téže obrazovky.
+
+**OPRAVENO (1.0.0.42).** `scr_Ciselnik.OnVisible` se po naplnění `colCiselnik`
+zeptá, jestli vybraná položka ještě existuje, a když ne, vrátí formulář na
+zakládání. Kontrola musí být až za naplněním kolekce — před ním by se ptala
+do prázdna a formulář by se resetoval pokaždé.
 
 ### A-08 · DROBNÝ · zbytky a natvrdo zapsané hodnoty
 
-- `.msapp` nese `Controls/4.json` se zrušenou obrazovkou `scr_Seznam`
+- **OPRAVENO (1.0.0.38)** — a ukázalo se, že to neškodné nebylo: Studio
+  ducha načetlo, mrtvé odkazy nahlásilo jako chyby a kvůli nim neprovedlo
+  App.OnStart, takže appka po importu naběhla černá. `build_app.py` teď
+  Controls zrušených obrazovek maže, `check_solution.py` to hlídá.
+  Původní text nálezu: `.msapp` nese `Controls/4.json` se zrušenou obrazovkou `scr_Seznam`
   a `AppCheckerResult.sarif` s odkazy na ni. Neškodné (`LoadFromYaml = true`,
   Studio čte `Src/*.pa.yaml`), ale je to smetí v balíku.
 - `Model` v publikačním flow má natvrdo `"sekce": "3"` a jméno správce —

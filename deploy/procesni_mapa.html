@@ -147,18 +147,48 @@ function buildTree(d){
   d.dilci_procesy.forEach(x => (dpByProces[x.proces_kod] = dpByProces[x.proces_kod] || []).push(x));
   d.procesy.forEach(x => (procByAgenda[x.agenda_kod] = procByAgenda[x.agenda_kod] || []).push(x));
 
-  return d.agendy.map(a => ({
+  const uzelAkt = k => ({
+    lvl:"k", kod:k.kod, nazev:k.nazev, utvar:k.vykonava, rec:k, kids:[]
+  });
+  const uzelDp = dp => ({
+    lvl:"d", kod:dp.kod, nazev:dp.nazev, vlastnik:dp.vlastnik, stav:dp.stav, rec:dp,
+    kids:(aktByDp[dp.kod]||[]).map(uzelAkt)
+  });
+  const uzelProces = p => ({
+    lvl:"p", kod:p.kod, nazev:p.nazev, vlastnik:p.vlastnik, rec:p,
+    kids:(dpByProces[p.kod]||[]).map(uzelDp)
+  });
+
+  const strom = d.agendy.map(a => ({
     lvl:"a", kod:a.kod, nazev:a.nazev, vlastnik:a.vlastnik, rec:a,
-    kids:(procByAgenda[a.kod]||[]).map(p => ({
-      lvl:"p", kod:p.kod, nazev:p.nazev, vlastnik:p.vlastnik, rec:p,
-      kids:(dpByProces[p.kod]||[]).map(dp => ({
-        lvl:"d", kod:dp.kod, nazev:dp.nazev, vlastnik:dp.vlastnik, stav:dp.stav, rec:dp,
-        kids:(aktByDp[dp.kod]||[]).map(k => ({
-          lvl:"k", kod:k.kod, nazev:k.nazev, utvar:k.vykonava, rec:k, kids:[]
-        }))
-      }))
-    }))
+    kids:(procByAgenda[a.kod]||[]).map(uzelProces)
   }));
+
+  /* Strom se skládá shora, takže co nemá živého rodiče, do něj nevstoupí —
+     a z mapy by zmizelo beze stopy, včetně aktivit pod tím. Smazání položky
+     číselníku je přitom běžná operace a v appce si osiřelé záznamy najdete
+     přepínačem „osiřelé"; mapa o nich musí mluvit taky, jinak si čtenář
+     myslí, že rejstřík je menší, než ve skutečnosti je. */
+  const kodyAgend = new Set(d.agendy.map(x => x.kod));
+  const kodyProcesu = new Set(d.procesy.map(x => x.kod));
+  const kodyDp = new Set(d.dilci_procesy.map(x => x.kod));
+
+  const sirotci = [
+    ...d.procesy.filter(x => !kodyAgend.has(x.agenda_kod)).map(uzelProces),
+    ...d.dilci_procesy.filter(x => !kodyProcesu.has(x.proces_kod)).map(uzelDp),
+    ...d.aktivity
+      .filter(a => !(linksByAkt[a.kod] || [a.dilci_proces_kod]).some(dp => kodyDp.has(dp)))
+      .map(uzelAkt)
+  ];
+
+  if (sirotci.length) {
+    strom.push({
+      lvl:"a", kod:"—", sirotek:true,
+      nazev:"Nezařazené — chybí nadřazená položka rejstříku",
+      vlastnik:"", rec:{}, kids:sirotci
+    });
+  }
+  return strom;
 }
 
 const TREE = buildTree(DATA);
@@ -285,7 +315,7 @@ function detail(n){
 
 /* ---- init ---- */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · sekční správce " + DATA.meta.spravce + " · " + "vygenerováno 21.08.2026 12:43";
+  "Sekce " + DATA.meta.sekce + " · sekční správce " + DATA.meta.spravce + " · " + "vygenerováno 23.08.2026 16:20";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]

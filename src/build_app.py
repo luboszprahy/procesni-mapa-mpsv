@@ -242,8 +242,62 @@ def vymen_zdroje_bez_pac(cesta_msapp):
     return len(OBRAZOVKY) + 1
 
 
+# Pole, která flow nad krátkým názvem posílá zpátky do listu, ačkoli je
+# nepočítá. Title zůstává: je to kód a ten se z principu nikdy nemění, takže
+# jeho přepsání toutéž hodnotou nic neudělá.
+FLOW_POLE_NAVIC = ["item/nazev", "item/dilci_proces_kod"]
+
+
+def oprav_flow_kratky_nazev(solution_dir):
+    """Flow smí přepsat jen to, co samo spočítalo.
+
+    `AktualizaceKratkehoNazvu` posílá do PatchItem `item/nazev`
+    a `item/dilci_proces_kod` z triggerBody, tedy ze snímku starého až
+    o minutu. Když správce uloží opravu názvu krátce po prvním uložení,
+    flow ji vrátí zpátky na starou hodnotu — tiše, protože zápis proběhne
+    v pořádku a nikdo se nedozví, že přepsal novější data.
+
+    Flow počítá `nazev_kratky`, takže posílat má jen ten (a `id`, podle
+    kterého se řádek najde).
+    """
+    zmenene = []
+    for cesta in sorted((solution_dir / "Workflows").glob("*.json")):
+        if "AktualizaceKratkehoNazvu" not in cesta.name:
+            continue
+        data = json.loads(cesta.read_text(encoding="utf-8-sig"))
+        for akce in _projdi_akce(data["properties"]["definition"]["actions"]):
+            # u Compose je `inputs` rovnou výraz (řetězec), ne objekt
+            vstupy = akce.get("inputs")
+            parametry = vstupy.get("parameters", {}) if isinstance(vstupy, dict) else {}
+            odebrane = [p for p in FLOW_POLE_NAVIC if p in parametry]
+            for polozka in odebrane:
+                del parametry[polozka]
+            if odebrane:
+                zmenene.append(f"{cesta.name.split('-')[0]}: {', '.join(odebrane)}")
+        cesta.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return zmenene
+
+
+def _projdi_akce(akce):
+    """Projde akce flow včetně větví If — zápis bývá vnořený."""
+    for definice in (akce or {}).values():
+        if not isinstance(definice, dict):
+            continue
+        yield definice
+        for klic in ("actions", "else"):
+            vnorene = definice.get(klic)
+            if isinstance(vnorene, dict):
+                vnorene = vnorene.get("actions", vnorene)
+            if isinstance(vnorene, dict):
+                yield from _projdi_akce(vnorene)
+
+
 def dokonci(solution_dir, verze):
     """Přepíše verzi v manifestu a složí solution zip."""
+    opravene = oprav_flow_kratky_nazev(solution_dir)
+    if opravene:
+        print(f"flow — odebraná pole, která nepočítá: {'; '.join(opravene)}")
+
     manifest = solution_dir / "solution.xml"
     text = manifest.read_text(encoding="utf-8-sig")
     novy, pocet = re.subn(r"<Version>[^<]+</Version>", f"<Version>{verze}</Version>", text, count=1)
