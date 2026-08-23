@@ -11,7 +11,7 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 | F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.23 ověřeno v provozu 21.08.) |
 | F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo** (ověřeno v provozu 21.08.) |
 | F4 | Přenos na tenant MPSV | **blokováno** — bez přístupu k tenantu MPSV (21.08.) |
-| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky, úklid číselníků, sjednocení editace | A–F **hotovo** (1.0.0.36, čeká na import) |
+| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky, úklid číselníků, sjednocení editace | A–G **hotovo** (1.0.0.37, čeká na import) |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
 Brány s `/audit` (agent `powerplatform-auditor`): před importem do DEV (konec F1),
@@ -714,6 +714,39 @@ dvojice — porovná operandy a pozná, že jde o protiklady.
 padat, s protikladným projít.
 **risk:** kdyby se rozpoznávání spletlo, brána by přestala hlásit skutečné
 překryvy. Proto porovnává celé normalizované operandy, ne podřetězce.
+
+---
+
+## F6/G — Akce nad HTML mapou na přehledu, rolovací nabídky
+
+Zadáno 23.08.2026. **Vzniklo z regrese:** obě tlačítka nad publikovanou mapou
+(„Zobrazit v HTML" a „Obnovit mapu") žila v `scr_Seznam` a zrušením té
+obrazovky v F6/F zmizela z appky. Zadání je vrátit je na přehled — a protože
+pruh nad stromem měl devět ovládacích prvků, schovat ovládání do nabídek.
+
+**co:** `src/app_src/scr_Dashboard.pa.yaml`, `src/check_app.py`
+
+- **Nabídka „HTML mapa ▾"** s volbami *Zobrazit v HTML* (`Launch(varMapaUrl)`)
+  a *Obnovit HTML* (`MapaPublishFlow.Run()`). Tlačítko se přejmenovalo
+  z „Obnovit mapu": v appce se nemění mapa, ale publikovaná HTML stránka.
+- **Nabídka „Rozbalit: … ▾"** sbalí čtyři stupně rozbalení do jednoho
+  tlačítka, které rovnou ukazuje, který stupeň platí. Tím se v pruhu uvolní
+  místo pro nabídku nad mapou.
+- **Stín pod panely** chytá kliknutí mimo nabídku; bez něj by zůstala
+  otevřená, dokud by na ni uživatel neklikl znovu.
+- `check_app.py`: `kontrola_prekryvu` pozná prvek rozbalovací nabídky podle
+  proměnné `varMenu…` a nehlásí ho proti obsahu pod ním — dva prvky **uvnitř
+  téže** nabídky ale porovnává dál. `kontrola_adresy_mapy` navíc zakáže
+  adresu zapsanou natvrdo do `Launch()`, aby zůstalo jediné místo s adresou.
+
+**verify:** `check_app.py` a `check_solution.py`; v balíku musí zůstat
+`MapaPublishFlow` v `References/DataSources.json` — ověřeno, jinak by tlačítko
+po importu hlásilo neznámý zdroj. Ve Studiu: obě nabídky se otevřou, klik
+mimo je zavře, „Obnovit HTML" spustí flow a je po dobu běhu neaktivní.
+**edge cases:** `varMapaUrl` prázdná (volba *Zobrazit v HTML* se skryje);
+otevřená nabídka při kliknutí na druhou (první se zavře).
+**risk:** obě nabídky leží nad stromem, takže špatné souřadnice by zakryly
+řádky — proto je kontrola překryvu uvnitř nabídky zachovaná.
 
 ---
 

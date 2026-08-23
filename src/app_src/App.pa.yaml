@@ -62,6 +62,9 @@ App:
       Set(varFs, 2);
       Set(varDashStav, "");
       Set(varDashOsirele, false);
+      Set(varMenuRozbalit, false);
+      Set(varMenuMapa, false);
+      Set(varPublikuji, false);
       Set(varSmazatD, Blank());
       Set(varRazeni, "kod");
       Set(varRazeniAsc, true);

@@ -1,6 +1,44 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (F6/F sjednocení editace a úklid z přehledu)
+Aktualizováno: 2026-08-23 (F6/G akce nad HTML mapou, rolovací nabídky)
+
+## Akce nad HTML mapou zpátky na přehledu (23.08.2026) — balík 1.0.0.37
+
+**Nejdřív přiznání k regresi.** Tlačítka „Zobrazit v HTML" a „Obnovit mapu"
+žila v `scr_Seznam`. Když ta obrazovka v F6/F zanikla, zmizela s ní i ona —
+publikaci mapy nešlo z appky spustit vůbec. Při rušení obrazovky jsem
+kontroloval odkazy NA ni, ne obsah, který nesla. Odhalilo se to až tím, že
+si uživatel obě tlačítka vyžádal na přehledu.
+
+Obojí je zpátky, na přehledu, pod nabídkou **„HTML mapa ▾"**. „Obnovit mapu"
+se přejmenovalo na **„Obnovit HTML"** — v appce se nemění mapa, mění se ta
+publikovaná HTML stránka.
+
+**Pruh nad stromem měl devět ovládacích prvků** a další dva by se do něj
+nevešly. Čtyři stupně rozbalení jsou proto pod nabídkou **„Rozbalit: … ▾"**,
+která rovnou ukazuje, který stupeň zrovna platí; uvolněné místo zabrala
+nabídka nad mapou. Pod oběma panely leží stín, který chytá kliknutí mimo —
+bez něj by nabídka zůstala otevřená, dokud by na ni uživatel neklikl znovu.
+
+**Brána musela pochopit, že nabídka leží nad obsahem záměrně.**
+`kontrola_prekryvu` pozná prvek nabídky podle proměnné `varMenu…` a nehlásí
+ho proti tomu, co je pod ním. Dva prvky **uvnitř téže** nabídky ale
+porovnává dál — ty na sebe lézt nemají o nic víc než tlačítka v pruhu.
+Mutačně ověřeno: posunutá položka nabídky přes sousední položku padá.
+
+Druhá mutace odhalila mezeru, která tam byla už dřív: `kontrola_adresy_mapy`
+hlídala jen `Set(varMapaUrl, "…")`, takže adresa zapsaná rovnou do `Launch()`
+by prošla. V cizím tenantu by pak appka otevírala cizí web a nikdo by nevěděl
+kde to změnit. Nově je zakázaná.
+
+Ověřeno navíc přímo v balíku, že `MapaPublishFlow` zůstal v
+`References/DataSources.json` — kdyby ho pac při přebalení vyhodil jako
+nepoužitý, tlačítko by po importu hlásilo neznámý zdroj.
+
+Brány: `check_app` OK (4 obrazovky, 193 prvků, 2 129 vzorců),
+`check_solution` 219 kontrol / 0 chyb.
+
+
 
 ## Jedna editační obrazovka a úklid přímo z přehledu (23.08.2026) — balík 1.0.0.36
 

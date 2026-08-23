@@ -5,11 +5,11 @@ teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (f
 Zadání drží `PRD.md`.
 
 > **Stav:** appka i publikační flow **běží v provozu**. Aktuální balík
-> k importu je **`deploy/procesnimapa_1_0_0_36.zip`** (jedna editační
+> k importu je **`deploy/procesnimapa_1_0_0_37.zip`** (jedna editační
 > obrazovka pro všechny čtyři úrovně, hledání a úklid přímo z přehledu) —
 > hotový a ověřený offline branami, ale **ještě nenaimportovaný**. Poslední
 > ověřeně běžící verze v prostředí je **1.0.0.28**. Balíky 34 a 35 jsou
-> nahrazené a smazané; 36 obsahuje všechno z nich.
+> nahrazené a smazané; 37 obsahuje všechno z nich.
 >
 > **Obrazovka `scr_Seznam` zanikla.** Aktivity se editují jako čtvrtá úroveň
 > číselníku; filtry, řazení i mazání se přenesly, nic se neztratilo.
@@ -33,10 +33,9 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_36.zip`** jako upgrade a appku
+1. **Naimportovat `deploy/procesnimapa_1_0_0_37.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-   Balík nese všechno z nenaimportovaných 1.0.0.34 a 35 plus sjednocenou
-   editaci.
+   Balík nese všechno z nenaimportovaných 1.0.0.34 až 36.
 
    **Navbar má nově dvě záložky: Přehled a Editace.** Samostatný seznam
    aktivit zmizel — je to teď čtvrtá úroveň v číselníku.
@@ -63,7 +62,13 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
      nezobrazují, protože nemají pod čím viset,
    - v řádku je vedle tužky **koš** se stejným potvrzením jako v editaci,
    - **zkusit celý cyklus**: smazat proces → jeho dílčí procesy se objeví
-     pod chipem „osiřelé" → uklidit je košem.
+     pod chipem „osiřelé" → uklidit je košem,
+   - **nabídka „Rozbalit: … ▾"** místo čtyř tlačítek — ukazuje, který stupeň
+     platí; klik mimo ji zavře,
+   - **nabídka „HTML mapa ▾"** s volbami **Zobrazit v HTML** a **Obnovit
+     HTML** (dřív „Obnovit mapu"). Obojí bylo v zrušeném seznamu aktivit
+     a ve verzi 1.0.0.36 v appce chybělo — ověřit, že publikace naskočí
+     a že se hláška o spuštění objeví.
 2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
    (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
    21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
@@ -141,11 +146,12 @@ píše podle finální podoby appky, a tou je teď obrazovka Editace.
 | F3b denní publikace mapy | hotovo, čeká na import — druhé flow `MapaPublishScheduled`, Recurrence 7:00 |
 | F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
 | F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.26) |
-| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.36) |
-| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.36) |
-| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.36) |
-| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.36) |
-| F6/F sjednocená editace, hledání a úklid z přehledu | hotovo, čeká na import (1.0.0.36) |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.37) |
+| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.37) |
+| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.37) |
+| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.37) |
+| F6/F sjednocená editace, hledání a úklid z přehledu | hotovo, čeká na import (1.0.0.37) |
+| F6/G akce nad HTML mapou na přehledu, rolovací nabídky | hotovo, čeká na import (1.0.0.37) |
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
 
@@ -269,6 +275,18 @@ a `kontrola_predikatu` v `check_app.py` — všechny tři mutačně ověřené
 Nové brány: rozpoznání vzájemně se vylučujících prvků v `kontrola_prekryvu`
 a kontrola shody definic téže kolekce na víc obrazovkách — obě mutačně
 ověřené.
+
+## 6d. Co přibylo 23.08. večer (balík 1.0.0.37)
+
+| co | proč |
+|---|---|
+| „Zobrazit v HTML" a „Obnovit HTML" na přehledu | obě tlačítka byla v zrušeném seznamu aktivit a v 1.0.0.36 v appce chyběla — regrese |
+| přejmenování „Obnovit mapu" → „Obnovit HTML" | v appce se nemění mapa, mění se publikovaná HTML stránka |
+| rolovací nabídky „Rozbalit" a „HTML mapa" | pruh nad stromem měl devět prvků, další dva by se nevešly |
+
+Brány: `kontrola_prekryvu` pozná prvek nabídky podle `varMenu…` a nehlásí ho
+proti obsahu pod ním (uvnitř nabídky hlídá dál), `kontrola_adresy_mapy`
+zakazuje adresu natvrdo v `Launch()`. Obě mutačně ověřené.
 
 ## 7. Brány (všechny mutačně ověřené)
 

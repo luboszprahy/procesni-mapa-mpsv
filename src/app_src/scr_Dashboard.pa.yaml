@@ -543,20 +543,22 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =28
+            Height: =32
             HoverColor: =If(varDashUroven = 1, RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varDashUroven = 1, stylAkceHover, stylRadekHover)
             OnSelect: |-
-              =ClearCollect(colOtevrene, { Kod: "" });
+              =Set(varMenuRozbalit, false);
+              ClearCollect(colOtevrene, { Kod: "" });
               Set(varDashUroven, 1)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
             Text: ="jen agendy"
             Tooltip: '="Sbalí strom na první úroveň - zůstanou jen agendy."'
-            Width: =92
-            X: =262
-            Y: =180
+            Visible: =varMenuRozbalit
+            Width: =192
+            X: =266
+            Y: =216
       - btn_Uroven2:
           Control: Classic/Button@2.2.0
           Properties:
@@ -567,21 +569,24 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =28
+            Height: =32
             HoverColor: =If(varDashUroven = 2, RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varDashUroven = 2, stylAkceHover, stylRadekHover)
             OnSelect: |-
-              =ClearCollect(colOtevrene, { Kod: "" });
+              =Set(varMenuRozbalit, false);
+              ClearCollect(colOtevrene, { Kod: "" });
               Collect(colOtevrene, ForAll(colAgendy As a, { Kod: a.Title }));
+              Set(varMenuRozbalit, false);
               Set(varDashUroven, 2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
             Text: ="+ procesy"
             Tooltip: '="Rozbalí všechny agendy naráz, takže jsou vidět procesy celé druhé úrovně."'
-            Width: =92
-            X: =358
-            Y: =180
+            Visible: =varMenuRozbalit
+            Width: =192
+            X: =266
+            Y: =252
       - btn_Uroven3:
           Control: Classic/Button@2.2.0
           Properties:
@@ -592,22 +597,25 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =28
+            Height: =32
             HoverColor: =If(varDashUroven = 3, RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varDashUroven = 3, stylAkceHover, stylRadekHover)
             OnSelect: |-
-              =ClearCollect(colOtevrene, { Kod: "" });
+              =Set(varMenuRozbalit, false);
+              ClearCollect(colOtevrene, { Kod: "" });
               Collect(colOtevrene, ForAll(colAgendy As a, { Kod: a.Title }));
               Collect(colOtevrene, ForAll(colProcesy As p, { Kod: p.Title }));
+              Set(varMenuRozbalit, false);
               Set(varDashUroven, 3)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
             Text: ="+ dílčí procesy"
             Tooltip: '="Rozbalí celou druhou i třetí úroveň - vidět jsou všechny dílčí procesy rejstříku."'
-            Width: =112
-            X: =454
-            Y: =180
+            Visible: =varMenuRozbalit
+            Width: =192
+            X: =266
+            Y: =288
       - btn_Uroven4:
           Control: Classic/Button@2.2.0
           Properties:
@@ -618,23 +626,26 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =28
+            Height: =32
             HoverColor: =If(varDashUroven = 4, RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varDashUroven = 4, stylAkceHover, stylRadekHover)
             OnSelect: |-
-              =ClearCollect(colOtevrene, { Kod: "" });
+              =Set(varMenuRozbalit, false);
+              ClearCollect(colOtevrene, { Kod: "" });
               Collect(colOtevrene, ForAll(colAgendy As a, { Kod: a.Title }));
               Collect(colOtevrene, ForAll(colProcesy As p, { Kod: p.Title }));
               Collect(colOtevrene, ForAll(colDilci As d, { Kod: d.Title }));
+              Set(varMenuRozbalit, false);
               Set(varDashUroven, 4)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
             Text: ="+ aktivity"
             Tooltip: '="Rozbalí celý strom. Nad velkým rejstříkem je to hodně řádků - pro hledání konkrétní věci je rychlejší seznam aktivit nebo publikovaná mapa."'
-            Width: =92
-            X: =570
-            Y: =180
+            Visible: =varMenuRozbalit
+            Width: =192
+            X: =266
+            Y: =324
       - lbl_StavPopis:
           Control: Label@2.5.1
           Properties:
@@ -645,7 +656,7 @@ Screens:
             Text: ="Stav:"
             VerticalAlign: =VerticalAlign.Middle
             Width: =40
-            X: =678
+            X: =424
             Y: =180
       - btn_StavVse:
           Control: Classic/Button@2.2.0
@@ -667,7 +678,7 @@ Screens:
             Text: ="vše"
             Tooltip: '="Bez filtru stavu - ve stromu jsou všechny aktivity i větve nad nimi."'
             Width: =60
-            X: =722
+            X: =468
             Y: =180
       - btn_StavSchvaleno:
           Control: Classic/Button@2.2.0
@@ -689,7 +700,7 @@ Screens:
             Text: ="schváleno"
             Tooltip: '="Nechá jen schválené aktivity a nad nimi jen ty agendy, procesy a dílčí procesy, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet schválených aktivit v dané větvi."'
             Width: =100
-            X: =786
+            X: =532
             Y: =180
       - btn_StavPracovni:
           Control: Classic/Button@2.2.0
@@ -711,7 +722,7 @@ Screens:
             Text: ="pracovní"
             Tooltip: '="Nechá jen pracovní aktivity, tedy rozpracované záznamy, a nad nimi jen větve, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet pracovních aktivit v dané větvi."'
             Width: =92
-            X: =890
+            X: =636
             Y: =180
       # Osiřelá položka nemá ve stromu kam patřit, takže se v něm vůbec
       # neukáže - chip je jediné místo, kde je z přehledu vidět.
@@ -735,7 +746,64 @@ Screens:
             Text: ="osiřelé"
             Tooltip: '="Vypíše položky, jejichž nadřazená úroveň v číselníku není: proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího procesu. U agendy, která nadřazenou úroveň nemá, to znamená agendu bez jediného procesu. Ve stromu je jinak nenajdeš - strom ukazuje jen to, co visí pod otevřeným předkem, a sirotek žádného předka nemá. Uklidit je jde na obrazovce Editace nebo rovnou košem v řádku."'
             Width: =110
-            X: =990
+            X: =736
+            Y: =180
+      - btn_RozbalitMenu:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varMenuRozbalit, RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varMenuRozbalit, stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =If(varMenuRozbalit, RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varMenuRozbalit, stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varMenuRozbalit, !varMenuRozbalit);
+              Set(varMenuMapa, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: |-
+              ="Rozbalit: " &
+              Switch(
+                  varDashUroven,
+                  1, "agendy",
+                  2, "procesy",
+                  3, "dílčí procesy",
+                  4, "vše",
+                  "vlastní"
+              ) & "  ▾"
+            Tooltip: '="Kolik úrovní stromu je rozbalených. Nabídka rozbalí celou úroveň naráz; vlastní rozbalení znamená, že jsi větve otevíral po jedné klikáním do řádků."'
+            Width: =150
+            X: =262
+            Y: =180
+      - btn_MapaMenu:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varMenuMapa, RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varMenuMapa, stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =If(varMenuMapa, RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varMenuMapa, stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varMenuMapa, !varMenuMapa);
+              Set(varMenuRozbalit, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="HTML mapa  ▾"
+            Tooltip: '="Publikovaná HTML mapa: otevření a obnovení. Mapa data nečte živě - ukazuje stav k okamžiku poslední publikace."'
+            Width: =120
+            X: =854
             Y: =180
       - lbl_RozpadPocet:
           Control: Label@2.5.1
@@ -1120,6 +1188,108 @@ Screens:
                   Width: =36
                   X: =Parent.TemplateWidth - 84
                   Y: =(Parent.TemplateHeight - 1) / 2 - 18
+      # ---------- rolovací nabídky ----------
+      # Pruh nad stromem měl devět ovládacích prvků; další dva by se do něj
+      # nevešly, tak jsou stupně rozbalení i akce nad HTML mapou schované
+      # pod tlačítky. Stín pod panely chytá kliknutí mimo — jinak by nabídka
+      # zůstala otevřená, dokud by na ni uživatel neklikl znovu.
+      - rec_MenuStin:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.08)
+            Height: =Parent.Height
+            OnSelect: |-
+              =Set(varMenuRozbalit, false);
+              Set(varMenuMapa, false)
+            Visible: =varMenuRozbalit || varMenuMapa
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - rec_MenuRozbalitPanel:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Fill: =stylKarta
+            Height: =148
+            Visible: =varMenuRozbalit
+            Width: =200
+            X: =262
+            Y: =212
+      - rec_MenuMapaPanel:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Fill: =stylKarta
+            Height: =84
+            Visible: =varMenuMapa
+            Width: =220
+            X: =854
+            Y: =212
+      - btn_MapaHtml:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuMapa, false);
+              Launch(varMapaUrl, {}, LaunchTarget.New)
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Zobrazit v HTML"
+            Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami bez ohledu na jejich počet. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
+            Visible: =varMenuMapa && !IsBlank(varMapaUrl)
+            Width: =212
+            X: =858
+            Y: =216
+      # Přejmenováno z „Obnovit mapu" na „Obnovit HTML" (23.08.2026): mapa
+      # se v appce nemění, mění se ta publikovaná HTML stránka.
+      - btn_ObnovitHtml:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varPublikuji, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuMapa, false);
+              Set(varPublikuji, true);
+              IfError(
+                  MapaPublishFlow.Run();
+                  Notify("Publikace spuštěna. Přegenerování chvíli trvá - pak stránku otevři volbou Zobrazit v HTML.", NotificationType.Information),
+                  Notify("Publikace selhala: " & FirstError.Message, NotificationType.Error)
+              );
+              Set(varPublikuji, false)
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Obnovit HTML"
+            Tooltip: '="Přegeneruje publikovanou HTML stránku z dnešního obsahu rejstříku. Stránka data nečte živě - ukazuje stav k okamžiku poslední publikace, takže po každé dávce úprav ji je potřeba obnovit. Běh trvá několik sekund a probíhá na pozadí; hlášení potvrzuje spuštění, ne dokončení. Kromě toho se stránka obnovuje sama každý den v 7:00."'
+            Visible: =varMenuMapa
+            Width: =212
+            X: =858
+            Y: =252
       # ---------- potvrzení smazání ----------
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
       # obrazovkou. Souřadnice jsou vzorce, takže kontrola překryvu je

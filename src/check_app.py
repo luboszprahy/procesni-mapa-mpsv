@@ -688,6 +688,17 @@ def vylucuji_se(va, vb):
     return a[0] != b[0] and a[1] == b[1] and a[2] == b[2]
 
 
+def je_nabidka(visible):
+    """Prvek rozbalovací nabídky — leží nad obsahem obrazovky záměrně.
+
+    Poznává se podle toho, že jeho zobrazení řídí proměnná `varMenu…`.
+    Dvojice, kde je nabídkou jen jeden z prvků, se proto nehlásí; dva prvky
+    UVNITŘ téže nabídky se ale porovnávají dál, protože ty na sebe lézt
+    nemají o nic víc než tlačítka v pruhu.
+    """
+    return "varMenu" in str(visible)
+
+
 def porovnej(jmeno_obrazovky, obdelniky):
     for i, (jmeno_a, (xa, ya, wa, ha), va) in enumerate(obdelniky):
         for jmeno_b, (xb, yb, wb, hb), vb in obdelniky[i + 1:]:
@@ -696,6 +707,8 @@ def porovnej(jmeno_obrazovky, obdelniky):
             if prekryv_x <= 0 or prekryv_y <= 0:
                 continue
             if vylucuji_se(va, vb):
+                continue
+            if je_nabidka(va) != je_nabidka(vb):
                 continue
             chyby.append(
                 f"{jmeno_obrazovky}: '{jmeno_a}' a '{jmeno_b}' se překrývají "
@@ -798,6 +811,16 @@ def kontrola_adresy_mapy(vzorce):
                 )
             if not adresa.lower().startswith("https://"):
                 chyby.append(f"{cesta}.{prop}: varMapaUrl není https adresa")
+
+        # Adresa smí být v appce jen na jediném místě — v App.OnStart, kde ji
+        # při přenosu na MPSV někdo najde. Zapsaná rovnou do Launch() by tam
+        # zůstala schovaná a appka by v cizím tenantu otevírala cizí web.
+        for shoda in re.finditer(r'Launch\(\s*"([^"]*)"', text):
+            chyby.append(
+                f"{cesta}.{prop}: Launch má adresu natvrdo ({shoda.group(1)[:60]}) — "
+                f"musí jít přes varMapaUrl, jinak se při přenosu na jiný tenant "
+                f"nenajde"
+            )
 
 
 def kontrola_stareho_result(vzorce):
