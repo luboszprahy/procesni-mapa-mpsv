@@ -523,15 +523,15 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =40
-            Y: ==If(varUrovenTyp = "aktivita", 228, 184)
+            Y: =If(varUrovenTyp = "aktivita", 228, 184)
       - rec_KartaSeznamC:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: ==If(varUrovenTyp = "aktivita", 452, 496)
+            Height: =If(varUrovenTyp = "aktivita", 452, 496)
             Width: =620
             X: =40
-            Y: ==If(varUrovenTyp = "aktivita", 256, 212)
+            Y: =If(varUrovenTyp = "aktivita", 256, 212)
       # Hlavičky řadí klikem, stejně jako je řadil zrušený seznam aktivit.
       - lbl_h_KodC:
           Control: Label@2.5.1
@@ -552,7 +552,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =140
             X: =56
-            Y: ==If(varUrovenTyp = "aktivita", 262, 218)
+            Y: =If(varUrovenTyp = "aktivita", 262, 218)
       - lbl_h_NazevC:
           Control: Label@2.5.1
           Properties:
@@ -572,7 +572,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =258
             X: =212
-            Y: ==If(varUrovenTyp = "aktivita", 262, 218)
+            Y: =If(varUrovenTyp = "aktivita", 262, 218)
       - lbl_h_VlastnikC:
           Control: Label@2.5.1
           Properties:
@@ -594,7 +594,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
             X: =470
-            Y: ==If(varUrovenTyp = "aktivita", 262, 218)
+            Y: =If(varUrovenTyp = "aktivita", 262, 218)
       - lbl_PrazdnoC:
           Control: Label@2.5.1
           Properties:
@@ -619,12 +619,12 @@ Screens:
             Visible: =CountRows(gal_CiselnikC.AllItems) = 0
             Width: =588
             X: =56
-            Y: ==If(varUrovenTyp = "aktivita", 304, 260)
+            Y: =If(varUrovenTyp = "aktivita", 304, 260)
       - gal_CiselnikC:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
           Properties:
-            Height: ==If(varUrovenTyp = "aktivita", 418, 462)
+            Height: =If(varUrovenTyp = "aktivita", 418, 462)
             Items: |-
               =Sort(
                   Search(
@@ -650,7 +650,7 @@ Screens:
             TemplateSize: =44 + varFs * 4
             Width: =620
             X: =40
-            Y: ==If(varUrovenTyp = "aktivita", 290, 246)
+            Y: =If(varUrovenTyp = "aktivita", 290, 246)
           Children:
             - rec_RadekC:
                 Control: Rectangle@2.3.0

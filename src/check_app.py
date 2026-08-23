@@ -970,6 +970,29 @@ def kontrola_operatoru_in(vzorce):
             )
 
 
+def kontrola_dvojiteho_rovnitka(soubory):
+    """`Vlastnost: ==vzorec` je překlep, který projde YAML i packerem.
+
+    V pa.yaml uvozuje vzorec jedno rovnítko. Když je tam omylem dvojité,
+    YAML se rozparsuje, packer nic nenamítne a Studio až po importu hlásí
+    „Unexpected characters" — u každého takového prvku zvlášť. Vzniká to
+    při generování vlastností skriptem, kde už předpřipravená hodnota
+    rovnítko obsahuje a další se přidá při skládání řádku.
+
+    Kontroluje se nad SYROVÝM textem souboru, ne nad načteným YAML: parser
+    druhé rovnítko schová do hodnoty a v načtené podobě není poznat.
+    (Zjištěno 23.08.2026 na 1.0.0.38 — nesla devět takových vlastností.)
+    """
+    for cesta in soubory:
+        for cislo, radek in enumerate(io.open(cesta, encoding="utf-8"), start=1):
+            if re.match(r"\s+[A-Za-z][A-Za-z0-9]*: ==", radek):
+                chyby.append(
+                    f"{Path(cesta).name}:{cislo}: vlastnost má dvojité rovnítko "
+                    f"({radek.strip()[:60]}) — Studio to hlásí jako "
+                    f"jako „Unexpected characters“"
+                )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -992,6 +1015,7 @@ def main():
     kontrola_navigace(vzorce, obrazovky)
     kontrola_rezimu_ciselniku(vzorce)
     kontrola_operatoru_in(vzorce)
+    kontrola_dvojiteho_rovnitka(soubory)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)
