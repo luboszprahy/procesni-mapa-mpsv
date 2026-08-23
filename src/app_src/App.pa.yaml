@@ -57,7 +57,6 @@ App:
       Set(varRazeniAscC, true);
       Set(varSekceKodC, "");
       Set(varUtvarKodC, "");
-      Set(varOsirele, false);
       Set(varSmazatC, Blank());
       Set(varFs, 2);
       Set(varDashStav, "");
@@ -65,8 +64,5 @@ App:
       Set(varMenuRozbalit, false);
       Set(varMenuMapa, false);
       Set(varPublikuji, false);
-      Set(varSmazatD, Blank());
-      Set(varRazeni, "kod");
-      Set(varRazeniAsc, true);
-      Set(varSmazat, Blank())
+      Set(varSmazatD, Blank())
     Theme: =PowerAppsTheme

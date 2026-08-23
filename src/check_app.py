@@ -993,6 +993,47 @@ def kontrola_dvojiteho_rovnitka(soubory):
                 )
 
 
+def kontrola_promennych(soubory, vzorce):
+    """Proměnná, která nikde nedostane typ, shodí celý App.OnStart.
+
+    `Set(x, Blank())` typ neurčuje. Když je to JEDINÉ přiřazení v celé appce,
+    Studio hlásí „No type found for variable 'x'" — a protože je ta chyba
+    v OnStart, neprovede se ani zbytek: appka naběhne bez barev (černá,
+    protože barvy jsou proměnné z OnStart) a s prázdnými kolekcemi.
+
+    Typicky vznikne po zrušení obrazovky: proměnná, kterou používala, zůstane
+    v OnStart viset. Přesně tohle shodilo 1.0.0.39 — `varSmazat` po zrušené
+    scr_Seznam. Mrtvá proměnná, která typ má, appku neshodí, ale je to smetí
+    ze stejného soudku, takže se hlásí jako varování.
+    """
+    app = next((c for c in soubory if Path(c).name == "App.pa.yaml"), None)
+    if app is None:
+        return
+    text_app = io.open(app, encoding="utf-8").read()
+    text_obrazovek = "".join(
+        io.open(c, encoding="utf-8").read() for c in soubory if Path(c).name != "App.pa.yaml"
+    )
+
+    vse = text_app + text_obrazovek
+    for jmeno in sorted(set(re.findall(r"Set\(\s*(var[A-Za-z0-9_]*)\s*,", text_app))):
+        # Počítá se, ne parsuje: hodnota Blank() má vlastní závorky, takže
+        # každý pokus vytáhnout ji regulárním výrazem skončí u té první.
+        vsechna = len(re.findall(rf"Set\(\s*{jmeno}\s*,", vse))
+        prazdna = len(re.findall(rf"Set\(\s*{jmeno}\s*,\s*Blank\(\)\s*\)", vse))
+        if vsechna and vsechna == prazdna:
+            chyby.append(
+                f"App.OnStart: '{jmeno}' nikde nedostane typ — jediné přiřazení "
+                f"je Blank(). Studio to hlásí jako 'No type found for variable' "
+                f"a kvůli té chybě neprovede celý OnStart: appka naběhne černá "
+                f"(barvy jsou proměnné z OnStart) a s prázdnými kolekcemi"
+            )
+        elif not re.search(rf"\b{jmeno}\b", text_obrazovek):
+            varovani.append(
+                f"App.OnStart: '{jmeno}' se v žádné obrazovce nepoužívá — "
+                f"nejspíš zbytek po zrušené obrazovce"
+            )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -1016,6 +1057,7 @@ def main():
     kontrola_rezimu_ciselniku(vzorce)
     kontrola_operatoru_in(vzorce)
     kontrola_dvojiteho_rovnitka(soubory)
+    kontrola_promennych(soubory, vzorce)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)
