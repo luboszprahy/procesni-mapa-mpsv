@@ -48,6 +48,13 @@ App:
       Set(varAktStale, true);
       Set(varZobrazitKod, true);
       Set(varDetailZpet, "seznam");
+      Set(varUrovenTyp, "agenda");
+      Set(varCiselnikNova, true);
+      Set(varCiselnikKod, "");
+      Set(varChybaC, "");
+      Set(varUklidC, false);
+      Set(varOsirele, false);
+      Set(varSmazatC, Blank());
       Set(varFs, 2);
       Set(varDashStav, "");
       Set(varRazeni, "kod");

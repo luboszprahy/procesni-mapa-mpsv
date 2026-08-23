@@ -481,7 +481,7 @@ Screens:
             Height: =20
             Size: =10 + varFs
             Text: ="Vnitřní předpis"
-            Width: =620
+            Width: =300
             X: =700
             Y: =424
       - txt_Predpis:
@@ -491,13 +491,13 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Tooltip: '="Vnitřní předpis, o který se aktivita opírá — např. SP 10/2021. Víc předpisů odděl středníkem. Slouží jako doklad, proč se činnost vykonává; při revizi předpisu je podle tohoto pole vidět, kterých aktivit se změna týká."'
-            HintText: ="Víc předpisů oddělte středníkem — např. SP 10/2021; VP 02/2016"
+            HintText: ="Víc předpisů oddělte středníkem — např. SP 10/2021"
             Default: =If(varNova, "", varAktivita.vnitrni_predpis)
             Font: =Font.'Open Sans'
             Height: =64
             Mode: =TextMode.MultiLine
             Size: =13 + varFs
-            Width: =620
+            Width: =300
             X: =700
             Y: =448
       - lbl_l_Stav:
@@ -509,8 +509,8 @@ Screens:
             Size: =10 + varFs
             Text: ="Stav"
             Width: =300
-            X: =700
-            Y: =524
+            X: =1020
+            Y: =424
       - drp_StavDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -524,59 +524,90 @@ Screens:
             Items: =["pracovní", "schváleno"]
             Size: =13 + varFs
             Width: =300
+            X: =1020
+            Y: =448
+      # ---------- karta zařazení do dílčích procesů ----------
+      # Do 1.0.0.34 to byla galerie 300×60 px vedle pole Stav: dva řádky
+      # písmem 10, bez nadpisu s počtem a bez štítku primárního zařazení.
+      # Z obrazovky nešlo poznat, že jde o zařazení do víc větví mapy.
+      # Nově karta přes celou šířku pravého sloupce, řádky 28+ px a akce
+      # v hlavičce karty.
+      - rec_KartaVazby:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =140
+            Width: =620
             X: =700
-            Y: =548
+            Y: =516
+      - rec_PruhVazby:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylAkce
+            Height: =140
+            Width: =4
+            X: =700
+            Y: =516
+      # Nadpis je vidět vždycky a u nové aktivity nese vysvětlení místo počtu.
+      # Samostatný popisek „zatím prázdno" přes galerii by neprošel branou
+      # kontrola_prekryvu — ta počítá geometrii, ne Visible za běhu.
       - lbl_l_Vazby:
           Control: Label@2.5.1
           Properties:
-            Color: =stylTextSlaby
+            Color: =stylText
             Font: =Font.'Open Sans'
-            Height: =20
-            Size: =10 + varFs
+            FontWeight: =FontWeight.Semibold
+            Height: =24
+            Size: =11 + varFs
             Text: |-
-              ="Zařazení do dílčích procesů (" & CountRows(gal_Zarazeni.AllItems) & ")"
-            Visible: =!varNova
-            Width: =300
-            X: =1020
+              =If(
+                  varNova,
+                  "Zařazení do dílčích procesů — vznikne po uložení",
+                  "Zařazení do dílčích procesů (" & CountRows(gal_Zarazeni.AllItems) & ")"
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =380
+            X: =724
             Y: =524
       - btn_Vazby:
           Control: Classic/Button@2.2.0
           Properties:
-            HoverFill: =stylRadekHover
-            PressedFill: =stylRadekVybrany
-            HoverColor: =stylAkce
             BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =RGBA(255, 255, 255, 1)
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Otevře přiřazení aktivity do DALŠÍCH dílčích procesů. Standardně aktivita patří do jednoho (vybraného výše) — ale metodika připouští, že tutéž činnost vykonává útvar ve víc dílčích procesech. Pak ji přidej i tam a v mapě se objeví v obou větvích, aniž by vznikl duplicitní záznam."'
-            Color: =stylPrimarni
-            Fill: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
             OnSelect: =Navigate(scr_Vazby, ScreenTransition.Cover)
-            Size: =13 + varFs
-            Text: ="Další dílčí procesy…"
+            PressedFill: =stylRadekVybrany
+            Size: =11 + varFs
+            Text: ="Spravovat…"
+            Tooltip: '="Otevře přiřazení aktivity do DALŠÍCH dílčích procesů. Standardně aktivita patří do jednoho (vybraného vlevo) — ale metodika připouští, že tutéž činnost vykonává útvar ve víc dílčích procesech. Pak ji přidej i tam a v mapě se objeví v obou větvích, aniž by vznikl duplicitní záznam."'
             Visible: =!varNova
-            Width: =240
-            X: =1020
-            Y: =616
-      # Výška na dva řádky se schválně nedopočítává z počtu položek: má být
+            Width: =184
+            X: =1112
+            Y: =520
+      # Výška na tři řádky se schválně nedopočítává z počtu položek: má být
       # vidět, že seznam pokračuje pod okrajem, a to ustálená výška se
       # svislým posuvníkem ukáže líp než karta, která se roztáhne.
       - gal_Zarazeni:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
           Properties:
-            Height: =60
+            Height: =84
             Items: |-
               =Filter('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title)
             ShowScrollbar: =true
             TemplatePadding: =0
-            TemplateSize: =30
+            TemplateSize: =28 + varFs * 3
             Visible: =!varNova
-            Width: =300
-            X: =1020
-            Y: =548
+            Width: =572
+            X: =724
+            Y: =560
           Children:
             - lbl_ZarazeniText:
                 Control: Label@2.5.1
@@ -587,7 +618,7 @@ Screens:
                     =If(ThisItem.primarni.Value = "ano", FontWeight.Semibold, FontWeight.Normal)
                   Height: =Parent.TemplateHeight
                   PaddingLeft: =0
-                  Size: =10
+                  Size: =11 + varFs
                   Text: |-
                     =ThisItem.dilci_proces_kod & " · " &
                     LookUp(colDilci, Title = ThisItem.dilci_proces_kod, nazev)
@@ -596,8 +627,23 @@ Screens:
                     LookUp(colDilci, Title = ThisItem.dilci_proces_kod, nazev) &
                     If(ThisItem.primarni.Value = "ano", " (primární zařazení — určuje kód aktivity)", "")
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =Parent.TemplateWidth - 8
+                  Width: =Parent.TemplateWidth - 88
                   X: =0
+                  Y: =0
+            - lbl_ZarazeniPrimarni:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =stylUspech
+                  Font: =Font.'Open Sans'
+                  Height: =Parent.TemplateHeight
+                  Size: =10 + varFs
+                  Text: |-
+                    =If(ThisItem.primarni.Value = "ano", "primární", "")
+                  Tooltip: '="Primární zařazení určuje kód aktivity a mění se výběrem dílčího procesu vlevo. Ostatní zařazení se přidávají a odebírají tlačítkem Spravovat."'
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =84
+                  X: =Parent.TemplateWidth - 84
                   Y: =0
       - btn_Ulozit:
           Control: Classic/Button@2.2.0

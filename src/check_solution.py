@@ -22,7 +22,7 @@ _a = _p.parse_args()
 VSTUP = Path(_a.vstup)
 VYSTUP = Path(_a.vystup)
 
-OCEKAVANE_OBRAZOVKY = {"scr_Dashboard", "scr_Seznam", "scr_Detail", "scr_Vazby"}
+OCEKAVANE_OBRAZOVKY = {"scr_Dashboard", "scr_Seznam", "scr_Detail", "scr_Vazby", "scr_Ciselnik"}
 UVODNI_OBRAZOVKA = "scr_Dashboard"
 OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces",
                    "Útvary"}

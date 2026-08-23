@@ -182,6 +182,35 @@ Screens:
             Width: =160
             X: =428
             Y: =0
+      # Zakládání číselníku je odsud na jedno kliknutí — přehled je úvodní
+      # obrazovka. Ze seznamu aktivit se sem chodit nemusí, tam se pořizují
+      # aktivity.
+      - btn_NovaPolozkaD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.55)
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(255, 255, 255, 0.14)
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =36
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.26)
+            OnSelect: |-
+              =Set(varUrovenTyp, "agenda");
+              Set(varCiselnikNova, true);
+              Set(varCiselnikKod, "");
+              Navigate(scr_Ciselnik, ScreenTransition.Cover)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.34)
+            Size: =11
+            Text: ="+ Nová položka rejstříku"
+            Tooltip: '="Založí novou agendu, proces nebo dílčí proces. Úroveň se vybírá až na další obrazovce. Aktivity se pořizují jinde - v seznamu aktivit."'
+            Width: =210
+            X: =620
+            Y: =14
       # Velikost písma (varFs = 0 / 2 / 4) vpravo u jména uživatele.
       # Mění se text
       # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
@@ -1007,22 +1036,20 @@ Screens:
                     If(
                         ThisItem.uroven = 4,
                         "Detail otevřeš tužkou vpravo.",
-                        "Číslo vpravo = počet položek o úroveň níž (" &
+                        "Tužka vpravo otevře úpravu názvu a vlastníka. Číslo vpravo = počet položek o úroveň níž (" &
                         Switch(ThisItem.uroven, 1, "procesů v agendě", 2, "dílčích procesů v procesu", "aktivit v dílčím procesu") &
                         "): " & ThisItem.pocet & ". Klikni pro rozbalení."
                     )
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =0
-            # Detail zatím existuje jen pro aktivitu. U vyšších úrovní ikona
-            # zůstává, jen tlumeně, a po kliknutí řekne, kde se ta úroveň dnes
-            # edituje — vlastní zadávací obrazovka pro agendu, proces a dílčí
-            # proces je F6/D.
+            # Aktivita se otevře na detailu, agenda / proces / dílčí proces
+            # na scr_Ciselnik v režimu úpravy (F6/D). Do 1.0.0.34 vyšší úrovně
+            # jen hlásily, že se mění přímo v SharePointu.
             - ico_StromEdit:
                 Control: Classic/Icon@2.5.0
                 Properties:
-                  Color: |-
-                    =If(ThisItem.uroven = 4, stylAkce, stylOkraj)
+                  Color: =stylAkce
                   Fill: =RGBA(0, 0, 0, 0)
                   Height: =36
                   HoverColor: =stylAkceHover
@@ -1035,12 +1062,13 @@ Screens:
                         Set(varNova, false);
                         Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
                         Navigate(scr_Detail, ScreenTransition.Cover),
-                        Notify(
-                            Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ") &
-                            ThisItem.kod &
-                            " se zatím upravuje přímo v SharePoint seznamu - vlastní zadávací obrazovka se připravuje.",
-                            NotificationType.Information
-                        )
+                        Set(
+                            varUrovenTyp,
+                            Switch(ThisItem.uroven, 1, "agenda", 2, "proces", "dilci")
+                        );
+                        Set(varCiselnikNova, false);
+                        Set(varCiselnikKod, ThisItem.kod);
+                        Navigate(scr_Ciselnik, ScreenTransition.Cover)
                     )
                   PaddingBottom: =8
                   PaddingLeft: =8
@@ -1051,8 +1079,8 @@ Screens:
                     =If(
                         ThisItem.uroven = 4,
                         "Otevře detail aktivity " & ThisItem.kod & " k úpravě.",
-                        "Úprava " & Switch(ThisItem.uroven, 1, "agendy", 2, "procesu", "dílčího procesu") &
-                        " zatím vlastní obrazovku nemá, připravuje se. Dnes se mění přímo v SharePoint seznamu."
+                        "Otevře úpravu " & Switch(ThisItem.uroven, 1, "agendy ", 2, "procesu ", "dílčího procesu ") &
+                        ThisItem.kod & ". Měnit jde název a vlastník; kód ani zařazení ne."
                     )
                   Width: =36
                   X: =Parent.TemplateWidth - 84

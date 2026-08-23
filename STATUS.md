@@ -1,6 +1,91 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-21 16:10 (připomínky ke stromu a detailu)
+Aktualizováno: 2026-08-23 (F6/D číselník + F6/E úklid osiřelých položek)
+
+## Číselník, karta zařazení a úklid sirotků (23.08.2026) — balík 1.0.0.35
+
+**F6/D — obrazovka číselníku (`scr_Ciselnik`).** Do 1.0.0.34 se agendy, procesy
+a dílčí procesy daly zakládat jedině ručně v SharePointu, což byl pro správce
+rámce slepé místo: nový proces musí vzniknout dřív, než pod něj půjde zařadit
+aktivita. Jedna obrazovka pro všechny tři úrovně, ne tři samostatné — formulář
+se liší jen počtem nadřazených polí a tři skoro shodné obrazovky by znamenaly
+trojí údržbu téhož vzorce pro přidělení kódu.
+
+Kód se přiděluje stejným způsobem jako u aktivit: poslední existující v prefixu
++ 1, zleva doplněné nulami. **Náhled** se počítá nad kolekcemi (dotaz na
+SharePoint při každém překreslení by obrazovku brzdil), **uložení** si ho
+přepočítá nad zdrojem — kolekce může být stará o celou session. Popisek pod
+tlačítkem to říká, aby náhled nikdo nečetl jako slib.
+
+Formulář má **dva režimy** (`varCiselnikNova`): zakládání a úprava. Úprava
+vznikla proto, aby tužka ve stromu měla kam vést i na úrovni agendy, procesu
+a dílčího procesu — do 1.0.0.34 tam jen hlásila, že se ta úroveň mění přímo
+v SharePointu. Při úpravě je zamčená úroveň i nadřazený prvek: obojí je
+zapečené v kódu a kód se nikdy nemění, takže přesun pod jiného rodiče není
+přejmenování, ale nová položka.
+
+**Vlastník se při úpravě nepřepíše naprázdno.** V datech je přípustné mít
+vlastníků víc oddělených středníkem („72; 71"), a takový řetězec se v nabídce
+jednoho útvaru nenajde — pole by zůstalo prázdné a uložení by je smazalo.
+Prázdný výběr proto při úpravě znamená „ponechat stávajícího" a popisek pole
+to říká.
+
+**F6/E — tři připomínky z provozu k 1.0.0.34.**
+
+1. **Karta zařazení v detailu aktivity.** Galerie zařazení byla 300×60 px
+   (dva řádky písmem 10) zaražená vedle pole Stav — z obrazovky nešlo poznat,
+   že jde o zařazení do víc větví mapy. Nově karta přes celou šířku pravého
+   sloupce: nadpis s počtem, tři čitelné řádky se štítkem „primární"
+   a tlačítko „Spravovat…" v hlavičce karty. Místo se uvolnilo zkrácením
+   vnitřního předpisu na polovinu a přesunem stavu vedle něj. U nové aktivity
+   nese vysvětlení sám nadpis — samostatný popisek „zatím prázdno" přes
+   galerii by neprošel branou `kontrola_prekryvu`, ta počítá geometrii,
+   ne `Visible` za běhu.
+2. **Dialog mazání byl malý a text se do něj nevešel** — karta 520×236,
+   textové pole 456×84 při písmu 12. Nově 640×360 a 576×200. Text doplněný
+   o to, že mazání nikdy nesahá na podřízené záznamy: ty zůstanou bez
+   nadřazené položky a uklízejí se ve své vlastní entitě.
+3. **Úklid osiřelých položek.** Sirotek = záznam, jehož nadřazená položka
+   v číselníku není. Vzniká smazáním nadřazené položky a dosud ho nikdo
+   neuklidil, protože číselník se z appky mazat nedal. Filtr je v každé
+   entitě, kde se ta entita spravuje: agendy, procesy a dílčí procesy
+   v číselníku, aktivity v jejich seznamu.
+
+**Význam „úklidu" se liší podle úrovně a je to schválně.** U procesu a dílčího
+procesu je to SIROTEK (chybí nadřazená položka), u agendy PRÁZDNÁ VĚTEV
+(agenda nemá nadřazenou úroveň, takže osiřet nemůže — ale může být bez
+procesů). Kdyby se ty dva významy prohodily, uklízecí tlačítko by nabízelo
+mazání živých větví; proto to říká popisek chipu, štítek na řádku i text
+dialogu.
+
+`colCiselnik` je plochá kolekce všech tří úrovní v jedné tabulce, stejný vzor
+jako `colStrom` na přehledu. Bez ní by galerie musela být trojí: `Switch` nad
+`colAgendy` / `colProcesy` / `colDilci` neprojde typovou kontrolou, protože
+každá z nich má jiné sloupce. Kolekce se přepočítá při vstupu na obrazovku
+a mutace ji dál udržují na místě — **smazání nadřazené položky rovnou přepíše
+příznak jejím potomkům**, jinak by se sirotci objevili až po opuštění
+a novém otevření obrazovky.
+
+Filtr osiřelých **aktivit** se nedeleguje (`LookUp` do kolekce), takže je
+navlečený až na výsledek delegovaného dotazu — stejný kompromis jako fulltext.
+Chip vpravo nad seznamem na to oranžově upozorňuje.
+
+**Tři nové brány v `check_app.py`, všechny mutačně ověřené:**
+
+| brána | co hlídá | mutace |
+|---|---|---|
+| `kontrola_sloupcu_kolekci` | zápis do kolekce se musí trefit do jejích sloupců — všech, ani o jeden víc | sloupec navíc i chybějící sloupec v `Collect` |
+| `kontrola_rezimu_ciselniku` | kdo dělá `Navigate(scr_Ciselnik)`, musí nastavit úroveň i režim formuláře | vynechané `Set(varCiselnikNova, …)` |
+| `kontrola_predikatu` | v podmínce `Filter` nad velkým listem nesmí být `LookUp` a spol. | `LookUp` vražený do delegovaného filtru aktivit |
+
+Druhá z nich má důvod: `scr_Ciselnik` v režimu úpravy sahá na záznam podle
+`varCiselnikKod`. Vstupní bod, který režim nenastaví, otevře formulář v tom,
+co zbylo po minulé návštěvě — v horším případě uloží změnu do cizí položky.
+
+Brány: `check_app` OK (6 souborů, 5 obrazovek, 238 prvků, 2 544 vzorců),
+`check_solution` 265 kontrol / 0 chyb.
+
+
 
 ## Připomínky z provozu ke stromu a detailu (21.08.2026 16:10) — balík 1.0.0.34
 

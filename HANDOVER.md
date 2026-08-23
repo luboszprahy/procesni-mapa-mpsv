@@ -1,19 +1,18 @@
-# HANDOVER — vstupní bod pro další session (21.08.2026 16:20)
+# HANDOVER — vstupní bod pro další session (23.08.2026)
 
 Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má dělat
 teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
 Zadání drží `PRD.md`.
 
 > **Stav:** appka i publikační flow **běží v provozu**. Aktuální balík
-> k importu je **`deploy/procesnimapa_1_0_0_34.zip`** (strom na dashboardu,
-> klikací řádky, filtr stavu, „Zobrazit vše" v seznamu) — hotový a ověřený
-> offline branami, ale **ještě nenaimportovaný**. Poslední ověřeně běžící
-> verze v prostředí je **1.0.0.28** (strom na dashboardu, snímek 14:35).
-> Nahrazené balíky 27–33 jsou z `deploy/` smazané.
+> k importu je **`deploy/procesnimapa_1_0_0_35.zip`** (obrazovka číselníku,
+> úklid osiřelých položek, karta zařazení v detailu, větší dialog mazání) —
+> hotový a ověřený offline branami, ale **ještě nenaimportovaný**. Poslední
+> ověřeně běžící verze v prostředí je **1.0.0.28**. Balík 1.0.0.34 je
+> nahrazený a z `deploy/` smazaný; 35 obsahuje všechno z něj.
 >
-> Pracovní strom je čistý a vše je pushnuté. `runs/app_build` (179 MB
-> rozbalený `pac`) i `runs/mapa_beh` smazané, náhledový http server zastavený,
-> projekt z 259 MB na ~81 MB (z toho 59 MB `.git`, 18 MB `.venv`).
+> `.venv` se nepřenáší přes git — na tomhle stroji byl po úklidu pryč
+> a musel se založit znovu (viz Rozjezd).
 
 ## Rozjezd na novém stroji
 
@@ -31,35 +30,38 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_34.zip`** jako upgrade a appku
+1. **Naimportovat `deploy/procesnimapa_1_0_0_35.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-   Na co se dívat na obrazovce **Přehled**:
-   - strom se ve výchozím stavu ukáže s rozbalenými agendami (úroveň 2),
-   - tlačítka **„jen agendy / + procesy / + dílčí procesy / + aktivity"**
-     rozbalí celou úroveň naráz,
-   - **klik kamkoli do řádku** rozbalí větev, u aktivity otevře detail —
-     tohle byla hlášená vada, klikat musí jít i na text, ne jen mezi popisky,
-   - najetí myší řádek **podbarví** (modrý nádech), řádek se neposouvá,
-   - chipy **vše / schváleno / pracovní** zúží strom na aktivity daného stavu
-     a na větve, které aspoň jednu takovou obsahují; číslo vpravo se přepne
-     na počet takových aktivit a hlavička sloupce to říká,
-   - hlavičky **VLASTNÍK / VYKONÁVÁ** a **POLOŽEK UVNITŘ** mají tooltip
-     s vysvětlením po úrovních; tooltip řádku navíc rozepíše kódy útvarů
-     na „kód · název" z číselníku, i když jich je víc („72; 71"),
-   - názvy nesmí podlézat sloupec „vykonává" (v 1.0.0.26 to dělaly, opraveno).
-   - **ikona tužky** v řádku otevře detail; u aktivity rovnou, u vyšších
-     úrovní je tlumená a řekne, že vlastní obrazovka se teprve chystá.
-     Klik do **řádku** detail neotevírá, jen rozbaluje — detail je jedině
-     přes tužku,
-   Na obrazovce **Seznam aktivit**: tlačítko **„Zobrazit vše"** vedle přepínače
-   kódu vynuluje všechny čtyři filtry a bez zapnutého filtru je neaktivní.
-   V tmavé liště **všech** obrazovek jsou vpravo u jména uživatele **tři
-   tlačítka A**. Volba platí napříč appkou (`varFs`), výchozí je **střední**
-   stupeň. Na největším stupni zkontrolovat, že se kódy neořezávají a nejdelší
-   názvy zůstávají čitelné.
-   Na **detailu aktivity**: šipka zpět je celý čtvereček, při najetí zesvětlá,
-   a vrací se **tam, odkud se přišlo** — z přehledu na přehled, ze seznamu do
-   seznamu. Ověřit obě cesty, včetně návratu po uložení.
+   Balík nese všechno z nenaimportovaného 1.0.0.34 plus novou obrazovku.
+
+   Na **Přehledu** (nové oproti 34):
+   - v tmavé liště vpravo od záložek přibylo **„+ Nová položka rejstříku"** —
+     otevře číselník,
+   - **tužka v řádku stromu** teď u agendy, procesu i dílčího procesu otevře
+     jejich úpravu; do 34 jen hlásila, že se ta úroveň mění v SharePointu.
+
+   Nová obrazovka **Číselník** (tlačítkem nebo tužkou):
+   - nahoře **Agendy / Procesy / Dílčí procesy** — přepíná seznam i formulář,
+   - vlevo seznam s hledáním, přepínačem **osiřelé** (u agend „bez procesů")
+     a košem; klik do řádku načte položku do formuláře vpravo,
+   - vpravo formulář: u zakládání ukazuje **kód, který se přidělí**, u úpravy
+     je kód i zařazení zamčené a mění se jen název a vlastník,
+   - **zkusit celý průchod**: založit proces v agendě `01` → kód `01-BB` →
+     objeví se v seznamu i v nabídce procesů na detailu aktivity bez restartu
+     appky; pak pod ním dílčí proces `01-BB-001`; pak agendu `01` smazat
+     a ověřit, že se procesy pod ní objeví pod přepínačem **osiřelé**
+     a jdou smazat.
+   - Pozor na formulaci v dialogu mazání: říká, **kolik podřízených položek
+     tím osiří**. Ověřit, že to číslo sedí.
+
+   Na **Detailu aktivity**: zařazení do dílčích procesů je nově **karta přes
+   celou šířku** pravého sloupce (nadpis s počtem, štítek „primární",
+   tlačítko „Spravovat…"). Vnitřní předpis se zkrátil na polovinu a vedle něj
+   je Stav — zkontrolovat, že se do polí vejde text i na největším písmu.
+
+   Na **Seznamu aktivit**: přibyl přepínač **„Jen osiřelé"** (aktivity, jejichž
+   dílčí proces v číselníku není). Dialog mazání je větší a text se do něj
+   vejde celý — ověřit s nejdelším názvem aktivity.
 2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
    (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
    21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
@@ -106,27 +108,24 @@ chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
-**F6 skupina D — zadávací obrazovky pro agendu, proces a dílčí proces.**
-Nezačaté — celá session 21.08. odpoledne padla na připomínky z provozu
-(balíky 1.0.0.29 až 34). Podrobný plán včetně rozhodnutí a vyhodnocených rizik
-je rozepsaný v `PLAN.md`, sekce F6/D, a je připravený k realizaci.
+**Čeká se na zpětnou vazbu z importu 1.0.0.35.** F6/D i F6/E jsou hotové
+a ověřené branami, ale ne v provozu — obrazovka číselníku je největší kus
+appky, který ještě nikdo neviděl běžet.
 
-Na F6/D visí ještě jedna věc: **ikona tužky ve stromu** dnes na úrovních
-agenda / proces / dílčí proces jen oznámí, že se ta úroveň zatím upravuje
-v SharePointu. Až obrazovka vznikne, přepoj ji tam (`ico_StromEdit.OnSelect`
-v `scr_Dashboard.pa.yaml`).
+Až přijde zpětná vazba, na řadě je z odložených věcí (§4) nejspíš
+`deploy/navod_sprava.md` — rozhodnuto 21.08., že se píše až podle finální
+podoby appky, a tou teď číselník je.
 
-Původní zadání F6/D
-(`PLAN.md`, sekce F6/D). Dnes jde založit jen aktivita; nově má průvodce vést
-uživatele i na vyšších úrovních a u zanořené úrovně vynutit údaje potřebné pro
-vazbu (proces bez agendy nevznikne). Kódy přiděluje stejný mechanismus jako
-u aktivit, `kody.json` se nesmí přečíslovat.
+**Otevřené k rozmyšlení, ne k okamžité implementaci:**
+- **Osiřelé vazby** v tabulce `Vazba aktivita–dílčí proces` (dílčí proces
+  smazán, vazba zůstala) zatím filtr nemají — vazební tabulka vlastní
+  obrazovku nemá. Mazání aktivity vazby uklízí, mazání dílčího procesu ne.
+- **„Enforce unique values" na sloupci `Title`** u všech čtyř listů. Dnes
+  drží jedinečnost kódu jen optimistický zámek v appce (`LookUp` před
+  `Patch`), který není atomický. Znamená to zásah do `src/schema.json`
+  a `make_setup.js` včetně dorovnání už založených listů.
 
-Otevřené riziko k rozmyšlení: kolize kódů při souběžném zakládání dvěma
-uživateli — posoudit, zda stačí kontrola před zápisem, nebo je potřeba
-pojistné flow.
-
-## 3. Co je hotové (21.08.2026)
+## 3. Co je hotové (23.08.2026)
 
 | oblast | stav |
 |---|---|
@@ -136,9 +135,10 @@ pojistné flow.
 | F3b denní publikace mapy | hotovo, čeká na import — druhé flow `MapaPublishScheduled`, Recurrence 7:00 |
 | F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
 | F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.26) |
-| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.34) |
-| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.34) |
-| F6/D zadávací obrazovky | **zbývá** |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.35) |
+| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.35) |
+| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.35) |
+| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.35) |
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
 
@@ -232,6 +232,21 @@ k importu jako upgrade. `.msapp` nejde postavit od nuly.
 Z toho plyne: cokoli, co vzniká **jen ve Studiu** (connection reference,
 registrace flow jako datového zdroje), musí udělat uživatel — a pak dodat nový
 export, jinak ho další build přepíše.
+
+## 6b. Co přibylo 23.08. (balík 1.0.0.35)
+
+| co | proč |
+|---|---|
+| obrazovka `scr_Ciselnik` — seznam + formulář pro tři úrovně | agendy, procesy a dílčí procesy se daly zakládat jedině ručně v SharePointu |
+| režim úpravy v témž formuláři | tužka ve stromu neměla u vyšších úrovní kam vést |
+| přepínač osiřelých v číselníku i v seznamu aktivit | smazání nadřazené položky nechává potomky viset a nikdo je neuklidil |
+| mazání položky číselníku s potvrzením | dialog říká, kolik podřízených položek tím osiří |
+| karta zařazení v detailu aktivity | galerie 300×60 px vedle pole Stav se nedala přečíst |
+| dialog mazání 520×236 → 640×360 | text se do něj nevešel |
+
+Nové brány: `kontrola_sloupcu_kolekci`, `kontrola_rezimu_ciselniku`
+a `kontrola_predikatu` v `check_app.py` — všechny tři mutačně ověřené
+(pět mutací, pět zachycení).
 
 ## 7. Brány (všechny mutačně ověřené)
 

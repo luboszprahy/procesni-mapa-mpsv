@@ -529,6 +529,7 @@ Screens:
                   IsBlank(txt_Hledat.Text)
                   && IsBlank(varSekceKod)
                   && IsBlank(varUtvarKod)
+                  && !varOsirele
                   && drp_Stav.Selected.Value = "(vše)",
                   DisplayMode.Disabled,
                   DisplayMode.Edit
@@ -546,22 +547,51 @@ Screens:
               Reset(drp_Utvar);
               Reset(drp_Stav);
               Set(varSekceKod, "");
-              Set(varUtvarKod, "")
+              Set(varUtvarKod, "");
+              Set(varOsirele, false)
             PressedColor: =stylAkceStisk
             PressedFill: =stylRadekVybrany
             Size: =11
             Text: ="Zobrazit vše"
-            Tooltip: '="Vynuluje hledání, sekci, útvar i stav naráz - v galerii zůstane celý rejstřík. Dokud není zapnutý žádný filtr, je tlačítko neaktivní. Zobrazení kódu se tím nemění, to je samostatný přepínač."'
+            Tooltip: '="Vynuluje hledání, sekci, útvar, stav i přepínač osiřelých naráz - v galerii zůstane celý rejstřík. Dokud není zapnutý žádný filtr, je tlačítko neaktivní. Zobrazení kódu se tím nemění, to je samostatný přepínač."'
             Width: =112
             X: =798
+            Y: =198
+      # Osiřelá aktivita = její dílčí proces v číselníku není. Vzniká smazáním
+      # dílčího procesu a v mapě se nezobrazí, protože se nemá kam zařadit.
+      # Predikát se nedeleguje (LookUp do kolekce), proto je navlečený AŽ NA
+      # VÝSLEDEK delegovaného dotazu — stejný kompromis jako fulltext a chip
+      # vpravo na to upozorňuje.
+      - btn_Osirele:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varOsirele, stylPozor, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varOsirele, RGBA(255, 255, 255, 1), stylPozor)
+            Fill: =If(varOsirele, stylPozor, stylKarta)
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: =Set(varOsirele, !varOsirele)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =11
+            Text: |-
+              =If(varOsirele, "Jen osiřelé ✓", "Jen osiřelé")
+            Tooltip: '="Nechá jen aktivity, jejichž dílčí proces v číselníku neexistuje. Takové vznikají smazáním dílčího procesu, do mapy se nedostanou a je potřeba je buď přeřadit v detailu, nebo smazat. Bez zapnutého přepínače se chovají jako každá jiná aktivita, takže bez něj je nikdo nenajde."'
+            Width: =120
+            X: =920
             Y: =198
       - rec_ChipPocet:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPlocha
             Height: =32
-            Width: =190
-            X: =Parent.Width - 442
+            Width: =140
+            X: =Parent.Width - 320
             Y: =198
       - lbl_ChipPocet:
           Control: Label@2.5.1
@@ -572,18 +602,19 @@ Screens:
             Height: =32
             Size: =11
             Text: |-
-              =CountRows(gal_Aktivity.AllItems) & " zobrazených aktivit"
+              =CountRows(gal_Aktivity.AllItems) & " aktivit"
+            Tooltip: '="Kolik řádků je právě v galerii po započtení všech filtrů."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =190
-            X: =Parent.Width - 442
+            Width: =140
+            X: =Parent.Width - 320
             Y: =198
       - rec_ChipFiltr:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPlocha
             Height: =32
-            Width: =200
-            X: =Parent.Width - 240
+            Width: =136
+            X: =Parent.Width - 176
             Y: =198
       - lbl_ChipFiltr:
           Control: Label@2.5.1
@@ -591,7 +622,8 @@ Screens:
             Align: =Align.Center
             Color: |-
               =If(
-                  !IsBlank(txt_Hledat.Text) && IsBlank(varSekceKod) && IsBlank(varUtvarKod),
+                  (!IsBlank(txt_Hledat.Text) || varOsirele)
+                  && IsBlank(varSekceKod) && IsBlank(varUtvarKod),
                   stylPozor,
                   stylTextSlaby
               )
@@ -600,16 +632,17 @@ Screens:
             Size: =11
             Text: |-
               =If(
-                  !IsBlank(txt_Hledat.Text) && IsBlank(varSekceKod) && IsBlank(varUtvarKod),
-                  "Hledání v prvním okně dat",
-                  IsBlank(txt_Hledat.Text) && IsBlank(varSekceKod) && IsBlank(varUtvarKod) && drp_Stav.Selected.Value = "(vše)",
-                  "Bez filtru — celý rejstřík",
+                  (!IsBlank(txt_Hledat.Text) || varOsirele)
+                  && IsBlank(varSekceKod) && IsBlank(varUtvarKod),
+                  "První okno dat",
+                  IsBlank(txt_Hledat.Text) && !varOsirele && IsBlank(varSekceKod) && IsBlank(varUtvarKod) && drp_Stav.Selected.Value = "(vše)",
+                  "Bez filtru",
                   "Filtrováno"
               )
-            Tooltip: '="Fulltextové hledání se počítá až nad tím, co vrátí ostatní filtry. Dokud je aktivit méně než 2 000, je výsledek úplný. Nad tím prohledá jen první okno dat - zúžení sekcí nebo útvarem to spolehlivě vyřeší, protože filtry běží na serveru nad celým rejstříkem."'
+            Tooltip: '="Fulltextové hledání i přepínač osiřelých se počítají až nad tím, co vrátí ostatní filtry - delegovat je nejde. Dokud je aktivit méně než 2 000, je výsledek úplný. Nad tím pracují jen s prvním oknem dat; zúžení sekcí nebo útvarem to spolehlivě vyřeší, protože ty filtry běží na serveru nad celým rejstříkem."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =200
-            X: =Parent.Width - 240
+            Width: =136
+            X: =Parent.Width - 176
             Y: =198
       # ---------- hlavička tabulky (klik = řazení) ----------
       - lbl_h_Kod:
@@ -734,40 +767,43 @@ Screens:
           Properties:
             Height: =Parent.Height - Self.Y - 24
             Items: |-
-              =Search(
-                  Switch(
-                      varRazeni,
-                      "nazev",
-                      Sort(Filter(
-                          Aktivity,
-                          IsBlank(varSekceKod) || sekce = varSekceKod,
-                          IsBlank(varUtvarKod) || vykonava = varUtvarKod,
-                          drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                      ), nazev_kratky, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
-                      "utvar",
-                      Sort(Filter(
-                          Aktivity,
-                          IsBlank(varSekceKod) || sekce = varSekceKod,
-                          IsBlank(varUtvarKod) || vykonava = varUtvarKod,
-                          drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                      ), vykonava, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
-                      "datum",
-                      Sort(Filter(
-                          Aktivity,
-                          IsBlank(varSekceKod) || sekce = varSekceKod,
-                          IsBlank(varUtvarKod) || vykonava = varUtvarKod,
-                          drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                      ), Created, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
-                      Sort(Filter(
-                          Aktivity,
-                          IsBlank(varSekceKod) || sekce = varSekceKod,
-                          IsBlank(varUtvarKod) || vykonava = varUtvarKod,
-                          drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
-                      ), Title, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending))
+              =Filter(
+                  Search(
+                      Switch(
+                          varRazeni,
+                          "nazev",
+                          Sort(Filter(
+                              Aktivity,
+                              IsBlank(varSekceKod) || sekce = varSekceKod,
+                              IsBlank(varUtvarKod) || vykonava = varUtvarKod,
+                              drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                          ), nazev_kratky, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
+                          "utvar",
+                          Sort(Filter(
+                              Aktivity,
+                              IsBlank(varSekceKod) || sekce = varSekceKod,
+                              IsBlank(varUtvarKod) || vykonava = varUtvarKod,
+                              drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                          ), vykonava, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
+                          "datum",
+                          Sort(Filter(
+                              Aktivity,
+                              IsBlank(varSekceKod) || sekce = varSekceKod,
+                              IsBlank(varUtvarKod) || vykonava = varUtvarKod,
+                              drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                          ), Created, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending)),
+                          Sort(Filter(
+                              Aktivity,
+                              IsBlank(varSekceKod) || sekce = varSekceKod,
+                              IsBlank(varUtvarKod) || vykonava = varUtvarKod,
+                              drp_Stav.Selected.Value = "(vše)" || stav.Value = drp_Stav.Selected.Value
+                          ), Title, If(varRazeniAsc, SortOrder.Ascending, SortOrder.Descending))
+                      ),
+                      txt_Hledat.Text,
+                      nazev_kratky,
+                      Title
                   ),
-                  txt_Hledat.Text,
-                  nazev_kratky,
-                  Title
+                  !varOsirele || IsBlank(LookUp(colDilci, Title = dilci_proces_kod))
               )
             TemplatePadding: =0
             TemplateSize: =56 + varFs * 5
@@ -939,20 +975,20 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =236
+            Height: =360
             Visible: =!IsBlank(varSmazat)
-            Width: =520
-            X: =Parent.Width / 2 - 260
-            Y: =Parent.Height / 2 - 118
+            Width: =640
+            X: =Parent.Width / 2 - 320
+            Y: =Parent.Height / 2 - 180
       - rec_ModalPruh:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylNebezpeci
             Height: =4
             Visible: =!IsBlank(varSmazat)
-            Width: =520
-            X: =Parent.Width / 2 - 260
-            Y: =Parent.Height / 2 - 118
+            Width: =640
+            X: =Parent.Width / 2 - 320
+            Y: =Parent.Height / 2 - 180
       - lbl_ModalNadpis:
           Control: Label@2.5.1
           Properties:
@@ -963,24 +999,26 @@ Screens:
             Size: =15
             Text: ="Smazat aktivitu?"
             Visible: =!IsBlank(varSmazat)
-            Width: =456
-            X: =Parent.Width / 2 - 228
-            Y: =Parent.Height / 2 - 86
+            Width: =576
+            X: =Parent.Width / 2 - 288
+            Y: =Parent.Height / 2 - 148
       - lbl_ModalText:
           Control: Label@2.5.1
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
-            Height: =84
+            Height: =200
             Size: =12
             Text: |-
               =varSmazat.Title & " — " & varSmazat.nazev_kratky & "
 
-              Smaže se i zařazení do všech dílčích procesů. Číselník agend, procesů a dílčích procesů zůstane nedotčený. Vrátit to zpět nejde."
+              Smaže se i zařazení do všech dílčích procesů. Číselník agend, procesů a dílčích procesů zůstane nedotčený. Vrátit to zpět nejde.
+
+              Mazání nikdy nesahá na podřízené záznamy: když se ruší položka číselníku, zůstanou pod ní záznamy bez nadřazené položky. Ty se uklízejí ve své vlastní entitě — aktivity tady v seznamu, agendy, procesy a dílčí procesy v číselníku — přepínačem „osiřelé“ nad seznamem."
             Visible: =!IsBlank(varSmazat)
-            Width: =456
-            X: =Parent.Width / 2 - 228
-            Y: =Parent.Height / 2 - 52
+            Width: =576
+            X: =Parent.Width / 2 - 288
+            Y: =Parent.Height / 2 - 112
       - btn_ModalZrusit:
           Control: Classic/Button@2.2.0
           Properties:
@@ -999,8 +1037,8 @@ Screens:
             Text: ="Zrušit"
             Visible: =!IsBlank(varSmazat)
             Width: =140
-            X: =Parent.Width / 2 - 228
-            Y: =Parent.Height / 2 + 46
+            X: =Parent.Width / 2 - 288
+            Y: =Parent.Height / 2 + 108
       - btn_ModalSmazat:
           Control: Classic/Button@2.2.0
           Properties:
@@ -1026,8 +1064,8 @@ Screens:
             PressedFill: =stylNebezpeci
             Size: =13
             Text: ="Smazat"
-            Tooltip: '="Nevratné. Smaže aktivitu i všechna její zařazení do dílčích procesů."'
+            Tooltip: '="Nevratné. Smaže aktivitu i všechna její zařazení do dílčích procesů. Číselník zůstane nedotčený."'
             Visible: =!IsBlank(varSmazat)
             Width: =160
-            X: =Parent.Width / 2 + 68
-            Y: =Parent.Height / 2 + 46
+            X: =Parent.Width / 2 + 128
+            Y: =Parent.Height / 2 + 108

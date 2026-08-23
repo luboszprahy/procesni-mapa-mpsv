@@ -609,7 +609,7 @@ def kontrola_unikatnosti(soubory):
 
 # Prvky, které se překrývat SMĚJÍ: podklady (rec_) leží pod popisky z definice
 # a překryvná vrstva galerie leží nad celým řádkem záměrně.
-PREKRYV_POVOLEN = {"lbl_RadekPrekryv", "lbl_StromPrekryv"}
+PREKRYV_POVOLEN = {"lbl_RadekPrekryv", "lbl_StromPrekryv", "lbl_RadekPrekryvC"}
 
 
 def kontrola_prekryvu(soubory):
@@ -790,6 +790,104 @@ def kontrola_stareho_result(vzorce):
             )
 
 
+def schema_kolekci(vzorce):
+    """col* založená jako ClearCollect(colX, ShowColumns(zdroj, a, b)) -> {a, b}.
+
+    Takové kolekci Power Fx zapamatuje schéma z prvního plnění. Záznam, který
+    do ní přiteče později s jiným kompletem sloupců, appku buď neotevře, nebo
+    v galerii tiše ukáže prázdná pole tam, kde ostatní řádky mají hodnotu.
+    """
+    nalezene = {}
+    for _cesta, _prop, syrovy in vzorce:
+        text = bez_retezcu(syrovy)
+        for shoda in re.finditer(
+                r"\bClearCollect\s*\(\s*(col[A-Za-z0-9_]*)\s*,\s*ShowColumns\s*\(", text):
+            argumenty = rozdel_argumenty(argumenty_volani(text, shoda.end() - 1))
+            nalezene[shoda.group(1)] = set(argumenty[1:])
+    return nalezene
+
+
+def kontrola_sloupcu_kolekci(vzorce):
+    """Zápis do kolekce se musí trefit do jejích sloupců — všech, ani o jeden víc."""
+    schema = schema_kolekci(vzorce)
+    for cesta, prop, syrovy in vzorce:
+        text = bez_retezcu(syrovy)
+        for funkce in ("Collect", "UpdateIf"):
+            for shoda in re.finditer(rf"\b{funkce}\s*\(\s*(col[A-Za-z0-9_]*)\s*,", text):
+                jmeno = shoda.group(1)
+                if jmeno not in schema:
+                    continue
+                zavorka = text.index("(", shoda.start())
+                klice = set(re.findall(r"[{,]\s*([A-Za-z][A-Za-z0-9_]*)\s*:",
+                                       argumenty_volani(text, zavorka)))
+                if not klice:
+                    continue  # Collect(col, jináTabulka) — sloupce nejsou vypsané
+                navic = klice - schema[jmeno]
+                if navic:
+                    chyby.append(
+                        f"{cesta}.{prop}: {funkce} do '{jmeno}' zapisuje sloupec "
+                        f"{sorted(navic)}, který kolekce nemá — má "
+                        f"{sorted(schema[jmeno])}"
+                    )
+                chybi = schema[jmeno] - klice if funkce == "Collect" else set()
+                if chybi:
+                    chyby.append(
+                        f"{cesta}.{prop}: Collect do '{jmeno}' nevyplňuje sloupec "
+                        f"{sorted(chybi)} — řádek by v galerii měl prázdno tam, "
+                        f"kde ostatní mají hodnotu"
+                    )
+
+
+def kontrola_rezimu_ciselniku(vzorce):
+    """Kdo otevírá číselník, musí říct, co tam formulář dělá.
+
+    scr_Ciselnik má dva režimy (varCiselnikNova) a v režimu úpravy sahá na
+    záznam podle varCiselnikKod. Vstupní bod, který režim nenastaví, otevře
+    formulář v tom, co zbylo po minulé návštěvě — v horším případě uloží
+    změnu do cizí položky nebo založí duplicitu.
+    """
+    povinne = ("varUrovenTyp", "varCiselnikNova", "varCiselnikKod")
+    for cesta, prop, text in vzorce:
+        if not re.search(r"Navigate\(\s*scr_Ciselnik", text):
+            continue
+        # bílé znaky pryč: Set( a jméno proměnné bývají na dvou řádcích
+        zhusteny = re.sub(r"\s+", "", text)
+        chybi = [p for p in povinne if f"Set({p}," not in zhusteny]
+        if chybi:
+            chyby.append(
+                f"{cesta}.{prop}: Navigate na scr_Ciselnik bez nastavení {chybi} — "
+                f"formulář by se otevřel v režimu, který zbyl po minulé návštěvě"
+            )
+
+
+# Funkce, které uvnitř predikátu Filter zabijí delegaci celého dotazu.
+NEDELEGOVATELNE_V_PREDIKATU = ("LookUp", "CountRows", "Search", "Concat", "Sum")
+
+
+def kontrola_predikatu(vzorce):
+    """V podmínce Filter nad velkým listem nesmí být nedelegovatelné volání.
+
+    Filter nad SharePointem se posílá na server jen tehdy, když mu rozumí celý.
+    Jediné LookUp do kolekce uvnitř podmínky shodí celý dotaz na první okno
+    2 000 řádků — a bez hlášky: appka běží dál, jen odpovídá z části dat.
+    Správně se takový predikát navléká AŽ NA VÝSLEDEK delegovaného dotazu
+    (viz filtr osiřelých aktivit v gal_Aktivity.Items).
+    """
+    for cesta, prop, syrovy in vzorce:
+        text = bez_retezcu(syrovy)
+        for list_nazev in VELKE_LISTY:
+            for shoda in re.finditer(rf"\bFilter\s*\(\s*'?{re.escape(list_nazev)}'?\s*,", text):
+                zavorka = text.index("(", shoda.start())
+                argumenty = argumenty_volani(text, zavorka)
+                for funkce in NEDELEGOVATELNE_V_PREDIKATU:
+                    if re.search(rf"\b{funkce}\s*\(", argumenty):
+                        chyby.append(
+                            f"{cesta}.{prop}: podmínka Filter nad '{list_nazev}' volá "
+                            f"{funkce}() — tím se celý dotaz přestane delegovat a vrátí "
+                            f"jen první okno dat. Navlékni predikát až na výsledek."
+                        )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -810,6 +908,9 @@ def main():
     kontrola_odkazu(vzorce, controly)
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
+    kontrola_rezimu_ciselniku(vzorce)
+    kontrola_sloupcu_kolekci(vzorce)
+    kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)
     kontrola_prekryvu(soubory)
     kontrola_adresy_mapy(vzorce)

@@ -30,7 +30,7 @@ PRACOVNI = Path("runs/app_build")
 SABLONY = Path("src/control_templates.json")
 
 # pořadí rozhoduje: první je úvodní obrazovka appky
-OBRAZOVKY = ["scr_Dashboard", "scr_Seznam", "scr_Detail", "scr_Vazby"]
+OBRAZOVKY = ["scr_Dashboard", "scr_Seznam", "scr_Detail", "scr_Vazby", "scr_Ciselnik"]
 
 
 

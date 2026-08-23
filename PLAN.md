@@ -11,7 +11,7 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 | F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.23 ověřeno v provozu 21.08.) |
 | F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo** (ověřeno v provozu 21.08.) |
 | F4 | Přenos na tenant MPSV | **blokováno** — bez přístupu k tenantu MPSV (21.08.) |
-| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky | A–C **hotovo** (1.0.0.26), D zbývá |
+| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky, úklid číselníků | A–C **hotovo** (1.0.0.26), D+E **hotovo** (1.0.0.35, čeká na import) |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
 Brány s `/audit` (agent `powerplatform-auditor`): před importem do DEV (konec F1),
@@ -475,6 +475,125 @@ u všech čtyř listů „Enforce unique values" — SharePoint pak duplicitu od
 a z tiché chyby v datech se stane hláška. Znamená to zásah do `src/schema.json`
 a `make_setup.js` včetně dorovnání už založených listů, což je samostatná
 úloha, ne součást D.
+
+---
+
+## F6/E — Zařazení v detailu, dialog mazání, úklid osiřelých položek
+
+Zadáno 23.08.2026 po prohlídce 1.0.0.34. Tři nezávislé věci; E1 a E2 jsou
+drobné, E3 mění tvar obrazovky číselníku z F6/D.
+
+### E1. Detail aktivity — karta zařazení do dílčích procesů
+
+**co:** `src/app_src/scr_Detail.pa.yaml`
+
+Dnes je `gal_Zarazeni` galerie 300×60 px (dva řádky po 30 px, písmo 10)
+zaražená vedle pole Stav a pod ní tlačítko „Další dílčí procesy…". Z obrazovky
+není poznat, že jde o zařazení do víc větví mapy — vypadá to jako omylem
+vložený prvek.
+
+Nově **karta na celou šířku pravého sloupce (620 px)**:
+
+- `rec_KartaVazby` X=700 Y=516 W=620 H=140, podklad `stylKarta`.
+- Nadpis `lbl_l_Vazby` (724, 524): „Zařazení do dílčích procesů (N)". U nové
+  aktivity místo počtu text, že zařazení vznikne až po uložení — nadpis je
+  tedy vidět vždycky, galerie a tlačítko jen u uložené aktivity. Popisek
+  „prázdno" jako samostatný prvek přes galerii nejde: `kontrola_prekryvu`
+  hlásí překryv i u prvků s opačným `Visible`.
+- `btn_Vazby` vpravo nahoře v kartě (1120, 520, 184×32), text „Spravovat…".
+- `gal_Zarazeni` (724, 560, 572×84), `TemplateSize` 28 + varFs*3, písmo
+  11 + varFs; kód, název a u primárního štítek „primární" jako na `scr_Vazby`.
+- Uvolnění místa: `txt_Predpis` se zkrátí z 620 na 300 px a vedle něj (1020,
+  448) se přesune `drp_StavDetail`; pás Y 516–656 tím zůstane celý kartě.
+
+**verify:** `python src/check_app.py` projde bez nových chyb (hlídá i překryvy,
+takže přesun stavu a předpisu se ověří sám); po importu ve Studiu má aktivita
+se třemi zařazeními všechny tři čitelné, primární má štítek, tlačítko vede
+na `scr_Vazby`; u nové aktivity je karta prázdná s vysvětlením.
+**edge cases:** aktivita s jedním zařazením (žádný prázdný druhý řádek),
+aktivita se šesti (posuvník), nová aktivita (galerie skrytá).
+**risk:** přesun stavu a předpisu rozhodí pořadí tabulátoru; vizuálně ověřit
+ve Studiu.
+
+### E2. Dialog mazání — velikost a text
+
+**co:** `src/app_src/scr_Seznam.pa.yaml`
+
+Karta dialogu je 520×236 a text 456×84 při písmu 12 — dnešní text se do ní
+nevejde a po doplnění o osiřelé položky by přetekl úplně.
+
+- `rec_ModalKarta` a `rec_ModalPruh` 520×236 → **640×360**, souřadnice
+  `Parent.Width / 2 - 320`, `Parent.Height / 2 - 180`.
+- `lbl_ModalText` 456×84 → **576×200**, tlačítka o řádek níž.
+- Text se doplní o odstavec: smazání nemaže, co je pod položkou — podřízené
+  záznamy zůstanou bez nadřazené položky a uklidí se ve své vlastní entitě,
+  kde je najde filtr osiřelých (E3). U aktivity je to poučení pro symetrii
+  s číselníkem, kde sirotci vznikají doopravdy.
+
+**verify:** `check_app.py`; ve Studiu se celý text vejde bez ořezu i při
+nejdelším názvu aktivity (220 znaků v datech).
+**edge cases:** nejdelší `nazev_kratky` (150 znaků) + kód na prvním řádku.
+**risk:** karta na malé obrazovce (1024×640) přeteče — 360 px výšky se vejde.
+
+### E3. Úklid osiřelých položek — filtr a mazání v každé entitě
+
+**co:** `src/app_src/scr_Ciselnik.pa.yaml` (přestavba), `scr_Seznam.pa.yaml`
+
+Sirotek = záznam, jehož nadřazená položka v číselníku neexistuje. Vzniká
+smazáním nadřazené položky a dnes ho nikdo neuklidí, protože číselník se
+z appky mazat nedá.
+
+| entita | sirotek | kde se uklidí |
+|---|---|---|
+| Agendy | nemá nadřazenou úroveň — místo toho **bez procesů** | `scr_Ciselnik` |
+| Procesy | `agenda_kod` prázdný nebo neodpovídá žádné agendě | `scr_Ciselnik` |
+| Dílčí procesy | `proces_kod` prázdný nebo neodpovídá žádnému procesu | `scr_Ciselnik` |
+| Aktivity | `dilci_proces_kod` neodpovídá žádnému dílčímu procesu | `scr_Seznam` |
+
+Vazební tabulka vlastní obrazovku nemá; osiřelé vazby maže `RemoveIf` při
+mazání aktivity, takže zůstávají mimo rozsah.
+
+**E3a. `scr_Ciselnik` se přestaví na správce číselníku (dva panely):**
+
+- **Vlevo (X 40, W 620)** seznam položek zvolené úrovně: hledání v kódu
+  i názvu, chip **vše / osiřelé** (u agendy „bez procesů"), galerie
+  `gal_Ciselnik` s kódem, názvem, vlastníkem, ikonou tužky (načte položku do
+  formuláře) a ikonou koše. Pod galerií počet a věta, co se filtruje.
+- **Vpravo (X 700, W 620)** dosavadní formulář zakládání/úpravy; z náhledového
+  panelu zůstane jednořádkový náhled kódu nad tlačítkem, zbytek zabere seznam.
+- **Mazání** neběží z řádku galerie: `kontrola_potvrzeni_mazani` to zakazuje
+  a má pravdu — koš v řádku se dá trefit omylem. Ikona jen naplní
+  `varSmazatC`, maže až tlačítko v modálním dialogu (stejný vzor jako
+  `scr_Seznam`), a text dialogu říká, kolik podřízených položek osiří.
+- Segmentová volba úrovně přepíná obojí naráz — seznam i formulář.
+
+**E3b. `scr_Seznam`:** k dosavadním filtrům (hledání, sekce, útvar, stav)
+přibude chip **jen osiřelé**. Osiřelost se nedeleguje (`LookUp` do kolekce
+v `Filter` nad SharePointem), takže se stejně jako fulltext navlékne až na
+výsledek delegovaného dotazu; popisek to musí říct a `check_app.py` na to
+dostane pojmenovanou výjimku, ne mlčení.
+
+**verify:**
+1. `python src/check_app.py` — bez nových chyb; nová výjimka delegace je
+   ve výpisu jako varování, ne jako mlčení.
+2. Ve Studiu: založit proces v agendě `01`, pak agendu `01` smazat →
+   v číselníku procesů ho chip „osiřelé" ukáže, koš + potvrzení ho smaže,
+   po návratu na přehled zmizí ze stromu.
+3. Chip „osiřelé" nad daty bez sirotků ukáže prázdný seznam s větou
+   „žádné osiřelé položky", ne prázdnou plochu.
+4. U agendy chip „bez procesů" vybere agendu, pod kterou nic není.
+5. V seznamu aktivit chip „jen osiřelé" nad dnešními daty (49 aktivit, všechny
+   zařazené) vrátí nula řádků; po smazání dílčího procesu se v něm objeví
+   aktivity, které pod ním visely.
+
+**edge cases:** prázdný číselník úrovně; položka s prázdným nadřazeným kódem
+(je sirotek); smazání položky, která je právě načtená ve formuláři — formulář
+se musí přepnout zpět na zakládání, jinak by uložení psalo do neexistujícího
+záznamu; víc než 2 000 aktivit (chip filtruje první okno, popisek to říká).
+**risk:** hlavní riziko je záměna „osiřelý" a „prázdný". Osiřelý = chybí
+NADŘAZENÁ položka (smaže se bez následků). Prázdný = nemá pod sebou nic
+(u agendy). Kdyby se to prohodilo, uklízecí tlačítko by mazalo živé větve —
+proto to hlídá pojmenovaný filtr ve vzorci i text v dialogu, ne jen popisek.
 
 ---
 
