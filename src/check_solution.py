@@ -144,6 +144,24 @@ def main():
         overit(OCEKAVANE_OBRAZOVKY <= nalezene,
                f"v .msapp chybí obrazovky: {sorted(OCEKAVANE_OBRAZOVKY - nalezene)}")
         overit("Screen1" not in nalezene, "v .msapp zůstala výchozí prázdná obrazovka Screen1")
+
+        # Zrušená obrazovka umí v balíku přežít jako Controls/*.json, i když
+        # ve Src/*.pa.yaml dávno není. Studio ji načte, mrtvé odkazy nahlásí
+        # jako chyby a kvůli nim neprovede App.OnStart — appka naběhne černá
+        # a s prázdnými kolekcemi. (Zjištěno na 1.0.0.37, 23.08.2026.)
+        duchove = []
+        for jmeno in msapp.namelist():
+            cesta = jmeno.replace("\\", "/")
+            if "Controls/" not in cesta or not cesta.endswith(".json"):
+                continue
+            data = json.loads(msapp.read(jmeno).decode("utf-8-sig"))
+            nazev = (data.get("TopParent") or {}).get("Name") or data.get("Name")
+            if nazev and nazev != "App" and nazev not in OCEKAVANE_OBRAZOVKY:
+                duchove.append(f"{nazev} v {cesta.split('/')[-1]}")
+        overit(not duchove,
+               f"v .msapp zůstaly zrušené obrazovky: {duchove} — Studio je načte, "
+               f"mrtvé odkazy nahlásí jako chyby a kvůli nim neprovede "
+               f"App.OnStart; appka pak naběhne černá")
         overit("App" in nalezene, "v .msapp chybí App.pa.yaml")
 
         stav = cti(msapp, "_EditorState.pa.yaml")

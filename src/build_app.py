@@ -55,6 +55,53 @@ def najdi_pac(zadana):
     return None
 
 
+def odstran_duchy(cesta_msapp):
+    """Vyhodí z .msapp Controls/*.json obrazovek, které už v OBRAZOVKY nejsou.
+
+    `pac canvas unpack --layout SourceCode` rozbalí jen Src/*.pa.yaml; zbytek
+    balíku (Controls, References, Assets) drží v .msapr a pack ho vrátí zpátky
+    beze změny. Zrušená obrazovka tak v balíku přežije jako duch: Studio ho
+    načte, každý odkaz na prvek, který už neexistuje, nahlásí jako chybu,
+    a kvůli těm chybám NEPROVEDE App.OnStart. Appka pak naběhne černá (barvy
+    jsou proměnné z OnStart) a s prázdnými kolekcemi — jen aktivity, které se
+    načítají až v OnVisible obrazovky, v ní jsou.
+
+    Zjištěno 23.08.2026 na 1.0.0.37: zrušená scr_Seznam nechala v .msapp
+    Controls/4.json o 626 kB s 65 prvky, z toho 30 už neexistujících, a appka
+    se po importu neotevřela. Obrazovky, které naopak v Controls nejsou
+    (scr_Dashboard, scr_Ciselnik), Studio bez potíží načte z YAML — Controls
+    tedy nutné nejsou a smazat je je bezpečné.
+    """
+    with zipfile.ZipFile(cesta_msapp) as balik:
+        polozky = {n: balik.read(n) for n in balik.namelist()}
+
+    smazane = []
+    for jmeno in list(polozky):
+        cesta = jmeno.replace("\\", "/")
+        if "Controls/" not in cesta or not cesta.endswith(".json"):
+            continue
+        data = json.loads(polozky[jmeno].decode("utf-8-sig"))
+        nazev = (data.get("TopParent") or {}).get("Name") or data.get("Name")
+        if nazev and nazev != "App" and nazev not in OBRAZOVKY:
+            del polozky[jmeno]
+            smazane.append(f"{nazev} ({cesta.split('/')[-1]})")
+        elif not nazev:
+            raise SystemExit(f"CHYBA: v {cesta} nenacházím jméno obrazovky — "
+                             f"kontrola duchů by mlčky přestala fungovat")
+
+    # výsledek App checkeru z minulého buildu drží odkazy na zrušené prvky
+    for jmeno in list(polozky):
+        if jmeno.replace("\\", "/").endswith("AppCheckerResult.sarif"):
+            del polozky[jmeno]
+            smazane.append("AppCheckerResult.sarif")
+
+    if smazane:
+        with zipfile.ZipFile(cesta_msapp, "w", zipfile.ZIP_DEFLATED) as balik:
+            for jmeno, data in polozky.items():
+                balik.writestr(jmeno, data)
+    return smazane
+
+
 def spust(prikaz):
     vysledek = subprocess.run(prikaz, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if vysledek.returncode != 0:
@@ -246,6 +293,9 @@ def main():
     if argumenty.bez_pac:
         vlozeno = vymen_zdroje_bez_pac(msapp)
         print(f"vloženo zdrojů (bez pac): {vlozeno}")
+        odstraneno = odstran_duchy(msapp)
+        if odstraneno:
+            print(f"odstraněné zbytky zrušených obrazovek: {', '.join(odstraneno)}")
         doplneno = doplnit_sablony(msapp)
         if doplneno:
             print(f"doplněné šablony controlů: {', '.join(doplneno)}")
@@ -275,6 +325,10 @@ def main():
     novy_msapp = PRACOVNI / "app.msapp"
     vystup_pac = spust([str(pac), "canvas", "pack", "--sources", str(zdroje), "--msapp", str(novy_msapp)])
     print(vystup_pac.strip().splitlines()[-1])
+
+    odstraneno = odstran_duchy(novy_msapp)
+    if odstraneno:
+        print(f"odstraněné zbytky zrušených obrazovek: {', '.join(odstraneno)}")
 
     doplneno = doplnit_sablony(novy_msapp)
     if doplneno:

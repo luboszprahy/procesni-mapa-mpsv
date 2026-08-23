@@ -889,11 +889,15 @@ Screens:
                   Sort(Filter(colStrom, osirely), kod, SortOrder.Ascending),
                   !IsBlank(txt_HledatD.Text),
                   Sort(
-                      Filter(
-                          colStrom,
-                          txt_HledatD.Text in kod || txt_HledatD.Text in nazev,
-                          varDashStav = ""
-                          || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
+                      Search(
+                          Filter(
+                              colStrom,
+                              varDashStav = ""
+                              || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
+                          ),
+                          txt_HledatD.Text,
+                          kod,
+                          nazev
                       ),
                       kod,
                       SortOrder.Ascending

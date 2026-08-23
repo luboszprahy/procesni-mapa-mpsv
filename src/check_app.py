@@ -949,6 +949,27 @@ def kontrola_predikatu(vzorce):
                         )
 
 
+def kontrola_operatoru_in(vzorce):
+    """Operátor `in` se v této appce nepoužívá — hledá se přes `Search()`.
+
+    `in` má v Power Fx dva významy (prvek v tabulce, podřetězec v textu)
+    a nad sloupcem kolekce si Studio umí vybrat ten druhý. Když se to stane
+    ve vlastnosti `Items` galerie, galerie ztratí typ a KAŽDÝ `ThisItem.*`
+    v šabloně řádku se stane chybou — z jednoho vzorce je rázem padesát
+    hlášek a prázdná galerie se vykreslí jako černá plocha.
+
+    `Search(tabulka, text, sloupce…)` dělá totéž, prázdný text bere jako
+    „neomezuj" a v této appce je ověřený od začátku (gal_Nabidka).
+    """
+    for cesta, prop, syrovy in vzorce:
+        if re.search(r"[)\w\"]\s+in\s+", bez_retezcu(syrovy)):
+            chyby.append(
+                f"{cesta}.{prop}: operátor 'in' — použij Search(tabulka, text, "
+                f"sloupce…). Nad sloupcem kolekce se 'in' umí vyhodnotit jinak, "
+                f"než čekáš, a v Items galerie to shodí celou šablonu řádku"
+            )
+
+
 def kontrola_navigace(vzorce, obrazovky):
     for cesta, prop, text in vzorce:
         for cil in re.findall(r"Navigate\(\s*([A-Za-z0-9_]+)", text):
@@ -970,6 +991,7 @@ def main():
     kontrola_delegace(vzorce)
     kontrola_navigace(vzorce, obrazovky)
     kontrola_rezimu_ciselniku(vzorce)
+    kontrola_operatoru_in(vzorce)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)

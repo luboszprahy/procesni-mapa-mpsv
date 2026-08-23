@@ -627,18 +627,20 @@ Screens:
             Height: ==If(varUrovenTyp = "aktivita", 418, 462)
             Items: |-
               =Sort(
-                  Filter(
-                      colCiselnik,
-                      uroven = varUrovenTyp,
-                      !varUklidC || uklid,
-                      IsBlank(txt_HledatC.Text)
-                      || txt_HledatC.Text in kod
-                      || txt_HledatC.Text in nazev,
-                      varUrovenTyp <> "aktivita" || IsBlank(varSekceKodC) || sekce = varSekceKodC,
-                      varUrovenTyp <> "aktivita" || IsBlank(varUtvarKodC) || vlastnik = varUtvarKodC,
-                      varUrovenTyp <> "aktivita"
-                      || drp_StavC.Selected.Value = "(vše)"
-                      || stav = drp_StavC.Selected.Value
+                  Search(
+                      Filter(
+                          colCiselnik,
+                          uroven = varUrovenTyp,
+                          !varUklidC || uklid,
+                          varUrovenTyp <> "aktivita" || IsBlank(varSekceKodC) || sekce = varSekceKodC,
+                          varUrovenTyp <> "aktivita" || IsBlank(varUtvarKodC) || vlastnik = varUtvarKodC,
+                          varUrovenTyp <> "aktivita"
+                          || drp_StavC.Selected.Value = "(vše)"
+                          || stav = drp_StavC.Selected.Value
+                      ),
+                      txt_HledatC.Text,
+                      kod,
+                      nazev
                   ),
                   If(varRazeniC = "nazev", nazev, varRazeniC = "vlastnik", vlastnik, kod),
                   If(varRazeniAscC, SortOrder.Ascending, SortOrder.Descending)
