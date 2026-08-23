@@ -1,21 +1,21 @@
-# HANDOVER — vstupní bod pro další session (23.08.2026)
+# HANDOVER — vstupní bod pro další session (23.08.2026, konec dne)
 
 Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má dělat
 teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
 Zadání drží `PRD.md`.
 
-> **Stav:** appka i publikační flow **běží v provozu**. Aktuální balík
-> k importu je **`deploy/procesnimapa_1_0_0_44.zip`** (jedna editační
-> obrazovka pro všechny čtyři úrovně, hledání a úklid přímo z přehledu) —
-> hotový a ověřený offline branami, ale **ještě nenaimportovaný**. Poslední
-> ověřeně běžící verze v prostředí je **1.0.0.28**. Balíky 34 a 35 jsou
-> nahrazené a smazané; 44 obsahuje všechno z nich.
+> **Stav:** appka běží v provozu a je **ověřená v tenantu** — dnes se
+> importovalo a zkoušelo opakovaně. Aktuální balík je
+> **`deploy/procesnimapa_1_0_0_50.zip`**; poslední potvrzeně naběhlá verze
+> je 1.0.0.40, novější balíky (41–50) nesou opravy auditu a design a čekají
+> na import. Starší balíky jsou z `deploy/` smazané.
 >
-> **Obrazovka `scr_Seznam` zanikla.** Aktivity se editují jako čtvrtá úroveň
-> číselníku; filtry, řazení i mazání se přenesly, nic se neztratilo.
+> **Osm bran zeleně** ke konci dne: `check_app` (4 obrazovky, 194 prvků,
+> 2 148 vzorců), `check_solution` 224/0, `check_schema`, `check_mapa_flow`
+> 142, `check_mapa_html` 31, `check_mapa_beh` 18, `check_setup.js`,
+> `check_import.js`.
 >
-> `.venv` se nepřenáší přes git — na tomhle stroji byl po úklidu pryč
-> a musel se založit znovu (viz Rozjezd).
+> `.venv` se přes git nepřenáší; na novém stroji viz Rozjezd.
 
 ## Rozjezd na novém stroji
 
@@ -33,57 +33,29 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_44.zip`** jako upgrade a appku
-   jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-   Balík nese všechno z nenaimportovaných 1.0.0.34 až 36.
-
-   **Navbar má nově dvě záložky: Přehled a Editace.** Samostatný seznam
-   aktivit zmizel — je to teď čtvrtá úroveň v číselníku.
-
-   Na obrazovce **Editace** (dřív Číselník):
-   - nahoře **Agendy / Procesy / Dílčí procesy / Aktivity**,
-   - u aktivit se objeví druhý filtrační řádek **sekce / útvar / stav**
-     a v pravém panelu místo formuláře vysvětlení a tlačítka
-     **„Otevřít detail"** a **„Nová aktivita"**,
-   - **klik na řádek aktivity otevře detail**, klik na řádek číselníku načte
-     položku do formuláře vpravo — ověřit obojí,
-   - **hlavičky sloupců řadí** (kód, název, vykonává/vlastník),
-   - koš v řádku maže s potvrzením; u aktivity zmizí i její zařazení do
-     dílčích procesů,
-   - **šipka zpět z detailu** se vrací do editace na úroveň aktivit
-     s vybraným řádkem — ověřit i návrat po uložení a po smazání.
-
-   Na obrazovce **Přehled**:
-   - vlevo nad stromem **pole pro hledání** — projde kód i název na všech
-     čtyřech úrovních naráz; nalezené se vypíšou jako **plochý seznam**, ne
-     ve stromu. Vymazání pole vrátí strom do původního rozbalení,
-   - vpravo od chipů stavu **chip „osiřelé"** — vypíše položky bez nadřazené
-     úrovně. Tohle je jediné místo, kde je z přehledu uvidíš: ve stromu se
-     nezobrazují, protože nemají pod čím viset,
-   - v řádku je vedle tužky **koš** se stejným potvrzením jako v editaci,
-   - **zkusit celý cyklus**: smazat proces → jeho dílčí procesy se objeví
-     pod chipem „osiřelé" → uklidit je košem,
-   - **ikona +** v řádku: u agendy založí proces, u procesu dílčí proces,
-     u dílčího procesu aktivitu — vždy s předvyplněnými nadřazenými úrovněmi.
-     U aktivity ikona schválně není. Ověřit, že po „+" u procesu je v číselníku
-     předvybraná agenda i proces a zbývá jen název,
-   - **nabídka „Rozbalit: … ▾"** místo čtyř tlačítek — ukazuje, který stupeň
-     platí; klik mimo ji zavře,
-   - **nabídka „HTML mapa ▾"** s volbami **Zobrazit v HTML** a **Obnovit
-     HTML** (dřív „Obnovit mapu"). Obojí bylo v zrušeném seznamu aktivit
-     a ve verzi 1.0.0.36 v appce chybělo — ověřit, že publikace naskočí
-     a že se hláška o spuštění objeví.
+1. **Naimportovat `deploy/procesnimapa_1_0_0_50.zip`** jako upgrade a appku
+   jednou otevřít ve Studiu. Proti naposledy ověřené 1.0.0.40 přibylo:
+   - **opravy auditu** — mazání dílčího procesu uklidí i vazby na něj,
+     zakládání odmítne kód, pod kterým leží osiřelé položky, zmizela možnost
+     vyrobit duplicitní vazbu, strop načítaných řádků je 2 000 místo 500,
+   - **ikona +** v řádku stromu: u agendy založí proces, u procesu dílčí
+     proces, u dílčího procesu aktivitu — vždy s předvyplněnými nadřazenými
+     úrovněmi. U aktivity ikona schválně není,
+   - **barvy vrstev** odvozené z výchozí modré `#00126B`, kontrast ověřený
+     výpočtem proti WCAG,
+   - **dlouhé názvy** začínají od horního okraje a tooltip ukazuje celý text,
+   - **mapa má uzel „Nezařazené"** — osiřelé záznamy z ní přestaly mizet.
+   Na co se dívat: projít celý cyklus zakládání přes „+", ověřit mazání
+   dílčího procesu s aktivitami pod ním a mrknout, jestli barvy sedí.
 2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
-   (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
-   21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
-   mapa neměla nové ovládací prvky. Teď je generuje `build_mapa.py`.
-3. **Spustit „Obnovit mapu"** v appce a v mapě zkontrolovat: přepínač stupně
-   rozbalení, zatržítko „Zobrazit kód", čtyři velikosti písma (tlačítka A),
-   nápovědu při najetí na řádek.
-4. **Zapnout nové flow `MapaPublishScheduled`** (Power Automate > Solutions >
-   procesní mapa). Import stav zapnutí nemění, takže nové flow může přijít
-   vypnuté a denní publikace by pak tiše neběžela. Ověřit v jeho detailu, že
-   trigger je Recurrence **denně v 7:00, Central Europe Standard Time**.
+   i `procesni_mapa.html`. Šablona se dnes měnila (uzel „Nezařazené"),
+   takže bez nahrání se to v publikované mapě neprojeví.
+3. **Spustit „Obnovit HTML"** z nabídky na přehledu a v mapě zkontrolovat
+   ovládací prvky.
+4. **Zapnout flow `MapaPublishScheduled`** (Power Automate > Solutions).
+   Import stav zapnutí nemění, takže může přijít vypnuté a denní publikace
+   by tiše neběžela. Trigger má být Recurrence denně 7:00, Central Europe
+   Standard Time.
 5. **Save & Publish** ve Studiu, jinak uživatelé vidí starou verzi.
 
 ## 1b. VYŘEŠENO: po importu je nutná mikro-změna, jinak Save neproběhne
@@ -119,47 +91,39 @@ chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
-**Čeká se na zpětnou vazbu z importu 1.0.0.36.** Appka je po sjednocení
-editace v jiném tvaru než ta, která běží v prostředí (1.0.0.44) — dvě
-obrazovky se staly jednou a přibyla celá editace číselníku. Než přijde
-zpětná vazba, nemá smysl stavět další.
+**Čeká se na zpětnou vazbu z importu 1.0.0.50.** Nic rozpracovaného
+nezůstalo — všechno, co se dnes zadalo, je hotové, ověřené branami
+a zapsané.
 
-Až přijde, na řadě je `deploy/navod_sprava.md` — rozhodnuto 21.08., že se
-píše podle finální podoby appky, a tou je teď obrazovka Editace.
+Připravené k vytažení, až přijde čas:
 
-**Otevřené k rozmyšlení, ne k okamžité implementaci:**
-- **Osiřelé vazby** v tabulce `Vazba aktivita–dílčí proces` (dílčí proces
-  smazán, vazba zůstala) zatím filtr nemají — vazební tabulka vlastní
-  obrazovku nemá. Mazání aktivity vazby uklízí, mazání dílčího procesu ne.
-- **„Enforce unique values" na sloupci `Title`** u všech čtyř listů. Dnes
-  drží jedinečnost kódu jen optimistický zámek v appce (`LookUp` před
-  `Patch`), který není atomický. Znamená to zásah do `src/schema.json`
-  a `make_setup.js` včetně dorovnání už založených listů.
-- **Rejstřík nad 2 000 aktivitami.** Strop `DefaultConnectedDataSourceMaxGetRowsCount`
-  je 2 000 a výš ho Power Apps nepustí; nad tím by strom, hledání, chip
-  osiřelých i seznam aktivit pracovaly s prvním oknem dat, aniž by to řekly.
-  **Hotový plán leží v `PLAN.md`** („Připravený plán: rejstřík nad 2 000
-  aktivitami") — předpočítané počty na dílčím procesu, aktivity až po
-  rozbalení, seznam zpátky na delegovaný dotaz, osiřelost příznakem.
-  Odloženo rozhodnutím zadavatele 23.08.2026; spouštěč je zhruba
-  **1 500 aktivit**, dnes jich je 47.
+- **`deploy/navod_sprava.md`** (krok 13 plánu) — rozhodnuto psát ho podle
+  finální podoby appky, a ta se dnes ustálila.
+- **Rejstřík nad 2 000 aktivitami** — hotový plán leží v `PLAN.md`
+  („Připravený plán: rejstřík nad 2 000 aktivitami"). Odloženo rozhodnutím
+  zadavatele; spouštěč je zhruba 1 500 aktivit, dnes jich je 47.
+- **Náměty na rozšíření N-1 až N-6** v `PLAN.md`, nejvýš hromadné pořízení
+  z evidenční karty.
+- **A-08 z auditu** — natvrdo zapsaná `"sekce": "3"` a jméno správce
+  v publikačním flow, `$top: 5000` bez stránkování, testovací tenant na
+  čtyřech místech. Věci pro přenos na MPSV, ne pro provoz.
 
 ## 3. Co je hotové (23.08.2026)
 
 | oblast | stav |
 |---|---|
 | F1 SharePoint rejstřík | hotovo, provisioning i import dat |
-| F2 canvas app | **ověřeno v provozu** (1.0.0.44) |
+| F2 canvas app | **ověřeno v provozu** (1.0.0.50) |
 | F3 publikační flow + HTML mapa | **ověřeno v provozu** — mapa se v tenantu zobrazí, flow vrací 250 dílčích procesů |
 | F3b denní publikace mapy | hotovo, čeká na import — druhé flow `MapaPublishScheduled`, Recurrence 7:00 |
 | F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
-| F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.44) |
-| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.44) |
-| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.44) |
-| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.44) |
-| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.44) |
-| F6/F sjednocená editace, hledání a úklid z přehledu | hotovo, čeká na import (1.0.0.44) |
-| F6/G akce nad HTML mapou na přehledu, rolovací nabídky | hotovo, čeká na import (1.0.0.44) |
+| F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.50) |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.50) |
+| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.50) |
+| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.50) |
+| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.50) |
+| F6/F sjednocená editace, hledání a úklid z přehledu | hotovo, čeká na import (1.0.0.50) |
+| F6/G akce nad HTML mapou na přehledu, rolovací nabídky | hotovo, čeká na import (1.0.0.50) |
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
 
@@ -224,22 +188,22 @@ $py = ".venv/Scripts/python.exe"
 
 # --- canvas app ---
 & $py src/check_app.py            # zdroje appky: YAML, sloupce, delegace, překryvy
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_44.zip" --verze 1.0.0.34
-& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_44.zip" `
-                            --vystup "deploy/procesnimapa_1_0_0_44.zip"
+& $py src/build_app.py --solution "input/procesnimapa_1_0_0_50.zip" --verze 1.0.0.34
+& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_50.zip" `
+                            --vystup "deploy/procesnimapa_1_0_0_50.zip"
 
 # --- flows ---
 # dvojče s denním během; idempotentní, píše zpátky do vstupní solution
-& $py src/add_mapa_schedule.py --solution "input/procesnimapa_1_0_0_44.zip" --hodina 7
-& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_44.zip"
-& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_44.zip"
+& $py src/add_mapa_schedule.py --solution "input/procesnimapa_1_0_0_50.zip" --hodina 7
+& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_50.zip"
+& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_50.zip"
 
 # --- náhled mapy v prohlížeči (file:// bývá blokované) ---
 & $py -m http.server 8765 --bind 127.0.0.1
 # http://127.0.0.1:8765/viz/mapa_prototyp.html
 ```
 
-**Vstupní solution pro build je `input/procesnimapa_1_0_0_44.zip`** — je to
+**Vstupní solution pro build je `input/procesnimapa_1_0_0_50.zip`** — je to
 poslední export ze Studia a jako jediný nese `MapaPublishFlow` mezi datovými
 zdroji appky (Add flow). Stavět z něj, dokud uživatel nedodá novější export.
 

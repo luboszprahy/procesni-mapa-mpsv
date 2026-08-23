@@ -1,6 +1,45 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (monochromatická modrá škála)
+Aktualizováno: 2026-08-23 (konec dne, balík 1.0.0.50)
+
+## Shrnutí dne 23.08.2026
+
+Den měl tři části: **dokončení editace**, **audit s opravami** a **design**.
+Mezi tím tři importy, které neběžely — a stály za to, protože každý odhalil
+jinou past.
+
+**Co se postavilo:** obrazovka číselníku pro agendy, procesy a dílčí procesy
+(F6/D), úklid osiřelých položek (F6/E), sjednocení editace do jedné obrazovky
+včetně aktivit a zrušení `scr_Seznam` (F6/F), akce nad HTML mapou v rolovacích
+nabídkách (F6/G), zakládání ikonou + přímo z řádku stromu.
+
+**Co se opravilo z auditu:** A-01 až A-07 — referenční integrita vazeb,
+duplicitní vazby, strop řádků 500 → 2 000, nedelegovatelné mazání, osiřelé
+záznamy v publikované mapě, flow přepisující cizí pole.
+
+**Tři poruchy z jednoho kořene.** Zrušení `scr_Seznam` vyrobilo ducha
+v `.msapp` (626 kB starých Controls), dvojité rovnítko z generujícího skriptu
+a osiřelou proměnnou bez typu. Každá shodila import zvlášť a žádnou brány
+neviděly, protože kontrolovaly YAML jako datovou strukturu — ne to, co z něj
+nakonec vznikne v balíku. Na každou je teď brána a `check_solution.py` kouká
+dovnitř `.msapp`.
+
+**Nejužitečnější diagnostický okamžik** nebyl seznam chyb, ale nesrovnalost
+na kartách: agend 0, procesů 0, dílčích procesů 0 — ale aktivit 47. První tři
+kolekce plní `App.OnStart`, aktivity se načítají až v `OnVisible` obrazovky.
+Z toho bylo jasné, že OnStart neproběhl, ještě než přišel App checker.
+
+**Brány ke konci dne (osm, všechny zelené):** `check_app` (4 obrazovky,
+194 prvků, 2 148 vzorců), `check_solution` 224/0, `check_schema`,
+`check_mapa_flow` 142, `check_mapa_html` 31, `check_mapa_beh` 18,
+`check_setup.js`, `check_import.js`.
+
+Přibylo přitom devět nových kontrol, všechny mutačně ověřené: sloupce kolekcí,
+režim číselníku, nedelegovatelné predikáty, dvojité rovnítko, proměnné bez
+typu, pořadí prvků v rolovacích nabídkách, duchové v `.msapp`, strop řádků
+a adresa natvrdo v `Launch()`.
+
+## Barvy podruhé: škála z výchozí modré (23.08.2026) — balík 1.0.0.49
 
 ## Barvy podruhé: škála z výchozí modré (23.08.2026) — balík 1.0.0.49
 
