@@ -11,7 +11,7 @@ Verze: 1.0 (19.08.2026) | Navazuje na `PRD.md` | Stav postupu drží `STATUS.md`
 | F2 | Canvas app pro pořizování aktivit | **hotovo** (1.0.0.23 ověřeno v provozu 21.08.) |
 | F3 | Publikační flow: data → HTML mapa v Site Assets | **hotovo** (ověřeno v provozu 21.08.) |
 | F4 | Přenos na tenant MPSV | **blokováno** — bez přístupu k tenantu MPSV (21.08.) |
-| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky, úklid číselníků | A–C **hotovo** (1.0.0.26), D+E **hotovo** (1.0.0.35, čeká na import) |
+| F6 | Připomínky z provozu: mapa, drobnosti v appce, dashboard, zadávací obrazovky, úklid číselníků, sjednocení editace | A–F **hotovo** (1.0.0.36, čeká na import) |
 | F5 | Generování textu organizačního řádu | fáze 2 (po 06/2028) |
 
 Brány s `/audit` (agent `powerplatform-auditor`): před importem do DEV (konec F1),
@@ -594,6 +594,126 @@ záznamu; víc než 2 000 aktivit (chip filtruje první okno, popisek to říká
 NADŘAZENÁ položka (smaže se bez následků). Prázdný = nemá pod sebou nic
 (u agendy). Kdyby se to prohodilo, uklízecí tlačítko by mazalo živé větve —
 proto to hlídá pojmenovaný filtr ve vzorci i text v dialogu, ne jen popisek.
+
+---
+
+## F6/F — Sjednocení editace a úklid přímo z přehledu
+
+Zadáno 23.08.2026 po prohlídce 1.0.0.35. Pět bodů, které spolu souvisejí:
+editace se stahuje do jedné obrazovky a přehled se z prohlížečky mění
+na místo, odkud jde i uklízet.
+
+### F1. Aktivity jako čtvrtá úroveň číselníku
+
+**co:** `src/app_src/scr_Ciselnik.pa.yaml`, zrušení `scr_Seznam.pa.yaml`
+
+Aktivity mají dnes vlastní obrazovku se záložkou v navbaru; agendy, procesy
+a dílčí procesy druhou. Dvě obrazovky pro totéž (vybrat záznam, upravit,
+smazat) znamenají dvojí zvyk a dvojí údržbu.
+
+- Segmentová volba dostane **čtvrté tlačítko „Aktivity"** (čtyři po 148 px).
+- `colCiselnik` dostane i aktivity: `rodic` = dílčí proces, `vlastnik`
+  = vykonávající útvar, `uklid` = dílčí proces v číselníku neexistuje.
+- **Formulář vpravo aktivity needituje** — aktivita má deset polí a zařazení
+  M:N, což se do panelu nevejde. Klik na řádek proto otevře `scr_Detail`.
+  Formulářová pole se skryjí a obě tlačítka dole změní text a chování:
+  „Otevřít detail" a „Nová aktivita". Nové prvky pro to nevznikají, takže
+  ani nový překryv.
+- Co si `scr_Seznam` bere s sebou a musí se přenést: **filtry sekce, útvar,
+  stav** (druhý filtrační řádek, viditelný jen u aktivit), **řazení klikem
+  na hlavičku** sloupce a **mazání s potvrzením** (číselník ho už má, jen
+  musí umět smazat i aktivitu včetně jejích vazeb).
+- `varDetailZpet` se přepíše z `"seznam"` na `"ciselnik"`.
+
+**verify:** `check_app.py` (5 obrazovek, ne 6, a žádný odkaz na `scr_Seznam`);
+ve Studiu: čtvrtý segment ukáže aktivity, klik otevře detail, šipka zpět
+se vrátí do číselníku, filtry zúží seznam, řazení podle útvaru funguje.
+**edge cases:** aktivita s prázdným `vykonava`; návrat z detailu po uložení;
+prázdný výsledek filtru.
+**risk:** zrušení obrazovky je nevratné rozhodnutí a `scr_Seznam` uměl víc
+než seznam v číselníku. Proto se filtry a řazení přenášejí, ne škrtají.
+
+### F2. Přehled a Editace jako dvě záložky
+
+**co:** `src/app_src/scr_Dashboard.pa.yaml`
+
+Záložka „Seznam aktivit" se mění na **„Editace"** a míří na `scr_Ciselnik`.
+Tlačítko „+ Nová položka rejstříku" z navbaru mizí — se záložkou by dělalo
+totéž dvakrát.
+
+**verify:** ve Studiu vede záložka na číselník ve stavu zakládání agendy;
+zpět z číselníku se vrací na přehled.
+
+### F3. Fulltext na přehledu
+
+**co:** `src/app_src/scr_Dashboard.pa.yaml`
+
+Pole nad stromem hledá **kdekoli uvnitř kódu i názvu na všech čtyřech
+úrovních naráz**. Jde to, protože `colStrom` je celá v paměti — hledání se
+nedeleguje a ani nemusí. Strop je 2 000 aktivit (`colAkt` je první okno dat,
+dnes 49) a popisek to říká.
+
+Při zadaném hledání se strom přepne do **plochého seznamu výsledků**:
+zobrazí každý odpovídající uzel bez ohledu na to, co je rozbalené. Rozbalování
+by u hledání spíš překáželo — nalezená aktivita se má ukázat rovnou, ne až po
+rozkliknutí tří úrovní nad ní.
+
+**verify:** hledání „nábor" najde aktivity i dílčí procesy s tím slovem;
+vymazání pole vrátí strom do původního rozbalení (`colOtevrene` se nesahá).
+**edge cases:** hledání bez výsledku (popisek, ne prázdná plocha);
+hledání + filtr stavu naráz.
+
+### F4. Mazání přímo z přehledu
+
+**co:** `src/app_src/scr_Dashboard.pa.yaml`
+
+Vedle tužky v řádku stromu **koš se stejnou logikou**: nemaže hned, jen
+naplní `varSmazatD`, a maže až tlačítko v modálním dialogu. Dialog říká,
+kolik podřízených položek tím osiří — u aktivity místo toho, že mizí i její
+zařazení do dílčích procesů.
+
+Sloupce ve stromu se o šířku koše posunou doleva (tužka na
+`TemplateWidth - 128`, koš na `- 84`).
+
+**verify:** `check_app.py` (`kontrola_potvrzeni_mazani` musí projít — koš
+v galerii jen nastavuje proměnnou); ve Studiu smazat dílčí proces a ověřit,
+že aktivity pod ním zůstaly a jsou vidět pod chipem osiřelých.
+**risk:** koš vedle tužky v řádku se dá trefit omylem — proto dialog
+a proto je koš až za překryvnou vrstvou, ne pod ní.
+
+### F5. Osiřelé položky na přehledu
+
+**co:** `src/app_src/scr_Dashboard.pa.yaml`
+
+Chip **„osiřelé"** vedle filtru stavu. Má vlastní důvod existovat: osiřelá
+položka se ve stromu **vůbec nezobrazí**, protože strom ukazuje jen uzly,
+jejichž předci jsou otevření — a sirotek žádného předka nemá. Bez tohoto
+chipu je z přehledu neviditelná, i když v datech je.
+
+Chip proto přepne strom do plochého seznamu osiřelých napříč úrovněmi.
+`colStrom` k tomu dostane sloupec `osirely`, počítaný při stavbě kolekce
+stejně jako `uklid` v číselníku: proces bez agendy, dílčí proces bez procesu,
+aktivita bez dílčího procesu, agenda bez procesů.
+
+**verify:** smazat proces v číselníku, přepnout na přehled → chip ukáže jeho
+dílčí procesy; vypnutí chipu vrátí strom.
+**edge cases:** žádní sirotci (popisek „nic k úklidu", ne prázdná plocha).
+**risk:** stejná past jako v F6/E — „osiřelý" u agendy znamená „prázdná".
+Popisek chipu i štítek na řádku to musí říkat, ne mlčet.
+
+### F6. Brána na vzájemně se vylučující prvky
+
+**co:** `src/check_app.py`
+
+`kontrola_prekryvu` dnes hlásí překryv i u dvojice prvků, z nichž je vždycky
+vidět jen jeden (`Visible: =X = "a"` proti `=X <> "a"`). Kvůli tomu se
+panelový layout musel obcházet. Kontrola se rozšíří o rozpoznání téhle
+dvojice — porovná operandy a pozná, že jde o protiklady.
+
+**verify:** mutačně — dva prvky přes sebe se **stejným** Visible musí dál
+padat, s protikladným projít.
+**risk:** kdyby se rozpoznávání spletlo, brána by přestala hlásit skutečné
+překryvy. Proto porovnává celé normalizované operandy, ne podřetězce.
 
 ---
 

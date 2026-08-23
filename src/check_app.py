@@ -663,12 +663,39 @@ def kontrola_prekryvu(soubory):
                     porovnej(jmeno_obrazovky, obdelniky)
 
 
+def vylucuji_se(va, vb):
+    """Pozná dvojici Visible, z níž je vždycky vidět jen jeden prvek.
+
+    Panelový layout přepíná dva obsahy na stejném místě: `X = "a"` proti
+    `X <> "a"`. Bez tohohle by kontrola hlásila překryv, který za běhu
+    nikdy nenastane, a layout by se musel obcházet.
+
+    Porovnávají se CELÉ normalizované operandy, ne podřetězce — jinak by
+    `varTyp = "aktivita"` a `varJinyTyp <> "aktivita"` prošly jako protiklady
+    a brána by přestala hlásit skutečné překryvy.
+    """
+    def rozloz(vyraz):
+        text = re.sub(r"\s+", "", str(vyraz).lstrip("=").strip())
+        for operator in ("<>", "="):
+            casti = text.split(operator)
+            if len(casti) == 2 and all(casti):
+                return operator, casti[0], casti[1]
+        return None
+
+    a, b = rozloz(va), rozloz(vb)
+    if not a or not b:
+        return False
+    return a[0] != b[0] and a[1] == b[1] and a[2] == b[2]
+
+
 def porovnej(jmeno_obrazovky, obdelniky):
     for i, (jmeno_a, (xa, ya, wa, ha), va) in enumerate(obdelniky):
         for jmeno_b, (xb, yb, wb, hb), vb in obdelniky[i + 1:]:
             prekryv_x = min(xa + wa, xb + wb) - max(xa, xb)
             prekryv_y = min(ya + ha, yb + hb) - max(ya, yb)
             if prekryv_x <= 0 or prekryv_y <= 0:
+                continue
+            if vylucuji_se(va, vb):
                 continue
             chyby.append(
                 f"{jmeno_obrazovky}: '{jmeno_a}' a '{jmeno_b}' se překrývají "
@@ -797,13 +824,24 @@ def schema_kolekci(vzorce):
     do ní přiteče později s jiným kompletem sloupců, appku buď neotevře, nebo
     v galerii tiše ukáže prázdná pole tam, kde ostatní řádky mají hodnotu.
     """
-    nalezene = {}
-    for _cesta, _prop, syrovy in vzorce:
+    nalezene, kde = {}, {}
+    for cesta, prop, syrovy in vzorce:
         text = bez_retezcu(syrovy)
         for shoda in re.finditer(
                 r"\bClearCollect\s*\(\s*(col[A-Za-z0-9_]*)\s*,\s*ShowColumns\s*\(", text):
-            argumenty = rozdel_argumenty(argumenty_volani(text, shoda.end() - 1))
-            nalezene[shoda.group(1)] = set(argumenty[1:])
+            jmeno = shoda.group(1)
+            sloupce = set(rozdel_argumenty(argumenty_volani(text, shoda.end() - 1))[1:])
+            # Táž kolekce se plní na víc obrazovkách (colAkt na přehledu
+            # i v číselníku). Kdyby se definice rozešly, chovala by se appka
+            # podle toho, odkud uživatel přišel — a nikdo by netušil proč.
+            if jmeno in nalezene and nalezene[jmeno] != sloupce:
+                chyby.append(
+                    f"{cesta}.{prop}: '{jmeno}' se plní jinými sloupci než "
+                    f"v {kde[jmeno]} — {sorted(sloupce)} proti "
+                    f"{sorted(nalezene[jmeno])}"
+                )
+            nalezene[jmeno] = sloupce
+            kde[jmeno] = f"{cesta}.{prop}"
     return nalezene
 
 

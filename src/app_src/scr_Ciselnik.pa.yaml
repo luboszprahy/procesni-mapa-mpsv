@@ -48,10 +48,10 @@ Screens:
         =Set(varChybaC, "");
         Set(varSmazatC, Blank());
         If(
-            IsEmpty(colAkt),
+            IsEmpty(colAkt) || varAktStale,
             ClearCollect(
                 colAkt,
-                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, stav)
+                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
             )
         );
         ClearCollect(
@@ -64,6 +64,8 @@ Screens:
                     vlastnik: a.vlastnik,
                     uroven: "agenda",
                     rodic: "",
+                    sekce: "",
+                    stav: "",
                     uklid: CountRows(Filter(colProcesy, agenda_kod = a.Title)) = 0
                 }
             )
@@ -78,6 +80,8 @@ Screens:
                     vlastnik: p.vlastnik,
                     uroven: "proces",
                     rodic: p.agenda_kod,
+                    sekce: "",
+                    stav: "",
                     uklid: IsBlank(p.agenda_kod) || IsBlank(LookUp(colAgendy, Title = p.agenda_kod))
                 }
             )
@@ -92,7 +96,25 @@ Screens:
                     vlastnik: d.vlastnik,
                     uroven: "dilci",
                     rodic: d.proces_kod,
+                    sekce: "",
+                    stav: "",
                     uklid: IsBlank(d.proces_kod) || IsBlank(LookUp(colProcesy, Title = d.proces_kod))
+                }
+            )
+        );
+        Collect(
+            colCiselnik,
+            ForAll(
+                colAkt As k,
+                {
+                    kod: k.Title,
+                    nazev: k.nazev_kratky,
+                    vlastnik: k.vykonava,
+                    uroven: "aktivita",
+                    rodic: k.dilci_proces_kod,
+                    sekce: k.sekce,
+                    stav: k.stav.Value,
+                    uklid: IsBlank(k.dilci_proces_kod) || IsBlank(LookUp(colDilci, Title = k.dilci_proces_kod))
                 }
             )
         );
@@ -241,7 +263,7 @@ Screens:
             Size: =12 + varFs
             Text: ="Agendy"
             Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem. Nadřazený prvek nemá, vlastníkem je sekce. Kód má dvě číslice."'
-            Width: =200
+            Width: =148
             X: =40
             Y: =88
       - btn_UrovenProcesC:
@@ -271,8 +293,8 @@ Screens:
             Size: =12 + varFs
             Text: ="Procesy"
             Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem. Patří vždy pod jednu agendu, vlastníkem je odbor. Kód má tvar AA-BB."'
-            Width: =200
-            X: =248
+            Width: =148
+            X: =197
             Y: =88
       - btn_UrovenDilciC:
           Control: Classic/Button@2.2.0
@@ -301,8 +323,42 @@ Screens:
             Size: =12 + varFs
             Text: ="Dílčí procesy"
             Tooltip: '="Třetí úroveň: vymezený úsek procesu. Patří vždy pod jeden proces, vlastníkem je odbor. Kód má tvar AA-BB-CCC a teprve pod něj se zařazují aktivity."'
-            Width: =204
-            X: =456
+            Width: =148
+            X: =354
+            Y: =88
+      # Aktivita je čtvrtá úroveň seznamu, ale formulář vpravo ji needituje:
+      # má deset polí a zařazení M:N, což se do panelu nevejde. Klik na řádek
+      # proto otevře scr_Detail — jednotný je výběr, mazání a filtrování,
+      # ne tvar formuláře.
+      - btn_UrovenAktivitaC:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varUrovenTyp = "aktivita", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varUrovenTyp = "aktivita", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =36
+            HoverColor: =If(varUrovenTyp = "aktivita", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varUrovenTyp = "aktivita", stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varUrovenTyp, "aktivita");
+              Set(varCiselnikNova, true);
+              Set(varCiselnikKod, "");
+              Set(varChybaC, "");
+              Reset(drp_AgendaC);
+              Reset(drp_ProcesC);
+              Reset(txt_NazevC);
+              Reset(drp_VlastnikC)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =12 + varFs
+            Text: ="Aktivity"
+            Tooltip: '="Čtvrtá a nejnižší úroveň: činnost tak, jak má znít v organizačním řádu. Vykonává ji oddělení. Kód má tvar AA-BB-CCC-DDDD. Upravuje se na vlastní obrazovce - klik na řádek ji otevře."'
+            Width: =148
+            X: =511
             Y: =88
       # ---------- levý panel: seznam ----------
       - txt_HledatC:
@@ -374,6 +430,75 @@ Screens:
             Width: =100
             X: =560
             Y: =140
+      # Filtry, které si s sebou přinesl zrušený seznam aktivit. Platí jen
+      # pro čtvrtou úroveň, u číselníků by neměly co filtrovat — proto celý
+      # řádek mizí a seznam se o jeho výšku posune nahoru.
+      - drp_SekceC:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: ="(vše)"
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =36
+            HoverBorderColor: =stylAkce
+            Items: =colSekceNabidka
+            OnChange: |-
+              =Set(
+                  varSekceKodC,
+                  If(
+                      drp_SekceC.Selected.Value = "(vše)",
+                      "",
+                      Left(drp_SekceC.Selected.Value, Find(" ·", drp_SekceC.Selected.Value & " ·") - 1)
+                  )
+              )
+            Size: =11
+            Tooltip: '="Sekce, pod kterou vykonávající útvar patří. Podle ní se evidence dělí mezi sekční správce procesního rámce."'
+            Visible: =varUrovenTyp = "aktivita"
+            Width: =190
+            X: =40
+            Y: =184
+      - drp_UtvarC:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: ="(vše)"
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =36
+            HoverBorderColor: =stylAkce
+            Items: =colUtvarNabidka
+            OnChange: |-
+              =Set(
+                  varUtvarKodC,
+                  If(
+                      drp_UtvarC.Selected.Value = "(vše)",
+                      "",
+                      Left(drp_UtvarC.Selected.Value, Find(" ·", drp_UtvarC.Selected.Value & " ·") - 1)
+                  )
+              )
+            Size: =11
+            Tooltip: '="Útvar, který aktivitu vykonává a nese za ni odpovědnost. Nabídka je z číselníku Útvary, takže je úplná bez ohledu na to, kolik aktivit v rejstříku je."'
+            Visible: =varUrovenTyp = "aktivita"
+            Width: =220
+            X: =238
+            Y: =184
+      - drp_StavC:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: ="(vše)"
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =36
+            HoverBorderColor: =stylAkce
+            Items: =["(vše)", "pracovní", "schváleno"]
+            Size: =11
+            Tooltip: '="Pracovní je rozpracovaný záznam, schváleno je potvrzené znění pro organizační řád. Stav se přepíná v detailu aktivity."'
+            Visible: =varUrovenTyp = "aktivita"
+            Width: =194
+            X: =466
+            Y: =184
       - lbl_PocetC:
           Control: Label@2.5.1
           Properties:
@@ -389,60 +514,87 @@ Screens:
                   If(varUrovenTyp = "agenda", " · jen prázdné", " · jen osiřelé"),
                   ""
               ) &
-              If(IsBlank(txt_HledatC.Text), "", " · hledání „" & txt_HledatC.Text & "“")
+              If(IsBlank(txt_HledatC.Text), "", " · hledání „" & txt_HledatC.Text & "“") &
+              If(
+                  varUrovenTyp = "aktivita" && (!IsBlank(varSekceKodC) || !IsBlank(varUtvarKodC) || drp_StavC.Selected.Value <> "(vše)"),
+                  " · filtrováno",
+                  ""
+              )
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =40
-            Y: =184
+            Y: ==If(varUrovenTyp = "aktivita", 228, 184)
       - rec_KartaSeznamC:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =496
+            Height: ==If(varUrovenTyp = "aktivita", 452, 496)
             Width: =620
             X: =40
-            Y: =212
+            Y: ==If(varUrovenTyp = "aktivita", 256, 212)
+      # Hlavičky řadí klikem, stejně jako je řadil zrušený seznam aktivit.
       - lbl_h_KodC:
           Control: Label@2.5.1
           Properties:
-            Color: =stylTextSlaby
+            Color: =If(varRazeniC = "kod", stylAkce, stylTextSlaby)
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =24
+            HoverColor: =stylAkce
+            OnSelect: |-
+              =Set(varRazeniAscC, If(varRazeniC = "kod", !varRazeniAscC, true));
+              Set(varRazeniC, "kod")
+            PressedColor: =stylAkceStisk
             Size: =10 + varFs
-            Text: ="KÓD"
+            Text: |-
+              ="KÓD" & If(varRazeniC = "kod", If(varRazeniAscC, " ▲", " ▼"), "")
+            Tooltip: '="Seřadí podle identifikačního kódu, tedy v pořadí rejstříku. Výchozí řazení. Další klik obrátí směr."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =140
             X: =56
-            Y: =218
+            Y: ==If(varUrovenTyp = "aktivita", 262, 218)
       - lbl_h_NazevC:
           Control: Label@2.5.1
           Properties:
-            Color: =stylTextSlaby
+            Color: =If(varRazeniC = "nazev", stylAkce, stylTextSlaby)
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =24
+            HoverColor: =stylAkce
+            OnSelect: |-
+              =Set(varRazeniAscC, If(varRazeniC = "nazev", !varRazeniAscC, true));
+              Set(varRazeniC, "nazev")
+            PressedColor: =stylAkceStisk
             Size: =10 + varFs
-            Text: ="NÁZEV"
+            Text: |-
+              ="NÁZEV" & If(varRazeniC = "nazev", If(varRazeniAscC, " ▲", " ▼"), "")
+            Tooltip: '="Seřadí abecedně podle názvu. Další klik obrátí směr."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =258
             X: =212
-            Y: =218
+            Y: ==If(varUrovenTyp = "aktivita", 262, 218)
       - lbl_h_VlastnikC:
           Control: Label@2.5.1
           Properties:
             Align: =Align.Right
-            Color: =stylTextSlaby
+            Color: =If(varRazeniC = "vlastnik", stylAkce, stylTextSlaby)
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =24
             Size: =10 + varFs
-            Text: ="VLASTNÍK"
-            Tooltip: '="Kód útvaru z číselníku Útvary. U agendy sekce, u procesu a dílčího procesu odbor. Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód."'
+            HoverColor: =stylAkce
+            OnSelect: |-
+              =Set(varRazeniAscC, If(varRazeniC = "vlastnik", !varRazeniAscC, true));
+              Set(varRazeniC, "vlastnik")
+            PressedColor: =stylAkceStisk
+            Text: |-
+              =If(varUrovenTyp = "aktivita", "VYKONÁVÁ", "VLASTNÍK") &
+              If(varRazeniC = "vlastnik", If(varRazeniAscC, " ▲", " ▼"), "")
+            Tooltip: '="Kód útvaru z číselníku Útvary. U agendy sekce, u procesu a dílčího procesu odbor, u aktivity útvar, který ji vykonává. Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód. Klik řadí."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
             X: =470
-            Y: =218
+            Y: ==If(varUrovenTyp = "aktivita", 262, 218)
       - lbl_PrazdnoC:
           Control: Label@2.5.1
           Properties:
@@ -458,17 +610,21 @@ Screens:
                       "Žádná prázdná agenda — pod každou je aspoň jeden proces.",
                       "Žádné osiřelé položky — každá má svou nadřazenou úroveň. To je stav, ve kterém má číselník být."
                   ),
-                  "Tady zatím nic není. Novou položku založíš formulářem vpravo."
+                  If(
+                      varUrovenTyp = "aktivita",
+                      "Žádná aktivita neodpovídá filtrům. Novou založíš tlačítkem vpravo.",
+                      "Tady zatím nic není. Novou položku založíš formulářem vpravo."
+                  )
               )
             Visible: =CountRows(gal_CiselnikC.AllItems) = 0
             Width: =588
             X: =56
-            Y: =260
+            Y: ==If(varUrovenTyp = "aktivita", 304, 260)
       - gal_CiselnikC:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
           Properties:
-            Height: =462
+            Height: ==If(varUrovenTyp = "aktivita", 418, 462)
             Items: |-
               =Sort(
                   Filter(
@@ -477,17 +633,22 @@ Screens:
                       !varUklidC || uklid,
                       IsBlank(txt_HledatC.Text)
                       || txt_HledatC.Text in kod
-                      || txt_HledatC.Text in nazev
+                      || txt_HledatC.Text in nazev,
+                      varUrovenTyp <> "aktivita" || IsBlank(varSekceKodC) || sekce = varSekceKodC,
+                      varUrovenTyp <> "aktivita" || IsBlank(varUtvarKodC) || vlastnik = varUtvarKodC,
+                      varUrovenTyp <> "aktivita"
+                      || drp_StavC.Selected.Value = "(vše)"
+                      || stav = drp_StavC.Selected.Value
                   ),
-                  kod,
-                  SortOrder.Ascending
+                  If(varRazeniC = "nazev", nazev, varRazeniC = "vlastnik", vlastnik, kod),
+                  If(varRazeniAscC, SortOrder.Ascending, SortOrder.Descending)
               )
             ShowScrollbar: =true
             TemplatePadding: =0
             TemplateSize: =44 + varFs * 4
             Width: =620
             X: =40
-            Y: =246
+            Y: ==If(varUrovenTyp = "aktivita", 290, 246)
           Children:
             - rec_RadekC:
                 Control: Rectangle@2.3.0
@@ -551,7 +712,11 @@ Screens:
                     =If(
                         !ThisItem.uklid,
                         "",
-                        If(ThisItem.uroven = "agenda", "prázdná", "osiřelý")
+                        If(
+                            ThisItem.uroven = "agenda",
+                            "prázdná",
+                            If(ThisItem.uroven = "aktivita", "osiřelá", "osiřelý")
+                        )
                     )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =76
@@ -584,7 +749,14 @@ Screens:
                     Reset(drp_AgendaC);
                     Reset(drp_ProcesC);
                     Reset(txt_NazevC);
-                    Reset(drp_VlastnikC)
+                    Reset(drp_VlastnikC);
+                    If(
+                        ThisItem.uroven = "aktivita",
+                        Set(varDetailZpet, "ciselnik");
+                        Set(varNova, false);
+                        Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
+                        Navigate(scr_Detail, ScreenTransition.Cover)
+                    )
                   PressedFill: =RGBA(0, 90, 181, 0.22)
                   Text: =""
                   Tooltip: |-
@@ -605,10 +777,18 @@ Screens:
                         If(
                             ThisItem.uroven = "agenda",
                             "Prázdná agenda — není pod ní žádný proces." & Char(10),
-                            "Osiřelá položka — nadřazená úroveň v číselníku není." & Char(10)
+                            If(
+                                ThisItem.uroven = "aktivita",
+                                "Osiřelá aktivita — její dílčí proces v číselníku není." & Char(10),
+                                "Osiřelá položka — nadřazená úroveň v číselníku není." & Char(10)
+                            )
                         )
                     ) &
-                    "Klikni pro načtení do formuláře vpravo."
+                    If(
+                        ThisItem.uroven = "aktivita",
+                        "Klikni pro otevření detailu aktivity.",
+                        "Klikni pro načtení do formuláře vpravo."
+                    )
                   Width: =Parent.TemplateWidth
                   X: =0
                   Y: =0
@@ -686,7 +866,8 @@ Screens:
           Properties:
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
-            Height: =48
+            Height: |-
+              =If(varUrovenTyp = "aktivita", 380, 48)
             Size: =10 + varFs
             Text: |-
               =Switch(
@@ -695,7 +876,11 @@ Screens:
                   "Agenda je oblast činnosti daná zákonem nebo vnitřním předpisem. Je to nejvyšší úroveň — nadřazený prvek nemá. Vlastníkem agendy je podle Metodiky sekce.",
                   "proces",
                   "Proces je tok činností s definovaným vstupem a výstupem. Patří vždy pod jednu agendu, takže ji musíš vybrat. Vlastníkem procesu je odbor.",
-                  "Dílčí proces je vymezený úsek procesu. Patří vždy pod jeden proces, takže musíš vybrat agendu i proces. Vlastníkem dílčího procesu je odbor."
+                  "dilci",
+                  "Dílčí proces je vymezený úsek procesu. Patří vždy pod jeden proces, takže musíš vybrat agendu i proces. Vlastníkem dílčího procesu je odbor.",
+                  "Aktivita je nejnižší úroveň — činnost tak, jak má znít v organizačním řádu. Vykonává ji oddělení." & Char(10) & Char(10) &
+                  "Upravuje se na vlastní obrazovce, ne tady: má deset polí a navíc zařazení do víc dílčích procesů, což se do tohohle panelu nevejde. Klik na řádek v seznamu vlevo detail otevře, tlačítka dole ho otevřou nebo založí novou aktivitu." & Char(10) & Char(10) &
+                  "Společné se zbytkem číselníku má výběr, filtrování a mazání — proto je aktivita čtvrtou úrovní tady, a ne na vlastní obrazovce se seznamem."
               )
             Width: =572
             X: =724
@@ -708,7 +893,8 @@ Screens:
             Height: =20
             Size: =10 + varFs
             Text: ="Nadřazená agenda"
-            Visible: =varUrovenTyp <> "agenda"
+            Visible: |-
+              =varUrovenTyp <> "agenda" && varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
             Y: =192
@@ -733,7 +919,8 @@ Screens:
             OnChange: =Reset(drp_ProcesC)
             Size: =13 + varFs
             Tooltip: '="Agenda, pod kterou nová položka patří. U procesu určuje první dvojčíslí kódu, u dílčího procesu navíc omezuje nabídku procesů. Když agendu změníš, výběr procesu se vynuluje — kombinace z různých agend neexistuje. Při úpravě je pole zamčené: přesun pod jiného rodiče by znamenal jiný kód, a ten se nikdy nemění."'
-            Visible: =varUrovenTyp <> "agenda"
+            Visible: |-
+              =varUrovenTyp <> "agenda" && varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
             Y: =214
@@ -789,6 +976,7 @@ Screens:
             Height: =20
             Size: =10 + varFs
             Text: ="Název"
+            Visible: =varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
             Y: =334
@@ -815,6 +1003,7 @@ Screens:
             MaxLength: =255
             Mode: =TextMode.MultiLine
             Size: =13 + varFs
+            Visible: =varUrovenTyp <> "aktivita"
             Tooltip: '="Povinné. Název položky číselníku. Delší text SharePoint ořízne na 255 znaků, proto je pole na tuhle délku omezené. Název jde později přejmenovat, přidělený kód už ne — vazby v rejstříku i v mapě stojí na kódu."'
             Width: =572
             X: =724
@@ -829,6 +1018,7 @@ Screens:
             Text: |-
               =If(varUrovenTyp = "agenda", "Vlastník agendy — sekce", "Vlastník — odbor") &
               If(varCiselnikNova, " (nepovinné)", " (prázdné = ponechat stávajícího)")
+            Visible: =varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
             Y: =446
@@ -863,6 +1053,7 @@ Screens:
                   Distinct(Filter(colUtvary, uroven.Value = "odbor"), Title & " · " & nazev)
               )
             Size: =13 + varFs
+            Visible: =varUrovenTyp <> "aktivita"
             Tooltip: '="Nepovinné, doplnit jde kdykoli později. Metodika říká, že vlastníkem agendy je sekce a vlastníkem procesu i dílčího procesu odbor — nabídka se podle úrovně mění. Ukládá se kód útvaru, ne celý řádek s názvem, aby se evidence nerozešla s číselníkem při přejmenování útvaru."'
             Width: =572
             X: =724
@@ -876,6 +1067,7 @@ Screens:
             Size: =10 + varFs
             Text: |-
               =If(varCiselnikNova, "Kód, který se přidělí", "Kód — nemění se")
+            Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =724
             Y: =520
@@ -948,6 +1140,7 @@ Screens:
               )
             Tooltip: '="Kód se skládá z nadřazeného kódu a prvního volného čísla v něm. Přiděluje se stejným způsobem jako u aktivit a jednou přidělený se už nemění, ani při přejmenování položky. Vlastník součástí kódu není — eviduje se zvlášť, protože při organizační změně se mění vlastník, ne kód."'
             VerticalAlign: =VerticalAlign.Middle
+            Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =724
             Y: =542
@@ -960,6 +1153,7 @@ Screens:
             Size: =11 + varFs
             Text: =varChybaC
             VerticalAlign: =VerticalAlign.Middle
+            Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =1016
             Y: =520
@@ -973,8 +1167,23 @@ Screens:
             Height: =44
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylAkceHover
+            DisplayMode: |-
+              =If(
+                  varUrovenTyp = "aktivita" && IsBlank(varCiselnikKod),
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
             OnSelect: |-
               =Set(varChybaC, "");
+              If(
+                  varUrovenTyp = "aktivita",
+                  Set(varDetailZpet, "ciselnik");
+                  Set(varNova, false);
+                  Set(varAktivita, LookUp(Aktivity, Title = varCiselnikKod));
+                  Navigate(scr_Detail, ScreenTransition.Cover)
+              );
+              If(
+                  varUrovenTyp <> "aktivita",
               If(
                   varCiselnikNova && varUrovenTyp <> "agenda" && IsBlank(drp_AgendaC.Selected.Value),
                   Set(varChybaC, "Vyber nadřazenou agendu.")
@@ -1215,17 +1424,26 @@ Screens:
                       )
                   )
               )
+              )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =14 + varFs
             Text: |-
-              =If(varCiselnikNova, "Založit", "Uložit změny")
+              =If(
+                  varUrovenTyp = "aktivita",
+                  "Otevřít detail",
+                  If(varCiselnikNova, "Založit", "Uložit změny")
+              )
             Tooltip: |-
               =If(
+                  varUrovenTyp = "aktivita",
+                  "Otevře detail vybrané aktivity. Dokud žádná není vybraná, je tlačítko neaktivní - vyber řádek v seznamu vlevo. Aktivita se needituje tady, protože má deset polí a zařazení do víc dílčích procesů.",
+                  If(
                   varCiselnikNova,
                   "Založí položku v příslušném SharePoint seznamu a přidělí jí kód. Zapíše se stav mapování nezmapováno a zdroj karta; u dílčího procesu navíc stav v rejstříku využitý, protože ho právě zakládá správce. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu.",
                   "Uloží změnu názvu a vlastníka. Kód, úroveň ani zařazení se nemění - vazby v rejstříku i v mapě na kódu stojí. Když necháš vlastníka nevyplněného, zůstane ten původní; je to pojistka pro položky, které mají vlastníků víc a v nabídce jednoho útvaru se proto nenajdou."
               ) & " Nová hodnota se rovnou objeví v seznamu vlevo i v nabídkách a po návratu na přehled ve stromu - appka se kvůli tomu nemusí restartovat."
+              )
             Width: =200
             X: =724
             Y: =596
@@ -1236,7 +1454,11 @@ Screens:
             BorderThickness: =1
             Color: =stylAkce
             DisplayMode: |-
-              =If(varCiselnikNova, DisplayMode.Disabled, DisplayMode.Edit)
+              =If(
+                  varUrovenTyp <> "aktivita" && varCiselnikNova,
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
             Fill: =RGBA(255, 255, 255, 1)
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
@@ -1251,11 +1473,24 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
-              Reset(drp_VlastnikC)
+              Reset(drp_VlastnikC);
+              If(
+                  varUrovenTyp = "aktivita",
+                  Set(varDetailZpet, "ciselnik");
+                  Set(varNova, true);
+                  Set(varAktivita, Blank());
+                  Navigate(scr_Detail, ScreenTransition.Cover)
+              )
             PressedFill: =stylRadekVybrany
             Size: =13 + varFs
-            Text: ="Nová položka"
-            Tooltip: '="Vyprázdní formulář a přepne ho ze zobrazení vybrané položky zpět na zakládání. Když už formulář zakládá, je tlačítko neaktivní - je z něj tak vidět, v jakém režimu formulář je."'
+            Text: |-
+              =If(varUrovenTyp = "aktivita", "Nová aktivita", "Nová položka")
+            Tooltip: |-
+              =If(
+                  varUrovenTyp = "aktivita",
+                  "Otevře detail s prázdnou aktivitou. Kód se jí přidělí až při uložení, podle vybraného dílčího procesu.",
+                  "Vyprázdní formulář a přepne ho ze zobrazení vybrané položky zpět na zakládání. Když už formulář zakládá, je tlačítko neaktivní - je z něj tak vidět, v jakém režimu formulář je."
+              )
             Width: =200
             X: =944
             Y: =596
@@ -1268,6 +1503,8 @@ Screens:
             Size: =10 + varFs
             Text: |-
               =If(
+                  varUrovenTyp = "aktivita",
+                  "Aktivity se filtrují sekcí, útvarem a stavem v řádku nad seznamem. Mazání i tady projde potvrzením a smaže i zařazení do dílčích procesů.",
                   varCiselnikNova,
                   "Kód je náhled z načtených dat. Skutečný kód se přidělí až při uložení, podle stavu v SharePointu.",
                   "Mění se jen název a vlastník. Kód a zařazení jsou zamčené — jednou přidělený kód se nemění."
@@ -1321,7 +1558,8 @@ Screens:
                   varSmazatC.uroven,
                   "agenda", "Smazat agendu?",
                   "proces", "Smazat proces?",
-                  "Smazat dílčí proces?"
+                  "dilci", "Smazat dílčí proces?",
+                  "Smazat aktivitu?"
               )
             Visible: =!IsBlank(varSmazatC)
             Width: =576
@@ -1349,11 +1587,18 @@ Screens:
                   "proces",
                   "Pod tímto procesem je " & CountRows(Filter(colDilci, proces_kod = varSmazatC.kod)) &
                   " dílčích procesů. Smazáním procesu nezmizí — zůstanou bez nadřazené položky a v číselníku dílčích procesů je pak najdeš přepínačem „osiřelé“.",
+                  "dilci",
                   "Pod tímto dílčím procesem je " & CountRows(Filter(colAkt, dilci_proces_kod = varSmazatC.kod)) &
-                  " aktivit. Smazáním dílčího procesu nezmizí — zůstanou bez nadřazené položky a v seznamu aktivit je pak najdeš přepínačem „osiřelé“."
+                  " aktivit. Smazáním dílčího procesu nezmizí — zůstanou bez nadřazené položky a pod úrovní Aktivity je pak najdeš přepínačem „osiřelé“.",
+                  "Smaže se aktivita i všechna její zařazení do dílčích procesů. Nic pod ní není, takže nic neosiří; číselník agend, procesů a dílčích procesů zůstane nedotčený."
               ) & "
 
-              Maže se jen tato jedna položka číselníku. Vrátit to zpět nejde."
+              " &
+              If(
+                  varSmazatC.uroven = "aktivita",
+                  "Vrátit to zpět nejde.",
+                  "Maže se jen tato jedna položka číselníku. Vrátit to zpět nejde."
+              )
             Visible: =!IsBlank(varSmazatC)
             Width: =576
             X: =Parent.Width / 2 - 288
@@ -1417,8 +1662,17 @@ Screens:
                           uroven = "agenda" && kod = Left(varSmazatC.kod, 2),
                           { uklid: CountRows(Filter(colProcesy, agenda_kod = Left(varSmazatC.kod, 2))) = 0 }
                       ),
+                      varSmazatC.uroven = "dilci",
                       Remove('Dílčí procesy', LookUp('Dílčí procesy', Title = varSmazatC.kod));
-                      RemoveIf(colDilci, Title = varSmazatC.kod)
+                      RemoveIf(colDilci, Title = varSmazatC.kod);
+                      UpdateIf(
+                          colCiselnik,
+                          uroven = "aktivita" && rodic = varSmazatC.kod,
+                          { uklid: true }
+                      ),
+                      RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varSmazatC.kod);
+                      Remove(Aktivity, LookUp(Aktivity, Title = varSmazatC.kod));
+                      RemoveIf(colAkt, Title = varSmazatC.kod)
                   );
                   RemoveIf(colCiselnik, kod = varSmazatC.kod);
                   Set(varAktStale, true);
@@ -1438,7 +1692,12 @@ Screens:
             PressedFill: =stylNebezpeci
             Size: =13
             Text: ="Smazat"
-            Tooltip: '="Nevratné. Smaže jen tuto položku číselníku; podřízené záznamy zůstanou a stanou se z nich osiřelé položky, které se uklízejí ve své vlastní entitě."'
+            Tooltip: |-
+              =If(
+                  varSmazatC.uroven = "aktivita",
+                  "Nevratné. Smaže aktivitu i všechna její zařazení do dílčích procesů. Číselník zůstane nedotčený.",
+                  "Nevratné. Smaže jen tuto položku číselníku; podřízené záznamy zůstanou a stanou se z nich osiřelé položky, které se uklízejí ve své vlastní entitě."
+              )
             Visible: =!IsBlank(varSmazatC)
             Width: =160
             X: =Parent.Width / 2 + 128

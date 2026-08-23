@@ -36,7 +36,7 @@ Screens:
             IsEmpty(colAkt) || varAktStale,
             ClearCollect(
                 colAkt,
-                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, stav)
+                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
             );
             ClearCollect(
                 colStrom,
@@ -49,6 +49,7 @@ Screens:
                         uroven: 1,
                         rodic: "",
                         pocet: CountRows(Filter(colProcesy, agenda_kod = a.Title)),
+                        osirely: CountRows(Filter(colProcesy, agenda_kod = a.Title)) = 0,
                         aktC: CountRows(Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title)),
                         aktS: CountRows(
                             Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title, stav.Value = "schváleno")
@@ -66,6 +67,7 @@ Screens:
                         utvar: p.vlastnik,
                         uroven: 2,
                         rodic: p.agenda_kod,
+                        osirely: IsBlank(p.agenda_kod) || IsBlank(LookUp(colAgendy, Title = p.agenda_kod)),
                         pocet: CountRows(Filter(colDilci, proces_kod = p.Title)),
                         aktC: CountRows(Filter(colAkt, Left(dilci_proces_kod, 5) = p.Title)),
                         aktS: CountRows(
@@ -84,6 +86,7 @@ Screens:
                         utvar: d.vlastnik,
                         uroven: 3,
                         rodic: d.proces_kod,
+                        osirely: IsBlank(d.proces_kod) || IsBlank(LookUp(colProcesy, Title = d.proces_kod)),
                         pocet: CountRows(Filter(colAkt, dilci_proces_kod = d.Title)),
                         aktC: CountRows(Filter(colAkt, dilci_proces_kod = d.Title)),
                         aktS: CountRows(
@@ -102,6 +105,7 @@ Screens:
                         utvar: k.vykonava,
                         uroven: 4,
                         rodic: k.dilci_proces_kod,
+                        osirely: IsBlank(k.dilci_proces_kod) || IsBlank(LookUp(colDilci, Title = k.dilci_proces_kod)),
                         pocet: 0,
                         aktC: 1,
                         aktS: If(k.stav.Value = "schváleno", 1, 0)
@@ -165,7 +169,10 @@ Screens:
             Width: =120
             X: =300
             Y: =58
-      - lbl_ZalozkaSeznamD:
+      # Jedna editační obrazovka pro všechny čtyři úrovně včetně aktivit —
+      # do 1.0.0.35 tu byla zvlášť záložka na seznam aktivit a zvlášť tlačítko
+      # na číselník, tedy dvě cesty k témuž.
+      - lbl_ZalozkaEditaceD:
           Control: Label@2.5.1
           Properties:
             Align: =Align.Center
@@ -173,44 +180,19 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =64
             HoverColor: =RGBA(255, 255, 255, 1)
-            OnSelect: =Navigate(scr_Seznam, ScreenTransition.None)
+            OnSelect: |-
+              =Set(varUrovenTyp, "aktivita");
+              Set(varCiselnikNova, true);
+              Set(varCiselnikKod, "");
+              Navigate(scr_Ciselnik, ScreenTransition.None)
             PressedColor: =RGBA(255, 255, 255, 1)
             Size: =13
-            Text: ="Seznam aktivit"
-            Tooltip: '="Přepne na seznam aktivit, kde se pořizuje a edituje."'
+            Text: ="Editace"
+            Tooltip: '="Obrazovka, kde se zakládá, upravuje a maže: aktivity, agendy, procesy i dílčí procesy. Otevře se na aktivitách, ostatní úrovně jsou vedle nich přepínačem."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =160
             X: =428
             Y: =0
-      # Zakládání číselníku je odsud na jedno kliknutí — přehled je úvodní
-      # obrazovka. Ze seznamu aktivit se sem chodit nemusí, tam se pořizují
-      # aktivity.
-      - btn_NovaPolozkaD:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =RGBA(255, 255, 255, 0.55)
-            BorderThickness: =1
-            Color: =RGBA(255, 255, 255, 1)
-            Fill: =RGBA(255, 255, 255, 0.14)
-            FocusedBorderColor: =RGBA(255, 255, 255, 1)
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =36
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(255, 255, 255, 0.26)
-            OnSelect: |-
-              =Set(varUrovenTyp, "agenda");
-              Set(varCiselnikNova, true);
-              Set(varCiselnikKod, "");
-              Navigate(scr_Ciselnik, ScreenTransition.Cover)
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =RGBA(255, 255, 255, 0.34)
-            Size: =11
-            Text: ="+ Nová položka rejstříku"
-            Tooltip: '="Založí novou agendu, proces nebo dílčí proces. Úroveň se vybírá až na další obrazovce. Aktivity se pořizují jinde - v seznamu aktivit."'
-            Width: =210
-            X: =620
-            Y: =14
       # Velikost písma (varFs = 0 / 2 / 4) vpravo u jména uživatele.
       # Mění se text
       # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
@@ -536,30 +518,20 @@ Screens:
       # Co je rozbalené, drží colOtevrene (kódy uzlů). Řádek je vidět, když
       # jsou otevření všichni jeho předci — proto ty vnořené LookUpy: u čtvrté
       # úrovně se ptáme na dílčí proces, proces i agendu.
-      - lbl_RozpadNadpis:
-          Control: Label@2.5.1
+      - txt_HledatD:
+          Control: Classic/TextInput@2.3.2
           Properties:
-            Color: =stylText
+            Default: =""
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            FontWeight: =FontWeight.Semibold
             Height: =28
-            Size: =12
-            Text: ="Rozpad rejstříku"
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =150
+            HintText: ="Hledat v celém rejstříku"
+            HoverBorderColor: =stylAkce
+            Size: =11
+            Tooltip: '="Hledá kdekoli uvnitř kódu i názvu, na všech čtyřech úrovních naráz - v agendách, procesech, dílčích procesech i aktivitách. Nalezené uzly se vypíšou jako plochý seznam, ne ve stromu: rozbalování by u hledání spíš překáželo, nalezená aktivita se má ukázat rovnou. Vymazáním pole se strom vrátí do původního rozbalení."'
+            Width: =214
             X: =40
-            Y: =180
-      - lbl_RozpadPopis:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylTextSlaby
-            Font: =Font.'Open Sans'
-            Height: =28
-            Size: =10
-            Text: ="Rozbalit:"
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =64
-            X: =194
             Y: =180
       - btn_Uroven1:
           Control: Classic/Button@2.2.0
@@ -741,6 +713,30 @@ Screens:
             Width: =92
             X: =890
             Y: =180
+      # Osiřelá položka nemá ve stromu kam patřit, takže se v něm vůbec
+      # neukáže - chip je jediné místo, kde je z přehledu vidět.
+      - btn_OsireleD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varDashOsirele, stylPozor, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varDashOsirele, RGBA(255, 255, 255, 1), stylPozor)
+            Fill: =If(varDashOsirele, stylPozor, stylKarta)
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: =Set(varDashOsirele, !varDashOsirele)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =10
+            Text: ="osiřelé"
+            Tooltip: '="Vypíše položky, jejichž nadřazená úroveň v číselníku není: proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího procesu. U agendy, která nadřazenou úroveň nemá, to znamená agendu bez jediného procesu. Ve stromu je jinak nenajdeš - strom ukazuje jen to, co visí pod otevřeným předkem, a sirotek žádného předka nemá. Uklidit je jde na obrazovce Editace nebo rovnou košem v řádku."'
+            Width: =110
+            X: =990
+            Y: =180
       - lbl_RozpadPocet:
           Control: Label@2.5.1
           Properties:
@@ -750,12 +746,15 @@ Screens:
             Height: =28
             Size: =10
             Text: |-
-              =CountRows(gal_Strom.AllItems) & " řádků" &
-              If(varDashUroven = 0, " · vlastní rozbalení", "") &
+              =CountRows(gal_Strom.AllItems) &
+              If(varDashOsirele, " osiřelých", If(IsBlank(txt_HledatD.Text), " řádků", " nalezených")) &
+              If(varDashOsirele || !IsBlank(txt_HledatD.Text), " · plochý seznam",
+                  If(varDashUroven = 0, " · vlastní rozbalení", "")) &
               If(varDashStav = "", "", " · jen " & varDashStav)
+            Tooltip: '="Při hledání i u osiřelých se strom přepne na plochý seznam - vypisuje nalezené uzly napříč úrovněmi bez ohledu na rozbalení. Počty aktivit pracují s prvním oknem dat (2 000 záznamů); dnes je jich v rejstříku 49, takže je výsledek úplný."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =280
-            X: =Parent.Width - 320
+            Width: =200
+            X: =Parent.Width - 240
             Y: =180
       - rec_StromKarta:
           Control: Rectangle@2.3.0
@@ -817,7 +816,21 @@ Screens:
           Properties:
             Height: =Parent.Height - 296
             Items: |-
-              =Sort(
+              =If(
+                  varDashOsirele,
+                  Sort(Filter(colStrom, osirely), kod, SortOrder.Ascending),
+                  !IsBlank(txt_HledatD.Text),
+                  Sort(
+                      Filter(
+                          colStrom,
+                          txt_HledatD.Text in kod || txt_HledatD.Text in nazev,
+                          varDashStav = ""
+                          || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
+                      ),
+                      kod,
+                      SortOrder.Ascending
+                  ),
+                  Sort(
                   Filter(
                       colStrom,
                       uroven = 1
@@ -838,6 +851,7 @@ Screens:
                   ),
                   kod,
                   SortOrder.Ascending
+                  )
               )
             ShowScrollbar: =true
             TemplatePadding: =0
@@ -932,7 +946,7 @@ Screens:
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
                   # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
                   # útvaru (ten začíná na TemplateWidth - 360).
-                  Width: =Parent.TemplateWidth - 400 - Self.X
+                  Width: =Parent.TemplateWidth - 444 - Self.X
                   X: |-
                     =If(varZobrazitKod, 191 + varFs * 12, 51) + (ThisItem.uroven - 1) * 28
                   Y: =0
@@ -947,7 +961,7 @@ Screens:
                   Text: =ThisItem.utvar
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =160
-                  X: =Parent.TemplateWidth - 380
+                  X: =Parent.TemplateWidth - 424
                   Y: =0
             # Nula je u dílčího procesu důležitá informace (v rejstříku je,
             # ale nikdo k němu ještě nepopsal činnosti), proto se vypisuje.
@@ -979,7 +993,7 @@ Screens:
                     )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =110
-                  X: =Parent.TemplateWidth - 204
+                  X: =Parent.TemplateWidth - 248
                   Y: =0
             - rec_StromLinka:
                 Control: Rectangle@2.3.0
@@ -1083,5 +1097,175 @@ Screens:
                         ThisItem.kod & ". Měnit jde název a vlastník; kód ani zařazení ne."
                     )
                   Width: =36
+                  X: =Parent.TemplateWidth - 128
+                  Y: =(Parent.TemplateHeight - 1) / 2 - 18
+            - ico_StromSmazat:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =stylTextSlaby
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =36
+                  HoverColor: =stylNebezpeci
+                  HoverFill: =stylRadekVybrany
+                  Icon: =Icon.Trash
+                  OnSelect: =Set(varSmazatD, ThisItem)
+                  PaddingBottom: =9
+                  PaddingLeft: =9
+                  PaddingRight: =9
+                  PaddingTop: =9
+                  PressedColor: =stylNebezpeci
+                  Tooltip: |-
+                    ="Smaže " & ThisItem.kod &
+                    ". Zeptá se na potvrzení a řekne, co se tím stane s tím, co je pod ní."
+                  Width: =36
                   X: =Parent.TemplateWidth - 84
                   Y: =(Parent.TemplateHeight - 1) / 2 - 18
+      # ---------- potvrzení smazání ----------
+      # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
+      # obrazovkou. Souřadnice jsou vzorce, takže kontrola překryvu je
+      # přeskočí — u překryvné vrstvy je to správně.
+      - rec_ModalStinD:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.35)
+            Height: =Parent.Height
+            OnSelect: =Set(varSmazatD, Blank())
+            Visible: =!IsBlank(varSmazatD)
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - rec_ModalKartaD:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =360
+            Visible: =!IsBlank(varSmazatD)
+            Width: =640
+            X: =Parent.Width / 2 - 320
+            Y: =Parent.Height / 2 - 180
+      - rec_ModalPruhD:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylNebezpeci
+            Height: =4
+            Visible: =!IsBlank(varSmazatD)
+            Width: =640
+            X: =Parent.Width / 2 - 320
+            Y: =Parent.Height / 2 - 180
+      - lbl_ModalNadpisD:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =15
+            Text: |-
+              =Switch(
+                  varSmazatD.uroven,
+                  1, "Smazat agendu?",
+                  2, "Smazat proces?",
+                  3, "Smazat dílčí proces?",
+                  "Smazat aktivitu?"
+              )
+            Visible: =!IsBlank(varSmazatD)
+            Width: =576
+            X: =Parent.Width / 2 - 288
+            Y: =Parent.Height / 2 - 148
+      - lbl_ModalTextD:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =200
+            Size: =12
+            Text: |-
+              =varSmazatD.kod & " — " & varSmazatD.nazev & Char(10) & Char(10) &
+              Switch(
+                  varSmazatD.uroven,
+                  1,
+                  "Pod touto agendou je " & varSmazatD.pocet &
+                  " procesů. Smazáním agendy nezmizí — zůstanou bez nadřazené položky a najdeš je přepínačem „osiřelé“ nad stromem.",
+                  2,
+                  "Pod tímto procesem je " & varSmazatD.pocet &
+                  " dílčích procesů. Smazáním procesu nezmizí — zůstanou bez nadřazené položky a najdeš je přepínačem „osiřelé“ nad stromem.",
+                  3,
+                  "Pod tímto dílčím procesem je " & varSmazatD.pocet &
+                  " aktivit. Smazáním dílčího procesu nezmizí — zůstanou bez nadřazené položky a najdeš je přepínačem „osiřelé“ nad stromem.",
+                  "Smaže se aktivita i všechna její zařazení do dílčích procesů. Nic pod ní není, takže nic neosiří; číselník agend, procesů a dílčích procesů zůstane nedotčený."
+              ) & Char(10) & Char(10) &
+              "Vrátit to zpět nejde."
+            Visible: =!IsBlank(varSmazatD)
+            Width: =576
+            X: =Parent.Width / 2 - 288
+            Y: =Parent.Height / 2 - 112
+      - btn_ModalZrusitD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylText
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =40
+            HoverFill: =stylRadekHover
+            OnSelect: =Set(varSmazatD, Blank())
+            PressedFill: =stylRadekVybrany
+            Size: =13
+            Text: ="Zrušit"
+            Visible: =!IsBlank(varSmazatD)
+            Width: =140
+            X: =Parent.Width / 2 - 288
+            Y: =Parent.Height / 2 + 108
+      # Po smazání se colStrom přestaví celá: příznak osiřelosti se mění
+      # i řádkům, kterých se mazání přímo netýká, a přepisovat je jeden po
+      # druhém by bylo křehčí než nechat OnVisible přepočítat všechno.
+      - btn_ModalSmazatD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =stylNebezpeci
+            FocusedBorderColor: =stylNebezpeci
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =40
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylNebezpeci
+            OnSelect: |-
+              =IfError(
+                  If(
+                      varSmazatD.uroven = 1,
+                      Remove(Agendy, LookUp(Agendy, Title = varSmazatD.kod));
+                      RemoveIf(colAgendy, Title = varSmazatD.kod),
+                      varSmazatD.uroven = 2,
+                      Remove(Procesy, LookUp(Procesy, Title = varSmazatD.kod));
+                      RemoveIf(colProcesy, Title = varSmazatD.kod),
+                      varSmazatD.uroven = 3,
+                      Remove('Dílčí procesy', LookUp('Dílčí procesy', Title = varSmazatD.kod));
+                      RemoveIf(colDilci, Title = varSmazatD.kod),
+                      RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varSmazatD.kod);
+                      Remove(Aktivity, LookUp(Aktivity, Title = varSmazatD.kod))
+                  );
+                  Notify("Smazáno: " & varSmazatD.kod & ".", NotificationType.Success);
+                  Set(varSmazatD, Blank());
+                  Set(varAktStale, true);
+                  Navigate(scr_Dashboard, ScreenTransition.None),
+                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error);
+                  Set(varSmazatD, Blank())
+              )
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylNebezpeci
+            Size: =13
+            Text: ="Smazat"
+            Tooltip: |-
+              =If(
+                  varSmazatD.uroven = 4,
+                  "Nevratné. Smaže aktivitu i všechna její zařazení do dílčích procesů.",
+                  "Nevratné. Smaže jen tuto položku číselníku; podřízené záznamy zůstanou a stanou se z nich osiřelé položky."
+              )
+            Visible: =!IsBlank(varSmazatD)
+            Width: =160
+            X: =Parent.Width / 2 + 128
+            Y: =Parent.Height / 2 + 108

@@ -34,10 +34,13 @@ Screens:
             HoverFill: =RGBA(255, 255, 255, 0.18)
             Icon: =Icon.ChevronLeft
             OnSelect: |-
-              =If(
+              =Set(varUrovenTyp, "aktivita");
+              Set(varCiselnikNova, varNova);
+              Set(varCiselnikKod, If(varNova, "", varAktivita.Title));
+              If(
                   varDetailZpet = "dashboard",
                   Navigate(scr_Dashboard, ScreenTransition.UnCover),
-                  Navigate(scr_Seznam, ScreenTransition.UnCover)
+                  Navigate(scr_Ciselnik, ScreenTransition.UnCover)
               )
             PaddingBottom: =16
             PaddingLeft: =16
@@ -48,7 +51,7 @@ Screens:
               =If(
                   varDetailZpet = "dashboard",
                   "Zpět na přehled, na to místo ve stromu, odkud jsi přišel.",
-                  "Zpět na seznam aktivit."
+                  "Zpět na editaci, na seznam aktivit."
               ) & " Neuložené změny se zahodí."
             Width: =56
             X: =16
@@ -720,10 +723,13 @@ Screens:
                           );
                           Set(varAktStale, true);
                           Notify("Uloženo jako " & varNovyKod & ".", NotificationType.Success);
+                          Set(varUrovenTyp, "aktivita");
+                          Set(varCiselnikNova, false);
+                          Set(varCiselnikKod, varNovyKod);
                           If(
                               varDetailZpet = "dashboard",
                               Navigate(scr_Dashboard, ScreenTransition.UnCover),
-                              Navigate(scr_Seznam, ScreenTransition.UnCover)
+                              Navigate(scr_Ciselnik, ScreenTransition.UnCover)
                           ),
                           Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
                       )
@@ -754,7 +760,10 @@ Screens:
                   Remove(Aktivity, varAktivita);
                   Set(varAktStale, true);
                   Notify("Aktivita " & varAktivita.Title & " smazána i s vazbami.", NotificationType.Success);
-                  Navigate(scr_Seznam, ScreenTransition.UnCover),
+                  Set(varUrovenTyp, "aktivita");
+                  Set(varCiselnikNova, true);
+                  Set(varCiselnikKod, "");
+                  Navigate(scr_Ciselnik, ScreenTransition.UnCover),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
               )
             Size: =14 + varFs

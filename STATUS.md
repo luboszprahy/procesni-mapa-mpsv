@@ -1,6 +1,65 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (F6/D číselník + F6/E úklid osiřelých položek)
+Aktualizováno: 2026-08-23 (F6/F sjednocení editace a úklid z přehledu)
+
+## Jedna editační obrazovka a úklid přímo z přehledu (23.08.2026) — balík 1.0.0.36
+
+Pět připomínek k 1.0.0.35, které spolu souvisejí: editace se stáhla do jedné
+obrazovky a přehled se z prohlížečky stal místem, odkud jde i uklízet.
+
+**Aktivity jsou čtvrtou úrovní číselníku a `scr_Seznam` zanikla.** Dvě
+obrazovky pro totéž (vybrat záznam, upravit, smazat) znamenaly dvojí zvyk
+i dvojí údržbu. Zrušení obrazovky je nevratné rozhodnutí, proto se přeneslo
+všechno, co uměla navíc: **filtry sekce / útvar / stav** jako druhý filtrační
+řádek viditelný jen u aktivit, **řazení klikem na hlavičku** sloupce
+a **mazání s potvrzením** včetně úklidu vazeb.
+
+Formulář vpravo aktivitu **needituje** — má deset polí a zařazení M:N, což se
+do panelu nevejde. Klik na řádek proto otevře `scr_Detail`, formulářová pole
+se skryjí a obě tlačítka dole změní text i chování na „Otevřít detail"
+a „Nová aktivita". Nové prvky pro to nevznikly, takže ani nový překryv.
+
+**Navbar má nově záložky Přehled a Editace.** Tlačítko „+ Nová položka
+rejstříku" zmizelo — se záložkou dělalo totéž dvakrát. Návrat z detailu vede
+zpátky do číselníku a nastaví ho na úroveň aktivit s vybraným řádkem; hlídá
+to brána, která právě tuhle mezeru našla.
+
+**Fulltext na přehledu jde přes všechny čtyři úrovně naráz**, protože
+`colStrom` je celá v paměti — nedeleguje se a ani nemusí. Strop je 2 000
+aktivit (`colAkt` je první okno dat, dnes 49) a popisek to říká. Při zadaném
+hledání se strom přepne na **plochý seznam výsledků**: rozbalování by
+u hledání překáželo, nalezená aktivita se má ukázat rovnou, ne až po
+rozkliknutí tří úrovní nad ní. `colOtevrene` se přitom nesahá, takže vymazání
+pole vrátí strom do původního rozbalení.
+
+**Chip „osiřelé" na přehledu má vlastní důvod existovat.** Osiřelá položka se
+ve stromu **vůbec nezobrazí** — strom ukazuje jen uzly, jejichž předci jsou
+otevření, a sirotek žádného předka nemá. Bez chipu je z přehledu neviditelná,
+i když v datech je. Chip proto přepne strom na plochý seznam sirotků napříč
+úrovněmi; `colStrom` k tomu dostal sloupec `osirely`.
+
+**Koš vedle tužky v řádku stromu.** Nemaže hned, jen naplní `varSmazatD`;
+maže až tlačítko v dialogu, který říká, kolik podřízených položek tím osiří.
+Sloupce ve stromu o jeho šířku ustoupily doleva. Po smazání se přehled
+přenaviguje sám na sebe, aby `OnVisible` přestavěl `colStrom` — příznak
+osiřelosti se totiž mění i řádkům, kterých se mazání přímo netýkalo,
+a přepisovat je po jednom by bylo křehčí.
+
+**Dvě nové brány, obě mutačně ověřené:**
+
+| brána | co hlídá | mutace |
+|---|---|---|
+| protiklady ve `vylucuji_se` | `kontrola_prekryvu` už nehlásí dvojici prvků, z nichž je vidět vždy jen jeden (`X = "a"` proti `X <> "a"`) — a u stejného `Visible` dál padá | posunutý popisek přes pole se stejným `Visible` |
+| shoda definic kolekce | táž kolekce plněná na dvou obrazovkách musí mít stejné sloupce | `colAkt` bez sloupce `sekce` v jedné z definic |
+
+Druhá vznikla z konkrétní příčiny: `colAkt` se plní na přehledu i v číselníku.
+Kdyby se definice rozešly, chovala by se appka podle toho, odkud uživatel
+přišel — a nikdo by netušil proč.
+
+Brány: `check_app` OK (5 souborů, 4 obrazovky, 186 prvků, 2 019 vzorců),
+`check_solution` 212 kontrol / 0 chyb.
+
+
 
 ## Číselník, karta zařazení a úklid sirotků (23.08.2026) — balík 1.0.0.35
 

@@ -5,11 +5,14 @@ teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (f
 Zadání drží `PRD.md`.
 
 > **Stav:** appka i publikační flow **běží v provozu**. Aktuální balík
-> k importu je **`deploy/procesnimapa_1_0_0_35.zip`** (obrazovka číselníku,
-> úklid osiřelých položek, karta zařazení v detailu, větší dialog mazání) —
+> k importu je **`deploy/procesnimapa_1_0_0_36.zip`** (jedna editační
+> obrazovka pro všechny čtyři úrovně, hledání a úklid přímo z přehledu) —
 > hotový a ověřený offline branami, ale **ještě nenaimportovaný**. Poslední
-> ověřeně běžící verze v prostředí je **1.0.0.28**. Balík 1.0.0.34 je
-> nahrazený a z `deploy/` smazaný; 35 obsahuje všechno z něj.
+> ověřeně běžící verze v prostředí je **1.0.0.28**. Balíky 34 a 35 jsou
+> nahrazené a smazané; 36 obsahuje všechno z nich.
+>
+> **Obrazovka `scr_Seznam` zanikla.** Aktivity se editují jako čtvrtá úroveň
+> číselníku; filtry, řazení i mazání se přenesly, nic se neztratilo.
 >
 > `.venv` se nepřenáší přes git — na tomhle stroji byl po úklidu pryč
 > a musel se založit znovu (viz Rozjezd).
@@ -30,38 +33,37 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_35.zip`** jako upgrade a appku
+1. **Naimportovat `deploy/procesnimapa_1_0_0_36.zip`** jako upgrade a appku
    jednou otevřít ve Studiu (z YAML zabalená appka se validuje až tam).
-   Balík nese všechno z nenaimportovaného 1.0.0.34 plus novou obrazovku.
+   Balík nese všechno z nenaimportovaných 1.0.0.34 a 35 plus sjednocenou
+   editaci.
 
-   Na **Přehledu** (nové oproti 34):
-   - v tmavé liště vpravo od záložek přibylo **„+ Nová položka rejstříku"** —
-     otevře číselník,
-   - **tužka v řádku stromu** teď u agendy, procesu i dílčího procesu otevře
-     jejich úpravu; do 34 jen hlásila, že se ta úroveň mění v SharePointu.
+   **Navbar má nově dvě záložky: Přehled a Editace.** Samostatný seznam
+   aktivit zmizel — je to teď čtvrtá úroveň v číselníku.
 
-   Nová obrazovka **Číselník** (tlačítkem nebo tužkou):
-   - nahoře **Agendy / Procesy / Dílčí procesy** — přepíná seznam i formulář,
-   - vlevo seznam s hledáním, přepínačem **osiřelé** (u agend „bez procesů")
-     a košem; klik do řádku načte položku do formuláře vpravo,
-   - vpravo formulář: u zakládání ukazuje **kód, který se přidělí**, u úpravy
-     je kód i zařazení zamčené a mění se jen název a vlastník,
-   - **zkusit celý průchod**: založit proces v agendě `01` → kód `01-BB` →
-     objeví se v seznamu i v nabídce procesů na detailu aktivity bez restartu
-     appky; pak pod ním dílčí proces `01-BB-001`; pak agendu `01` smazat
-     a ověřit, že se procesy pod ní objeví pod přepínačem **osiřelé**
-     a jdou smazat.
-   - Pozor na formulaci v dialogu mazání: říká, **kolik podřízených položek
-     tím osiří**. Ověřit, že to číslo sedí.
+   Na obrazovce **Editace** (dřív Číselník):
+   - nahoře **Agendy / Procesy / Dílčí procesy / Aktivity**,
+   - u aktivit se objeví druhý filtrační řádek **sekce / útvar / stav**
+     a v pravém panelu místo formuláře vysvětlení a tlačítka
+     **„Otevřít detail"** a **„Nová aktivita"**,
+   - **klik na řádek aktivity otevře detail**, klik na řádek číselníku načte
+     položku do formuláře vpravo — ověřit obojí,
+   - **hlavičky sloupců řadí** (kód, název, vykonává/vlastník),
+   - koš v řádku maže s potvrzením; u aktivity zmizí i její zařazení do
+     dílčích procesů,
+   - **šipka zpět z detailu** se vrací do editace na úroveň aktivit
+     s vybraným řádkem — ověřit i návrat po uložení a po smazání.
 
-   Na **Detailu aktivity**: zařazení do dílčích procesů je nově **karta přes
-   celou šířku** pravého sloupce (nadpis s počtem, štítek „primární",
-   tlačítko „Spravovat…"). Vnitřní předpis se zkrátil na polovinu a vedle něj
-   je Stav — zkontrolovat, že se do polí vejde text i na největším písmu.
-
-   Na **Seznamu aktivit**: přibyl přepínač **„Jen osiřelé"** (aktivity, jejichž
-   dílčí proces v číselníku není). Dialog mazání je větší a text se do něj
-   vejde celý — ověřit s nejdelším názvem aktivity.
+   Na obrazovce **Přehled**:
+   - vlevo nad stromem **pole pro hledání** — projde kód i název na všech
+     čtyřech úrovních naráz; nalezené se vypíšou jako **plochý seznam**, ne
+     ve stromu. Vymazání pole vrátí strom do původního rozbalení,
+   - vpravo od chipů stavu **chip „osiřelé"** — vypíše položky bez nadřazené
+     úrovně. Tohle je jediné místo, kde je z přehledu uvidíš: ve stromu se
+     nezobrazují, protože nemají pod čím viset,
+   - v řádku je vedle tužky **koš** se stejným potvrzením jako v editaci,
+   - **zkusit celý cyklus**: smazat proces → jeho dílčí procesy se objeví
+     pod chipem „osiřelé" → uklidit je košem.
 2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
    (z ní flow skládá stránku) i `procesni_mapa.html` (hotová mapa). Do
    21.08. se kopie dělala ručně a rozešla se se zdrojem, takže publikovaná
@@ -108,13 +110,13 @@ chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
-**Čeká se na zpětnou vazbu z importu 1.0.0.35.** F6/D i F6/E jsou hotové
-a ověřené branami, ale ne v provozu — obrazovka číselníku je největší kus
-appky, který ještě nikdo neviděl běžet.
+**Čeká se na zpětnou vazbu z importu 1.0.0.36.** Appka je po sjednocení
+editace v jiném tvaru než ta, která běží v prostředí (1.0.0.28) — dvě
+obrazovky se staly jednou a přibyla celá editace číselníku. Než přijde
+zpětná vazba, nemá smysl stavět další.
 
-Až přijde zpětná vazba, na řadě je z odložených věcí (§4) nejspíš
-`deploy/navod_sprava.md` — rozhodnuto 21.08., že se píše až podle finální
-podoby appky, a tou teď číselník je.
+Až přijde, na řadě je `deploy/navod_sprava.md` — rozhodnuto 21.08., že se
+píše podle finální podoby appky, a tou je teď obrazovka Editace.
 
 **Otevřené k rozmyšlení, ne k okamžité implementaci:**
 - **Osiřelé vazby** v tabulce `Vazba aktivita–dílčí proces` (dílčí proces
@@ -124,6 +126,10 @@ podoby appky, a tou teď číselník je.
   drží jedinečnost kódu jen optimistický zámek v appce (`LookUp` před
   `Patch`), který není atomický. Znamená to zásah do `src/schema.json`
   a `make_setup.js` včetně dorovnání už založených listů.
+- **Hledání na přehledu nad 2 000 aktivitami** projde jen první okno dat
+  (`colAkt`). Dnes je aktivit 49; až rejstřík povyroste, bude potřeba buď
+  indexovaný sloupec s normalizovaným názvem, nebo odkázat na fulltext
+  v publikované mapě.
 
 ## 3. Co je hotové (23.08.2026)
 
@@ -135,10 +141,11 @@ podoby appky, a tou teď číselník je.
 | F3b denní publikace mapy | hotovo, čeká na import — druhé flow `MapaPublishScheduled`, Recurrence 7:00 |
 | F6/A mapa: rozbalení, kód, písmo, nápovědy, barvy vrstev | hotovo |
 | F6/B appka: šipka pryč, přepínač kódu, zařazení s posuvníkem | hotovo (1.0.0.26) |
-| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.35) |
-| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.35) |
-| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.35) |
-| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.35) |
+| F6/C dashboard jako úvodní obrazovka | hotovo, čeká na import (1.0.0.36) |
+| F6 připomínky z provozu: klikací řádky, hlavičky sloupců, filtr stavu, „Zobrazit vše" | hotovo, čeká na import (1.0.0.36) |
+| F6/D zadávací obrazovky (`scr_Ciselnik`) | hotovo, čeká na import (1.0.0.36) |
+| F6/E karta zařazení, větší dialog mazání, úklid osiřelých | hotovo, čeká na import (1.0.0.36) |
+| F6/F sjednocená editace, hledání a úklid z přehledu | hotovo, čeká na import (1.0.0.36) |
 | F4 přenos na MPSV | **blokováno** — uživatel nemá přístup k tenantu MPSV |
 | F5 generování textu OŘ | fáze 2 (po 06/2028) |
 
@@ -247,6 +254,21 @@ export, jinak ho další build přepíše.
 Nové brány: `kontrola_sloupcu_kolekci`, `kontrola_rezimu_ciselniku`
 a `kontrola_predikatu` v `check_app.py` — všechny tři mutačně ověřené
 (pět mutací, pět zachycení).
+
+## 6c. Co přibylo 23.08. odpoledne (balík 1.0.0.36)
+
+| co | proč |
+|---|---|
+| aktivity jako čtvrtá úroveň číselníku, `scr_Seznam` zrušena | dvě obrazovky pro totéž znamenaly dvojí zvyk i dvojí údržbu |
+| filtry sekce/útvar/stav a řazení klikem přeneseny do číselníku | zrušená obrazovka je uměla a nesmělo se to ztratit |
+| záložky Přehled / Editace místo Přehled / Seznam aktivit | jedna cesta k editaci, ne dvě |
+| fulltext na přehledu přes všechny čtyři úrovně | hledat šlo jen v seznamu aktivit, tedy v jedné úrovni ze čtyř |
+| chip osiřelých na přehledu | sirotek nemá pod čím viset, takže se ve stromu vůbec nezobrazí |
+| koš vedle tužky v řádku stromu | uklidit šlo jen z editace, ne odtud, kde je problém vidět |
+
+Nové brány: rozpoznání vzájemně se vylučujících prvků v `kontrola_prekryvu`
+a kontrola shody definic téže kolekce na víc obrazovkách — obě mutačně
+ověřené.
 
 ## 7. Brány (všechny mutačně ověřené)
 

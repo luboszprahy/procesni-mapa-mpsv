@@ -53,10 +53,16 @@ App:
       Set(varCiselnikKod, "");
       Set(varChybaC, "");
       Set(varUklidC, false);
+      Set(varRazeniC, "kod");
+      Set(varRazeniAscC, true);
+      Set(varSekceKodC, "");
+      Set(varUtvarKodC, "");
       Set(varOsirele, false);
       Set(varSmazatC, Blank());
       Set(varFs, 2);
       Set(varDashStav, "");
+      Set(varDashOsirele, false);
+      Set(varSmazatD, Blank());
       Set(varRazeni, "kod");
       Set(varRazeniAsc, true);
       Set(varSmazat, Blank())
