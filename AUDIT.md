@@ -1,7 +1,10 @@
 # AUDIT — Procesní mapa MPSV
 
-Poslední audit: 19.08.2026 · auditor: powerplatform-auditor · kolo: 2
-Verdikt: NÁLEZY (0/1/0) — žádný otevřený BLOKUJÍCÍ, F1 je připravená na první ostrý běh
+Poslední audit: 23.08.2026 · kolo: 3 (canvas app — mazání, editace, vazby, flow)
+Předchozí: 19.08.2026 · powerplatform-auditor · kolo 2 (datová vrstva)
+Verdikt kolo 3: NÁLEZY (0 blokujících / 3 vážné / 3 střední / 2 drobné) — neopraveno,
+nejzávažnější je referenční integrita vazební tabulky (A-01) a strop 500 řádků (A-03)
+Verdikt kolo 2: NÁLEZY (0/1/0) — žádný otevřený BLOKUJÍCÍ, F1 připravená na ostrý běh
 Rozsah kola 2: re-audit oprav P-01/P-02/P-03 z kola 1 (`src/make_import.py`,
 `src/anonymize.py`, `PLAN.md`), spuštění `check_schema.py`/`make_setup.py`/
 `make_import.py`/`check_setup.js`/`check_import.js`, nově `deploy/app_navrh.md`
@@ -9,6 +12,135 @@ Rozsah kola 2: re-audit oprav P-01/P-02/P-03 z kola 1 (`src/make_import.py`,
 
 V tomto projektu **neplatí** kritéria vázaná na publisher `ppf`/prefix `ppf_`/
 tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze změny).
+
+## Nálezy — kolo 3 (23.08.2026, appka 1.0.0.37)
+
+Rozsah: všechna mutační místa ve zdrojích appky, referenční integrita vazební
+tabulky, soulad kolekcí se zdrojem, tři flow a šablona mapy. **Žádný nález
+zatím není opraven** — tenhle seznam je zadání, ne hlášení o vyřízení.
+
+Tři nálezy jsem po auditorovi ověřil sám (A-01, A-03 a tvrzení o `check_solution`);
+jeden se nepotvrdil, viz „Zamítnuté nálezy — kolo 3" na konci sekce.
+
+### A-01 · VÁŽNÝ · vazby přežijí smazání dílčího procesu a přilepí se k cizí položce
+
+`RemoveIf('Vazba aktivita–dílčí proces', dilci_proces_kod = …)` **v appce
+neexistuje**; všechny čtyři úklidy vazeb jdou přes `aktivita_kod`
+(`scr_Detail` 712 a 759, `scr_Ciselnik` 1673, `scr_Dashboard` 1418). Ověřeno
+greppem.
+
+Scénář:
+1. Dílčí proces `01-02-005` má tři aktivity, tedy tři vazby.
+2. Smaže se (číselník nebo přehled) → vazby zůstanou a nedá se na ně dostat:
+   žádná obrazovka je podle dílčího procesu nefiltruje a chip osiřelých je
+   nezná, protože `colCiselnik` úroveň „vazba" nemá.
+3. Kód se přiděluje jako *poslední existující + 1*, takže se `005`
+   po smazání **uvolní a znovu přidělí** jinému dílčímu procesu.
+4. Publikace: `mapa_template.html` seskupuje vazby podle `dilci_proces_kod`,
+   takže staré aktivity vyskočí pod novým, obsahově nesouvisejícím dílčím
+   procesem.
+
+`PLAN.md` (F6/F) pokrývá výslovně jen vazby osiřelé po **aktivitě**; vazby
+osiřelé po dílčím procesu nejsou popsané nikde. Není to tedy přijatý kompromis.
+
+**Návrh opravy:** při mazání dílčího procesu uklidit i vazby na něj; a zvážit,
+jestli se kód po smazané položce vůbec smí recyklovat (projekt jinak stojí na
+tom, že se přidělený kód nemění).
+
+### A-02 · VÁŽNÝ · změna primárního dílčího procesu umí vyrobit duplicitní vazbu
+
+`scr_Detail.pa.yaml` 712-724: `RemoveIf(… primarni.Value = "ano")` a hned
+`Patch` nové primární vazby. Nekontroluje se, jestli dvojice aktivita–dílčí
+proces už neexistuje jako **neprimární** — `scr_Vazby` tu kontrolu má
+(`ico_Pridat`), cesta přes detail ne.
+
+Scénář: aktivita primární v `A`, přes „Spravovat" přidaná i do `B`; v detailu
+se přepne dílčí proces na `B` → vznikne druhý záznam `AKT__B`. V mapě je
+aktivita pod `B` dvakrát a počty nadřazených uzlů jsou o jedna vyšší, zatímco
+přehled v appce počítá z `Aktivity.dilci_proces_kod` a ukazuje správně —
+čísla v appce a v mapě se rozejdou.
+
+### A-03 · VÁŽNÝ · appka má strop 500 řádků, ale všude tvrdí 2 000
+
+`Properties.json` v `.msapp`: `DefaultConnectedDataSourceMaxGetRowsCount = 500`.
+Ověřeno přímo v balíku 1.0.0.37.
+
+Proti tomu tooltipy na přehledu, komentáře ve zdrojích, výjimka delegace
+v `check_app.py` a řada míst v `STATUS.md` i `PLAN.md` tvrdí, že do 2 000
+aktivit je výsledek úplný. Práh se přitom láme už u **501. aktivity**:
+`colAkt`, počty ve stromu, chip osiřelých i fulltext pracují s prvním oknem.
+
+**Návrh opravy:** zvednout hodnotu na 2000 při buildu a přidat na ni kontrolu,
+aby se popisky a skutečnost nemohly znovu rozejít.
+
+### A-04 · STŘEDNÍ · `RemoveIf` nad velkým listem se nedeleguje a brána mlčí
+
+`NEDELEGOVATELNE` v `check_app.py` neobsahuje `Remove`/`RemoveIf`, přestože
+vazební tabulka je ve `VELKE_LISTY`. Nad ~500 vazbami se `RemoveIf` provede
+jen nad prvním oknem: stará primární vazba se nemusí odstranit a `Patch`
+přidá druhou → aktivita se **dvěma primárními** vazbami. Predikát
+`primarni.Value = "ano"` (choice) delegaci zabíjí sám o sobě.
+
+### A-05 · STŘEDNÍ · publikace osiřelé záznamy tiše zahodí
+
+`mapa_template.html`, `buildTree()`: strom se skládá shora, takže co nemá
+živého rodiče, se do mapy vůbec nedostane. Flow nemá žádnou kontrolu.
+
+Dialog při mazání agendy slibuje „nezmizí, najdeš je přepínačem osiřelé" —
+v rejstříku ano, ale z publikované mapy zmizí celá větev včetně desítek
+aktivit a mapa to nijak nepřizná. Texty dialogů o dopadu na mapu mlčí.
+
+### A-06 · STŘEDNÍ · appka a flow `AktualizaceKratkehoNazvu` počítají zkratku jinak
+
+Appka ukládá `Left(text, 150)`, flow počítá kanonické zkrácení (kolaps mezer,
+řez na hranici slova, oříznutí interpunkce, `…`). U názvu delšího než 150
+znaků tedy appka uloží useknuté slovo a flow ho do minuty přepíše.
+
+Flow navíc patchuje `Title`, `nazev` i `dilci_proces_kod` ze snapshotu
+triggeru, takže může přepsat opravu uloženou do minuty po prvním uložení.
+`STATUS.md` přitom tvrdí „jen `item/nazev_kratky`" — dokumentace se
+rozchází s tím, co flow dělá.
+
+### A-07 · DROBNÝ · `varCiselnikKod` přežije smazání položky z přehledu
+
+`scr_Ciselnik.OnVisible` resetuje `varChybaC` a `varSmazatC`, ale ne
+`varCiselnikKod`. Když se položka načtená ve formuláři smaže z **přehledu**,
+formulář po návratu dál hlásí „Úprava …" nad neexistujícím záznamem. Skončí
+to hláškou z `IfError`, data se nerozbijí. `PLAN.md` (F6/E) tenhle edge case
+vyžaduje ošetřit — ošetřený je jen pro mazání z téže obrazovky.
+
+### A-08 · DROBNÝ · zbytky a natvrdo zapsané hodnoty
+
+- `.msapp` nese `Controls/4.json` se zrušenou obrazovkou `scr_Seznam`
+  a `AppCheckerResult.sarif` s odkazy na ni. Neškodné (`LoadFromYaml = true`,
+  Studio čte `Src/*.pa.yaml`), ale je to smetí v balíku.
+- `Model` v publikačním flow má natvrdo `"sekce": "3"` a jméno správce —
+  po rozšíření mimo sekci 3 bude hlavička mapy lhát.
+- `$top: 5000` bez `paginationPolicy` je strop pro aktivity v mapě.
+- Testovací tenant je při přenosu na MPSV na čtyřech místech (`varMapaUrl`
+  a `dataset` ve třech flow), ne na jednom.
+
+### Zamítnuté nálezy — kolo 3
+
+- **„`check_solution.py` při chybějícím vstupu skončí s exit 0, takže v CI
+  mlčky projde."** Neplatí. Ověřeno spuštěním: bez vstupu vypíše
+  `CHYBA: chybí …` a vrátí **exit 1**. Pravdivá je jen ta část, že výchozí
+  cesta `input/procesnimapa_1_0_0_2 (2).zip` po úklidu repa neexistuje, takže
+  se skript musí spouštět s `--vstup`/`--vystup` (což příkazy v `HANDOVER.md`
+  dělají).
+
+### Ověřeno spuštěním — kolo 3
+
+| brána | výsledek |
+|---|---|
+| `check_app.py` | OK — 4 obrazovky, 193 prvků, 2 129 vzorců |
+| `check_solution.py --vstup … --vystup …` | 219 kontrol / 0 chyb |
+| `check_mapa_flow.py --solution …` | 142 kontrol OK; akce obou mapových flow bajtově shodné, liší se jen trigger |
+| `check_schema.py` | OK — 7 / 46 / 250 / 46 / 46 / 8 |
+| `check_mapa_html.py` | 31 kontrol OK |
+| `check_mapa_beh.py` | 18 kontrol OK |
+
+---
 
 ## Nálezy — kolo 1 (stav po kole 2)
 
