@@ -811,6 +811,99 @@ schvalování to není.
 
 ---
 
+## Připravený plán: rejstřík nad 2 000 aktivitami
+
+Sepsáno 23.08.2026, **odloženo rozhodnutím zadavatele** — při 47 aktivitách
+není co řešit. Tenhle plán tu leží hotový, aby se k němu dalo sáhnout bez
+dalšího přemýšlení, až přijde čas.
+
+### Kdy to vytáhnout
+
+Spouštěč je **zhruba 1 500 aktivit**. Tou dobou je pořád rezerva a je čas
+pracovat v klidu. Dobrý průběžný ukazatel: 250 dílčích procesů × průměrně
+8 aktivit = 2 000, takže hranice přijde zhruba při zmapování poloviny
+rejstříku.
+
+### Proč zvednutí limitu nestačí
+
+`DefaultConnectedDataSourceMaxGetRowsCount` je dnes 2 000 a **to je strop,
+který Power Apps nedovolí překročit**. Řešení tedy není mít víc dat v paměti,
+ale nepotřebovat je tam.
+
+Rozhoduje delegace: `Filter(Aktivity, sekce = "3")` SharePoint vyřídí sám
+a galerie si výsledek dotahuje po stránkách bez omezení. Cokoli, čemu
+konektor nerozumí (`Search` uvnitř textu, `CountRows`, choice přes `.Value`,
+`LookUp` do kolekce v podmínce), se počítá až v appce nad prvním oknem dat.
+
+### K1. Předpočítané počty na dílčím procesu
+
+**co:** `src/schema.json`, `src/make_setup.py`, `src/app_src/*`
+
+Strom na přehledu ve skutečnosti aktivity nepotřebuje — potřebuje jejich
+**počty**. Dílčí proces dostane sloupce `pocet_aktivit` a `pocet_schvalenych`
+(Number; `make_setup.py` dnes typ Number neumí, musí se doplnit). Strom se pak
+postaví ze 7 + 46 + 250 = 303 řádků, což se do limitu vejde s velkou rezervou
+i při plném rejstříku.
+
+Počty udržuje **appka inkrementálně** při každém svém zápisu (+1 / −1 při
+založení, smazání, změně stavu a přesunu aktivity) — to je delegovatelné
+a bez limitu. Pro nápravu po ruční editaci v SharePointu tlačítko
+**„Přepočítat počty"** pro správce.
+
+**verify:** založit aktivitu → číslo u dílčího procesu vzroste bez znovunačtení;
+smazat → klesne; přesunout jinam → klesne u starého, vzroste u nového.
+**edge cases:** selhání zápisu uprostřed (počet zůstane vedle — proto tlačítko
+přepočtu); souběžný zápis dvou uživatelů.
+**risk:** inkrementální údržba je na víc místech a každé opomenutí se projeví
+tiše. Kontrola: brána, která ověří, že každý `Patch`/`Remove` nad `Aktivity`
+sahá i na počty.
+
+### K2. Aktivity ve stromu až po rozbalení
+
+**co:** `src/app_src/scr_Dashboard.pa.yaml`
+
+Řádky aktivit se do `colStrom` doplní až při rozbalení konkrétního dílčího
+procesu — delegovaným `Filter(Aktivity, dilci_proces_kod = …)`, tedy vždy
+úplně, bez ohledu na velikost rejstříku.
+
+Tlačítko **„+ aktivity"** (rozbalit vše) je jediné místo, kde se limit udrží:
+načte, co se vejde, a popisek to musí říct. Hromadné rozbalení 250 dílčích
+procesů je stejně nepřehledné, takže to není velká ztráta.
+
+**verify:** rozbalit dílčí proces s 20 aktivitami → všech 20; sbalit a rozbalit
+znovu → nenačítá se dvakrát.
+**risk:** filtr stavu a chip osiřelých dnes pracují nad `colStrom` jako celkem
+— po změně musí počítat z předpočítaných čísel, ne z řádků.
+
+### K3. Seznam aktivit zpátky na delegovaný dotaz
+
+**co:** `src/app_src/scr_Ciselnik.pa.yaml`
+
+Filtry sekce, útvar a stav jsou rovnosti a SharePoint je deleguje, pokud jsou
+sloupce indexované. **Háček:** `stav` je Choice a choice se nedeleguje — musel
+by přibýt pomocný textový sloupec, nebo se stav filtroval až nad výsledkem.
+
+Hledání uvnitř textu delegovat nejde nikdy. Buď pomocný indexovaný sloupec
+`nazev_norm` (bez diakritiky, malá písmena) a `StartsWith`, nebo fulltext
+odkázat na publikovanou HTML mapu, která má data v prohlížeči a hledá bez
+omezení.
+
+### K4. Osiřelé aktivity příznakem
+
+Podmínka `IsBlank(LookUp(colDilci, …))` se nedeleguje nikdy. Aktivita dostane
+příznak `osirely`, který nastaví flow při změně číselníku nebo jednou denně —
+může to být totéž flow, které publikuje mapu.
+
+### Co se do plánu nevešlo a proč
+
+- **Dataverse** by problém vyřešil elegantně (deleguje i `Contains`), ale
+  `PRD.md` ho vylučuje kvůli licencím. Zůstává jako záložní cesta; datový
+  model je na něj převeditelný bez ztráty, jak zadání vyžaduje.
+- **Stránkované načítání do kolekce** je v Power Fx bez `Skip()` křehký trik.
+- **List per sekce** by rozbil vazby a kódy.
+
+---
+
 ## F5 — Generování textu OŘ (fáze 2)
 
 Ze schválených aktivit (`stav = schváleno`) sestavit text organizačního řádu

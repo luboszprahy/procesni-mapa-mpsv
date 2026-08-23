@@ -172,6 +172,24 @@ do prázdna a formulář by se resetoval pokaždé.
 - Testovací tenant je při přenosu na MPSV na čtyřech místech (`varMapaUrl`
   a `dataset` ve třech flow), ne na jednom.
 
+### A-09 · OTEVŘENÉ · sjednocení editace vzalo seznamu aktivit delegaci
+
+Doplněno 23.08.2026 při vysvětlování limitu — není to nález auditora, ale
+důsledek F6/F, který je fér pojmenovat.
+
+Zrušený `scr_Seznam` měl filtry sekce, útvar a stav postavené jako
+**delegovaný** dotaz nad listem `Aktivity`: běžely na serveru nad celým
+rejstříkem a limit se dotýkal jen fulltextu. Po sjednocení editace stojí
+seznam aktivit nad `colCiselnik`, tedy nad kolekcí odvozenou z `colAkt` —
+a ta je omezená stropem 2 000 řádků vždycky.
+
+Pro dnešní data (47 aktivit) to nic nemění a čitelnost obrazovky za to
+stála. Je to ale skutečná ztráta, ne detail: nad 2 000 aktivitami by seznam
+přestal být úplný, aniž by to řekl.
+
+**Řešení je připravené** v `PLAN.md`, sekce „Připravený plán: rejstřík nad
+2 000 aktivitami", bod K3. Odloženo rozhodnutím zadavatele.
+
 ### Zamítnuté nálezy — kolo 3
 
 - **„`check_solution.py` při chybějícím vstupu skončí s exit 0, takže v CI

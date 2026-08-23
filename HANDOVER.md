@@ -135,10 +135,14 @@ píše podle finální podoby appky, a tou je teď obrazovka Editace.
   drží jedinečnost kódu jen optimistický zámek v appce (`LookUp` před
   `Patch`), který není atomický. Znamená to zásah do `src/schema.json`
   a `make_setup.js` včetně dorovnání už založených listů.
-- **Hledání na přehledu nad 2 000 aktivitami** projde jen první okno dat
-  (`colAkt`). Dnes je aktivit 49; až rejstřík povyroste, bude potřeba buď
-  indexovaný sloupec s normalizovaným názvem, nebo odkázat na fulltext
-  v publikované mapě.
+- **Rejstřík nad 2 000 aktivitami.** Strop `DefaultConnectedDataSourceMaxGetRowsCount`
+  je 2 000 a výš ho Power Apps nepustí; nad tím by strom, hledání, chip
+  osiřelých i seznam aktivit pracovaly s prvním oknem dat, aniž by to řekly.
+  **Hotový plán leží v `PLAN.md`** („Připravený plán: rejstřík nad 2 000
+  aktivitami") — předpočítané počty na dílčím procesu, aktivity až po
+  rozbalení, seznam zpátky na delegovaný dotaz, osiřelost příznakem.
+  Odloženo rozhodnutím zadavatele 23.08.2026; spouštěč je zhruba
+  **1 500 aktivit**, dnes jich je 47.
 
 ## 3. Co je hotové (23.08.2026)
 
