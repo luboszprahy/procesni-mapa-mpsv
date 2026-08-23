@@ -136,6 +136,11 @@ def main():
         vlastnosti = cti(msapp, "Properties.json")
         if vlastnosti:
             priznaky = json.loads(vlastnosti).get("AppPreviewFlagsMap", {})
+            limit = json.loads(vlastnosti).get("DefaultConnectedDataSourceMaxGetRowsCount")
+            overit(limit == 2000,
+                   f"strop načítaných řádků je {limit}, ale popisky v appce "
+                   f"i dokumentace slibují úplný výsledek do 2 000 — hledání "
+                   f"a počty by přestaly být úplné dřív, než kdokoli čeká")
             overit(priznaky.get("supportcolumnnamesasidentifiers") is True,
                    "appka nemá supportcolumnnamesasidentifiers=True, ale vzorce "
                    "předávají sloupce jako identifikátory")

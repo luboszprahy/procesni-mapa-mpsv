@@ -709,7 +709,16 @@ Screens:
                           );
                           If(
                               varNova || varStaryDp <> Left(drp_Dilci.Selected.Value, 9),
-                              RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varNovyKod, primarni.Value = "ano");
+                              RemoveIf(
+                                  'Vazba aktivita–dílčí proces',
+                                  aktivita_kod = varNovyKod,
+                                  dilci_proces_kod = varStaryDp
+                              );
+                              RemoveIf(
+                                  'Vazba aktivita–dílčí proces',
+                                  aktivita_kod = varNovyKod,
+                                  dilci_proces_kod = Left(drp_Dilci.Selected.Value, 9)
+                              );
                               Patch(
                                   'Vazba aktivita–dílčí proces',
                                   Defaults('Vazba aktivita–dílčí proces'),

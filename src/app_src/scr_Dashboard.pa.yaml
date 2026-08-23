@@ -1418,7 +1418,11 @@ Screens:
                       RemoveIf(colProcesy, Title = varSmazatD.kod),
                       varSmazatD.uroven = 3,
                       Remove('Dílčí procesy', LookUp('Dílčí procesy', Title = varSmazatD.kod));
-                      RemoveIf(colDilci, Title = varSmazatD.kod),
+                      RemoveIf(colDilci, Title = varSmazatD.kod);
+                      RemoveIf(
+                          'Vazba aktivita–dílčí proces',
+                          dilci_proces_kod = varSmazatD.kod
+                      ),
                       RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varSmazatD.kod);
                       Remove(Aktivity, LookUp(Aktivity, Title = varSmazatD.kod))
                   );

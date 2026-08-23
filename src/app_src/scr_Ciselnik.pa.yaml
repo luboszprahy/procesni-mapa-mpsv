@@ -118,6 +118,12 @@ Screens:
                 }
             )
         );
+        If(
+            !varCiselnikNova
+            && IsBlank(LookUp(colCiselnik, kod = varCiselnikKod && uroven = varUrovenTyp)),
+            Set(varCiselnikNova, true);
+            Set(varCiselnikKod, "")
+        );
         Reset(drp_AgendaC);
         Reset(drp_ProcesC);
         Reset(txt_NazevC);
@@ -1269,9 +1275,25 @@ Screens:
                               !IsBlank(LookUp('Dílčí procesy', Title = varNovyKodC))
                           )
                       );
+                      Set(
+                          varSirotciC,
+                          Switch(
+                              varUrovenTyp,
+                              "agenda", !IsBlank(LookUp(Procesy, StartsWith(Title, varNovyKodC & "-"))),
+                              "proces", !IsBlank(LookUp('Dílčí procesy', StartsWith(Title, varNovyKodC & "-"))),
+                              !IsBlank(LookUp(Aktivity, StartsWith(Title, varNovyKodC & "-")))
+                          )
+                      );
                       If(
-                          varKolizeC,
-                          Notify("Kód " & varNovyKodC & " mezitím někdo zabral, zkus uložit znovu.", NotificationType.Warning),
+                          varKolizeC || varSirotciC,
+                          Notify(
+                              If(
+                                  varKolizeC,
+                                  "Kód " & varNovyKodC & " mezitím někdo zabral, zkus uložit znovu.",
+                                  "Kód " & varNovyKodC & " je volný jen zdánlivě — leží pod ním osiřelé položky po dřívější položce se stejným kódem. Ukliď je nejdřív přepínačem osiřelých, jinak by se pod novou položkou objevily jako její vlastní."
+                              ),
+                              NotificationType.Warning
+                          ),
                           IfError(
                               If(
                                   varUrovenTyp = "agenda",
@@ -1667,6 +1689,10 @@ Screens:
                       varSmazatC.uroven = "dilci",
                       Remove('Dílčí procesy', LookUp('Dílčí procesy', Title = varSmazatC.kod));
                       RemoveIf(colDilci, Title = varSmazatC.kod);
+                      RemoveIf(
+                          'Vazba aktivita–dílčí proces',
+                          dilci_proces_kod = varSmazatC.kod
+                      );
                       UpdateIf(
                           colCiselnik,
                           uroven = "aktivita" && rodic = varSmazatC.kod,

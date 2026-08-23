@@ -129,6 +129,34 @@ def zabal(adresar, cil):
                 balik.write(cesta, cesta.relative_to(adresar).as_posix())
 
 
+MAX_RADKU = 2000
+
+
+def nastav_limit_radku(cesta_msapp):
+    """Srovná strop načítaných řádků s tím, co appka o sobě tvrdí.
+
+    Prázdná appka ze Studia má DefaultConnectedDataSourceMaxGetRowsCount = 500,
+    takže Search i počty nad aktivitami pracují s prvním pěti stovkami — a
+    popisky u toho slibují úplný výsledek do 2 000. Rozpor je tichý: nic
+    nespadne, jen odpověď přestane být úplná dřív, než kdokoli čeká.
+    """
+    with zipfile.ZipFile(cesta_msapp) as balik:
+        polozky = {n: balik.read(n) for n in balik.namelist()}
+
+    klic = next(n for n in polozky if n.replace("\\", "/").endswith("Properties.json"))
+    vlastnosti = json.loads(polozky[klic].decode("utf-8-sig"))
+    puvodni = vlastnosti.get("DefaultConnectedDataSourceMaxGetRowsCount")
+    if puvodni == MAX_RADKU:
+        return None
+
+    vlastnosti["DefaultConnectedDataSourceMaxGetRowsCount"] = MAX_RADKU
+    polozky[klic] = json.dumps(vlastnosti, ensure_ascii=False).encode("utf-8")
+    with zipfile.ZipFile(cesta_msapp, "w", zipfile.ZIP_DEFLATED) as balik:
+        for jmeno, data in polozky.items():
+            balik.writestr(jmeno, data)
+    return puvodni
+
+
 def doplnit_sablony(cesta_msapp):
     """Doplní do balíku definice controlů, které původní appka neobsahovala.
 
@@ -293,6 +321,9 @@ def main():
     if argumenty.bez_pac:
         vlozeno = vymen_zdroje_bez_pac(msapp)
         print(f"vloženo zdrojů (bez pac): {vlozeno}")
+        puvodni_limit = nastav_limit_radku(msapp)
+        if puvodni_limit is not None:
+            print(f"strop načítaných řádků: {puvodni_limit} -> {MAX_RADKU}")
         odstraneno = odstran_duchy(msapp)
         if odstraneno:
             print(f"odstraněné zbytky zrušených obrazovek: {', '.join(odstraneno)}")
@@ -325,6 +356,10 @@ def main():
     novy_msapp = PRACOVNI / "app.msapp"
     vystup_pac = spust([str(pac), "canvas", "pack", "--sources", str(zdroje), "--msapp", str(novy_msapp)])
     print(vystup_pac.strip().splitlines()[-1])
+
+    puvodni_limit = nastav_limit_radku(novy_msapp)
+    if puvodni_limit is not None:
+        print(f"strop načítaných řádků: {puvodni_limit} -> {MAX_RADKU}")
 
     odstraneno = odstran_duchy(novy_msapp)
     if odstraneno:

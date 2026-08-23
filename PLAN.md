@@ -750,6 +750,67 @@ otevřená nabídka při kliknutí na druhou (první se zavře).
 
 ---
 
+## Náměty na rozšíření (neschválené, k připomenutí)
+
+Sepsáno 23.08.2026 na vyžádání. **Nic z toho není zadané ani rozpracované** —
+je to seznam, ze kterého se vybírá, seřazený podle toho, jak moc to bude
+v provozu chybět.
+
+### N-1 · Hromadné pořízení z evidenční karty
+
+Zadavatelka pracuje s excelovými kartami (~45 aktivit na sekci) a sekcí bude
+víc. Appka umí zakládat po jedné; hromadný import existuje jen jako
+`src/import_data.js`, který se vkládá do konzole prohlížeče — to je nástroj
+pro vývojáře, ne pro správce rámce. Až přijde karta další sekce, znamená to
+45× proklikat formulář.
+
+Návrh: flow, které přečte kartu nahranou do knihovny a založí aktivity dávkou,
+s náhledem „co vznikne / co je duplicita" před zápisem. Kódy přiděluje stejný
+mechanismus jako appka.
+
+**Proč je to podle mě nejdůležitější:** je to jediná věc ze seznamu, která
+brání běžnému provozu — zbytek jsou vylepšení něčeho, co funguje.
+
+### N-2 · Datum poslední publikace mapy
+
+„Obnovit HTML" řekne „spuštěno" a tím to končí. Uživatel neví, jestli flow
+doběhlo ani k jakému okamžiku jsou data v mapě. Stačilo by, aby flow zapsalo
+datum do listu `Nastaveni` (PRD s ním počítá) a přehled ho ukázal vedle
+tlačítka.
+
+### N-3 · Pohled „co ještě není zmapováno"
+
+V datech je 250 dílčích procesů a 46 aktivit — poměr zmapovanosti je hlavní
+metrika projektu do 06/2028. Dashboard ukazuje součty, ale ne rozpad podle
+sekcí a vlastníků, tedy „kdo má co dodělat". Pro řízení projektu je to podle
+mě užitečnější než cokoli dalšího v appce.
+
+### N-4 · Kdo a kdy záznam změnil
+
+SharePoint drží `Modified` a `Editor`, appka je nezobrazuje. U evidence, ze
+které se stane organizační řád, je dohledatelnost změny na místě — dva řádky
+v detailu aktivity.
+
+### N-5 · Schvalování s rolemi a notifikací
+
+Stav „schváleno" dnes přepne kdokoli s přístupem. Metodika má role (vlastník
+procesu, sekční správce), ale bez oprávnění a notifikace je to čestné
+prohlášení. `PRD.md` to řadí do fáze 2, takže to není nedodělek — ale hotové
+schvalování to není.
+
+### N-6 · Drobnosti
+
+- **Jedinečnost kódu** drží jen optimistický zámek v appce; „Enforce unique
+  values" na `Title` by z tiché duplicity udělalo hlášku (viz A-01 v `AUDIT.md`).
+- **Rozvržení je pevné** na 1366×768; na menším monitoru Power Apps appku
+  zdrobní, ale nepřeskládá.
+- **Aktivita zařazená do víc dílčích procesů** se v mapě objeví vícekrát
+  a mapa nenaznačí, že jde o tutéž činnost.
+- **Osiřelé vazby** v tabulce `Vazba aktivita–dílčí proces` nemají vlastní
+  filtr, protože vazební tabulka nemá obrazovku.
+
+---
+
 ## F5 — Generování textu OŘ (fáze 2)
 
 Ze schválených aktivit (`stav = schváleno`) sestavit text organizačního řádu

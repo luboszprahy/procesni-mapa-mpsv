@@ -937,16 +937,29 @@ def kontrola_predikatu(vzorce):
     for cesta, prop, syrovy in vzorce:
         text = bez_retezcu(syrovy)
         for list_nazev in VELKE_LISTY:
-            for shoda in re.finditer(rf"\bFilter\s*\(\s*'?{re.escape(list_nazev)}'?\s*,", text):
+            for shoda in re.finditer(rf"\b(Filter|RemoveIf)\s*\(\s*'?{re.escape(list_nazev)}'?\s*,", text):
+                jmeno_funkce = shoda.group(1)
                 zavorka = text.index("(", shoda.start())
                 argumenty = argumenty_volani(text, zavorka)
                 for funkce in NEDELEGOVATELNE_V_PREDIKATU:
                     if re.search(rf"\b{funkce}\s*\(", argumenty):
                         chyby.append(
-                            f"{cesta}.{prop}: podmínka Filter nad '{list_nazev}' volá "
+                            f"{cesta}.{prop}: podmínka {jmeno_funkce} nad '{list_nazev}' volá "
                             f"{funkce}() — tím se celý dotaz přestane delegovat a vrátí "
                             f"jen první okno dat. Navlékni predikát až na výsledek."
                         )
+                # Choice se porovnává přes .Value a to SharePoint nedeleguje.
+                # U RemoveIf to není jen neúplná odpověď: nad velkým listem se
+                # smaže jen část toho, co uživatel čeká, a zbytek zůstane
+                # v datech bez hlášky. Přesně tak umí vzniknout aktivita se
+                # dvěma primárními vazbami.
+                if jmeno_funkce == "RemoveIf" and re.search(r"\w+\.Value\s*[=<>]", argumenty):
+                    chyby.append(
+                        f"{cesta}.{prop}: RemoveIf nad '{list_nazev}' se rozhoduje "
+                        f"podle choice sloupce (.Value), což se nedeleguje — nad "
+                        f"velkým listem by smazal jen část a zbytek nechal v datech. "
+                        f"Vyber řádky podle textového sloupce."
+                    )
 
 
 def kontrola_operatoru_in(vzorce):
