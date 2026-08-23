@@ -1,6 +1,44 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (design: barvy vrstev, číselník aktivit, detail)
+Aktualizováno: 2026-08-23 (paleta coolors.co, dlouhé názvy od horního okraje)
+
+## Barvy podle zadané palety a dlouhé názvy (23.08.2026) — balík 1.0.0.48
+
+**Paleta z coolors.co**: `#EFECCA` krémová · `#A9CBB7` šalvějová ·
+`#F7FF58` žlutá · `#FF934F` oranžová · `#5E565A` tmavá šedofialová.
+
+Přímo jako podklad řádku se hodí jen dvě z nich — žlutá a oranžová mají
+takovou sytost, že by přes ně nešlo číst dlouhé názvy. Rozdělily se proto
+podle role: krémová a šalvějová (a jejich světlejší varianty, spočítané
+průměrem s bílou) nesou plochu, oranžová a tmavá dělají akcenty na svislých
+pruzích, žlutá zůstala jako rezerva pro zvýraznění.
+
+Hierarchie čte shora dolů: šalvějová pro organizační úrovně (agenda sytější,
+proces světlejší), krémová pro výkonné (dílčí proces, aktivita nejsvětlejší).
+Pruhy karet s počty nahoře berou tytéž barvy jako vrstvy, na které ukazují —
+jinak by obrazovka měla dvě nesouvisející barevné soustavy.
+
+**Kontrast ověřen výpočtem, ne okem.** Hlavní text projde s rezervou
+(7,9 až 13,0:1), ale kód řádku na nejsytějším podkladu měl **4,03:1**, tedy
+pod hranicí WCAG AA. Ztmavil se z `#5E565A` na `#4A4347` → 5,45:1. Text je
+nově jednotně tmavý místo tří různých barev: podklad a pruh odlišují úroveň
+dost a barevný text na barevné ploše ubírá čitelnost.
+
+**Dlouhé názvy začínají od horního okraje.** Vertikálně vystředěný text se
+ořízne z obou stran, takže byl vidět prostředek věty a začátek chyběl.
+U dílčích procesů a aktivit je proto zarovnání nahoru, u agend a procesů
+zůstává vystředění — tam jsou názvy krátké a působí to klidněji.
+
+**Tooltip ukazuje název celý.** Strom dosud nesl jen zkrácenou verzi
+(150 znaků, sloupec `nazev_kratky`), takže i tooltip končil uprostřed věty.
+`colAkt` proto načítá i plný název a kolekce ho vedle zobrazovaného nesou
+jako `nazevPlny`.
+
+Postup hledání a použití palet je zapsaný jako uživatelský skill
+`harmonicke-barvy` — mimo jiné to, že hex hodnoty z coolors.co jsou přímo
+v URL a stránku není potřeba otevírat.
+
+## Designové připomínky ze snímků (23.08.2026) — balík 1.0.0.46
 
 ## Designové připomínky ze snímků (23.08.2026) — balík 1.0.0.46
 
