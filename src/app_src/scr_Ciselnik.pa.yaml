@@ -51,7 +51,7 @@ Screens:
             IsEmpty(colAkt) || varAktStale,
             ClearCollect(
                 colAkt,
-                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
+                ShowColumns(Aktivity, Title, nazev, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
             )
         );
         ClearCollect(
@@ -61,6 +61,7 @@ Screens:
                 {
                     kod: a.Title,
                     nazev: a.nazev,
+                    nazevPlny: a.nazev,
                     vlastnik: a.vlastnik,
                     uroven: "agenda",
                     rodic: "",
@@ -77,6 +78,7 @@ Screens:
                 {
                     kod: p.Title,
                     nazev: p.nazev,
+                    nazevPlny: p.nazev,
                     vlastnik: p.vlastnik,
                     uroven: "proces",
                     rodic: p.agenda_kod,
@@ -93,6 +95,7 @@ Screens:
                 {
                     kod: d.Title,
                     nazev: d.nazev,
+                    nazevPlny: d.nazev,
                     vlastnik: d.vlastnik,
                     uroven: "dilci",
                     rodic: d.proces_kod,
@@ -109,6 +112,7 @@ Screens:
                 {
                     kod: k.Title,
                     nazev: k.nazev_kratky,
+                    nazevPlny: k.nazev,
                     vlastnik: k.vykonava,
                     uroven: "aktivita",
                     rodic: k.dilci_proces_kod,
@@ -697,8 +701,10 @@ Screens:
                   Font: =Font.'Open Sans'
                   Height: =Parent.TemplateHeight - 1
                   Size: =11 + varFs
+                  PaddingTop: =4
                   Text: =ThisItem.nazev
-                  VerticalAlign: =VerticalAlign.Middle
+                  VerticalAlign: |-
+                    =If(varUrovenTyp = "aktivita", VerticalAlign.Top, VerticalAlign.Middle)
                   Width: =Parent.TemplateWidth - 362
                   X: =172
                   Y: =0
@@ -779,7 +785,7 @@ Screens:
                   PressedFill: =RGBA(0, 90, 181, 0.22)
                   Text: =""
                   Tooltip: |-
-                    =ThisItem.kod & " · " & ThisItem.nazev & Char(10) &
+                    =ThisItem.kod & " · " & ThisItem.nazevPlny & Char(10) &
                     If(
                         IsBlank(ThisItem.vlastnik),
                         "Vlastník není vyplněný.",

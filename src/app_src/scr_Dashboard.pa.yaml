@@ -36,7 +36,7 @@ Screens:
             IsEmpty(colAkt) || varAktStale,
             ClearCollect(
                 colAkt,
-                ShowColumns(Aktivity, Title, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
+                ShowColumns(Aktivity, Title, nazev, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
             );
             ClearCollect(
                 colStrom,
@@ -45,6 +45,7 @@ Screens:
                     {
                         kod: a.Title,
                         nazev: a.nazev,
+                        nazevPlny: a.nazev,
                         utvar: a.vlastnik,
                         uroven: 1,
                         rodic: "",
@@ -64,6 +65,7 @@ Screens:
                     {
                         kod: p.Title,
                         nazev: p.nazev,
+                        nazevPlny: p.nazev,
                         utvar: p.vlastnik,
                         uroven: 2,
                         rodic: p.agenda_kod,
@@ -83,6 +85,7 @@ Screens:
                     {
                         kod: d.Title,
                         nazev: d.nazev,
+                        nazevPlny: d.nazev,
                         utvar: d.vlastnik,
                         uroven: 3,
                         rodic: d.proces_kod,
@@ -102,6 +105,7 @@ Screens:
                     {
                         kod: k.Title,
                         nazev: k.nazev_kratky,
+                        nazevPlny: k.nazev,
                         utvar: k.vykonava,
                         uroven: 4,
                         rodic: k.dilci_proces_kod,
@@ -912,8 +916,10 @@ Screens:
                     =If(ThisItem.uroven <= 2, FontWeight.Semibold, FontWeight.Normal)
                   Height: =Parent.TemplateHeight - 1
                   Size: =11 + varFs
+                  PaddingTop: =4
                   Text: =ThisItem.nazev
-                  VerticalAlign: =VerticalAlign.Middle
+                  VerticalAlign: |-
+                    =If(ThisItem.uroven >= 3, VerticalAlign.Top, VerticalAlign.Middle)
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
                   # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
                   # útvaru (ten začíná na TemplateWidth - 360).
@@ -1002,7 +1008,7 @@ Screens:
                   Text: =""
                   Tooltip: |-
                     =Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ", "Aktivita ") &
-                    ThisItem.kod & Char(10) & ThisItem.nazev & Char(10) &
+                    ThisItem.kod & Char(10) & ThisItem.nazevPlny & Char(10) &
                     If(
                         IsBlank(ThisItem.utvar),
                         Switch(ThisItem.uroven, 4, "Vykonávající útvar není vyplněný.", "Vlastník není vyplněný.") & Char(10),
