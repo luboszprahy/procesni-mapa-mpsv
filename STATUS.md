@@ -1,6 +1,38 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (zakládání z řádku stromu)
+Aktualizováno: 2026-08-23 (design: barvy vrstev, číselník aktivit, detail)
+
+## Designové připomínky ze snímků (23.08.2026) — balík 1.0.0.46
+
+**Aktivity už nejsou bílé.** Čtvrtá úroveň splývala s podkladem karty
+a vypadala jako „žádná úroveň". Škála je laděná jako analogická s jedním
+teplým protipólem: agenda a proces modré (sytost klesá s hloubkou), dílčí
+proces zelený jako předěl k výkonu, aktivita teple pískoví. Sytost je všude
+nízká, protože přes to jde číst dlouhé názvy.
+
+**Hlavičky sloupců se lámaly na dva řádky.** „VLASTNÍK / VYKONÁVÁ" a
+„POLOŽEK UVNITŘ" se do 160 a 110 px nevešly. Sloupec rozšířit nešlo — musel
+by ustoupit název — takže se zkrátily texty na „VLASTNÍK" a „POLOŽEK";
+co se ztratilo, doplňuje tooltip, který hlavičky mají od 1.0.0.31.
+
+**Číselník na úrovni aktivit hlásil cizí texty.** `Switch` bez větve pro
+`aktivita` spadl do else, takže hlavička ukazovala „Číselník — dílčí procesy"
+a formulář „Nový dílčí proces", i když uživatel stál na aktivitách. Chybějící
+větev doplněna na třech místech.
+
+**Tlačítko „Otevřít detail" zrušeno.** Dělalo totéž co klik do řádku, jen
+o krok víc: nejdřív vyber řádek, pak zamiř dolů a klikni znovu. Zůstává
+„Nová aktivita", protože tu klik do seznamu nabídnout nemůže — a u aktivit
+se posune na uvolněné místo.
+
+**Vnitřní předpis v detailu byl 300×64 px**, přestože se do něj píše ručně
+a bývá delší („SP 10/2021; VP 02/2016; …"). Místo se vzalo tam, kde ho bylo
+nejvíc nazbyt: tři vlastníci pod sebou zabírali 216 px svisle, ačkoli jsou
+jen ke čtení z číselníku a vejdou se vedle sebe. Předpis tím dostal celou
+šířku sloupce a dvojnásobnou výšku — z 19 200 px² na 74 400 px², tedy skoro
+čtyřnásobek plochy.
+
+## Zakládání přímo z řádku přehledu (23.08.2026) — balík 1.0.0.44
 
 ## Zakládání přímo z řádku přehledu (23.08.2026) — balík 1.0.0.44
 

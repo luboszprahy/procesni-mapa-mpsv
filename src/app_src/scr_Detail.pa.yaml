@@ -335,8 +335,8 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10 + varFs
-            Text: ="Vlastník agendy (z číselníku)"
-            Width: =620
+            Text: ="Vlastník agendy"
+            Width: =196
             X: =700
             Y: =96
       - lbl_VlastnikAgendy:
@@ -353,11 +353,11 @@ Screens:
                   "",
                   Coalesce(
                       LookUp(colAgendy, Title = Left(drp_Agenda.Selected.Value, 2), vlastnik),
-                      "— v rejstříku nevyplněno —"
+                      "nevyplněno"
                   )
               )
             VerticalAlign: =VerticalAlign.Middle
-            Width: =620
+            Width: =196
             X: =700
             Y: =120
       - lbl_l_VlastnikProcesu:
@@ -367,10 +367,10 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10 + varFs
-            Text: ="Vlastník procesu (z číselníku)"
-            Width: =620
-            X: =700
-            Y: =172
+            Text: ="Vlastník procesu"
+            Width: =196
+            X: =908
+            Y: =96
       - lbl_VlastnikProcesu:
           Control: Label@2.5.1
           Properties:
@@ -385,13 +385,13 @@ Screens:
                   "",
                   Coalesce(
                       LookUp(colProcesy, Title = Left(drp_Proces.Selected.Value, 5), vlastnik),
-                      "— v rejstříku nevyplněno —"
+                      "nevyplněno"
                   )
               )
             VerticalAlign: =VerticalAlign.Middle
-            Width: =620
-            X: =700
-            Y: =196
+            Width: =196
+            X: =908
+            Y: =120
       - lbl_l_VlastnikDilci:
           Control: Label@2.5.1
           Properties:
@@ -399,10 +399,10 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =20
             Size: =10 + varFs
-            Text: ="Vlastník dílčího procesu (z číselníku)"
-            Width: =620
-            X: =700
-            Y: =248
+            Text: ="Vlastník dílčího"
+            Width: =196
+            X: =1116
+            Y: =96
       - lbl_VlastnikDilci:
           Control: Label@2.5.1
           Properties:
@@ -417,13 +417,13 @@ Screens:
                   "",
                   Coalesce(
                       LookUp(colDilci, Title = Left(drp_Dilci.Selected.Value, 9), vlastnik),
-                      "— v rejstříku nevyplněno —"
+                      "nevyplněno"
                   )
               )
             VerticalAlign: =VerticalAlign.Middle
-            Width: =620
-            X: =700
-            Y: =272
+            Width: =196
+            X: =1116
+            Y: =120
       - lbl_l_Utvar:
           Control: Label@2.5.1
           Properties:
@@ -434,7 +434,7 @@ Screens:
             Text: ="Vykonává útvar"
             Width: =300
             X: =700
-            Y: =324
+            Y: =176
       - drp_UtvarDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -455,7 +455,7 @@ Screens:
             Size: =13 + varFs
             Width: =300
             X: =700
-            Y: =348
+            Y: =200
       - lbl_l_Sekce:
           Control: Label@2.5.1
           Properties:
@@ -466,7 +466,7 @@ Screens:
             Text: ="Sekce"
             Width: =300
             X: =1020
-            Y: =324
+            Y: =176
       - drp_SekceDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -487,7 +487,7 @@ Screens:
             Size: =13 + varFs
             Width: =300
             X: =1020
-            Y: =348
+            Y: =200
       - lbl_l_Predpis:
           Control: Label@2.5.1
           Properties:
@@ -496,9 +496,9 @@ Screens:
             Height: =20
             Size: =10 + varFs
             Text: ="Vnitřní předpis"
-            Width: =300
+            Width: =620
             X: =700
-            Y: =424
+            Y: =336
       - txt_Predpis:
           Control: Classic/TextInput@2.3.2
           Properties:
@@ -509,12 +509,12 @@ Screens:
             HintText: ="Víc předpisů oddělte středníkem — např. SP 10/2021"
             Default: =If(varNova, "", varAktivita.vnitrni_predpis)
             Font: =Font.'Open Sans'
-            Height: =64
+            Height: =120
             Mode: =TextMode.MultiLine
             Size: =13 + varFs
-            Width: =300
+            Width: =620
             X: =700
-            Y: =448
+            Y: =360
       - lbl_l_Stav:
           Control: Label@2.5.1
           Properties:
@@ -524,8 +524,8 @@ Screens:
             Size: =10 + varFs
             Text: ="Stav"
             Width: =300
-            X: =1020
-            Y: =424
+            X: =700
+            Y: =256
       - drp_StavDetail:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -539,8 +539,8 @@ Screens:
             Items: =["pracovní", "schváleno"]
             Size: =13 + varFs
             Width: =300
-            X: =1020
-            Y: =448
+            X: =700
+            Y: =280
       # ---------- karta zařazení do dílčích procesů ----------
       # Do 1.0.0.34 to byla galerie 300×60 px vedle pole Stav: dva řádky
       # písmem 10, bez nadpisu s počtem a bez štítku primárního zařazení.
@@ -554,7 +554,7 @@ Screens:
             Height: =140
             Width: =620
             X: =700
-            Y: =516
+            Y: =496
       - rec_PruhVazby:
           Control: Rectangle@2.3.0
           Properties:
@@ -562,7 +562,7 @@ Screens:
             Height: =140
             Width: =4
             X: =700
-            Y: =516
+            Y: =496
       # Nadpis je vidět vždycky a u nové aktivity nese vysvětlení místo počtu.
       # Samostatný popisek „zatím prázdno" přes galerii by neprošel branou
       # kontrola_prekryvu — ta počítá geometrii, ne Visible za běhu.
@@ -583,7 +583,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =380
             X: =724
-            Y: =524
+            Y: =504
       - btn_Vazby:
           Control: Classic/Button@2.2.0
           Properties:
@@ -605,7 +605,7 @@ Screens:
             Visible: =!varNova
             Width: =184
             X: =1112
-            Y: =520
+            Y: =500
       # Výška na tři řádky se schválně nedopočítává z počtu položek: má být
       # vidět, že seznam pokračuje pod okrajem, a to ustálená výška se
       # svislým posuvníkem ukáže líp než karta, která se roztáhne.
@@ -622,7 +622,7 @@ Screens:
             Visible: =!varNova
             Width: =572
             X: =724
-            Y: =560
+            Y: =540
           Children:
             - lbl_ZarazeniText:
                 Control: Label@2.5.1
@@ -761,7 +761,7 @@ Screens:
             Text: ="Uložit"
             Width: =200
             X: =700
-            Y: =664
+            Y: =652
       - btn_Smazat:
           Control: Classic/Button@2.2.0
           Properties:
@@ -794,4 +794,4 @@ Screens:
             Visible: =!varNova
             Width: =160
             X: =920
-            Y: =664
+            Y: =652

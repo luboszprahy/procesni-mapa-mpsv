@@ -167,7 +167,13 @@ Screens:
             Size: =16 + varFs
             Text: |-
               ="Číselník — " &
-              Switch(varUrovenTyp, "agenda", "agendy", "proces", "procesy", "dílčí procesy")
+              Switch(
+                  varUrovenTyp,
+                  "agenda", "agendy",
+                  "proces", "procesy",
+                  "dilci", "dílčí procesy",
+                  "aktivity"
+              )
             VerticalAlign: =VerticalAlign.Middle
             Width: =740
             X: =88
@@ -861,13 +867,15 @@ Screens:
                       varUrovenTyp,
                       "agenda", "Nová agenda",
                       "proces", "Nový proces",
-                      "Nový dílčí proces"
+                      "dilci", "Nový dílčí proces",
+                      "Aktivity"
                   ),
                   Switch(
                       varUrovenTyp,
                       "agenda", "Úprava agendy ",
                       "proces", "Úprava procesu ",
-                      "Úprava dílčího procesu "
+                      "dilci", "Úprava dílčího procesu ",
+                      "Aktivita "
                   ) & varCiselnikKod
               )
             VerticalAlign: =VerticalAlign.Middle
@@ -892,8 +900,8 @@ Screens:
                   "dilci",
                   "Dílčí proces je vymezený úsek procesu. Patří vždy pod jeden proces, takže musíš vybrat agendu i proces. Vlastníkem dílčího procesu je odbor.",
                   "Aktivita je nejnižší úroveň — činnost tak, jak má znít v organizačním řádu. Vykonává ji oddělení." & Char(10) & Char(10) &
-                  "Upravuje se na vlastní obrazovce, ne tady: má deset polí a navíc zařazení do víc dílčích procesů, což se do tohohle panelu nevejde. Klik na řádek v seznamu vlevo detail otevře, tlačítka dole ho otevřou nebo založí novou aktivitu." & Char(10) & Char(10) &
-                  "Společné se zbytkem číselníku má výběr, filtrování a mazání — proto je aktivita čtvrtou úrovní tady, a ne na vlastní obrazovce se seznamem."
+                  "Klikem na řádek vlevo se otevře detail, kde se aktivita edituje: má deset polí a zařazení do víc dílčích procesů, což se do tohohle panelu nevejde." & Char(10) & Char(10) &
+                  "Vlevo se aktivity hledají, filtrují sekcí, útvarem a stavem a mažou — proto jsou tady, a ne na vlastní obrazovce."
               )
             Width: =572
             X: =724
@@ -1184,22 +1192,8 @@ Screens:
             Height: =44
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylAkceHover
-            DisplayMode: |-
-              =If(
-                  varUrovenTyp = "aktivita" && IsBlank(varCiselnikKod),
-                  DisplayMode.Disabled,
-                  DisplayMode.Edit
-              )
             OnSelect: |-
               =Set(varChybaC, "");
-              If(
-                  varUrovenTyp = "aktivita",
-                  Set(varDetailZpet, "ciselnik");
-                  Set(varNova, false);
-                  Set(varNovyDpKod, "");
-                  Set(varAktivita, LookUp(Aktivity, Title = varCiselnikKod));
-                  Navigate(scr_Detail, ScreenTransition.Cover)
-              );
               If(
                   varUrovenTyp <> "aktivita",
               If(
@@ -1463,21 +1457,14 @@ Screens:
             PressedFill: =stylAkceStisk
             Size: =14 + varFs
             Text: |-
-              =If(
-                  varUrovenTyp = "aktivita",
-                  "Otevřít detail",
-                  If(varCiselnikNova, "Založit", "Uložit změny")
-              )
+              =If(varCiselnikNova, "Založit", "Uložit změny")
+            Visible: =varUrovenTyp <> "aktivita"
             Tooltip: |-
               =If(
-                  varUrovenTyp = "aktivita",
-                  "Otevře detail vybrané aktivity. Dokud žádná není vybraná, je tlačítko neaktivní - vyber řádek v seznamu vlevo. Aktivita se needituje tady, protože má deset polí a zařazení do víc dílčích procesů.",
-                  If(
                   varCiselnikNova,
                   "Založí položku v příslušném SharePoint seznamu a přidělí jí kód. Zapíše se stav mapování nezmapováno a zdroj karta; u dílčího procesu navíc stav v rejstříku využitý, protože ho právě zakládá správce. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu.",
                   "Uloží změnu názvu a vlastníka. Kód, úroveň ani zařazení se nemění - vazby v rejstříku i v mapě na kódu stojí. Když necháš vlastníka nevyplněného, zůstane ten původní; je to pojistka pro položky, které mají vlastníků víc a v nabídce jednoho útvaru se proto nenajdou."
               ) & " Nová hodnota se rovnou objeví v seznamu vlevo i v nabídkách a po návratu na přehled ve stromu - appka se kvůli tomu nemusí restartovat."
-              )
             Width: =200
             X: =724
             Y: =596
@@ -1527,7 +1514,8 @@ Screens:
                   "Vyprázdní formulář a přepne ho ze zobrazení vybrané položky zpět na zakládání. Když už formulář zakládá, je tlačítko neaktivní - je z něj tak vidět, v jakém režimu formulář je."
               )
             Width: =200
-            X: =944
+            X: |-
+              =If(varUrovenTyp = "aktivita", 724, 944)
             Y: =596
       - lbl_PoznamkaC:
           Control: Label@2.5.1

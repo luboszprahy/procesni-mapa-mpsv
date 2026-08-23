@@ -744,7 +744,7 @@ Screens:
             FontWeight: =FontWeight.Semibold
             Height: =28
             Size: =10 + varFs
-            Text: ="VLASTNÍK / VYKONÁVÁ"
+            Text: ="VLASTNÍK"
             Tooltip: '="Kód útvaru z číselníku Útvary - u agendy, procesu a dílčího procesu je to jejich vlastník (sekce u agendy, odbor u procesu a dílčího procesu), u aktivity útvar, který ji vykonává. Vlastníků může být víc, pak jsou kódy oddělené středníkem (například 72; 71). Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =160
@@ -760,7 +760,11 @@ Screens:
             Height: =28
             Size: =10 + varFs
             Text: |-
-              =If(varDashStav = "", "POLOŽEK UVNITŘ", "AKTIVIT " & Upper(varDashStav))
+              =If(
+                  varDashStav = "",
+                  "POLOŽEK",
+                  If(varDashStav = "schváleno", "SCHVÁLENO", "PRACOVNÍ")
+              )
             Tooltip: '="Bez filtru stavu je to počet položek o úroveň níž: u agendy procesy, u procesu dílčí procesy, u dílčího procesu aktivity. U aktivity zůstává prázdné - nižší úroveň už nemá. Nula u dílčího procesu znamená, že v rejstříku je, ale žádná aktivita k němu zatím není popsaná. Se zapnutým filtrem stavu se číslo přepne na počet aktivit toho stavu v celé větvi."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =110
@@ -830,10 +834,10 @@ Screens:
                   Fill: |-
                     =Switch(
                         ThisItem.uroven,
-                        1, RGBA(206, 221, 242, 1),
-                        2, RGBA(228, 237, 250, 1),
-                        3, RGBA(223, 240, 230, 1),
-                        stylKarta
+                        1, RGBA(205, 220, 241, 1),
+                        2, RGBA(224, 234, 247, 1),
+                        3, RGBA(222, 239, 229, 1),
+                        RGBA(249, 245, 236, 1)
                     )
                   Height: =Parent.TemplateHeight - 1
                   Width: =Parent.TemplateWidth
@@ -848,7 +852,7 @@ Screens:
                         1, stylPrimarni,
                         2, stylAkce,
                         3, stylUspech,
-                        RGBA(160, 168, 180, 1)
+                        RGBA(184, 148, 92, 1)
                     )
                   Height: =Parent.TemplateHeight - 1
                   Width: =5
