@@ -309,7 +309,7 @@ Screens:
       - rec_PruhAgendy:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(94, 86, 90, 1)
+            Fill: =stylPrimarni
             Height: =56
             Width: =4
             X: =40
@@ -362,7 +362,7 @@ Screens:
       - rec_PruhProcesy:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(127, 175, 151, 1)
+            Fill: =stylAkce
             Height: =56
             Width: =4
             X: =366
@@ -415,7 +415,7 @@ Screens:
       - rec_PruhDilci:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(255, 147, 79, 1)
+            Fill: =RGBA(74, 127, 193, 1)
             Height: =56
             Width: =4
             X: =692
@@ -470,7 +470,7 @@ Screens:
       - rec_PruhAktivity:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(255, 196, 155, 1)
+            Fill: =RGBA(147, 175, 214, 1)
             Height: =56
             Width: =4
             X: =1018
@@ -838,10 +838,10 @@ Screens:
                   Fill: |-
                     =Switch(
                         ThisItem.uroven,
-                        1, RGBA(169, 203, 183, 1),
-                        2, RGBA(212, 229, 219, 1),
-                        3, RGBA(239, 236, 202, 1),
-                        RGBA(249, 248, 234, 1)
+                        1, RGBA(214, 223, 242, 1),
+                        2, RGBA(230, 236, 248, 1),
+                        3, RGBA(240, 244, 251, 1),
+                        RGBA(250, 251, 254, 1)
                     )
                   Height: =Parent.TemplateHeight - 1
                   Width: =Parent.TemplateWidth
@@ -853,10 +853,10 @@ Screens:
                   Fill: |-
                     =Switch(
                         ThisItem.uroven,
-                        1, RGBA(94, 86, 90, 1),
-                        2, RGBA(127, 175, 151, 1),
-                        3, RGBA(255, 147, 79, 1),
-                        RGBA(255, 196, 155, 1)
+                        1, stylPrimarni,
+                        2, stylAkce,
+                        3, RGBA(74, 127, 193, 1),
+                        RGBA(147, 175, 214, 1)
                     )
                   Height: =Parent.TemplateHeight - 1
                   Width: =5
@@ -883,7 +883,7 @@ Screens:
             - lbl_StromKod:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(74, 67, 71, 1)
+                  Color: =RGBA(71, 84, 107, 1)
                   Font: =Font.'Open Sans'
                   Height: =Parent.TemplateHeight - 1
                   Size: =10 + varFs
@@ -896,7 +896,7 @@ Screens:
             - lbl_StromNazev:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =RGBA(48, 43, 46, 1)
+                  Color: =stylText
                   Font: =Font.'Open Sans'
                   FontWeight: |-
                     =If(ThisItem.uroven <= 2, FontWeight.Semibold, FontWeight.Normal)

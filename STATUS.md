@@ -1,6 +1,35 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (paleta coolors.co, dlouhé názvy od horního okraje)
+Aktualizováno: 2026-08-23 (monochromatická modrá škála)
+
+## Barvy podruhé: škála z výchozí modré (23.08.2026) — balík 1.0.0.49
+
+Paleta z coolors (šalvějová + krémová) se neujala: k tmavě modrému navbaru
+neseděla a na obrazovce vznikly dvě nesouvisející barevné rodiny. Zadavatel
+to shrnul výstižně — „z toho se mi dělá špatně".
+
+Nová škála vychází z barvy, která na obrazovce už je: `stylPrimarni`
+**#00126B**. Odstíny jsou její světlé varianty, takže strom a navbar mluví
+touž řečí. Hierarchii dělá sytost, ne odstín:
+
+| úroveň | plocha | pruh |
+|---|---|---|
+| agenda | `#D6DFF2` | `#00126B` (výchozí modrá) |
+| proces | `#E6ECF8` | `#005AB5` |
+| dílčí proces | `#F0F4FB` | `#4A7FC1` |
+| aktivita | `#FAFBFE` | `#93AFD6` |
+
+Aktivita je skoro bílá, ale ne bílá — bílá by splynula s podkladem karty.
+
+Kód řádku je `#47546B`, tmavá modrošedá z téže rodiny: **5,71:1** na
+nejsytějším podkladu, tedy nad hranicí WCAG AA. Neutrální šedá by dala jen
+3,83:1, takže by neprošla.
+
+Poučení je zapsané do skillu `harmonicke-barvy` jako pravidlo nulté: **vyjdi
+z barvy, kterou aplikace už má**, a když zadaná paleta k ní nesedí, řekni to
+— ale nabídni konkrétní náhradu, ne jen námitku.
+
+## Barvy podle zadané palety a dlouhé názvy (23.08.2026) — balík 1.0.0.48
 
 ## Barvy podle zadané palety a dlouhé názvy (23.08.2026) — balík 1.0.0.48
 
