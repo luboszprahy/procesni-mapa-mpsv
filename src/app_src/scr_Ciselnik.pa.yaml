@@ -601,15 +601,14 @@ Screens:
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
             Height: =24
-            Size: =10 + varFs
+            Size: =10
             HoverColor: =stylAkce
             OnSelect: |-
               =Set(varRazeniAscC, If(varRazeniC = "vlastnik", !varRazeniAscC, true));
               Set(varRazeniC, "vlastnik")
             PressedColor: =stylAkceStisk
             Text: |-
-              =If(varUrovenTyp = "aktivita", "VYKONÁVÁ", "VLASTNÍK") &
-              If(varRazeniC = "vlastnik", If(varRazeniAscC, " ▲", " ▼"), "")
+              ="ÚTVAR" & If(varRazeniC = "vlastnik", If(varRazeniAscC, " ▲", " ▼"), "")
             Tooltip: '="Kód útvaru z číselníku Útvary. U agendy sekce, u procesu a dílčího procesu odbor, u aktivity útvar, který ji vykonává. Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód. Klik řadí."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
