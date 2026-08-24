@@ -53,18 +53,6 @@ const SCHEMA = {
      "popis": "Sekce. Vice vlastniku je pripustny stav - oddelovac '; '."
     },
     {
-     "name": "stav_mapovani",
-     "display": "Stav mapování",
-     "type": "Choice",
-     "indexed": true,
-     "csv": "stav_mapovani",
-     "choices": [
-      "zmapováno",
-      "zmapováno jiným útvarem",
-      "nezmapováno"
-     ]
-    },
-    {
      "name": "zdroj",
      "display": "Zdroj",
      "type": "Choice",
@@ -122,18 +110,6 @@ const SCHEMA = {
      "maxlen": 255,
      "csv": "vlastnik",
      "popis": "Odbor. Vice vlastniku pripustne - oddelovac '; '."
-    },
-    {
-     "name": "stav_mapovani",
-     "display": "Stav mapování",
-     "type": "Choice",
-     "indexed": true,
-     "csv": "stav_mapovani",
-     "choices": [
-      "zmapováno",
-      "zmapováno jiným útvarem",
-      "nezmapováno"
-     ]
     },
     {
      "name": "zdroj",
@@ -204,18 +180,6 @@ const SCHEMA = {
       "nevyužitý"
      ],
      "popis": "Barevne odliseni v puvodnim rejstriku."
-    },
-    {
-     "name": "stav_mapovani",
-     "display": "Stav mapování",
-     "type": "Choice",
-     "indexed": true,
-     "csv": "stav_mapovani",
-     "choices": [
-      "zmapováno",
-      "zmapováno jiným útvarem",
-      "nezmapováno"
-     ]
     },
     {
      "name": "zdroj",

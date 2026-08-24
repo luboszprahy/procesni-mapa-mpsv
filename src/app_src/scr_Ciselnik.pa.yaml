@@ -1319,7 +1319,6 @@ Screens:
                                           Title: varNovyKodC,
                                           nazev: txt_NazevC.Text,
                                           vlastnik: varVlastnikC,
-                                          stav_mapovani: { Value: "nezmapováno" },
                                           zdroj: { Value: "karta" }
                                       }
                                   );
@@ -1347,7 +1346,6 @@ Screens:
                                           nazev: txt_NazevC.Text,
                                           agenda_kod: Left(drp_AgendaC.Selected.Value, 2),
                                           vlastnik: varVlastnikC,
-                                          stav_mapovani: { Value: "nezmapováno" },
                                           zdroj: { Value: "karta" }
                                       }
                                   );
@@ -1384,8 +1382,6 @@ Screens:
                                           nazev: txt_NazevC.Text,
                                           proces_kod: Left(drp_ProcesC.Selected.Value, 5),
                                           vlastnik: varVlastnikC,
-                                          stav_rejstrik: { Value: "využitý" },
-                                          stav_mapovani: { Value: "nezmapováno" },
                                           zdroj: { Value: "karta" }
                                       }
                                   );

@@ -30,10 +30,8 @@ Zdroj dat: `agendy.csv` (7 řádků). Verzování: zapnuto.
 | `Title` | Kód | Jeden řádek textu | ano | ano | kod |
 | `nazev` | Název | Jeden řádek textu | ano | ne | nazev |
 | `vlastnik` | Vlastník agendy | Jeden řádek textu | ne | ne | vlastnik |
-| `stav_mapovani` | Stav mapování | Volba | ne | ano | stav_mapovani |
 | `zdroj` | Zdroj | Volba | ne | ne | zdroj |
 
-- `stav_mapovani` — hodnoty: `zmapováno`, `zmapováno jiným útvarem`, `nezmapováno`
 - `zdroj` — hodnoty: `rejstrik`, `karta`
 - `Title` — Identifikacni kod AA. Prirozeny klic.
 - `vlastnik` — Sekce. Vice vlastniku je pripustny stav - oddelovac '; '.
@@ -54,10 +52,8 @@ Zdroj dat: `procesy.csv` (46 řádků). Verzování: zapnuto.
 | `nazev` | Název | Jeden řádek textu | ano | ne | nazev |
 | `agenda_kod` | Agenda (kód) | Jeden řádek textu | ano | ano | agenda_kod |
 | `vlastnik` | Vlastník procesu | Jeden řádek textu | ne | ne | vlastnik |
-| `stav_mapovani` | Stav mapování | Volba | ne | ano | stav_mapovani |
 | `zdroj` | Zdroj | Volba | ne | ne | zdroj |
 
-- `stav_mapovani` — hodnoty: `zmapováno`, `zmapováno jiným útvarem`, `nezmapováno`
 - `zdroj` — hodnoty: `rejstrik`, `karta`
 - `Title` — Identifikacni kod AA-BB.
 - `agenda_kod` — Textovy odkaz na Agendy.Title - ne lookup ID (prenositelnost mezi tenanty).
@@ -79,11 +75,9 @@ Zdroj dat: `dilci_procesy.csv` (250 řádků). Verzování: zapnuto.
 | `proces_kod` | Proces (kód) | Jeden řádek textu | ano | ano | proces_kod |
 | `vlastnik` | Vlastník dílčího procesu | Jeden řádek textu | ne | ne | vlastnik |
 | `stav_rejstrik` | Stav v rejstříku | Volba | ne | ne | stav_rejstrik |
-| `stav_mapovani` | Stav mapování | Volba | ne | ano | stav_mapovani |
 | `zdroj` | Zdroj | Volba | ne | ne | zdroj |
 
 - `stav_rejstrik` — hodnoty: `využitý`, `využitý-S4`, `nevyužitý`
-- `stav_mapovani` — hodnoty: `zmapováno`, `zmapováno jiným útvarem`, `nezmapováno`
 - `zdroj` — hodnoty: `rejstrik`, `karta`
 - `Title` — Identifikacni kod AA-BB-CCC.
 - `nazev` — Nejdelsi namereny nazev 166 znaku - rezerva do 255 je mala, ale sloupec musi zustat Text kvuli razeni a indexaci.

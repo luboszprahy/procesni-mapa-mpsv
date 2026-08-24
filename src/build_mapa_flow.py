@@ -38,15 +38,14 @@ META = {"sekce": "3"}
 LISTY = [
     ("Agendy", "Agendy", {
         "kod": "Title", "nazev": "nazev", "vlastnik": "vlastnik",
-        "stav_mapovani": ("stav_mapovani", "choice"),
     }),
     ("Procesy", "Procesy", {
         "kod": "Title", "nazev": "nazev", "agenda_kod": "agenda_kod",
-        "vlastnik": "vlastnik", "stav_mapovani": ("stav_mapovani", "choice"),
+        "vlastnik": "vlastnik",
     }),
     ("Dílčí procesy", "DilciProcesy", {
         "kod": "Title", "nazev": "nazev", "proces_kod": "proces_kod",
-        "vlastnik": "vlastnik", "stav_mapovani": ("stav_mapovani", "choice"),
+        "vlastnik": "vlastnik",
     }),
     ("Aktivity", "Aktivity", {
         "kod": "Title", "nazev": "nazev", "dilci_proces_kod": "dilci_proces_kod",

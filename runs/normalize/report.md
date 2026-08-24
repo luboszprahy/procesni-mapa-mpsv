@@ -13,9 +13,9 @@ Sekce: 3 | Sekční správce: Ing. Tomáš Kroutil
 
 ## Stav zmapování
 
-- agendy: nezmapováno 5, zmapováno 2
-- procesy: nezmapováno 39, zmapováno 7
-- dílčí procesy: nezmapováno 165, zmapováno jiným útvarem 62, zmapováno 23
+- agendy: 2 s aktivitami, 5 bez aktivit
+- procesy: 7 s aktivitami, 39 bez aktivit
+- dílčí procesy: 23 s aktivitami, 227 bez aktivit
 
 ## Nálezy
 

@@ -339,28 +339,18 @@ def main():
         akt_proces[(ag, pr)] += len(d["aktivity"])
         akt_agenda[ag] += len(d["aktivity"])
 
-    def stav_mapovani(n, stav_rejstrik=None):
-        if n:
-            return "zmapováno"
-        if stav_rejstrik and stav_rejstrik.startswith("využitý"):
-            return "zmapováno jiným útvarem"
-        return "nezmapováno"
-
     agendy = [{"kod": a["kod"], "nazev": a["nazev"], "vlastnik": owners(a["vlastnici"]),
                "pocet_aktivit": akt_agenda[a["key"]],
-               "stav_mapovani": stav_mapovani(akt_agenda[a["key"]]),
                "zdroj": a["zdroj"]} for a in reg.agendy.values()]
     procesy = [{"kod": p["kod"], "nazev": p["nazev"], "agenda_kod": reg.agendy[p["agenda"]]["kod"],
                 "vlastnik": owners(p["vlastnici"]),
                 "pocet_aktivit": akt_proces[(p["agenda"], p["key"])],
-                "stav_mapovani": stav_mapovani(akt_proces[(p["agenda"], p["key"])]),
                 "zdroj": p["zdroj"]}
                for p in reg.procesy.values()]
     dilci = [{"kod": d["kod"], "nazev": d["nazev"],
               "proces_kod": reg.procesy[(d["agenda"], d["proces"])]["kod"],
               "vlastnik": owners(d["vlastnici"]), "stav_rejstrik": d["stav"],
               "pocet_aktivit": len(d["aktivity"]),
-              "stav_mapovani": stav_mapovani(len(d["aktivity"]), d["stav"]),
               "zdroj": d["zdroj"]}
              for d in reg.dilci.values()]
     aktivity = [{"kod": a["kod"], "nazev": a["nazev"], "dilci_proces_kod": a["primarni_dp"],
@@ -372,12 +362,12 @@ def main():
               "primarni": "ano" if v["primarni"] else "ne"} for v in karta["vazby"]]
 
     write_csv(out / "agendy.csv", agendy,
-              ["kod", "nazev", "vlastnik", "pocet_aktivit", "stav_mapovani", "zdroj"])
+              ["kod", "nazev", "vlastnik", "pocet_aktivit", "zdroj"])
     write_csv(out / "procesy.csv", procesy,
-              ["kod", "nazev", "agenda_kod", "vlastnik", "pocet_aktivit", "stav_mapovani", "zdroj"])
+              ["kod", "nazev", "agenda_kod", "vlastnik", "pocet_aktivit", "zdroj"])
     write_csv(out / "dilci_procesy.csv", dilci,
               ["kod", "nazev", "proces_kod", "vlastnik", "stav_rejstrik", "pocet_aktivit",
-               "stav_mapovani", "zdroj"])
+               "zdroj"])
     write_csv(out / "aktivity.csv", aktivity,
               ["kod", "nazev", "dilci_proces_kod", "vykonava", "spolupracuje",
                "vnitrni_predpis", "sekce", "zdroj_radek"])
@@ -409,9 +399,12 @@ def main():
              "- aktivity: %d" % len(aktivity),
              "- vazby aktivita-dílčí proces: %d" % len(vazby), "",
              "## Stav zmapování", ""]
+    # Počítá se ze skutečnosti, ne z uloženého sloupce: `stav_mapovani`
+    # 24.08.2026 zrušen, protože byl odvozený a od importu zamrzlý.
     for tab, nazev in ((agendy, "agendy"), (procesy, "procesy"), (dilci, "dílčí procesy")):
-        c = Counter(x["stav_mapovani"] for x in tab)
-        lines.append("- %s: %s" % (nazev, ", ".join("%s %d" % (v, n) for v, n in c.most_common())))
+        s_aktivitami = sum(1 for x in tab if x["pocet_aktivit"])
+        lines.append("- %s: %d s aktivitami, %d bez aktivit"
+                     % (nazev, s_aktivitami, len(tab) - s_aktivitami))
     lines += ["", "## Nálezy", ""]
     for kind, msgs in by_kind.items():
         lines += ["### %s (%d)" % (kind, len(msgs)), ""] + ["- " + m for m in msgs] + [""]

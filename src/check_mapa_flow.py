@@ -29,15 +29,15 @@ KLICE_MODELU = ("agendy", "procesy", "dilci_procesy", "aktivity", "vazby")
 # Klíče, které šablona z dat opravdu čte. Kdyby Select některý vynechal,
 # strom se postaví prázdný a nic nespadne.
 OCEKAVANE_KLICE = {
-    "Map_Agendy": {"kod", "nazev", "vlastnik", "stav_mapovani"},
-    "Map_Procesy": {"kod", "nazev", "agenda_kod", "vlastnik", "stav_mapovani"},
-    "Map_DilciProcesy": {"kod", "nazev", "proces_kod", "vlastnik", "stav_mapovani"},
+    "Map_Agendy": {"kod", "nazev", "vlastnik"},
+    "Map_Procesy": {"kod", "nazev", "agenda_kod", "vlastnik"},
+    "Map_DilciProcesy": {"kod", "nazev", "proces_kod", "vlastnik"},
     "Map_Aktivity": {"kod", "nazev", "dilci_proces_kod", "vykonava",
                      "spolupracuje", "vnitrni_predpis", "sekce"},
     "Map_Vazby": {"aktivita_kod", "dilci_proces_kod"},
 }
 
-CHOICE_KLICE = {"stav_mapovani"}
+CHOICE_KLICE = set()   # choice sloupec uz do mapy nejde
 
 chyby = []
 kontrol = 0

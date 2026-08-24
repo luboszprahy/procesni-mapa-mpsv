@@ -49,9 +49,9 @@ v uvozovkách** (je to JS výraz), `__DATA_JSON__` objektem:
 ```json
 {
   "meta":          { "sekce": "3", "spravce": "Ing. Tomáš Kroutil" },
-  "agendy":        [ { "kod", "nazev", "vlastnik", "stav_mapovani" } ],
-  "procesy":       [ { "kod", "nazev", "agenda_kod", "vlastnik", "stav_mapovani" } ],
-  "dilci_procesy": [ { "kod", "nazev", "proces_kod", "vlastnik", "stav_mapovani" } ],
+  "agendy":        [ { "kod", "nazev", "vlastnik" } ],
+  "procesy":       [ { "kod", "nazev", "agenda_kod", "vlastnik" } ],
+  "dilci_procesy": [ { "kod", "nazev", "proces_kod", "vlastnik" } ],
   "aktivity":      [ { "kod", "nazev", "dilci_proces_kod", "vykonava",
                        "spolupracuje", "vnitrni_predpis", "sekce" } ],
   "vazby":         [ { "aktivita_kod", "dilci_proces_kod" } ]
@@ -95,7 +95,6 @@ přiblíží, bude potřeba jiné řešení, ne vyšší číslo.
 | `kod` | `@item()?['Title']` |
 | `nazev` | `@item()?['nazev']` |
 | `vlastnik` | `@item()?['vlastnik']` |
-| `stav_mapovani` | `@item()?['stav_mapovani']?['Value']` |
 
 **Sloupce typu Choice vracejí objekt, ne řetězec** — proto `?['Value']`.
 Bez toho se do JSON dostane `{"Value":"zmapováno"}` a filtr stavu v mapě
@@ -103,9 +102,7 @@ přestane fungovat.
 
 Obdobně:
 - `Map_Procesy`: `kod`←`Title`, `nazev`, `agenda_kod`, `vlastnik`,
-  `stav_mapovani`←`…?['Value']`
 - `Map_DilciProcesy`: `kod`←`Title`, `nazev`, `proces_kod`, `vlastnik`,
-  `stav_mapovani`←`…?['Value']`
 - `Map_Aktivity`: `kod`←`Title`, `nazev`, `dilci_proces_kod`, `vykonava`,
   `spolupracuje`, `vnitrni_predpis`, `sekce`
 - `Map_Vazby`: `aktivita_kod`, `dilci_proces_kod`

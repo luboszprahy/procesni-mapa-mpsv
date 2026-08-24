@@ -1,8 +1,8 @@
-﻿kod;nazev;vlastnik;pocet_aktivit;stav_mapovani;zdroj
-01;Organizace a řízení XÚ a resortu;7;10;zmapováno;rejstrik
-02;Sociální záležitosti;;0;nezmapováno;rejstrik
-03;Příjmová politika a sociální pojištění;;0;nezmapováno;rejstrik
-04;Zaměstnanost;;0;nezmapováno;rejstrik
-05;Pracovněprávní záležitosti;;0;nezmapováno;rejstrik
-06;EU a mezinárodní vztahy;;0;nezmapováno;rejstrik
-07;Zajištění chodu XÚ a resortu;7;36;zmapováno;rejstrik
+﻿kod;nazev;vlastnik;pocet_aktivit;zdroj
+01;Organizace a řízení XÚ a resortu;7;10;rejstrik
+02;Sociální záležitosti;;0;rejstrik
+03;Příjmová politika a sociální pojištění;;0;rejstrik
+04;Zaměstnanost;;0;rejstrik
+05;Pracovněprávní záležitosti;;0;rejstrik
+06;EU a mezinárodní vztahy;;0;rejstrik
+07;Zajištění chodu XÚ a resortu;7;36;rejstrik

@@ -84,7 +84,6 @@
   .badge{flex:0 0 auto;font-size:.79rem;border-radius:9px;padding:1px 7px;background:var(--chip);
          color:var(--muted);margin-top:2px;white-space:nowrap}
   .badge.no{background:#fdecea;color:#a3352a}
-  .badge.jinde{background:#fff4e0;color:#8a5a12}
   .node.unmapped > .row > .nm{opacity:.62;font-style:italic}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);padding:8px 20px 0}
   .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
@@ -135,8 +134,7 @@
   <span><i class="g3"></i>dílčí proces</span>
   <span><i class="g4"></i>aktivita</span>
   <span class="vysvetlivky">Odznak vpravo v řádku říká, kolik aktivit je uvnitř větve.
-    <b class="badge no">bez aktivit</b> = položka v rejstříku je, ale činnosti k ní zatím nikdo nepopsal.
-    <b class="badge jinde">u jiného útvaru</b> = rejstřík ji vede jako využitou, ale činnosti k ní popsal jiný útvar, takže v této evidenci nejsou.</span>
+    <b class="badge no">bez aktivit</b> = položka v rejstříku je, ale činnosti k ní zatím nikdo nepopsal.</span>
 </div>
 
 <main>
@@ -272,14 +270,11 @@ function render(){
       row.appendChild(b);
     } else if (n.lvl !== "k"){
       const b = document.createElement("span");
-      const jinde = !n.aktCount && (n.rec.stav_mapovani || "").startsWith("zmapováno jiným");
-      b.className = "badge" + (n.aktCount ? "" : jinde ? " jinde" : " no");
-      b.textContent = n.aktCount ? n.aktCount + " akt." : jinde ? "u jiného útvaru" : "bez aktivit";
+      b.className = "badge" + (n.aktCount ? "" : " no");
+      b.textContent = n.aktCount ? n.aktCount + " akt." : "bez aktivit";
       b.title = n.aktCount
         ? "Uvnitř této větve je " + n.aktCount + " " + sklonAkt(n.aktCount) + "."
-        : jinde
-          ? "Rejstřík tuhle položku vede jako využitou, ale činnosti k ní popsal jiný útvar — v této evidenci proto žádné aktivity nejsou. Není to nedodělek."
-          : "V rejstříku položka je, ale činnosti k ní zatím nikdo nepopsal. Právě takhle je vidět, co ještě čeká na zmapování.";
+        : "V rejstříku položka je, ale činnosti k ní zatím nikdo nepopsal. Právě takhle je vidět, co ještě čeká na zmapování.";
       row.appendChild(b);
       if (!n.aktCount) node.classList.add("unmapped");
     }

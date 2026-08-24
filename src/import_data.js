@@ -22,49 +22,42 @@ const DATA = [
     "Title": "01",
     "nazev": "Organizace a řízení XÚ a resortu",
     "vlastnik": "7",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
     "Title": "02",
     "nazev": "Sociální záležitosti",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
     "Title": "03",
     "nazev": "Příjmová politika a sociální pojištění",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
     "Title": "04",
     "nazev": "Zaměstnanost",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
     "Title": "05",
     "nazev": "Pracovněprávní záležitosti",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
     "Title": "06",
     "nazev": "EU a mezinárodní vztahy",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
     "Title": "07",
     "nazev": "Zajištění chodu XÚ a resortu",
     "vlastnik": "7",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    }
   ]
@@ -77,7 +70,6 @@ const DATA = [
     "nazev": "Strategie a koncepce XÚ",
     "agenda_kod": "01",
     "vlastnik": "72; 71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -85,7 +77,6 @@ const DATA = [
     "nazev": "Operativní řízení útvarů XÚ a resortních organizací",
     "agenda_kod": "01",
     "vlastnik": "71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -93,7 +84,6 @@ const DATA = [
     "nazev": "Správa rozpočtové kapitoly",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -101,7 +91,6 @@ const DATA = [
     "nazev": "Programové financování XÚ a resortu",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -109,7 +98,6 @@ const DATA = [
     "nazev": "Boj proti korupci, oznamování",
     "agenda_kod": "01",
     "vlastnik": "71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -117,7 +105,6 @@ const DATA = [
     "nazev": "Výzkum a vývoj",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -125,7 +112,6 @@ const DATA = [
     "nazev": "Audit",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -133,7 +119,6 @@ const DATA = [
     "nazev": "Kontrola",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -141,7 +126,6 @@ const DATA = [
     "nazev": "Řízení rizik",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -149,7 +133,6 @@ const DATA = [
     "nazev": "Krizové řízení",
     "agenda_kod": "01",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -157,7 +140,6 @@ const DATA = [
     "nazev": "Sociální politika",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -165,7 +147,6 @@ const DATA = [
     "nazev": "Odškodňování",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -173,7 +154,6 @@ const DATA = [
     "nazev": "Rodinná politika",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -181,7 +161,6 @@ const DATA = [
     "nazev": "Rovné příležitosti",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -189,7 +168,6 @@ const DATA = [
     "nazev": "Sociálně právní ochrana dětí",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -197,7 +175,6 @@ const DATA = [
     "nazev": "Posudková služba",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -205,7 +182,6 @@ const DATA = [
     "nazev": "Sociální služby",
     "agenda_kod": "02",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -213,7 +189,6 @@ const DATA = [
     "nazev": "Příjmová politika",
     "agenda_kod": "03",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -221,7 +196,6 @@ const DATA = [
     "nazev": "Pracovní úrazové pojištění",
     "agenda_kod": "03",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -229,7 +203,6 @@ const DATA = [
     "nazev": "Soukromé důchodové pojištění",
     "agenda_kod": "03",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -237,7 +210,6 @@ const DATA = [
     "nazev": "Důchodové pojištění",
     "agenda_kod": "03",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -245,7 +217,6 @@ const DATA = [
     "nazev": "Pojistné na sociální zabezpečení",
     "agenda_kod": "03",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -253,7 +224,6 @@ const DATA = [
     "nazev": "Nemocenské pojištění",
     "agenda_kod": "03",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -261,7 +231,6 @@ const DATA = [
     "nazev": "Politika zaměstnanosti",
     "agenda_kod": "04",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -269,7 +238,6 @@ const DATA = [
     "nazev": "Aktivní politika maněstnanosti",
     "agenda_kod": "04",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -277,7 +245,6 @@ const DATA = [
     "nazev": "Analýzy trhu práce a politik zaměstnanosti",
     "agenda_kod": "04",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -285,7 +252,6 @@ const DATA = [
     "nazev": "Mezinárodní pracovní mobilita a integrace cizinců",
     "agenda_kod": "04",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -293,7 +259,6 @@ const DATA = [
     "nazev": "Služby trhu práce a dalšího vzdělávání",
     "agenda_kod": "04",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -301,7 +266,6 @@ const DATA = [
     "nazev": "Zaměstnávání OZP a sociální podnikání",
     "agenda_kod": "04",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -309,7 +273,6 @@ const DATA = [
     "nazev": "Pracovněprávní legislativa a kolektivní vyjednávání",
     "agenda_kod": "05",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -317,7 +280,6 @@ const DATA = [
     "nazev": "Mzdová politika",
     "agenda_kod": "05",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -325,7 +287,6 @@ const DATA = [
     "nazev": "Bezpečnost práce a pracovní prostředí",
     "agenda_kod": "05",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -333,7 +294,6 @@ const DATA = [
     "nazev": "Řízení pomoci z fondů EU a EHF",
     "agenda_kod": "06",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -341,7 +301,6 @@ const DATA = [
     "nazev": "Mezinárodní vztahy",
     "agenda_kod": "06",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -349,7 +308,6 @@ const DATA = [
     "nazev": "Vnější komunikace",
     "agenda_kod": "07",
     "vlastnik": "71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -357,7 +315,6 @@ const DATA = [
     "nazev": "Parlamentní agenda",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -365,7 +322,6 @@ const DATA = [
     "nazev": "Vládní agenda",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -373,7 +329,6 @@ const DATA = [
     "nazev": "Právní podpora",
     "agenda_kod": "07",
     "vlastnik": "71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -381,7 +336,6 @@ const DATA = [
     "nazev": "Finance",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -389,7 +343,6 @@ const DATA = [
     "nazev": "Statistika",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -397,7 +350,6 @@ const DATA = [
     "nazev": "Správa majetku",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -405,7 +357,6 @@ const DATA = [
     "nazev": "Řízení lidských zdrojů",
     "agenda_kod": "07",
     "vlastnik": "72; 71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -413,7 +364,6 @@ const DATA = [
     "nazev": "Odborná podpora",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -421,7 +371,6 @@ const DATA = [
     "nazev": "Administrativní podpora",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -429,7 +378,6 @@ const DATA = [
     "nazev": "Náhrada škody",
     "agenda_kod": "07",
     "vlastnik": "71",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -437,7 +385,6 @@ const DATA = [
     "nazev": "ICT a digitalizace",
     "agenda_kod": "07",
     "vlastnik": "",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    }
   ]
@@ -451,7 +398,6 @@ const DATA = [
     "proces_kod": "01-01",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -460,7 +406,6 @@ const DATA = [
     "proces_kod": "01-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -469,7 +414,6 @@ const DATA = [
     "proces_kod": "01-01",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -478,7 +422,6 @@ const DATA = [
     "proces_kod": "01-01",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -487,7 +430,6 @@ const DATA = [
     "proces_kod": "01-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -496,7 +438,6 @@ const DATA = [
     "proces_kod": "01-02",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -505,7 +446,6 @@ const DATA = [
     "proces_kod": "01-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -514,7 +454,6 @@ const DATA = [
     "proces_kod": "01-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -523,7 +462,6 @@ const DATA = [
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -532,7 +470,6 @@ const DATA = [
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -541,7 +478,6 @@ const DATA = [
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -550,7 +486,6 @@ const DATA = [
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -559,7 +494,6 @@ const DATA = [
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -568,7 +502,6 @@ const DATA = [
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -577,7 +510,6 @@ const DATA = [
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -586,7 +518,6 @@ const DATA = [
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -595,7 +526,6 @@ const DATA = [
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -604,7 +534,6 @@ const DATA = [
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -613,7 +542,6 @@ const DATA = [
     "proces_kod": "01-05",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -622,7 +550,6 @@ const DATA = [
     "proces_kod": "01-05",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -631,7 +558,6 @@ const DATA = [
     "proces_kod": "01-05",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -640,7 +566,6 @@ const DATA = [
     "proces_kod": "01-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý-S4",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -649,7 +574,6 @@ const DATA = [
     "proces_kod": "01-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -658,7 +582,6 @@ const DATA = [
     "proces_kod": "01-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý-S4",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -667,7 +590,6 @@ const DATA = [
     "proces_kod": "01-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý-S4",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -676,7 +598,6 @@ const DATA = [
     "proces_kod": "01-07",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -685,7 +606,6 @@ const DATA = [
     "proces_kod": "01-07",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -694,7 +614,6 @@ const DATA = [
     "proces_kod": "01-07",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -703,7 +622,6 @@ const DATA = [
     "proces_kod": "01-08",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -712,7 +630,6 @@ const DATA = [
     "proces_kod": "01-08",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -721,7 +638,6 @@ const DATA = [
     "proces_kod": "01-08",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -730,7 +646,6 @@ const DATA = [
     "proces_kod": "01-08",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -739,7 +654,6 @@ const DATA = [
     "proces_kod": "01-08",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -748,7 +662,6 @@ const DATA = [
     "proces_kod": "01-08",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -757,7 +670,6 @@ const DATA = [
     "proces_kod": "01-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -766,7 +678,6 @@ const DATA = [
     "proces_kod": "01-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -775,7 +686,6 @@ const DATA = [
     "proces_kod": "01-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -784,7 +694,6 @@ const DATA = [
     "proces_kod": "01-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -793,7 +702,6 @@ const DATA = [
     "proces_kod": "01-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -802,7 +710,6 @@ const DATA = [
     "proces_kod": "01-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -811,7 +718,6 @@ const DATA = [
     "proces_kod": "01-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -820,7 +726,6 @@ const DATA = [
     "proces_kod": "02-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -829,7 +734,6 @@ const DATA = [
     "proces_kod": "02-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -838,7 +742,6 @@ const DATA = [
     "proces_kod": "02-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -847,7 +750,6 @@ const DATA = [
     "proces_kod": "02-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -856,7 +758,6 @@ const DATA = [
     "proces_kod": "02-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -865,7 +766,6 @@ const DATA = [
     "proces_kod": "02-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -874,7 +774,6 @@ const DATA = [
     "proces_kod": "02-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -883,7 +782,6 @@ const DATA = [
     "proces_kod": "02-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -892,7 +790,6 @@ const DATA = [
     "proces_kod": "02-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -901,7 +798,6 @@ const DATA = [
     "proces_kod": "02-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -910,7 +806,6 @@ const DATA = [
     "proces_kod": "02-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -919,7 +814,6 @@ const DATA = [
     "proces_kod": "02-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -928,7 +822,6 @@ const DATA = [
     "proces_kod": "02-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -937,7 +830,6 @@ const DATA = [
     "proces_kod": "02-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -946,7 +838,6 @@ const DATA = [
     "proces_kod": "02-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -955,7 +846,6 @@ const DATA = [
     "proces_kod": "02-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -964,7 +854,6 @@ const DATA = [
     "proces_kod": "02-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -973,7 +862,6 @@ const DATA = [
     "proces_kod": "02-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -982,7 +870,6 @@ const DATA = [
     "proces_kod": "02-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -991,7 +878,6 @@ const DATA = [
     "proces_kod": "02-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1000,7 +886,6 @@ const DATA = [
     "proces_kod": "02-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1009,7 +894,6 @@ const DATA = [
     "proces_kod": "02-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1018,7 +902,6 @@ const DATA = [
     "proces_kod": "02-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1027,7 +910,6 @@ const DATA = [
     "proces_kod": "02-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1036,7 +918,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1045,7 +926,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1054,7 +934,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1063,7 +942,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1072,7 +950,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1081,7 +958,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1090,7 +966,6 @@ const DATA = [
     "proces_kod": "02-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1099,7 +974,6 @@ const DATA = [
     "proces_kod": "02-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1108,7 +982,6 @@ const DATA = [
     "proces_kod": "02-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1117,7 +990,6 @@ const DATA = [
     "proces_kod": "02-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1126,7 +998,6 @@ const DATA = [
     "proces_kod": "02-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1135,7 +1006,6 @@ const DATA = [
     "proces_kod": "02-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1144,7 +1014,6 @@ const DATA = [
     "proces_kod": "03-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1153,7 +1022,6 @@ const DATA = [
     "proces_kod": "03-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1162,7 +1030,6 @@ const DATA = [
     "proces_kod": "03-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1171,7 +1038,6 @@ const DATA = [
     "proces_kod": "03-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1180,7 +1046,6 @@ const DATA = [
     "proces_kod": "03-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1189,7 +1054,6 @@ const DATA = [
     "proces_kod": "03-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1198,7 +1062,6 @@ const DATA = [
     "proces_kod": "03-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1207,7 +1070,6 @@ const DATA = [
     "proces_kod": "03-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1216,7 +1078,6 @@ const DATA = [
     "proces_kod": "03-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1225,7 +1086,6 @@ const DATA = [
     "proces_kod": "03-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1234,7 +1094,6 @@ const DATA = [
     "proces_kod": "03-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1243,7 +1102,6 @@ const DATA = [
     "proces_kod": "03-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1252,7 +1110,6 @@ const DATA = [
     "proces_kod": "03-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1261,7 +1118,6 @@ const DATA = [
     "proces_kod": "03-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1270,7 +1126,6 @@ const DATA = [
     "proces_kod": "03-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1279,7 +1134,6 @@ const DATA = [
     "proces_kod": "03-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1288,7 +1142,6 @@ const DATA = [
     "proces_kod": "03-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1297,7 +1150,6 @@ const DATA = [
     "proces_kod": "03-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1306,7 +1158,6 @@ const DATA = [
     "proces_kod": "03-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1315,7 +1166,6 @@ const DATA = [
     "proces_kod": "03-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1324,7 +1174,6 @@ const DATA = [
     "proces_kod": "03-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1333,7 +1182,6 @@ const DATA = [
     "proces_kod": "03-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1342,7 +1190,6 @@ const DATA = [
     "proces_kod": "03-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1351,7 +1198,6 @@ const DATA = [
     "proces_kod": "03-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1360,7 +1206,6 @@ const DATA = [
     "proces_kod": "03-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1369,7 +1214,6 @@ const DATA = [
     "proces_kod": "03-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1378,7 +1222,6 @@ const DATA = [
     "proces_kod": "03-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1387,7 +1230,6 @@ const DATA = [
     "proces_kod": "03-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1396,7 +1238,6 @@ const DATA = [
     "proces_kod": "03-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1405,7 +1246,6 @@ const DATA = [
     "proces_kod": "03-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1414,7 +1254,6 @@ const DATA = [
     "proces_kod": "03-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1423,7 +1262,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1432,7 +1270,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1441,7 +1278,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1450,7 +1286,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1459,7 +1294,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1468,7 +1302,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1477,7 +1310,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1486,7 +1318,6 @@ const DATA = [
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1495,7 +1326,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1504,7 +1334,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1513,7 +1342,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1522,7 +1350,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1531,7 +1358,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1540,7 +1366,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1549,7 +1374,6 @@ const DATA = [
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1558,7 +1382,6 @@ const DATA = [
     "proces_kod": "04-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1567,7 +1390,6 @@ const DATA = [
     "proces_kod": "04-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1576,7 +1398,6 @@ const DATA = [
     "proces_kod": "04-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1585,7 +1406,6 @@ const DATA = [
     "proces_kod": "04-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1594,7 +1414,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1603,7 +1422,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1612,7 +1430,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1621,7 +1438,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1630,7 +1446,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1639,7 +1454,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1648,7 +1462,6 @@ const DATA = [
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1657,7 +1470,6 @@ const DATA = [
     "proces_kod": "04-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1666,7 +1478,6 @@ const DATA = [
     "proces_kod": "04-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1675,7 +1486,6 @@ const DATA = [
     "proces_kod": "04-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1684,7 +1494,6 @@ const DATA = [
     "proces_kod": "04-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1693,7 +1502,6 @@ const DATA = [
     "proces_kod": "04-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1702,7 +1510,6 @@ const DATA = [
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1711,7 +1518,6 @@ const DATA = [
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1720,7 +1526,6 @@ const DATA = [
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1729,7 +1534,6 @@ const DATA = [
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1738,7 +1542,6 @@ const DATA = [
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1747,7 +1550,6 @@ const DATA = [
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1756,7 +1558,6 @@ const DATA = [
     "proces_kod": "05-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1765,7 +1566,6 @@ const DATA = [
     "proces_kod": "05-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1774,7 +1574,6 @@ const DATA = [
     "proces_kod": "05-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1783,7 +1582,6 @@ const DATA = [
     "proces_kod": "05-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1792,7 +1590,6 @@ const DATA = [
     "proces_kod": "05-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1801,7 +1598,6 @@ const DATA = [
     "proces_kod": "05-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1810,7 +1606,6 @@ const DATA = [
     "proces_kod": "05-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1819,7 +1614,6 @@ const DATA = [
     "proces_kod": "05-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1828,7 +1622,6 @@ const DATA = [
     "proces_kod": "05-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1837,7 +1630,6 @@ const DATA = [
     "proces_kod": "05-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1846,7 +1638,6 @@ const DATA = [
     "proces_kod": "05-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1855,7 +1646,6 @@ const DATA = [
     "proces_kod": "05-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1864,7 +1654,6 @@ const DATA = [
     "proces_kod": "05-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1873,7 +1662,6 @@ const DATA = [
     "proces_kod": "05-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1882,7 +1670,6 @@ const DATA = [
     "proces_kod": "05-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1891,7 +1678,6 @@ const DATA = [
     "proces_kod": "05-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1900,7 +1686,6 @@ const DATA = [
     "proces_kod": "05-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1909,7 +1694,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1918,7 +1702,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1927,7 +1710,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1936,7 +1718,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1945,7 +1726,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1954,7 +1734,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1963,7 +1742,6 @@ const DATA = [
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1972,7 +1750,6 @@ const DATA = [
     "proces_kod": "06-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1981,7 +1758,6 @@ const DATA = [
     "proces_kod": "06-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -1990,7 +1766,6 @@ const DATA = [
     "proces_kod": "06-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -1999,7 +1774,6 @@ const DATA = [
     "proces_kod": "06-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -2008,7 +1782,6 @@ const DATA = [
     "proces_kod": "06-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2017,7 +1790,6 @@ const DATA = [
     "proces_kod": "06-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2026,7 +1798,6 @@ const DATA = [
     "proces_kod": "07-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2035,7 +1806,6 @@ const DATA = [
     "proces_kod": "07-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2044,7 +1814,6 @@ const DATA = [
     "proces_kod": "07-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2053,7 +1822,6 @@ const DATA = [
     "proces_kod": "07-01",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2062,7 +1830,6 @@ const DATA = [
     "proces_kod": "07-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2071,7 +1838,6 @@ const DATA = [
     "proces_kod": "07-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2080,7 +1846,6 @@ const DATA = [
     "proces_kod": "07-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2089,7 +1854,6 @@ const DATA = [
     "proces_kod": "07-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2098,7 +1862,6 @@ const DATA = [
     "proces_kod": "07-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2107,7 +1870,6 @@ const DATA = [
     "proces_kod": "07-02",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2116,7 +1878,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2125,7 +1886,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2134,7 +1894,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -2143,7 +1902,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2152,7 +1910,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2161,7 +1918,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2170,7 +1926,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2179,7 +1934,6 @@ const DATA = [
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2188,7 +1942,6 @@ const DATA = [
     "proces_kod": "07-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2197,7 +1950,6 @@ const DATA = [
     "proces_kod": "07-04",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2206,7 +1958,6 @@ const DATA = [
     "proces_kod": "07-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2215,7 +1966,6 @@ const DATA = [
     "proces_kod": "07-04",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2224,7 +1974,6 @@ const DATA = [
     "proces_kod": "07-04",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2233,7 +1982,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2242,7 +1990,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2251,7 +1998,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2260,7 +2006,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2269,7 +2014,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2278,7 +2022,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2287,7 +2030,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2296,7 +2038,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2305,7 +2046,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2314,7 +2054,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2323,7 +2062,6 @@ const DATA = [
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -2332,7 +2070,6 @@ const DATA = [
     "proces_kod": "07-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2341,7 +2078,6 @@ const DATA = [
     "proces_kod": "07-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2350,7 +2086,6 @@ const DATA = [
     "proces_kod": "07-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2359,7 +2094,6 @@ const DATA = [
     "proces_kod": "07-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2368,7 +2102,6 @@ const DATA = [
     "proces_kod": "07-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2377,7 +2110,6 @@ const DATA = [
     "proces_kod": "07-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2386,7 +2118,6 @@ const DATA = [
     "proces_kod": "07-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2395,7 +2126,6 @@ const DATA = [
     "proces_kod": "07-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2404,7 +2134,6 @@ const DATA = [
     "proces_kod": "07-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2413,7 +2142,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72; 71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2422,7 +2150,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2431,7 +2158,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2440,7 +2166,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2449,7 +2174,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2458,7 +2182,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2467,7 +2190,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2476,7 +2198,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "72",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2485,7 +2206,6 @@ const DATA = [
     "proces_kod": "07-08",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2494,7 +2214,6 @@ const DATA = [
     "proces_kod": "07-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2503,7 +2222,6 @@ const DATA = [
     "proces_kod": "07-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2512,7 +2230,6 @@ const DATA = [
     "proces_kod": "07-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2521,7 +2238,6 @@ const DATA = [
     "proces_kod": "07-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2530,7 +2246,6 @@ const DATA = [
     "proces_kod": "07-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2539,7 +2254,6 @@ const DATA = [
     "proces_kod": "07-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2548,7 +2262,6 @@ const DATA = [
     "proces_kod": "07-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2557,7 +2270,6 @@ const DATA = [
     "proces_kod": "07-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2566,7 +2278,6 @@ const DATA = [
     "proces_kod": "07-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2575,7 +2286,6 @@ const DATA = [
     "proces_kod": "07-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2584,7 +2294,6 @@ const DATA = [
     "proces_kod": "07-11",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2593,7 +2302,6 @@ const DATA = [
     "proces_kod": "07-11",
     "vlastnik": "71",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2602,7 +2310,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2611,7 +2318,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2620,7 +2326,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2629,7 +2334,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2638,7 +2342,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2647,7 +2350,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
-    "stav_mapovani": "zmapováno jiným útvarem",
     "zdroj": "rejstrik"
    },
    {
@@ -2656,7 +2358,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2665,7 +2366,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2674,7 +2374,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2683,7 +2382,6 @@ const DATA = [
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
-    "stav_mapovani": "nezmapováno",
     "zdroj": "rejstrik"
    },
    {
@@ -2692,7 +2390,6 @@ const DATA = [
     "proces_kod": "07-04",
     "vlastnik": "71",
     "stav_rejstrik": "",
-    "stav_mapovani": "zmapováno",
     "zdroj": "karta"
    }
   ]
@@ -2711,7 +2408,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-009-0001",
@@ -2724,7 +2421,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-009-0002",
@@ -2737,7 +2434,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-009-0003",
@@ -2750,7 +2447,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-004-0001",
@@ -2763,7 +2460,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0001",
@@ -2776,7 +2473,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0002",
@@ -2789,7 +2486,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-01-001-0001",
@@ -2802,7 +2499,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-01-001-0002",
@@ -2815,7 +2512,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-01-004-0001",
@@ -2828,7 +2525,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-01-004-0002",
@@ -2841,7 +2538,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-01-004-0003",
@@ -2854,7 +2551,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-05-001-0001",
@@ -2867,7 +2564,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-05-002-0001",
@@ -2880,7 +2577,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-004-0002",
@@ -2893,7 +2590,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-05-003-0001",
@@ -2906,7 +2603,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-004-0003",
@@ -2919,7 +2616,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-11-001-0001",
@@ -2932,7 +2629,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-11-002-0001",
@@ -2945,7 +2642,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-11-002-0002",
@@ -2958,7 +2655,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-002-0001",
@@ -2971,7 +2668,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-002-0002",
@@ -2984,7 +2681,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-002-0003",
@@ -2997,7 +2694,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-006-0001",
@@ -3010,7 +2707,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-04-005-0001",
@@ -3023,7 +2720,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-01-003-0001",
@@ -3036,7 +2733,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-01-003-0002",
@@ -3049,7 +2746,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-01-003-0003",
@@ -3062,7 +2759,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "01-01-004-0001",
@@ -3075,7 +2772,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0003",
@@ -3088,7 +2785,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0004",
@@ -3101,7 +2798,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0005",
@@ -3114,7 +2811,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0006",
@@ -3127,7 +2824,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0007",
@@ -3140,7 +2837,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0008",
@@ -3153,7 +2850,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-001-0009",
@@ -3166,7 +2863,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-002-0001",
@@ -3179,7 +2876,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-004-0001",
@@ -3192,7 +2889,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-004-0002",
@@ -3205,7 +2902,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-003-0001",
@@ -3218,7 +2915,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-005-0001",
@@ -3231,7 +2928,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-005-0002",
@@ -3244,7 +2941,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-007-0001",
@@ -3257,7 +2954,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-007-0002",
@@ -3270,7 +2967,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-006-0001",
@@ -3283,7 +2980,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    },
    {
     "Title": "07-08-008-0001",
@@ -3296,7 +2993,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "7",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-20T00:00:00Z"
+    "datum_aktualizace": "2026-08-24T00:00:00Z"
    }
   ]
  },

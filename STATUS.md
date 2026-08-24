@@ -2,6 +2,42 @@
 
 Aktualizováno: 2026-08-23 (konec dne, balík 1.0.0.50)
 
+## Sloupec `stav_mapovani` zrušen (24.08.2026) — balík 1.0.0.54
+
+**Zadáno:** „je to celé matoucí a nechci tam pole které zastarává případně
+vyžaduje ruční update. dej ho celé pryč."
+
+Vyšlo to najevo z otázky, jak vzniká odznak „u jiného útvaru" v mapě. Řetěz
+vedl přes `stav_mapovani`, což byla **čistá odvozenina**: má aktivitu →
+`zmapováno`; nemá a `stav_rejstrik` začíná na „využitý" → `zmapováno jiným
+útvarem`; jinak `nezmapováno`. Uložený sloupec se ale po importu nikdy
+nepřepočítal — appka do něj při zakládání zapsala natvrdo `nezmapováno`
+a v žádném formuláři se nedal změnit. Postupně tedy lhal, a nikdo neměl jak
+to opravit.
+
+**Odstraněno ze sedmi míst:** `schema.json` (3 listy), `normalize.py`
+(funkce i sloupce v CSV), `anonymize.py`, `build_mapa_flow.py`,
+`check_mapa_flow.py`, `mapa_template.html`, `scr_Ciselnik.pa.yaml`.
+Přegenerované: `setup_sharepoint.js`, `import_data.js`,
+`deploy/sharepoint_schema.md`, `deploy/flow_MapaPublish.md`.
+
+**Odznak v mapě má nově jen dvě podoby:** `N akt.` a `bez aktivit` — obojí
+spočítané ze skutečného počtu aktivit ve větvi, takže nemá jak zastarat.
+Souhrn v `report.md` počítá totéž ze `pocet_aktivit` místo z uloženého stavu.
+
+**Appka při zakládání nezapisuje ani `stav_rejstrik`.** Zapisovala natvrdo
+„využitý", což u položky, která v původním rejstříku nikdy nebyla, není
+pravda. `stav_rejstrik` v listu zůstává — na rozdíl od `stav_mapovani` to
+není odvozenina, ale zdrojový údaj z barev v původním rejstříku.
+
+**Sloupec v SharePoint listech smaže zadavatel ručně.** Do té doby tam
+nevadí — nikdo ho nečte.
+
+Brány po změně: `check_schema`, `check_app`, `check_solution` 225/0,
+`check_mapa_html` 31, `check_mapa_beh` 25, `check_mapa_flow` **139**
+(bylo 142 — ubyly kontroly zrušeného sloupce), `check_flow` 17,
+`check_setup.js`, `check_import.js`.
+
 ## Strom se stavěl z nedonačtených kolekcí (24.08.2026) — balík 1.0.0.53
 
 **Příznak z provozu:** na Přehledu měly všechny procesy ve sloupci POLOŽKY
