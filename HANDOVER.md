@@ -5,7 +5,7 @@ teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (f
 Zadání drží `PRD.md`.
 
 > **Stav:** appka běží v provozu a je **ověřená v tenantu**. Aktuální balík
-> je **`deploy/procesnimapa_1_0_0_51.zip`** — nese připomínky z vyzkoušení
+> je **`deploy/procesnimapa_1_0_0_53.zip`** — nese připomínky z vyzkoušení
 > 1.0.0.50 (menší písmo, sloupec POLOŽKY, přepínač kódu, subtilnější ovládací
 > prvky, nová paleta, mapa bez jména správce, filtr stavu a chip osiřelých).
 > Poslední potvrzeně naběhlá verze je 1.0.0.50.
@@ -37,7 +37,9 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
    novou paletu a je to nejrychlejší způsob, jak posoudit, jestli sedí.
    Kdyby ne, vrací se to změnou hodnot (`styl*` v `App.OnStart`, CSS proměnné
    v šabloně), ne přepisem prvků.
-2. **Naimportovat `deploy/procesnimapa_1_0_0_51.zip`** jako upgrade. Proti
+2. **Naimportovat `deploy/procesnimapa_1_0_0_53.zip`** jako upgrade — nese
+   **opravu prázdných počtů** (strom se stavěl z nedonačtených kolekcí,
+   viz `STATUS.md`). Proti
    1.0.0.50 přibylo: menší tři stupně písma, sloupec **POLOŽKY** posunutý od
    ikony „+" s vycentrovanými čísly, **přepínač kódu** zpátky v pruhu nad
    stromem, ovládací prvky číselníku a detailu **na velikost z Přehledu**

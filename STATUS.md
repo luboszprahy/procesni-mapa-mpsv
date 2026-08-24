@@ -2,6 +2,44 @@
 
 Aktualizováno: 2026-08-23 (konec dne, balík 1.0.0.50)
 
+## Strom se stavěl z nedonačtených kolekcí (24.08.2026) — balík 1.0.0.53
+
+**Příznak z provozu:** na Přehledu měly všechny procesy ve sloupci POLOŽKY
+**0** a karta hlásila „251 dílčích procesů, 0 s aktivitami"; v Číselníku bylo
+zároveň **všech 251 dílčích procesů osiřelých**. Publikovaná mapa přitom tytéž
+vazby z týchž listů zobrazovala správně.
+
+**Sonda rozhodla spor.** `src/probe_dilci.js` (vložit do F12 konzole na webu
+appky, jen čte) vypsala interní názvy sloupců, ukázku řádků a spárování:
+**239 z 251 dílčích procesů má platný `proces_kod`**, 12 jich odkazuje na
+proces `02-01`, který v listu není — ti jsou osiřelí právem. Data tedy byla
+celou dobu v pořádku a chyba byla v appce.
+
+**Příčina: `Concurrent()` v `App.OnStart` nečeká na dokončení.** Vrátí se hned
+a načítání kolekcí dobíhá na pozadí. Úvodní obrazovka se mezitím zobrazí a její
+`OnVisible` postaví `colStrom` z toho, co zrovna dorazilo. Vznikne snímek
+prázdna, který se sám neopraví — `ClearCollect` proběhl jen jednou.
+
+Proč to vypadalo jako vada dat: karty s počty čtou `CountRows()` **reaktivně**,
+takže po dotažení ukazují 251 správně, kdežto strom postavený vedle nich
+zůstane prázdný. A protože pořadí dokončení `Concurrent` nezaručuje nic,
+dostala každá obrazovka jinou nedonačtenou kolekci — Přehled přišel o `colDilci`
+(procesy bez dílčích procesů), Číselník o `colProcesy` (dílčí procesy bez
+rodiče, tedy „osiřelé").
+
+**Oprava:** `OnVisible` Přehledu i Číselníku má před stavbou odvozené kolekce
+pojistku `IsEmpty()` — když číselník ještě nedorazil, načte se synchronně.
+Test na prázdnotu stačí, protože `ClearCollect` je atomický: kolekce je buď
+prázdná, nebo celá.
+
+**Brána `kontrola_concurrent`** v `check_app.py`, mutačně ověřená: každá
+kolekce plněná uvnitř `Concurrent()` musí mít v `OnVisible`, které z ní staví,
+test `IsEmpty()`. Odebrání pojistky bránu shodí.
+
+Zároveň v mapě: odznak **„nezmapováno" → „bez aktivit"** a **„jiný útvar" →
+„u jiného útvaru"**, oba s nápovědou; legenda je vysvětluje ukázkou odznaku.
+Obojí znělo jako hodnocení kvality místo údaje o evidenci.
+
 ## Připomínky po vyzkoušení 1.0.0.50 (24.08.2026) — balík 1.0.0.51
 
 Zadáno dokumentem `claude 1.docx` s pěti snímky. Rozhodnutí padla hned:

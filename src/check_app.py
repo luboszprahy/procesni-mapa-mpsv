@@ -1165,6 +1165,60 @@ def kontrola_velikosti(soubory):
                 )
 
 
+def kontrola_concurrent(soubory):
+    """Kolekce z `Concurrent()` nesmí být použitá bez pojistky na prázdnotu.
+
+    `Concurrent()` v `App.OnStart` NEČEKÁ na dokončení — vrátí se hned a větve
+    dobíhají na pozadí. Úvodní obrazovka se mezitím zobrazí a její `OnVisible`
+    postaví odvozenou kolekci z něčeho, co ještě nedorazilo. Vznikne snímek
+    prázdna, který se sám neopraví, protože `ClearCollect` proběhl jen jednou.
+
+    Pozná se to špatně: karty s počty čtou `CountRows()` reaktivně, takže po
+    dotažení ukazují správná čísla, kdežto strom postavený vedle nich zůstane
+    prázdný. Vypadá to jako vada dat, ne jako závod.
+
+    Přesně tak se 24.08.2026 projevil rejstřík v provozu: na Přehledu měly
+    všechny procesy POLOŽKY = 0, v Číselníku bylo všech 251 dílčích procesů
+    osiřelých — a sonda `probe_dilci.js` přitom v SharePointu našla 239 z 251
+    vazeb v pořádku. Každá obrazovka dostala jinou nedonačtenou kolekci,
+    protože pořadí dokončení `Concurrent` nezaručuje nic.
+
+    Pojistkou je test `IsEmpty()` před stavbou odvozené kolekce. Stačí,
+    protože `ClearCollect` je atomický — kolekce je buď prázdná, nebo celá.
+    """
+    app = next((c for c in soubory if Path(c).name == "App.pa.yaml"), None)
+    if app is None:
+        return
+    text_app = io.open(app, encoding="utf-8").read()
+    zacatek = re.search(r"Concurrent\(", text_app)
+    if not zacatek:
+        return
+    uvnitr = argumenty_volani(text_app, zacatek.end() - 1)
+    asynchronni = set(re.findall(r"ClearCollect\(\s*(col[A-Za-z0-9_]*)", uvnitr))
+    if not asynchronni:
+        return
+
+    for cesta in soubory:
+        if Path(cesta).name == "App.pa.yaml":
+            continue
+        dokument = nacti_yaml(cesta)
+        for obrazovka, telo in (dokument.get("Screens") or {}).items():
+            onvisible = ((telo or {}).get("Properties") or {}).get("OnVisible", "")
+            if not isinstance(onvisible, str) or "ClearCollect" not in onvisible:
+                continue
+            pouzite = {k for k in asynchronni if je_slovo(k, onvisible)}
+            hlidane = {k for k in pouzite
+                       if re.search(r"IsEmpty\(\s*" + re.escape(k) + r"\s*\)", onvisible)}
+            chybi = sorted(pouzite - hlidane)
+            if chybi:
+                chyby.append(
+                    f"{Path(cesta).name}: {obrazovka}.OnVisible staví kolekci z "
+                    f"{', '.join(chybi)} — ty plní Concurrent() v App.OnStart a ten "
+                    f"na dokončení nečeká, takže se odvozená kolekce může postavit "
+                    f"z prázdna. Před stavbou chybí test IsEmpty()"
+                )
+
+
 def kontrola_poradi_nabidek(soubory):
     """Položky rozbalovací nabídky musí ležet NAD jejím stínem.
 
@@ -1230,6 +1284,7 @@ def main():
     kontrola_poradi_nabidek(soubory)
     kontrola_prepinacu(soubory)
     kontrola_velikosti(soubory)
+    kontrola_concurrent(soubory)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)
