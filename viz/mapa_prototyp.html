@@ -6,11 +6,18 @@
 <title>Procesní mapa MPSV</title>
 <style>
   :root{
-    --bg:#f4f6f8; --panel:#fff; --ink:#16202c; --muted:#5d6b7a; --line:#dde3ea;
-    --a:#1f4e79; --p:#2e6da4; --d:#3f8f6f; --k:#8a6d1f;
-    --chip:#eef2f6; --hit:#fff3bf; --shadow:0 1px 3px rgba(16,32,48,.08);
-    /* podklady a linky jednotlivých vrstev stromu */
-    --a-bg:#e7eff7; --p-bg:#eef5fb; --d-bg:#eef7f2; --k-bg:transparent;
+    /* Paleta zadaná 24.08.2026 (Adobe Color): #110B7A #149EBB #A9C7EC #171F09 #3CA050.
+       Plné barvy nesou svislé linky vrstev, plochy jsou jejich světlé odvozeniny —
+       přes sytý tyrkys ani zelenou by nešly číst dlouhé názvy. Odstíny pro TEXT
+       jsou ztmavené (tyrkys má na bílé jen 3,16:1, zelená 3,31:1); každá dvojice
+       text/podklad je spočítaná proti WCAG AA, nejtěsnější je 5,45:1. */
+    --bg:#f6f8fc; --panel:#fff; --ink:#1b2233; --muted:#545e73; --line:#dce1ec;
+    --a:#110b7a; --p:#0c5f70; --d:#246030; --k:#1b2233;
+    --chip:#e7ebf4; --hit:#fff3bf; --shadow:0 1px 3px rgba(17,11,122,.10);
+    /* podklady vrstev stromu */
+    --a-bg:#d5d8ef; --p-bg:#e2e9f6; --d-bg:#edf2fa; --k-bg:transparent;
+    /* svislé linky vrstev — plné barvy palety */
+    --a-line:#110b7a; --p-line:#149ebb; --d-line:#3ca050; --k-line:#a9c7ec;
     /* jediné místo, které řídí velikost písma celé stránky (viz #fVelikost) */
     --fs:14px;
   }
@@ -60,19 +67,19 @@
   body.bez-kodu .kod{display:none}
   .nm{flex:1 1 auto;min-width:0}
   /* vrstvy se liší podkladem řádku a barvou svislé linky, ne jen barvou písma */
-  .lvl-a>.row{background:var(--a-bg);border-left-color:var(--a)}
-  .lvl-p>.row{background:var(--p-bg);border-left-color:var(--p)}
-  .lvl-d>.row{background:var(--d-bg);border-left-color:var(--d)}
-  .lvl-k>.row{border-left-color:var(--line)}
+  .lvl-a>.row{background:var(--a-bg);border-left-color:var(--a-line)}
+  .lvl-p>.row{background:var(--p-bg);border-left-color:var(--p-line)}
+  .lvl-d>.row{background:var(--d-bg);border-left-color:var(--d-line)}
+  .lvl-k>.row{border-left-color:var(--k-line)}
   .lvl-a>.row>.nm{font-weight:600;color:var(--a);font-size:1.07rem}
   .lvl-p>.row>.nm{font-weight:600;color:var(--p)}
   .lvl-d>.row>.nm{color:var(--d)}
   .lvl-k>.row>.nm{color:var(--ink)}
   .lvl-k>.row{cursor:pointer}
   .kids{margin-left:17px;border-left:1px solid var(--line);padding-left:9px}
-  .lvl-a>.kids{border-left-color:var(--a)}
-  .lvl-p>.kids{border-left-color:var(--p)}
-  .lvl-d>.kids{border-left-color:var(--d)}
+  .lvl-a>.kids{border-left-color:var(--a-line)}
+  .lvl-p>.kids{border-left-color:var(--p-line)}
+  .lvl-d>.kids{border-left-color:var(--d-line)}
   .hide{display:none}
   .badge{flex:0 0 auto;font-size:.79rem;border-radius:9px;padding:1px 7px;background:var(--chip);
          color:var(--muted);margin-top:2px;white-space:nowrap}
@@ -81,7 +88,8 @@
   .node.unmapped > .row > .nm{opacity:.62;font-style:italic}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);padding:8px 20px 0}
   .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-  .legend .g1{background:#3f8f6f}.legend .g2{background:#e0a33c}.legend .g3{background:#c9503f}
+  .legend .g1{background:var(--a-line)}.legend .g2{background:var(--p-line)}
+  .legend .g3{background:var(--d-line)}.legend .g4{background:var(--k-line)}
   .badge.ut{background:#e8f0f7;color:var(--p)}
   mark{background:var(--hit);padding:0 1px}
   .empty{padding:20px;color:var(--muted);text-align:center}
@@ -98,10 +106,10 @@
 <div class="bar">
   <input type="search" id="q" placeholder="Hledat v agendách, procesech, dílčích procesech a aktivitách…" autocomplete="off">
   <select id="fUtvar"><option value="">Vykonává útvar: vše</option></select>
-  <select id="fStav">
-    <option value="akt">Zobrazit: jen zmapované</option>
-    <option value="vse">Zobrazit: celý rejstřík</option>
-    <option value="ne">Zobrazit: jen nezmapované</option>
+  <select id="fStav" title="Filtruje podle stavu aktivit, stejně jako přehled v aplikaci. Větev, ve které po odfiltrování žádná aktivita nezbude, se schová.">
+    <option value="">Stav: vše</option>
+    <option value="schváleno">Stav: schváleno</option>
+    <option value="pracovní">Stav: pracovní</option>
   </select>
   <select id="fUroven" title="Do které vrstvy se strom rozbalí">
     <option value="1">Rozbalit: jen agendy</option>
@@ -110,6 +118,7 @@
     <option value="4">Rozbalit: vše až po aktivity</option>
   </select>
   <label title="Skryje identifikační kódy ve stromu. Hledat podle kódu jde dál."><input type="checkbox" id="cKod" checked> Zobrazit kód</label>
+  <label title="Nechá ve stromu jen položky, kterým chybí nadřazená úroveň rejstříku — visí pod uzlem Nezařazené. Jinde je nenajdeš, protože strom ukazuje jen to, co má nad sebou předka."><input type="checkbox" id="cOsirele"> Jen osiřelé</label>
   <span class="fs" id="fVelikost" title="Velikost písma celé stránky">
     <button type="button" data-fs="12">A</button>
     <button type="button" data-fs="14" aria-pressed="true">A</button>
@@ -119,9 +128,11 @@
 </div>
 
 <div class="legend">
-  <span><i class="g1"></i>zmapováno — aktivity jsou v evidenci</span>
-  <span><i class="g2"></i>zmapováno jiným útvarem — rejstřík je vede jako využité, aktivity zatím nemáme</span>
-  <span><i class="g3"></i>nezmapováno — v rejstříku existuje, aktivity zatím nikdo nepopsal</span>
+  <span><i class="g1"></i>agenda</span>
+  <span><i class="g2"></i>proces</span>
+  <span><i class="g3"></i>dílčí proces</span>
+  <span><i class="g4"></i>aktivita</span>
+  <span>Odznak vpravo v řádku říká, kolik aktivit je uvnitř větve — „nezmapováno“ znamená, že v rejstříku položka je, ale činnosti k ní zatím nikdo nepopsal.</span>
 </div>
 
 <main>
@@ -193,7 +204,16 @@ function buildTree(d){
 
 const TREE = buildTree(DATA);
 const walk = (ns,f) => ns.forEach(n => { walk(n.kids,f); f(n); });
-walk(TREE, n => { n.aktCount = n.lvl==="k" ? 1 : n.kids.reduce((s,c)=>s+(c.aktCount||0),0); n.hay = norm(n.kod+" "+n.nazev+" "+(n.utvar||"")); });
+/* aktS = kolik aktivit ve větvi je schválených. Počítá se jednou při stavbě,
+   ne při každém překreslení — filtr stavu je pak jen porovnání dvou čísel.
+   Aktivita bez vyplněného stavu patří mezi pracovní: import ji plní hodnotou
+   „pracovní", ale ručně založená ji mít nemusí a nikam zmizet nesmí. */
+walk(TREE, n => {
+  n.aktCount = n.lvl==="k" ? 1 : n.kids.reduce((s,c)=>s+(c.aktCount||0),0);
+  n.aktS = n.lvl==="k" ? ((n.rec||{}).stav === "schváleno" ? 1 : 0)
+                       : n.kids.reduce((s,c)=>s+(c.aktS||0),0);
+  n.hay = norm(n.kod+" "+n.nazev+" "+(n.utvar||""));
+});
 
 /* ---- render ---- */
 const TYPY = {a:"Agenda", p:"Proces", d:"Dílčí proces", k:"Aktivita"};
@@ -205,6 +225,7 @@ function render(){
   const q = norm(document.getElementById("q").value.trim());
   const ut = document.getElementById("fUtvar").value;
   const stav = document.getElementById("fStav").value;
+  const jenOsirele = document.getElementById("cOsirele").checked;
   elTree.textContent = "";
 
   const mk = (n, depth, forced) => {
@@ -212,7 +233,11 @@ function render(){
     const selfUt = n.lvl !== "k" || !ut || (n.utvar||"").split(/,\s*/).includes(ut);
     // shoda na uzlu zpristupni celou jeho podstrukturu
     const kids = n.kids.map(c => mk(c, depth+1, forced || (!!q && n.hay.includes(q)))).filter(Boolean);
-    const stavOk = stav === "vse" ? true : stav === "akt" ? n.aktCount > 0 : n.aktCount === 0;
+    /* Stav se u aktivity čte z ní samé, u větve z počtu aktivit toho stavu
+       uvnitř — jinak by se prázdné větve schovávaly i bez zapnutého filtru. */
+    const stavOk = !stav ? true
+      : n.lvl === "k" ? (stav === "schváleno") === ((n.rec||{}).stav === "schváleno")
+      : (stav === "schváleno" ? n.aktS > 0 : n.aktCount - n.aktS > 0);
     const keepSelf = n.lvl === "k" ? hit && selfUt && stavOk : hit && !ut && stavOk;
     if (!kids.length && !keepSelf) return null;
 
@@ -266,10 +291,16 @@ function render(){
     return node;
   };
 
-  TREE.map(n => mk(n, 0, false)).filter(Boolean).forEach(n => elTree.appendChild(n));
+  TREE.filter(n => !jenOsirele || n.sirotek)
+      .map(n => mk(n, 0, jenOsirele && !q))
+      .filter(Boolean)
+      .forEach(n => elTree.appendChild(n));
   if (!elTree.children.length){
     const e = document.createElement("div"); e.className="empty";
-    e.textContent = "Nic neodpovídá zadanému filtru."; elTree.appendChild(e);
+    e.textContent = jenOsirele
+      ? "Žádné osiřelé položky — každá má nad sebou svou nadřazenou úroveň."
+      : "Nic neodpovídá zadanému filtru.";
+    elTree.appendChild(e);
   }
 }
 
@@ -314,8 +345,11 @@ function detail(n){
 }
 
 /* ---- init ---- */
+/* Jméno správce se do hlavičky nepíše — je to údaj o osobě, který v mapě
+   určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
+   natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · sekční správce " + DATA.meta.spravce + " · " + "vygenerováno 23.08.2026 16:20";
+  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 24.08.2026 10:17";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
@@ -325,8 +359,16 @@ const utvary = [...new Set(DATA.aktivity.flatMap(a => (a.vykonava||"").split(/,\
 const sel = document.getElementById("fUtvar");
 utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
 
-["q","fUtvar","fStav","fUroven"].forEach(id => document.getElementById(id)
+["q","fUtvar","fStav","fUroven","cOsirele"].forEach(id => document.getElementById(id)
   .addEventListener(id === "q" ? "input" : "change", render));
+
+/* Bez osiřelých položek nemá přepínač co ukázat — zůstává vidět (jinak by
+   nebylo poznat, že se na ně kontroluje), ale je neaktivní a řekne proč. */
+const cOsirele = document.getElementById("cOsirele");
+if (!TREE.some(n => n.sirotek)){
+  cOsirele.disabled = true;
+  cOsirele.parentElement.title = "Žádné osiřelé položky nejsou — každá má nad sebou svou nadřazenou úroveň.";
+}
 
 /* volby, které se jen přepnou třídou nebo proměnnou — strom se nepřekresluje */
 const pamet = {

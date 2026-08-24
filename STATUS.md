@@ -2,6 +2,52 @@
 
 Aktualizováno: 2026-08-23 (konec dne, balík 1.0.0.50)
 
+## Připomínky po vyzkoušení 1.0.0.50 (24.08.2026) — balík 1.0.0.51
+
+Zadáno dokumentem `claude 1.docx` s pěti snímky. Rozhodnutí padla hned:
+**export do Wordu jen v appce** (v sandboxu SharePointu je stahování z JS
+nejisté stejně jako `fetch`) a **paleta jako světlé plochy + plné barvy na
+pruzích** (přes sytý tyrkys ani zelenou by nešly číst dlouhé názvy).
+
+**Hotovo v 1.0.0.51:**
+
+| co | jak |
+|---|---|
+| tři stupně písma o dva body dolů | `varFs` -2 / 0 / 2, střední je tím, co bývalo nejmenší |
+| `POLOŽEK` → `POLOŽKY`, sloupec doleva od „+" | mezera k ikoně 10 → 30 px, čísla vycentrovaná pod nadpisy |
+| přepínač kódu zpátky na Přehled | regrese z 1.0.0.37, výchozí stav zobrazeno |
+| ovládací prvky číselníku a detailu na 32 px | Přehled je měřítko; víceřádková pole si výšku nechala |
+| nová paleta v appce i v mapě | `#110B7A` `#149EBB` `#A9C7EC` `#171F09` `#3CA050` |
+| jméno správce z hlavičky mapy pryč | část auditního A-08 |
+| filtr mapy: vše / schváleno / pracovní | místo zmapované/nezmapované, stejně jako Přehled |
+| chip „jen osiřelé" v mapě | při nulovém počtu neaktivní a řekne proč |
+
+**Barvy jsou spočítané, ne odhadnuté.** Tyrkys má na bílé 3,16:1 a zelená
+3,31:1 — obojí pod WCAG AA, takže jako barva textu neprošly. Pro text se
+používají ztmavené varianty (`#107E96`, `#308040`), plné barvy zůstaly na
+svislých pruzích, kde o kontrast nejde. Nejtěsnější dvojice v celé appce je
+teď 4,62:1 (slabý text na nejsytější ploše agendy).
+
+**Dvě nové brány, obě mutačně ověřené.** `kontrola_prepinacu` hlídá, že
+proměnná řídící vzhled má v appce něco, co ji přepne — přesně tak zmizel
+přepínač kódu a tři balíky si toho nikdo nevšiml. `kontrola_velikosti` drží
+jednu výšku ovládacích prvků napříč obrazovkami; hned při zavedení našla dvě
+tlačítka dialogu na Přehledu, která jsem sám minul.
+
+**Zděděný rozpor mezi bránou a opravou auditu.** `check_flow.py` spadl —
+a spadl i na 1.0.0.50, takže to není regrese z dneška. Oprava A-07 (flow smí
+přepsat jen to, co samo spočítalo) odebrala ze zápisu `item/nazev`
+a `item/dilci_proces_kod`, ale brána dál vyžadovala původní čtveřici. Nikdo ji
+po opravě nepřespustil. Sladěno na `Title` + `nazev_kratky`.
+
+**Osm bran zeleně:** `check_app`, `check_solution` 225/0, `check_schema`,
+`check_mapa_html` 31, `check_mapa_beh` 25 (na datech se sirotky 27),
+`check_mapa_flow` 142, `check_flow` 17, `check_setup.js`, `check_import.js`.
+
+**Zbývá:** export do Wordu z Přehledu (F7/D) — potřebuje nové flow, jeho import
+a **registraci jako datový zdroj ve Studiu**, což jde udělat jen tam. Do té doby
+se `.Run()` nemá na co navázat.
+
 ## Shrnutí dne 23.08.2026
 
 Den měl tři části: **dokončení editace**, **audit s opravami** a **design**.

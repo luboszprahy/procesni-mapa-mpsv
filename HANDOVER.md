@@ -1,21 +1,21 @@
-# HANDOVER — vstupní bod pro další session (23.08.2026, konec dne)
+# HANDOVER — vstupní bod pro další session (24.08.2026)
 
 Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má dělat
 teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
 Zadání drží `PRD.md`.
 
-> **Stav:** appka běží v provozu a je **ověřená v tenantu** — dnes se
-> importovalo a zkoušelo opakovaně. Aktuální balík je
-> **`deploy/procesnimapa_1_0_0_50.zip`**; poslední potvrzeně naběhlá verze
-> je 1.0.0.40, novější balíky (41–50) nesou opravy auditu a design a čekají
-> na import. Starší balíky jsou z `deploy/` smazané.
+> **Stav:** appka běží v provozu a je **ověřená v tenantu**. Aktuální balík
+> je **`deploy/procesnimapa_1_0_0_51.zip`** — nese připomínky z vyzkoušení
+> 1.0.0.50 (menší písmo, sloupec POLOŽKY, přepínač kódu, subtilnější ovládací
+> prvky, nová paleta, mapa bez jména správce, filtr stavu a chip osiřelých).
+> Poslední potvrzeně naběhlá verze je 1.0.0.50.
 >
-> **Osm bran zeleně** ke konci dne: `check_app` (4 obrazovky, 194 prvků,
-> 2 148 vzorců), `check_solution` 224/0, `check_schema`, `check_mapa_flow`
-> 142, `check_mapa_html` 31, `check_mapa_beh` 18, `check_setup.js`,
-> `check_import.js`.
+> **Osm bran zeleně:** `check_app`, `check_solution` 225/0, `check_schema`,
+> `check_mapa_html` 31, `check_mapa_beh` 25, `check_mapa_flow` 142,
+> `check_flow` 17, `check_setup.js`, `check_import.js`.
 >
 > `.venv` se přes git nepřenáší; na novém stroji viz Rozjezd.
+>
 
 ## Rozjezd na novém stroji
 
@@ -33,30 +33,28 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
 
 ## 1. CO JE NA TOBĚ (uživateli)
 
-1. **Naimportovat `deploy/procesnimapa_1_0_0_50.zip`** jako upgrade a appku
-   jednou otevřít ve Studiu. Proti naposledy ověřené 1.0.0.40 přibylo:
-   - **opravy auditu** — mazání dílčího procesu uklidí i vazby na něj,
-     zakládání odmítne kód, pod kterým leží osiřelé položky, zmizela možnost
-     vyrobit duplicitní vazbu, strop načítaných řádků je 2 000 místo 500,
-   - **ikona +** v řádku stromu: u agendy založí proces, u procesu dílčí
-     proces, u dílčího procesu aktivitu — vždy s předvyplněnými nadřazenými
-     úrovněmi. U aktivity ikona schválně není,
-   - **barvy vrstev** odvozené z výchozí modré `#00126B`, kontrast ověřený
-     výpočtem proti WCAG,
-   - **dlouhé názvy** začínají od horního okraje a tooltip ukazuje celý text,
-   - **mapa má uzel „Nezařazené"** — osiřelé záznamy z ní přestaly mizet.
-   Na co se dívat: projít celý cyklus zakládání přes „+", ověřit mazání
-   dílčího procesu s aktivitami pod ním a mrknout, jestli barvy sedí.
-2. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
-   i `procesni_mapa.html`. Šablona se dnes měnila (uzel „Nezařazené"),
-   takže bez nahrání se to v publikované mapě neprojeví.
-3. **Spustit „Obnovit HTML"** z nabídky na přehledu a v mapě zkontrolovat
-   ovládací prvky.
-4. **Zapnout flow `MapaPublishScheduled`** (Power Automate > Solutions).
-   Import stav zapnutí nemění, takže může přijít vypnuté a denní publikace
-   by tiše neběžela. Trigger má být Recurrence denně 7:00, Central Europe
-   Standard Time.
-5. **Save & Publish** ve Studiu, jinak uživatelé vidí starou verzi.
+1. **Podívat se na barvy v `viz/mapa_prototyp.html`** — mapa i appka mají
+   novou paletu a je to nejrychlejší způsob, jak posoudit, jestli sedí.
+   Kdyby ne, vrací se to změnou hodnot (`styl*` v `App.OnStart`, CSS proměnné
+   v šabloně), ne přepisem prvků.
+2. **Naimportovat `deploy/procesnimapa_1_0_0_51.zip`** jako upgrade. Proti
+   1.0.0.50 přibylo: menší tři stupně písma, sloupec **POLOŽKY** posunutý od
+   ikony „+" s vycentrovanými čísly, **přepínač kódu** zpátky v pruhu nad
+   stromem, ovládací prvky číselníku a detailu **na velikost z Přehledu**
+   (32 px) a nová paleta.
+3. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
+   i `procesni_mapa.html`. Šablona se dnes měnila (barvy, filtr stavu, chip
+   osiřelých, hlavička bez jména), takže bez nahrání se nic z toho v publikované
+   mapě neprojeví. Tím se zároveň objeví volba **Zobrazit kód**, která
+   v mapě existuje od 1.0.0.31 — ve staré nahrané verzi prostě není.
+4. **Mikro-změna → Save → Publish** ve Studiu (§1b), jinak ostatní vidí starou
+   verzi.
+5. **Zapnout flow** `MapaPublishFlow` i `MapaPublishScheduled`, pokud import
+   hlásí, že se nezapnula. Import stav zapnutí nemění.
+6. **Pro export do Wordu (F7/D):** až dodám flow a naimportuješ ho, přidej ho
+   v Power Apps Studiu jako **datový zdroj** (Add data → flow) a pošli mi
+   **nový export solution**. Registrace flow vzniká jen ve Studiu; bez ní se
+   `.Run()` nemá na co navázat a build ji nedogeneruje.
 
 ## 1b. VYŘEŠENO: po importu je nutná mikro-změna, jinak Save neproběhne
 
@@ -91,24 +89,27 @@ chybějící Live verze.
 
 ## 2. CO DĚLÁM JÁ (další krok)
 
-**Čeká se na zpětnou vazbu z importu 1.0.0.50.** Nic rozpracovaného
-nezůstalo — všechno, co se dnes zadalo, je hotové, ověřené branami
-a zapsané.
+**F7/D — export do Wordu z Přehledu.** Exportuje se momentální zobrazení
+(strom po filtru stavu, hledání a chipu osiřelých), ne celý rejstřík. Appka
+pošle flow serializovaný strom, flow z něj složí dokument, uloží ho do Site
+Assets a vrátí adresu; appka zavolá `Download()`.
+
+Vznikne **`.doc`** — HTML, které Word otevře a umí uložit jako `.docx`.
+Skutečné OOXML by chtělo premium konektor (Encodian, Word Online) a ten přes
+DLP neprojde. Vědomý ústupek, ne opomenutí.
+
+Rozpracovaného nic není. Plán drží `PLAN.md` §F7.
 
 Připravené k vytažení, až přijde čas:
 
-- **`deploy/navod_sprava.md`** (krok 13 plánu) — rozhodnuto psát ho podle
-  finální podoby appky, a ta se dnes ustálila.
-- **Rejstřík nad 2 000 aktivitami** — hotový plán leží v `PLAN.md`
-  („Připravený plán: rejstřík nad 2 000 aktivitami"). Odloženo rozhodnutím
-  zadavatele; spouštěč je zhruba 1 500 aktivit, dnes jich je 47.
-- **Náměty na rozšíření N-1 až N-6** v `PLAN.md`, nejvýš hromadné pořízení
-  z evidenční karty.
-- **A-08 z auditu** — natvrdo zapsaná `"sekce": "3"` a jméno správce
-  v publikačním flow, `$top: 5000` bez stránkování, testovací tenant na
-  čtyřech místech. Věci pro přenos na MPSV, ne pro provoz.
+- **`deploy/navod_sprava.md`** (krok 13) — rozepsaný, přerušený zadáním F7.
+- **Rejstřík nad 2 000 aktivitami** — hotový plán v `PLAN.md`, spouštěč je
+  zhruba 1 500 aktivit, dnes 47.
+- **A-08 z auditu** — zbývá `$top: 5000` bez stránkování a testovací tenant
+  na čtyřech místech; jméno správce z mapy odešlo 24.08.2026.
+- **Náměty N-1 až N-6** v `PLAN.md`.
 
-## 3. Co je hotové (23.08.2026)
+## 3. Co je hotové (24.08.2026)
 
 | oblast | stav |
 |---|---|

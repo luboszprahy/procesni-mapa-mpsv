@@ -750,6 +750,204 @@ otevřená nabídka při kliknutí na druhou (první se zavře).
 
 ---
 
+## F7 — Připomínky po vyzkoušení 1.0.0.50 (zadáno 24.08.2026)
+
+Zadáno dokumentem `claude 1.docx` po vyzkoušení balíku 1.0.0.50 v tenantu.
+Dvě rozhodnutí padla hned při zadání:
+
+- **Export do Wordu bude jen v appce**, HTML mapa ho nedostane. V sandboxu
+  SharePointu (origin `null`) je stahování souboru z JS nejisté stejně jako
+  `fetch`, takže se do toho neinvestuje — kdo chce dokument, vezme si ho
+  z Přehledu.
+- **Nová paleta se mapuje jako světlé plochy + plné barvy na svislých
+  pruzích**, ne čtyři barevné rodiny pod sebou. Sytá tyrkysová ani zelená
+  nesmí nést dlouhý název — přes ně se nedá číst.
+
+Paleta (Adobe Color, dodal zadavatel):
+`#110B7A` · `#149EBB` · `#A9C7EC` · `#171F09` · `#3CA050`.
+
+### A1. Menší tři stupně písma — co: `scr_Dashboard.pa.yaml`, `scr_Ciselnik.pa.yaml`
+
+Dnešní `varFs ∈ {0, 2, 4}` se přičítá k základní velikosti, takže střední
+stupeň je o 2 body větší než výchozí. Posune se celá trojice o dva body dolů
+(`-2 / 0 / +2`), aby střední odpovídal výchozí velikosti Power Apps a velký
+byl tím, co je dnes střední.
+
+**verify:** `check_app.py` projde; ve třech snímcích ze Studia (malý, střední,
+velký) se do stromu vejde víc řádků než dnes a nejdelší kód `AA-BB-CCC-DDDD`
+se v žádném stupni neoříznul.
+**edge cases:** výška řádku galerie je odvozená z `varFs` — musí klesnout
+s písmem, jinak vznikne prázdné místo pod textem; sloupec kódu má šířku
+`191 + varFs * 12`, přepočítat na nové hodnoty.
+**risk:** záporná hodnota `varFs` v `Size: =13 + varFs` může u nejmenšího
+popisku spadnout pod 8 bodů, což je hranice čitelnosti — projít všechna místa,
+kde se `varFs` přičítá k něčemu menšímu než 12.
+
+### A2. Sloupec POLOŽKY — co: `scr_Dashboard.pa.yaml`
+
+Tři změny v hlavičce a řádku stromu:
+- hlavička **POLOŽEK → POLOŽKY**,
+- sloupec se posune doleva, aby mezi číslem a ikonou **+** vznikla mezera,
+- čísla pod hlavičkami VLASTNÍK a POLOŽKY se **vycentrují pod nadpis**
+  (dnes je hodnota zarovnaná jinak než nadpis, takže sloupec vypadá rozjetě).
+
+**verify:** `kontrola_prekryvu` v `check_app.py` nesmí najít překryv s ikonami;
+vizuálně ze snímku — svislá osa čísla a nadpisu je táž, mezera k „+" aspoň
+16 px.
+**edge cases:** trojmístné počty (dnes max 251) nesmí přetéct do ikon;
+při největším písmu je číslo širší.
+**risk:** ikony `+`, tužka a koš mají pevné `X` odvozené od `Parent.Width` —
+posun sloupce musí respektovat všechny tři, jinak se sloupec s ikonami
+překryje jen u některých šířek okna.
+
+### A3. Přepínač kódu zpátky na Přehled — co: `scr_Dashboard.pa.yaml`
+
+**Regrese z 1.0.0.37.** `varZobrazitKod` řídí viditelnost sloupce KÓD i odsazení
+názvu, ale od přestavby pruhu na rolovací nabídky ji nikdo nepřepíná — nastaví
+se v `App.OnStart` na `true` a tam zůstane. Vrátí se přepínač do pruhu nad
+stromem; výchozí stav **zobrazeno**.
+
+**verify:** nová kontrola v `check_app.py` — každá proměnná, na které visí
+`Visible` nebo šířka, musí mít v appce aspoň jedno místo, které ji přepíná
+(mutačně ověřit odebráním přepínače). Ručně: klik skryje sloupec a název se
+posune doleva.
+**edge cases:** pruh je plný, prvek se musí vejít vedle nabídek; při skrytém
+kódu se mění odsazení všech čtyř úrovní.
+**risk:** týž typ regrese může být i jinde — kontrola z verify ji odhalí
+plošně, ne jen tady.
+
+### A4. Ovládací prvky detailů srovnat na Přehled — co: `scr_Ciselnik`, `scr_Detail`, `scr_Vazby`
+
+Zadáno snímkem s vyznačenými prvky a upřesněno v konverzaci: **měřítkem je
+Přehled**, ne nová vymyšlená hodnota. Změřeno ve zdrojích:
+
+| obrazovka | dnešní výšky ovládacích prvků | dnešní písmo |
+|---|---|---|
+| Přehled (**vzor**) | 28 a 32 px | `Size 10–11` |
+| Číselník | 36, 40, 44 px | `12–14 + varFs` |
+| Detail | 40 a 44 px | `13–14 + varFs` |
+| Vazby | 40 px | `13 + varFs` |
+
+Cíl: každý **ovládací** prvek (tlačítko, rozbalovací nabídka, jednořádkové
+pole, chip, segment) má na všech obrazovkách výšku **32 px** a písmo
+`11 + varFs`. Víceřádková pole pro obsah (znění aktivity, spolupracuje,
+vnitřní předpis, text pro OŘ) si výšku nechávají — jsou to plochy pro text,
+ne ovládací prvky — ale písmo dostanou stejné.
+
+**verify:** nová kontrola v `check_app.py` — žádný ovládací prvek mimo Přehled
+nemá `Height` větší než největší hodnota na Přehledu; mutačně ověřit vrácením
+jedné výšky na 44. Ručně: snímky číselníku a detailu vedle Přehledu.
+**edge cases:** texty tlačítek („Uložit změny", „Přidat další dílčí proces")
+se při největším písmu nesmí oříznout — kontrola šířky proti délce textu;
+ikony zpět v hlavičce (56 px) do pravidla nepatří, jsou to prvky navigace.
+**risk:** zmenšení výšky bez zmenšení `Y` následujících prvků nechá v obou
+formulářích mezery — souřadnice se musí přepočítat po sloupcích, ne po
+prvcích. Uvolněné místo padne formulářovým polím, ne prázdnu.
+
+### B. Nová paleta — co: `App.pa.yaml`, obě obrazovky se stromem, `src/mapa_template.html`
+
+Mapování rozhodnuté při zadání:
+
+| úroveň | plocha | pruh |
+|---|---|---|
+| agenda | `#D5D8EF` | `#110B7A` |
+| proces | `#E2E9F6` | `#149EBB` |
+| dílčí proces | `#EDF2FA` | `#3CA050` |
+| aktivita | `#FAFBFE` | `#A9C7EC` |
+
+Navbar `#110B7A`, akce `#149EBB`, text `#1B2233`, „schváleno" `#3CA050`.
+Mapa dostane tytéž hodnoty přes CSS proměnné, aby appka a mapa mluvily touž
+řečí.
+
+**verify:** skript spočítá kontrast každé dvojice text/plocha podle WCAG
+a selže pod 4,5:1 — pro hlavní text i pro kód řádku, na všech čtyřech
+plochách. Ručně: snímek Přehledu a mapy vedle sebe.
+**edge cases:** kód řádku je slabší šedomodrý, na `#D5D8EF` je nejtěsnější;
+hover a vybraný řádek musí zůstat rozlišitelné od plochy pod sebou.
+**risk:** paleta se už dvakrát vrátila jako nepovedená — proto se nejdřív
+pošle snímek, teprve pak se staví zbytek.
+
+### C1. Jméno správce z hlavičky mapy — co: `src/build_mapa_flow.py`, `src/mapa_template.html`
+
+`META = {"sekce": "3", "spravce": "Ing. Tomáš Kroutil"}` — obojí je natvrdo
+zapsané a je to část otevřeného auditního nálezu **A-08**. Jméno se z hlavičky
+odstraní úplně; „Sekce 3" zůstává, dokud se rejstřík netýká víc sekcí.
+
+**verify:** `check_mapa_flow.py` — nové tvrzení „hlavička neobsahuje jméno
+osoby" (mutačně ověřit vrácením jména); `check_mapa_html.py` na výstupu.
+**edge cases:** starší publikovaná mapa v Site Assets jméno pořád nese, dokud
+neproběhne publikace.
+**risk:** žádné — ubývá pole, nic na něm nevisí.
+
+### C2. Filtr stavu podle Přehledu — co: `src/mapa_template.html`
+
+Dnešní `#fStav` filtruje podle `stav_mapovani` (zmapované / zmapované jiným
+útvarem / nezmapované). Nahradí se filtrem **stavu aktivit** (vše / schváleno /
+pracovní), jak ho má Přehled — větev se schová, když v ní po odfiltrování
+nezbude žádná aktivita. Legenda pod hlavičkou se přepíše podle toho.
+
+**verify:** `check_mapa_beh.py` — nový průchod v headless prohlížeči: přepnutí
+na „schváleno" musí snížit počet viditelných aktivit a schovat prázdné větve;
+mutačně ověřit filtrem, který nedělá nic.
+**edge cases:** aktivita bez vyplněného stavu (import ji plní hodnotou
+`pracovní`, ale ručně založená ji mít nemusí) — patří do „pracovní";
+dílčí proces bez aktivit zmizí v obou filtrech kromě „vše".
+**risk:** `stav_mapovani` se používá i v odznaku vpravo („jiný útvar",
+„nezmapováno") — ten zůstává, mění se jen filtr, jinak by se ztratila
+informace, kterou nic jiného nenese.
+
+### C3. Osiřelé položky v mapě — co: `src/mapa_template.html`
+
+Mapa už osiřelé záznamy neztrácí — od 1.0.0.43 je věší pod uzel
+„Nezařazené". Přibude **chip „jen osiřelé"**, který ostatní větve schová,
+stejně jako to umí Přehled.
+
+**verify:** `check_mapa_beh.py` — klik na chip nechá viditelné jen uzly pod
+„Nezařazené"; při nulovém počtu osiřelých je chip neaktivní s vysvětlením.
+**edge cases:** žádné osiřelé záznamy (dnes reálný stav); osiřelá aktivita,
+jejíž dílčí proces je jen v jiné sekci.
+**risk:** chip a hledání se musí kombinovat, ne přebíjet.
+
+### D. Export do Wordu z Přehledu — co: nové flow + `scr_Dashboard.pa.yaml`
+
+Exportuje se **momentální zobrazení**, tedy strom po filtru stavu, hledání
+a chipu osiřelých — ne celý rejstřík.
+
+Rozdělení práce: appka pošle flow serializovaný strom (`JSON(colStrom…)`),
+flow z něj složí dokument, uloží ho do Site Assets a vrátí adresu; appka
+zavolá `Download()`.
+
+> **Formát:** vznikne `.doc` — HTML dokument, který Word otevře a umí uložit
+> jako `.docx`. Skutečné OOXML by ve flow znamenalo premium konektor
+> (Encodian, Word Online), a ten v tomhle tenantu neprojde DLP. Je to vědomý
+> ústupek, ne opomenutí.
+
+**verify:** `check_export_flow.py` — definice flow má právě jeden trigger
+`PowerAppV2` s textovým vstupem, zápis souboru necílí na runtime výraz
+(pravidlo `PatchItem`), akce `Response` vrací adresu; smoke test složí
+dokument z vzorového JSON mimo prostředí a ověří, že obsahuje všechny čtyři
+úrovně a tolik aktivit, kolik bylo na vstupu. Ručně: export s filtrem
+„schváleno" nesmí obsahovat pracovní aktivity.
+**edge cases:** prázdný výběr (export se nespustí a řekne proč); velký strom —
+u dnešních 47 aktivit je JSON malý, u tisíců narazí na limit vstupu flow
+(popsat mez v návodu); souběžné exporty přepisující týž soubor → název nese
+časové razítko.
+**risk:** appka musí flow registrovat jako datový zdroj, což jde **jen ve
+Studiu** — potřebuji od uživatele nový export solution poté, co flow přidá.
+Bez toho se `.Run()` nedá zavolat a build by ho vyhodil.
+
+### E. Brána a předání
+
+**verify:** všech osm dnešních bran zeleně + tři nové (kontrast, přepínač
+proměnné, minimální velikost prvku); `check_solution.py` na výsledném balíku;
+teprve pak předat zip.
+**risk:** nová paleta se dotkne obou výstupů naráz (appka i mapa) — kdyby se
+zadavateli nelíbila, musí jít vrátit jednou změnou hodnot, ne přepisem
+prvků. Proto barvy zůstávají v proměnných `styl*` a v CSS proměnných, nikde
+natvrdo.
+
+---
+
 ## Náměty na rozšíření (neschválené, k připomenutí)
 
 Sepsáno 23.08.2026 na vyžádání. **Nic z toho není zadané ani rozpracované** —

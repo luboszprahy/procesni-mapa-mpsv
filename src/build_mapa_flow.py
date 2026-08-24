@@ -28,7 +28,10 @@ CILOVY_SOUBOR = "procesni_mapa.html"
 # k němu rejstřík přiblíží, potřebuje jiné řešení, ne vyšší číslo.
 STRANKOVANI = 5000
 
-META = {"sekce": "3", "spravce": "Ing. Tomáš Kroutil"}
+# Jméno správce se do mapy nepíše (auditní nález A-08): je to údaj o osobě
+# v dokumentu pro celý úřad a natvrdo zapsané jméno by po první organizační
+# změně lhalo. Sekce zůstává, dokud rejstřík pokrývá jen ji.
+META = {"sekce": "3"}
 
 # Zobrazovaný název listu v canvas appce -> název kroku ve flow a mapování
 # sloupců na datový kontrakt. 'kod' je v SharePointu vždy ve sloupci Title.

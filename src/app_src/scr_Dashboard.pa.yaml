@@ -198,13 +198,37 @@ Screens:
             Width: =160
             X: =428
             Y: =0
-      # Velikost písma (varFs = 0 / 2 / 4) vpravo u jména uživatele.
+      # Velikost písma (varFs = -2 / 0 / 2) vpravo u jména uživatele. Stupně
+      # se 24.08.2026 posunuly o dva body dolů — střední stupeň je tím, co
+      # bývalo nejmenší; nejmenší popisky jsou na 8 bodech, což je dolní mez.
       # Mění se text
       # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
       # Height = TemplateHeight - 1, takže rostou s řádkem a neořežou se.
       # Sloupec kódu se rozšiřuje spolu s písmem, jinak by se při XL
       # oříznulo AA-BB-CCC-DDDD.
       - btn_PismoD1:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(255, 255, 255, 0.35)
+            BorderThickness: =1
+            Color: =If(varFs = -2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = -2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            FocusedBorderColor: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.14)
+            OnSelect: =Set(varFs, -2)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(255, 255, 255, 0.30)
+            Size: =10
+            Text: ="A"
+            Tooltip: '="Nejmenší text, nejvíc řádků na obrazovku."'
+            Width: =34
+            X: =Parent.Width - 502
+            Y: =16
+      - btn_PismoD2:
           Control: Classic/Button@2.2.0
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
@@ -220,13 +244,13 @@ Screens:
             OnSelect: =Set(varFs, 0)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
-            Size: =10
+            Size: =13
             Text: ="A"
-            Tooltip: '="Nejmenší text, nejvíc řádků na obrazovku."'
-            Width: =34
-            X: =Parent.Width - 502
+            Tooltip: '="Střední text a vyšší řádky. Výchozí nastavení."'
+            Width: =38
+            X: =Parent.Width - 464
             Y: =16
-      - btn_PismoD2:
+      - btn_PismoD3:
           Control: Classic/Button@2.2.0
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
@@ -240,28 +264,6 @@ Screens:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
             OnSelect: =Set(varFs, 2)
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =RGBA(255, 255, 255, 0.30)
-            Size: =13
-            Text: ="A"
-            Tooltip: '="Střední text a vyšší řádky. Výchozí nastavení."'
-            Width: =38
-            X: =Parent.Width - 464
-            Y: =16
-      - btn_PismoD3:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =RGBA(255, 255, 255, 0.35)
-            BorderThickness: =1
-            Color: =If(varFs = 4, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 4, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
-            FocusedBorderColor: =RGBA(255, 255, 255, 1)
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =32
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 4)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =16
@@ -309,7 +311,7 @@ Screens:
       - rec_PruhAgendy:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =stylPrimarni
+            Fill: =stylPruh1
             Height: =56
             Width: =4
             X: =40
@@ -362,7 +364,7 @@ Screens:
       - rec_PruhProcesy:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =stylAkce
+            Fill: =stylPruh2
             Height: =56
             Width: =4
             X: =366
@@ -415,7 +417,7 @@ Screens:
       - rec_PruhDilci:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(74, 127, 193, 1)
+            Fill: =stylPruh3
             Height: =56
             Width: =4
             X: =692
@@ -470,7 +472,7 @@ Screens:
       - rec_PruhAktivity:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(147, 175, 214, 1)
+            Fill: =stylPruh4
             Height: =56
             Width: =4
             X: =1018
@@ -697,6 +699,28 @@ Screens:
             Width: =120
             X: =894
             Y: =152
+      - btn_KodD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varZobrazitKod, stylAkce, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varZobrazitKod, RGBA(255, 255, 255, 1), stylTextSlaby)
+            Fill: =If(varZobrazitKod, stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =If(varZobrazitKod, stylAkceHover, stylAkce)
+            OnSelect: =Set(varZobrazitKod, !varZobrazitKod)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="kód"
+            Tooltip: '="Skryje sloupec s identifikačními kódy a názvy se posunou doleva. Hledat podle kódu jde dál - hledání pracuje s daty, ne s tím, co je vidět."'
+            Width: =76
+            X: =1022
+            Y: =152
       - lbl_RozpadPocet:
           Control: Label@2.5.1
           Properties:
@@ -742,7 +766,7 @@ Screens:
       - lbl_h_StromUtvar:
           Control: Label@2.5.1
           Properties:
-            Align: =Align.Right
+            Align: =Align.Center
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
@@ -752,12 +776,12 @@ Screens:
             Tooltip: '="Kód útvaru z číselníku Útvary - u agendy, procesu a dílčího procesu je to jejich vlastník (sekce u agendy, odbor u procesu a dílčího procesu), u aktivity útvar, který ji vykonává. Vlastníků může být víc, pak jsou kódy oddělené středníkem (například 72; 71). Vlastník schválně není součástí identifikačního kódu - při organizační změně se mění vlastník, ne kód."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =160
-            X: =Parent.Width - 508
+            X: =Parent.Width - 528
             Y: =194
       - lbl_h_StromPocet:
           Control: Label@2.5.1
           Properties:
-            Align: =Align.Right
+            Align: =Align.Center
             Color: =stylTextSlaby
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
@@ -766,13 +790,13 @@ Screens:
             Text: |-
               =If(
                   varDashStav = "",
-                  "POLOŽEK",
+                  "POLOŽKY",
                   If(varDashStav = "schváleno", "SCHVÁLENO", "PRACOVNÍ")
               )
             Tooltip: '="Bez filtru stavu je to počet položek o úroveň níž: u agendy procesy, u procesu dílčí procesy, u dílčího procesu aktivity. U aktivity zůstává prázdné - nižší úroveň už nemá. Nula u dílčího procesu znamená, že v rejstříku je, ale žádná aktivita k němu zatím není popsaná. Se zapnutým filtrem stavu se číslo přepne na počet aktivit toho stavu v celé větvi."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =110
-            X: =Parent.Width - 332
+            X: =Parent.Width - 352
             Y: =194
       - gal_Strom:
           Control: Gallery@2.15.0
@@ -838,10 +862,10 @@ Screens:
                   Fill: |-
                     =Switch(
                         ThisItem.uroven,
-                        1, RGBA(214, 223, 242, 1),
-                        2, RGBA(230, 236, 248, 1),
-                        3, RGBA(240, 244, 251, 1),
-                        RGBA(250, 251, 254, 1)
+                        1, stylVrstva1,
+                        2, stylVrstva2,
+                        3, stylVrstva3,
+                        stylVrstva4
                     )
                   Height: =Parent.TemplateHeight - 1
                   Width: =Parent.TemplateWidth
@@ -853,10 +877,10 @@ Screens:
                   Fill: |-
                     =Switch(
                         ThisItem.uroven,
-                        1, stylPrimarni,
-                        2, stylAkce,
-                        3, RGBA(74, 127, 193, 1),
-                        RGBA(147, 175, 214, 1)
+                        1, stylPruh1,
+                        2, stylPruh2,
+                        3, stylPruh3,
+                        stylPruh4
                     )
                   Height: =Parent.TemplateHeight - 1
                   Width: =5
@@ -909,14 +933,14 @@ Screens:
                   # Šířka se počítá zpětně od vlastního X, ne od šířky řádku:
                   # při odsazení hlubší úrovně by pevná šířka podlezla sloupec
                   # útvaru (ten začíná na TemplateWidth - 360).
-                  Width: =Parent.TemplateWidth - 488 - Self.X
+                  Width: =Parent.TemplateWidth - 508 - Self.X
                   X: |-
                     =If(varZobrazitKod, 191 + varFs * 12, 51) + (ThisItem.uroven - 1) * 28
                   Y: =0
             - lbl_StromUtvar:
                 Control: Label@2.5.1
                 Properties:
-                  Align: =Align.Right
+                  Align: =Align.Center
                   Color: =stylTextSlaby
                   Font: =Font.'Open Sans'
                   Height: =Parent.TemplateHeight - 1
@@ -924,14 +948,14 @@ Screens:
                   Text: =ThisItem.utvar
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =160
-                  X: =Parent.TemplateWidth - 468
+                  X: =Parent.TemplateWidth - 488
                   Y: =0
             # Nula je u dílčího procesu důležitá informace (v rejstříku je,
             # ale nikdo k němu ještě nepopsal činnosti), proto se vypisuje.
             - lbl_StromPocet:
                 Control: Label@2.5.1
                 Properties:
-                  Align: =Align.Right
+                  Align: =Align.Center
                   Color: |-
                     =If(
                         ThisItem.uroven = 3 && ThisItem.pocet = 0,
@@ -956,7 +980,7 @@ Screens:
                     )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =110
-                  X: =Parent.TemplateWidth - 292
+                  X: =Parent.TemplateWidth - 312
                   Y: =0
             - rec_StromLinka:
                 Control: Rectangle@2.3.0
@@ -976,7 +1000,7 @@ Screens:
                   BorderThickness: =0
                   Fill: =RGBA(0, 0, 0, 0)
                   Height: =Parent.TemplateHeight - 1
-                  HoverFill: =RGBA(0, 90, 181, 0.14)
+                  HoverFill: =RGBA(16, 126, 150, 0.14)
                   # Klik do řádku POUZE rozbaluje. Detail otevírá jedině tužka
                   # vpravo — dokud detail otevíral i celý řádek, nebylo poznat,
                   # co která akce udělá.
@@ -990,7 +1014,7 @@ Screens:
                         );
                         Set(varDashUroven, 0)
                     )
-                  PressedFill: =RGBA(0, 90, 181, 0.22)
+                  PressedFill: =RGBA(16, 126, 150, 0.22)
                   Text: =""
                   Tooltip: |-
                     =Switch(ThisItem.uroven, 1, "Agenda ", 2, "Proces ", 3, "Dílčí proces ", "Aktivita ") &
@@ -1429,11 +1453,11 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverFill: =stylRadekHover
             OnSelect: =Set(varSmazatD, Blank())
             PressedFill: =stylRadekVybrany
-            Size: =13
+            Size: =11 + varFs
             Text: ="Zrušit"
             Visible: =!IsBlank(varSmazatD)
             Width: =140
@@ -1450,7 +1474,7 @@ Screens:
             FocusedBorderColor: =stylNebezpeci
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylNebezpeci
             OnSelect: |-
@@ -1481,7 +1505,7 @@ Screens:
               )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylNebezpeci
-            Size: =13
+            Size: =11 + varFs
             Text: ="Smazat"
             Tooltip: |-
               =If(

@@ -251,12 +251,17 @@ def main():
                "zápisová akce má web jako runtime výraz")
         overit(parametry.get("item/nazev_kratky") == "@outputs('Cil')",
                "zápis neplní nazev_kratky výstupem Cil")
-        # povinné sloupce musí v těle být (jinak flow nejde aktivovat), ale smí
-        # se posílat jen beze změny z triggeru — měnit se smí výhradně nazev_kratky
+        # Flow smí do řádku poslat jen to, co samo spočítalo, a `Title`, podle
+        # kterého SharePoint řádek najde. `nazev` a `dilci_proces_kod` odsud
+        # 23.08.2026 zmizely (auditní nález A-07): posílaly se ze snímku
+        # triggeru starého až o minutu, takže opravu názvu uloženou krátce po
+        # prvním zápisu flow tiše vrátilo na starou hodnotu. Odebírá je
+        # `oprav_flow_kratky_nazev()` v build_app.py — kontrola tady tedy musí
+        # čekat dvojici, ne původní čtveřici, jinak si obě strany odporují
+        # (rozešly se a spadlo to až 24.08.2026).
         polozky = {k: v for k, v in parametry.items() if k.startswith("item/")}
-        overit(set(polozky) == {"item/Title", "item/nazev", "item/dilci_proces_kod",
-                                "item/nazev_kratky"},
-               f"zápis nemá právě povinné sloupce + nazev_kratky: {sorted(polozky)}")
+        overit(set(polozky) == {"item/Title", "item/nazev_kratky"},
+               f"zápis nemá právě Title + nazev_kratky: {sorted(polozky)}")
         for sloupec, hodnota in polozky.items():
             if sloupec == "item/nazev_kratky":
                 continue

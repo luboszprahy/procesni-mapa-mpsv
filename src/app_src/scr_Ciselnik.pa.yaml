@@ -187,15 +187,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = -2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = -2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 0)
+            OnSelect: =Set(varFs, -2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =10
@@ -209,15 +209,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 2)
+            OnSelect: =Set(varFs, 0)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =13
@@ -231,15 +231,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 4, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 4, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 4)
+            OnSelect: =Set(varFs, 2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =16
@@ -262,7 +262,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverColor: =If(varUrovenTyp = "agenda", RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varUrovenTyp = "agenda", stylAkceHover, stylRadekHover)
             OnSelect: |-
@@ -277,7 +277,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =12 + varFs
+            Size: =11 + varFs
             Text: ="Agendy"
             Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem. Nadřazený prvek nemá, vlastníkem je sekce. Kód má dvě číslice."'
             Width: =148
@@ -293,7 +293,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverColor: =If(varUrovenTyp = "proces", RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varUrovenTyp = "proces", stylAkceHover, stylRadekHover)
             OnSelect: |-
@@ -308,7 +308,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =12 + varFs
+            Size: =11 + varFs
             Text: ="Procesy"
             Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem. Patří vždy pod jednu agendu, vlastníkem je odbor. Kód má tvar AA-BB."'
             Width: =148
@@ -324,7 +324,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverColor: =If(varUrovenTyp = "dilci", RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varUrovenTyp = "dilci", stylAkceHover, stylRadekHover)
             OnSelect: |-
@@ -339,7 +339,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =12 + varFs
+            Size: =11 + varFs
             Text: ="Dílčí procesy"
             Tooltip: '="Třetí úroveň: vymezený úsek procesu. Patří vždy pod jeden proces, vlastníkem je odbor. Kód má tvar AA-BB-CCC a teprve pod něj se zařazují aktivity."'
             Width: =148
@@ -359,7 +359,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverColor: =If(varUrovenTyp = "aktivita", RGBA(255, 255, 255, 1), stylAkce)
             HoverFill: =If(varUrovenTyp = "aktivita", stylAkceHover, stylRadekHover)
             OnSelect: |-
@@ -374,7 +374,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =12 + varFs
+            Size: =11 + varFs
             Text: ="Aktivity"
             Tooltip: '="Čtvrtá a nejnižší úroveň: činnost tak, jak má znít v organizačním řádu. Vykonává ji oddělení. Kód má tvar AA-BB-CCC-DDDD. Upravuje se na vlastní obrazovce - klik na řádek ji otevře."'
             Width: =148
@@ -388,10 +388,10 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HintText: ="Hledat v kódu nebo názvu"
             HoverBorderColor: =stylAkce
-            Size: =12 + varFs
+            Size: =11 + varFs
             Tooltip: '="Hledá kdekoli uvnitř kódu i názvu, na velikosti písmen nezáleží. Pracuje nad načteným číselníkem, ne nad SharePointem, takže je výsledek úplný bez ohledu na velikost rejstříku."'
             Width: =400
             X: =40
@@ -406,7 +406,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverColor: =If(varUklidC, stylAkce, RGBA(255, 255, 255, 1))
             HoverFill: =If(varUklidC, stylRadekHover, stylAkceHover)
             OnSelect: =Set(varUklidC, false)
@@ -430,7 +430,7 @@ Screens:
             FocusedBorderColor: =stylPozor
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylPozor
             OnSelect: =Set(varUklidC, true)
@@ -460,7 +460,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverBorderColor: =stylAkce
             Items: =colSekceNabidka
             OnChange: |-
@@ -485,7 +485,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverBorderColor: =stylAkce
             Items: =colUtvarNabidka
             OnChange: |-
@@ -510,7 +510,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =36
+            Height: =32
             HoverBorderColor: =stylAkce
             Items: =["(vše)", "pracovní", "schváleno"]
             Size: =11
@@ -763,7 +763,7 @@ Screens:
                   BorderThickness: =0
                   Fill: =RGBA(0, 0, 0, 0)
                   Height: =Parent.TemplateHeight - 1
-                  HoverFill: =RGBA(0, 90, 181, 0.14)
+                  HoverFill: =RGBA(16, 126, 150, 0.14)
                   OnSelect: |-
                     =Set(varUrovenTyp, ThisItem.uroven);
                     Set(varCiselnikNova, false);
@@ -781,7 +781,7 @@ Screens:
                         Set(varAktivita, LookUp(Aktivity, Title = ThisItem.kod));
                         Navigate(scr_Detail, ScreenTransition.Cover)
                     )
-                  PressedFill: =RGBA(0, 90, 181, 0.22)
+                  PressedFill: =RGBA(16, 126, 150, 0.22)
                   Text: =""
                   Tooltip: |-
                     =ThisItem.kod & " · " & ThisItem.nazevPlny & Char(10) &
@@ -941,11 +941,11 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverBorderColor: =stylAkce
             Items: =Distinct(colAgendy, Title & " · " & nazev)
             OnChange: =Reset(drp_ProcesC)
-            Size: =13 + varFs
+            Size: =11 + varFs
             Tooltip: '="Agenda, pod kterou nová položka patří. U procesu určuje první dvojčíslí kódu, u dílčího procesu navíc omezuje nabídku procesů. Když agendu změníš, výběr procesu se vynuluje — kombinace z různých agend neexistuje. Při úpravě je pole zamčené: přesun pod jiného rodiče by znamenal jiný kód, a ten se nikdy nemění."'
             Visible: |-
               =varUrovenTyp <> "agenda" && varUrovenTyp <> "aktivita"
@@ -985,14 +985,14 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverBorderColor: =stylAkce
             Items: |-
               =Distinct(
                   Filter(colProcesy, agenda_kod = Left(drp_AgendaC.Selected.Value, 2)),
                   Title & " · " & nazev
               )
-            Size: =13 + varFs
+            Size: =11 + varFs
             Tooltip: '="Proces, pod který nový dílčí proces patří. Nabízejí se jen procesy vybrané agendy. Dokud není vybraná agenda, je pole zašedlé — to není chyba, jen kaskáda čeká na nadřazenou úroveň."'
             Visible: =varUrovenTyp = "dilci"
             Width: =572
@@ -1032,7 +1032,7 @@ Screens:
             HoverBorderColor: =stylAkce
             MaxLength: =255
             Mode: =TextMode.MultiLine
-            Size: =13 + varFs
+            Size: =12 + varFs
             Visible: =varUrovenTyp <> "aktivita"
             Tooltip: '="Povinné. Název položky číselníku. Delší text SharePoint ořízne na 255 znaků, proto je pole na tuhle délku omezené. Název jde později přejmenovat, přidělený kód už ne — vazby v rejstříku i v mapě stojí na kódu."'
             Width: =572
@@ -1074,7 +1074,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverBorderColor: =stylAkce
             Items: |-
               =If(
@@ -1082,7 +1082,7 @@ Screens:
                   Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev),
                   Distinct(Filter(colUtvary, uroven.Value = "odbor"), Title & " · " & nazev)
               )
-            Size: =13 + varFs
+            Size: =11 + varFs
             Visible: =varUrovenTyp <> "aktivita"
             Tooltip: '="Nepovinné, doplnit jde kdykoli později. Metodika říká, že vlastníkem agendy je sekce a vlastníkem procesu i dílčího procesu odbor — nabídka se podle úrovně mění. Ukládá se kód útvaru, ne celý řádek s názvem, aby se evidence nerozešla s číselníkem při přejmenování útvaru."'
             Width: =572
@@ -1194,7 +1194,7 @@ Screens:
             FocusedBorderColor: =stylPrimarni
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =44
+            Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylAkceHover
             OnSelect: |-
@@ -1460,7 +1460,7 @@ Screens:
               )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =14 + varFs
+            Size: =11 + varFs
             Text: |-
               =If(varCiselnikNova, "Založit", "Uložit změny")
             Visible: =varUrovenTyp <> "aktivita"
@@ -1489,7 +1489,7 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =44
+            Height: =32
             HoverColor: =stylAkce
             HoverFill: =stylRadekHover
             OnSelect: |-
@@ -1509,7 +1509,7 @@ Screens:
                   Navigate(scr_Detail, ScreenTransition.Cover)
               )
             PressedFill: =stylRadekVybrany
-            Size: =13 + varFs
+            Size: =11 + varFs
             Text: |-
               =If(varUrovenTyp = "aktivita", "Nová aktivita", "Nová položka")
             Tooltip: |-
@@ -1641,11 +1641,11 @@ Screens:
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverFill: =stylRadekHover
             OnSelect: =Set(varSmazatC, Blank())
             PressedFill: =stylRadekVybrany
-            Size: =13
+            Size: =11 + varFs
             Text: ="Zrušit"
             Visible: =!IsBlank(varSmazatC)
             Width: =140
@@ -1663,7 +1663,7 @@ Screens:
             FocusedBorderColor: =stylNebezpeci
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylNebezpeci
             OnSelect: |-
@@ -1722,7 +1722,7 @@ Screens:
               )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylNebezpeci
-            Size: =13
+            Size: =11 + varFs
             Text: ="Smazat"
             Tooltip: |-
               =If(

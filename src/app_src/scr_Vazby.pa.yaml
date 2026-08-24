@@ -183,9 +183,9 @@ Screens:
             Tooltip: '="Hledá v kódu i v názvu dílčího procesu, kdekoli uvnitř textu. Prázdné pole zobrazí celý číselník (250 dílčích procesů), takže je rychlejší napsat kus názvu než scrollovat."'
             Default: =""
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             HintText: ="Hledat v názvu nebo kódu"
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =620
             X: =700
             Y: =164

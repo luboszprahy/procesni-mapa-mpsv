@@ -79,6 +79,38 @@ SCENAR = """
   out.hledaniRozbalilo = vidi(kids("a"));
   out.hledaniNaslo = document.querySelectorAll("mark").length;
 
+  // 8) filtr stavu aktivit (nahradil filtr zmapované/nezmapované)
+  q.value = ""; q.dispatchEvent(new Event("input"));
+  uroven.value = "4"; uroven.dispatchEvent(new Event("change"));
+  const fStav = document.getElementById("fStav");
+  const aktivit = () => document.querySelectorAll(".lvl-k").length;
+  const vetvi   = () => document.querySelectorAll(".lvl-d").length;
+  out.stavVolby   = [...fStav.options].map(o => o.value);
+  out.stavVse     = aktivit();
+  out.vetviVse    = vetvi();
+  fStav.value = "schváleno"; fStav.dispatchEvent(new Event("change"));
+  out.stavSchvaleno = aktivit();
+  out.vetviSchvaleno = vetvi();
+  fStav.value = "pracovní"; fStav.dispatchEvent(new Event("change"));
+  out.stavPracovni = aktivit();
+  fStav.value = ""; fStav.dispatchEvent(new Event("change"));
+
+  // 9) chip osiřelých
+  const cOsirele = document.getElementById("cOsirele");
+  out.osireleVychozi = cOsirele.checked;
+  out.osireleZakazany = cOsirele.disabled;
+  if (!cOsirele.disabled){
+    cOsirele.checked = true; cOsirele.dispatchEvent(new Event("change"));
+    out.osireleKorenu = document.querySelectorAll("#tree > .node").length;
+    out.osireleJenNezarazene = [...document.querySelectorAll("#tree > .node > .row > .nm")]
+      .every(x => x.textContent.startsWith("Nezařazené"));
+    cOsirele.checked = false; cOsirele.dispatchEvent(new Event("change"));
+  }
+  out.korenuPoVraceni = document.querySelectorAll("#tree > .node").length;
+
+  // 10) hlavička neuvádí jméno osoby
+  out.meta = document.getElementById("meta").textContent;
+
   const pre = document.createElement("pre");
   pre.id = "vysledek-testu";
   pre.textContent = JSON.stringify(out);
@@ -153,6 +185,31 @@ def main():
 
     overit(r["hledaniRozbalilo"] is True, "hledání nerozbalilo strom navzdory stupni 1")
     overit(r["hledaniNaslo"] > 0, "hledání nic nezvýraznilo")
+
+    # Filtr stavu aktivit — od 24.08.2026 místo zmapované/nezmapované, aby
+    # mapa filtrovala touž věcí jako přehled v appce.
+    overit(r["stavVolby"] == ["", "schváleno", "pracovní"],
+           f"volby filtru stavu nejsou vše/schváleno/pracovní ({r['stavVolby']})")
+    overit(r["stavVse"] > 0, "při stavu „vše“ nejsou vidět žádné aktivity")
+    overit(r["stavSchvaleno"] + r["stavPracovni"] == r["stavVse"],
+           f"schválené ({r['stavSchvaleno']}) a pracovní ({r['stavPracovni']}) nedají "
+           f"dohromady všechny aktivity ({r['stavVse']}) — aktivita bez vyplněného "
+           f"stavu se ztrácí v obou filtrech")
+    overit(r["vetviSchvaleno"] <= r["vetviVse"],
+           "filtr stavu neschoval větve, ve kterých po odfiltrování nic nezbylo")
+
+    # Chip osiřelých
+    overit(r["osireleVychozi"] is False, "chip osiřelých je zapnutý hned po otevření")
+    if not r["osireleZakazany"]:
+        overit(r["osireleJenNezarazene"] is True,
+               "zapnutý chip osiřelých nechal ve stromu i větve s živým předkem")
+        overit(r["osireleKorenu"] < r["korenuPoVraceni"],
+               "zapnutý chip osiřelých strom nezúžil")
+    overit(r["korenuPoVraceni"] > 0, "po vypnutí chipu osiřelých zůstal strom prázdný")
+
+    # A-08: jméno správce v hlavičce mapy
+    overit("správce" not in r["meta"] and "Ing." not in r["meta"],
+           f"hlavička mapy uvádí jméno osoby: {r['meta'][:80]!r}")
 
     print(f"kontrol: {kontrol}, chyb: {len(chyby)}   (prohlížeč: {prohlizec.name})")
     if chyby:

@@ -80,15 +80,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = -2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = -2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 0)
+            OnSelect: =Set(varFs, -2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =10
@@ -102,15 +102,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 2)
+            OnSelect: =Set(varFs, 0)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =13
@@ -124,15 +124,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 4, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 4, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =32
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 4)
+            OnSelect: =Set(varFs, 2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =16
@@ -167,12 +167,12 @@ Screens:
                   LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev)
               )
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             Items: =Distinct(colAgendy, Title & " · " & nazev)
             OnChange: |-
               =Reset(drp_Proces);
               Reset(drp_Dilci)
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =620
             X: =40
             Y: =120
@@ -203,14 +203,14 @@ Screens:
                   LookUp(colProcesy, Title = Left(varDpKod, 5), Title & " · " & nazev)
               )
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             Items: |-
               =Distinct(
                   Filter(colProcesy, agenda_kod = Left(drp_Agenda.Selected.Value, 2)),
                   Title & " · " & nazev
               )
             OnChange: =Reset(drp_Dilci)
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =620
             X: =40
             Y: =196
@@ -237,13 +237,13 @@ Screens:
             Default: |-
               =If(IsBlank(varDpKod), "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             Items: |-
               =Distinct(
                   Filter(colDilci, proces_kod = Left(drp_Proces.Selected.Value, 5)),
                   Title & " · " & nazev
               )
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =620
             X: =40
             Y: =272
@@ -270,7 +270,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =88
             Mode: =TextMode.MultiLine
-            Size: =13 + varFs
+            Size: =12 + varFs
             Width: =620
             X: =40
             Y: =348
@@ -297,7 +297,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =64
             Mode: =TextMode.MultiLine
-            Size: =13 + varFs
+            Size: =12 + varFs
             Width: =620
             X: =40
             Y: =472
@@ -324,7 +324,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =64
             Mode: =TextMode.MultiLine
-            Size: =13 + varFs
+            Size: =12 + varFs
             Width: =620
             X: =40
             Y: =572
@@ -450,9 +450,9 @@ Screens:
                   LookUp(colUtvary, Title = varAktivita.vykonava, Title & " · " & nazev)
               )
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             Items: =Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev)
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =300
             X: =700
             Y: =200
@@ -482,9 +482,9 @@ Screens:
                   LookUp(colUtvary, Title = varAktivita.sekce, Title & " · " & nazev)
               )
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             Items: =Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev)
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =300
             X: =1020
             Y: =200
@@ -511,7 +511,7 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =120
             Mode: =TextMode.MultiLine
-            Size: =13 + varFs
+            Size: =12 + varFs
             Width: =620
             X: =700
             Y: =360
@@ -535,9 +535,9 @@ Screens:
             Tooltip: '="Pracovní = rozpracováno, schváleno = potvrzené znění pro organizační řád. Přepnutím na „schváleno“ dáváš najevo, že formulace prošla vlastníkem procesu. Automatické schvalování s notifikacemi součástí této fáze není."'
             Default: =If(varNova, "pracovní", varAktivita.stav.Value)
             Font: =Font.'Open Sans'
-            Height: =40
+            Height: =32
             Items: =["pracovní", "schváleno"]
-            Size: =13 + varFs
+            Size: =11 + varFs
             Width: =300
             X: =700
             Y: =280
@@ -672,7 +672,7 @@ Screens:
             Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód AA-BB-CCC-DDDD: AA agenda, BB proces, CCC dílčí proces, DDDD první volné čtyřčíslí v tom dílčím procesu. Zároveň se založí primární vazba do rejstříku. Jednou přidělený kód se už nikdy nemění, ani při přesunu do jiného dílčího procesu - vazby v rejstříku i v mapě na něm stojí. Vlastník součástí kódu není, eviduje se zvlášť. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu."'
             Fill: =stylAkce
             Font: =Font.'Open Sans'
-            Height: =44
+            Height: =32
             OnSelect: |-
               =Set(varChyba, "");
               If(IsBlank(drp_Dilci.Selected.Value), Set(varChyba, "Vyber dílčí proces."));
@@ -757,7 +757,7 @@ Screens:
                       )
                   )
               )
-            Size: =14 + varFs
+            Size: =11 + varFs
             Text: ="Uložit"
             Width: =200
             X: =700
@@ -775,7 +775,7 @@ Screens:
             Color: =stylNebezpeci
             Fill: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
-            Height: =44
+            Height: =32
             OnSelect: |-
               =IfError(
                   RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title);
@@ -789,7 +789,7 @@ Screens:
                   Navigate(scr_Ciselnik, ScreenTransition.UnCover),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
               )
-            Size: =14 + varFs
+            Size: =11 + varFs
             Text: ="Smazat"
             Visible: =!varNova
             Width: =160

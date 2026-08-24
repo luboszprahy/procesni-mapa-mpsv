@@ -1047,6 +1047,124 @@ def kontrola_promennych(soubory, vzorce):
             )
 
 
+VYJIMKY_PREPINACU = {
+    "varMapaUrl": "konfigurační hodnota, ne přepínač — adresu publikované mapy "
+                  "nastavuje App.OnStart a mění se jen při přenosu na jiný tenant",
+}
+
+
+def je_slovo(jmeno, radek):
+    """Jméno proměnné jako celé slovo, ne jako podřetězec delšího jména."""
+    return re.search(r"\b" + re.escape(jmeno) + r"\b", radek)
+
+
+def kontrola_prepinacu(soubory):
+    """Proměnná, která řídí vzhled, musí mít v appce něco, co ji přepne.
+
+    Vzniká to při přestavbě obrazovky: prvek, který proměnnou přepínal,
+    zanikne, ale všechno, co na ní visí, zůstane. Proměnná pak drží hodnotu
+    z App.OnStart a chová se jako konstanta — funkce z pohledu uživatele
+    zmizela, ale ve zdrojích po ní zbyly viditelné stopy, takže při čtení
+    kódu vypadá, že tam pořád je.
+
+    Přesně tak zmizel přepínač sloupce s kódy na přehledu: v 1.0.0.37
+    nahradily pruh nad stromem rolovací nabídky, tlačítko se do nich
+    nevešlo a `varZobrazitKod` od té doby nikdo nepřepínal (hlášeno
+    24.08.2026, tři balíky poté).
+
+    Kontroluje se jen vzhled — behaviorální vlastnosti (OnSelect, OnVisible)
+    proměnné nastavují, ne čtou.
+    """
+    app = next((c for c in soubory if Path(c).name == "App.pa.yaml"), None)
+    if app is None:
+        return
+    text_app = io.open(app, encoding="utf-8").read()
+    obrazovky = [c for c in soubory if Path(c).name != "App.pa.yaml"]
+    text_obrazovek = "".join(io.open(c, encoding="utf-8").read() for c in obrazovky)
+
+    VZHLED = ("Visible", "Width", "Height", "X", "Y", "Fill", "Color", "Size", "Text",
+              "BorderColor", "DisplayMode", "PaddingTop")
+    for jmeno in sorted(set(re.findall(r"Set\(\s*(var[A-Za-z0-9_]*)\s*,", text_app))):
+        if jmeno in VYJIMKY_PREPINACU:
+            continue
+        if re.search(rf"Set\(\s*{jmeno}\s*,", text_obrazovek):
+            continue  # něco ji za běhu přepíná
+        kde = []
+        for cesta in obrazovky:
+            # Vlastnost si musí držet i přes pokračovací řádky bloku `|-`:
+            # ve víceřádkovém vzorci je jméno proměnné o pár řádků níž než
+            # `Text:` a jednořádkové hledání by ho minulo.
+            vlastnost, odsazeni = None, 0
+            for cislo, radek in enumerate(io.open(cesta, encoding="utf-8"), start=1):
+                m = re.match(r"(\s+)([A-Za-z][A-Za-z0-9]*): ", radek)
+                if m:
+                    vlastnost, odsazeni = m.group(2), len(m.group(1))
+                elif radek.strip() and len(radek) - len(radek.lstrip()) <= odsazeni:
+                    vlastnost = None  # blok skončil
+                if vlastnost in VZHLED and je_slovo(jmeno, radek):
+                    kde.append(f"{Path(cesta).name}:{cislo} ({vlastnost})")
+        if kde:
+            chyby.append(
+                f"'{jmeno}' řídí vzhled ({', '.join(kde[:3])}"
+                f"{' a další' if len(kde) > 3 else ''}), ale žádná obrazovka ji "
+                f"nepřepíná — drží hodnotu z App.OnStart, takže se ta funkce "
+                f"z appky ztratila, i když ve zdrojích po ní zbyly stopy"
+            )
+
+
+VYJIMKY_VELIKOSTI = {
+    "ico_Zpet": "šipka zpět v hlavičce je navigace, ne ovládací prvek formuláře",
+    "ico_ZpetV": "totéž na obrazovce vazeb",
+}
+
+# Ovládací prvky mají napříč appkou jednu výšku. Vyšší TextInput je plocha
+# pro psaní (znění aktivity, spolupracuje, předpis), ne ovládací prvek.
+VYSKA_OVLADACIHO_PRVKU = 32
+VICERADKOVE_POLE_OD = 48
+
+
+def kontrola_velikosti(soubory):
+    """Ovládací prvky musí mít napříč obrazovkami stejnou výšku.
+
+    Přehled má tlačítka a pole na 28-32 px, kdežto číselník a detail vyrostly
+    na 36-44 px, protože každá obrazovka vznikala zvlášť. Na husté obrazovce
+    to působí hrubě a hlavně nesourodě — táž akce vypadá jinde jinak
+    (hlášeno 24.08.2026 snímkem s vyznačenými prvky).
+
+    Kontroluje se strop, ne přesná hodnota: menší prvek (28 px v pruhu nad
+    stromem) je vědomé odlišení hustého ovládacího pásu, vyšší je regrese.
+    """
+    for cesta in soubory:
+        if Path(cesta).name == "App.pa.yaml":
+            continue
+        t = io.open(cesta, encoding="utf-8").read()
+        hranice = [m.start() for m in re.finditer(r"\n\s+- [A-Za-z0-9_]+:\n\s+Control: ", t)]
+        hranice.append(len(t))
+        for i, zac in enumerate(hranice[:-1]):
+            blok = t[zac:hranice[i + 1]]
+            m = re.match(r"\n\s+- ([A-Za-z0-9_]+):\n\s+Control: ([^\n]+)", blok)
+            if not m:
+                continue
+            jmeno, ctrl = m.group(1), m.group(2).strip()
+            if any(jmeno.startswith(v) for v in VYJIMKY_VELIKOSTI):
+                continue
+            if not any(k in ctrl for k in ("Button", "DropDown", "TextInput", "ComboBox")):
+                continue
+            mh = re.search(r"^\s+Height: =(\d+)$", blok, re.M)
+            if not mh:
+                continue
+            vyska = int(mh.group(1))
+            if "TextInput" in ctrl and vyska >= VICERADKOVE_POLE_OD:
+                continue  # plocha pro psaní, ne ovládací prvek
+            if vyska > VYSKA_OVLADACIHO_PRVKU:
+                chyby.append(
+                    f"{Path(cesta).name}: '{jmeno}' má výšku {vyska} px, "
+                    f"ale ovládací prvky mají napříč appkou "
+                    f"{VYSKA_OVLADACIHO_PRVKU} px — táž akce by na dvou "
+                    f"obrazovkách vypadala jinak"
+                )
+
+
 def kontrola_poradi_nabidek(soubory):
     """Položky rozbalovací nabídky musí ležet NAD jejím stínem.
 
@@ -1110,6 +1228,8 @@ def main():
     kontrola_dvojiteho_rovnitka(soubory)
     kontrola_promennych(soubory, vzorce)
     kontrola_poradi_nabidek(soubory)
+    kontrola_prepinacu(soubory)
+    kontrola_velikosti(soubory)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)
