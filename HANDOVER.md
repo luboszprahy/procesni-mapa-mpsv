@@ -89,6 +89,44 @@ neodstranilo, ale správně to být má.
 Vyloučeno: cache prohlížeče (stejné chování v jiném prohlížeči), špatný odkaz,
 chybějící Live verze.
 
+## 2b. ROZPRACOVANÉ: rušení sloupce `stav_mapovani` (zadáno 24.08.2026 12:16)
+
+**Rozhodnutí zadavatele:** „je to celé matoucí a nechci tam pole které
+zastarává případně vyžaduje ruční update. dej ho celé pryč." Ze SharePoint
+listů sloupec smaže ručně sám.
+
+**Proč:** `stav_mapovani` je čistá odvozenina — `zmapováno` = má aktivitu,
+`zmapováno jiným útvarem` = nemá aktivitu a `stav_rejstrik` začíná na
+„využitý", jinak `nezmapováno`. Uložený sloupec se ale od importu nikdy
+nepřepočítával a appka ho jen zapisovala natvrdo při zakládání
+(`nezmapováno`), takže postupně lhal. V žádném formuláři se nedal změnit.
+
+**Co se má stát (kdyby to nestihl dojet, tohle je celý rozsah):**
+
+1. `src/schema.json` — odebrat sloupec `stav_mapovani` z listů `Agendy`,
+   `Procesy`, `DilciProcesy`.
+2. `src/normalize.py` — smazat funkci `stav_mapovani()` (kolem řádku 342)
+   a pole z hlaviček CSV (řádky ~375-380) i ze souhrnu v reportu (~413).
+3. `src/build_mapa_flow.py` — vyhodit `stav_mapovani` z mapování sloupců
+   u všech tří listů (konstanta `LISTY`).
+4. `src/mapa_template.html` — odznak má mít **jen dvě** podoby: `N akt.`
+   a `bez aktivit`. Větev `jinde` / `u jiného útvaru` zrušit včetně stylu
+   `.badge.jinde`, legendy a nápovědy k ní.
+5. `src/app_src/scr_Ciselnik.pa.yaml` — zrušit zápisy `stav_mapovani`
+   (3 místa) i `stav_rejstrik` (1 místo). Nová položka žádný stav z rejstříku
+   nemá, protože v původním rejstříku nebyla — zapisovat „využitý" natvrdo
+   je lež.
+6. Brány: `check_schema.py`, `check_app.py`, `check_mapa_flow.py`,
+   `check_mapa_html.py`, `check_mapa_beh.py`, `check_setup.js`,
+   `check_import.js` — všechny musí projít; kde se `stav_mapovani` objeví
+   v očekávaných sloupcích, odebrat.
+7. Přegenerovat `deploy/sharepoint_schema.md` (`check_schema.py`), postavit
+   nový balík a poslat.
+
+**`stav_rejstrik` zůstává v listu** — na rozdíl od `stav_mapovani` to není
+odvozenina, ale zdrojový údaj z barev v původním rejstříku. Nikdo ho ale
+needituje a mapa ho po téhle změně nepoužívá.
+
 ## 2. CO DĚLÁM JÁ (další krok)
 
 **F7/D — export do Wordu z Přehledu.** Exportuje se momentální zobrazení
