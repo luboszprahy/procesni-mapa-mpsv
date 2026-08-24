@@ -2,6 +2,35 @@
 
 Aktualizováno: 2026-08-23 (konec dne, balík 1.0.0.50)
 
+## Číslo, které neřeklo, co počítá (24.08.2026) — balík 1.0.0.55
+
+**Hlášeno jako chyba:** „na html to píše bez aktivit, přitom aktivity tam
+jsou". Nebyla to chyba — appka a mapa říkaly totéž, každá jinými slovy:
+
+| | proces `01-06` | jeho dílčí procesy |
+|---|---|---|
+| appka, sloupec POLOŽKY | **4** (dílčí procesy) | **0** (aktivity) |
+| mapa, odznak | **bez aktivit** | **bez aktivit** |
+
+Proces má čtyři dílčí procesy, ale ani jeden z nich nemá popsanou činnost.
+Obojí platí, jenže sloupec POLOŽKY ukazoval **holé číslo bez jednotky** —
+u procesu tedy „4" vypadalo jako čtyři aktivity a vedle toho mapa psala „bez
+aktivit". Vypadalo to jako spor dvou pohledů na tatáž data.
+
+**Opraveno na obou stranách:**
+- sloupec v appce říká, co počítá: `10 proc.` u agendy, `4 dílč.` u procesu,
+  `0 akt.` u dílčího procesu. Se zapnutým filtrem stavu je jednotka vždy
+  `akt.`, protože tam se počítají aktivity ve větvi;
+- nápověda odznaku v mapě dovysvětlí obojí: „Uvnitř tohoto procesu jsou
+  4 dílčí procesy, ale činnosti k ní zatím nikdo nepopsal."
+
+**Odsazení úrovní v mapě** zvětšeno ze 17+9 px na 26+14 px — hlubší stupeň
+splýval s tím nad sebou (zadáno tamtéž).
+
+Potvrzeno ze snímků: oprava závodu s `Concurrent` (1.0.0.53) v provozu
+zabrala — Přehled ukazuje reálné počty a karta „251 dílčích procesů,
+26 s aktivitami".
+
 ## Sloupec `stav_mapovani` zrušen (24.08.2026) — balík 1.0.0.54
 
 **Zadáno:** „je to celé matoucí a nechci tam pole které zastarává případně

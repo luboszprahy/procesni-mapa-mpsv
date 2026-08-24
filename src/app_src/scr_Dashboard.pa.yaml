@@ -972,6 +972,11 @@ Screens:
                   FontWeight: =FontWeight.Semibold
                   Height: =Parent.TemplateHeight - 1
                   Size: =10 + varFs
+                  # Číslo musí říct, CO počítá. Holé „4" u procesu vypadalo jako
+                  # čtyři aktivity, přitom to byly čtyři dílčí procesy — a mapa
+                  # na témž řádku psala „bez aktivit", takže to vypadalo jako
+                  # spor dvou pohledů na tatáž data (hlášeno 24.08.2026).
+                  # Se zapnutým filtrem stavu se počítají vždy aktivity ve větvi.
                   Text: |-
                     =If(
                         ThisItem.uroven = 4,
@@ -982,6 +987,10 @@ Screens:
                                 ThisItem.pocet,
                                 If(varDashStav = "schváleno", ThisItem.aktS, ThisItem.aktC - ThisItem.aktS)
                             )
+                        ) & If(
+                            varDashStav <> "",
+                            " akt.",
+                            Switch(ThisItem.uroven, 1, " proc.", 2, " dílč.", " akt.")
                         )
                     )
                   VerticalAlign: =VerticalAlign.Middle

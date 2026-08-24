@@ -76,7 +76,9 @@
   .lvl-d>.row>.nm{color:var(--d)}
   .lvl-k>.row>.nm{color:var(--ink)}
   .lvl-k>.row{cursor:pointer}
-  .kids{margin-left:17px;border-left:1px solid var(--line);padding-left:9px}
+  /* Odsazení každého stupně je znát na první pohled — 17+9 px splývalo,
+     takže hlubší úroveň vypadala skoro zarovnaně s tou nad ní (24.08.2026). */
+  .kids{margin-left:26px;border-left:1px solid var(--line);padding-left:14px}
   .lvl-a>.kids{border-left-color:var(--a-line)}
   .lvl-p>.kids{border-left-color:var(--p-line)}
   .lvl-d>.kids{border-left-color:var(--d-line)}
@@ -272,9 +274,23 @@ function render(){
       const b = document.createElement("span");
       b.className = "badge" + (n.aktCount ? "" : " no");
       b.textContent = n.aktCount ? n.aktCount + " akt." : "bez aktivit";
+      /* Odznak počítá AKTIVITY, kdežto sloupec POLOŽKY v aplikaci počítá
+         položky o úroveň níž. Na témž řádku tedy stojí „4" a „bez aktivit"
+         a vypadá to jako spor (hlášeno 24.08.2026). Nápověda proto řekne
+         obojí — kolik je uvnitř větví a kolik z nich vede k činnosti. */
+      const potomku = (n.kids || []).length;
+      const NIZSI = {a: ["proces", "procesy", "procesů"],
+                     p: ["dílčí proces", "dílčí procesy", "dílčích procesů"],
+                     d: ["aktivitu", "aktivity", "aktivit"]};
+      const sklon = (p, s) => p === 1 ? s[0] : p >= 2 && p <= 4 ? s[1] : s[2];
       b.title = n.aktCount
         ? "Uvnitř této větve je " + n.aktCount + " " + sklonAkt(n.aktCount) + "."
-        : "V rejstříku položka je, ale činnosti k ní zatím nikdo nepopsal. Právě takhle je vidět, co ještě čeká na zmapování.";
+        : (potomku
+            ? "Uvnitř " + (n.lvl === "a" ? "této agendy" : n.lvl === "p" ? "tohoto procesu" : "tohoto dílčího procesu")
+              + " " + (potomku === 1 ? "je" : "jsou") + " " + potomku + " "
+              + sklon(potomku, NIZSI[n.lvl] || NIZSI.d) + ", ale "
+            : "")
+          + "činnosti k ní zatím nikdo nepopsal. Právě takhle je vidět, co ještě čeká na zmapování.";
       row.appendChild(b);
       if (!n.aktCount) node.classList.add("unmapped");
     }
