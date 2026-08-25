@@ -1545,8 +1545,8 @@ Screens:
             PressedColor: =stylAkceStisk
             PressedFill: =stylRadekVybrany
             Size: =11
-            Text: ="Do Excelu (.csv)"
-            Tooltip: '="Uloží momentální pohled jako tabulku se sloupci úroveň, kód, název, vlastník a stav. Excel ji otevře rovnou do sloupců. Formát .csv místo .xlsx schválně - .xlsx by vyžadoval placený konektor, který v tomhle prostředí není povolený."'
+            Text: ="Do Excelu (.xls)"
+            Tooltip: '="Uloží momentální pohled jako tabulku se sloupci úroveň, kód, název, vlastník a stav. Kódy zůstávají textem - v .csv je Excel převáděl na data (01-01 na 01.I). Formát .xls místo .xlsx schválně: .xlsx by vyžadoval placený konektor, který v tomhle prostředí není povolený, takže je to HTML tabulka s excelovým formátováním. Excel při otevření jednou upozorní, že přípona neodpovídá obsahu - potvrď Ano."'
             Visible: =varMenuExport
             Width: =172
             X: =1020
@@ -1640,7 +1640,7 @@ Screens:
             HoverFill: =stylRadekHover
             OnSelect: =Set(varSmazatD, Blank())
             PressedFill: =stylRadekVybrany
-            Size: =11 + varFs
+            Size: =11
             Text: ="Zrušit"
             Visible: =!IsBlank(varSmazatD)
             Width: =140
@@ -1688,7 +1688,7 @@ Screens:
               )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylNebezpeci
-            Size: =11 + varFs
+            Size: =11
             Text: ="Smazat"
             Tooltip: |-
               =If(

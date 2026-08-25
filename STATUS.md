@@ -1,17 +1,67 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-25 (balík 1.0.0.58)
+Aktualizováno: 2026-08-25 (balík 1.0.0.59)
 
 ## CO JE NA TOBĚ
 
-**Balík `deploy/procesnimapa_1_0_0_58.zip`** — import jako upgrade, pak
-otevřít appku ve Studiu, **mikro-změna → Save → Publish** (bez ní se
-publikovaná verze pro ostatní účty neaktualizuje). Flow už je zapnuté
-a zaregistrované, nic dalšího netřeba.
+**Balík `deploy/procesnimapa_1_0_0_59.zip`** — import jako upgrade, pak
+ve Studiu **mikro-změna → Save → Publish**.
 
-Vyzkoušet: **Export → Do Wordu** a **Export → Do Excelu** nad různě
-zafiltrovaným stromem. Soubory vznikají v knihovně **Site Assets** a rovnou
-se stahují; hromadí se tam, takže je občas potřeba je smazat.
+Vyzkoušet **Export → Do Excelu (.xls)**: Excel jednou upozorní, že přípona
+neodpovídá obsahu — potvrdit **Ano**. Pak musí sedět diakritika i kódy
+(`01-01`, ne `01.I`).
+
+## Excel dostal .xls místo .csv, tlačítka odpojena od písma (25.08.2026) — balík 1.0.0.59
+
+### Export do Excelu selhal v provozu dvakrát naráz
+
+Hlášeno jako „trochu hapruje font", ze snímku ale vyšly najevo **dvě** vady:
+
+| příznak | příčina |
+|---|---|
+| `Úroveň` přišlo jako `Ãšroveň` | soubor **měl** BOM, jenže řádek `sep=;` přepne Excel na starý textový parser, který BOM ignoruje a čte podle národního nastavení |
+| kód `01-01` skončil jako `01.I`, `01` jako číslo `1` | Excel si u CSV typ buňky hádá z obsahu; **uvozovky kolem pole proti tomu nepomáhají** |
+
+Druhá vada byla vážnější — kódy jsou to jediné, co v rejstříku nesmí zmutovat.
+
+**Excel proto dostává `.xls` — HTML tabulku s excelovými styly.** Obojí se
+tím dá určit napevno: kódování hlavičkou `charset=utf-8` (přesně jako u Wordu,
+který funguje bez výhrad) a typ buňky stylem `mso-number-format:"\@"`, což je
+vynucený text. Úroveň je jediný sloupec s číselným formátem, aby se dala
+v Excelu filtrovat.
+
+**Cena:** Excel při otevření jednou upozorní, že přípona neodpovídá obsahu.
+Je to jediná cesta, jak z cloud flow bez placeného konektoru dostat sešit se
+správným kódováním a typy — `.xlsx` je zip a ten Logic Apps sestavit neumí.
+
+**Brána přepsána, 109 kontrol.** Excelový výstup se nově rozebírá **parserem
+HTML**, ne regulárem: ověřuje se počet buněk v každém řádku, obsah proti
+vzorku, třída číselné buňky u úrovně a přítomnost textového formátu. Sedm
+mutací (zrušený textový formát, jiný charset, buňka úrovně bez třídy, zrušené
+escapování, přípona `.csv`, ubraná buňka, wordový dokument ve formátu excel)
+**brána chytila všechny**.
+
+Word export je podle snímku v pořádku — diakritika, odsazení úrovní, tučné
+agendy, kódy jako text. Svislý pruh vpravo na snímku jsou jen značky konce
+řádku Wordu, ne sloupec navíc.
+
+### Tlačítka už nerostou s písmem
+
+Zadáno: „při změně fontu k tomu dochází i u tlačítek na detailech — tlačítka
+nech pořád stejná". Třináct tlačítek mělo `Size: =11 + varFs`; nově mají
+pevných 11. Přepínač písma tak mění text v seznamech, stromu a formulářích,
+ne rozvržení ovládacích prvků. Rozbalovací nabídky (`drp_*`) písmo dál mění —
+je v nich obsah, ne ovládání; kdyby měly zůstat taky, je to stejná změna.
+
+### Ověřeno, ne změněno
+
+- **Modrý pruh na detailech** — potvrzeno v balíku i uživatelem: od 1.0.0.58
+  má všech čtyři obrazovek 48 px.
+- **Výchozí velikost písma je střední** — `App.OnStart` nastavuje `varFs = -2`,
+  což je prostřední z trojice −4 / −2 / 0.
+
+**Brány zeleně:** `check_app`, `check_solution` 229/0, `check_export_flow`
+**109**, `check_mapa_flow` 139, `check_flow` 17.
 
 ## Tlačítko Export, sjednocené hlavičky, oprava karty (25.08.2026) — balík 1.0.0.58
 

@@ -599,7 +599,7 @@ Screens:
             HoverFill: =stylRadekHover
             OnSelect: =Navigate(scr_Vazby, ScreenTransition.Cover)
             PressedFill: =stylRadekVybrany
-            Size: =11 + varFs
+            Size: =11
             Text: ="Spravovat…"
             Tooltip: '="Otevře přiřazení aktivity do DALŠÍCH dílčích procesů. Standardně aktivita patří do jednoho (vybraného vlevo) — ale metodika připouští, že tutéž činnost vykonává útvar ve víc dílčích procesech. Pak ji přidej i tam a v mapě se objeví v obou větvích, aniž by vznikl duplicitní záznam."'
             Visible: =!varNova
@@ -757,7 +757,7 @@ Screens:
                       )
                   )
               )
-            Size: =11 + varFs
+            Size: =11
             Text: ="Uložit"
             Width: =200
             X: =700
@@ -789,7 +789,7 @@ Screens:
                   Navigate(scr_Ciselnik, ScreenTransition.UnCover),
                   Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
               )
-            Size: =11 + varFs
+            Size: =11
             Text: ="Smazat"
             Visible: =!varNova
             Width: =160

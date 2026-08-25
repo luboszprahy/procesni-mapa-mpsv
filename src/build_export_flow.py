@@ -9,9 +9,15 @@ Formáty:
 - `word` -> `.doc`, HTML dokument, který Word otevře a umí uložit jako .docx.
   Skutečné OOXML by znamenalo premium konektor (Encodian, Word Online) a ten
   v tomhle tenantu neprojde DLP. Vědomý ústupek, ne opomenutí.
-- `excel` -> `.csv` v UTF-8 s BOM a řádkem `sep=;`. Excel takový soubor otevře
-  rovnou do sloupců a bez varování; `.xls` s HTML tabulkou by sice nesl
-  formátování, ale Excel u něj hlásí nesoulad přípony a obsahu.
+- `excel` -> `.xls`, HTML tabulka s excelovými styly. CSV to bylo do 1.0.0.58
+  a v provozu selhalo dvakrát naráz (snímek 25.08.2026): Excel **ignoroval BOM**,
+  protože řádek `sep=;` ho přepne na starý textový parser, takže diakritika se
+  rozsypala; a **kódy převedl na data** — `01-01` skončilo jako „01.I" a `01`
+  jako číslo 1. Uvozovky kolem pole proti tomu nepomáhají, typ si Excel hádá
+  z obsahu. HTML tabulka obojí určuje napevno: kódování hlavičkou `charset`
+  (přesně jako u Wordu, který funguje) a typ buňky stylem
+  `mso-number-format` s vynuceným textem.
+  Cena: Excel při otevření jednou upozorní, že přípona neodpovídá obsahu.
 
 Obě podoby dokumentu se počítají vždy (jsou to jen řetězce) a `Dokument` z nich
 vybírá výrazem `if`. Větvení přes If/Scope by přidalo akce, které by brána
@@ -19,7 +25,7 @@ musela obcházet, a jedna z podob by nikdy nebyla otestovaná.
 
 Proč plochý seznam řádků a ne strom: Logic Apps neumí rekurzi ani vnořený
 Foreach, takže stromovat musí appka. Flow z řádků dělá tabulku, úroveň se
-v dokumentu projeví odsazením buňky a v CSV vlastním sloupcem.
+v dokumentu projeví odsazením buňky a v tabulce vlastním sloupcem.
 
 Obálka (spojení, uzel <Workflow>, RootComponent) se KLONUJE z MapaPublishFlow
 — je to nejbezpečnější lokální úprava exportu, jakou skill připouští. GUID je
@@ -74,9 +80,28 @@ HLAVICKA_HTML = (
     "</style></head><body><div class=WordSection1>"
 )
 
-# BOM a konec řádku se v Logic Apps jinak než procentní sekvencí napsat nedají.
+# Excelová tabulka. `mso-number-format:"\@"` je vynucený text — bez něj si
+# Excel typ buňky hádá z obsahu a kód `01-01` mu vyjde jako datum, `01` jako
+# číslo 1 (v provozu 25.08.2026 přesně tak). Úroveň je jediný sloupec, který
+# číslo být má, a má proto vlastní třídu.
+HLAVICKA_XLS = (
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office"'
+    ' xmlns:x="urn:schemas-microsoft-com:office:excel"'
+    ' xmlns="http://www.w3.org/TR/REC-html40"><head>'
+    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
+    '<title>Procesní mapa MPSV</title><style>'
+    'table {border-collapse:collapse;}'
+    'td {mso-number-format:"\\@"; font-family:Arial,sans-serif; font-size:10.0pt;'
+    ' vertical-align:top; border:0.5pt solid #A9C7EC;}'
+    'td.n {mso-number-format:"0"; text-align:center;}'
+    'th {mso-number-format:"\\@"; font-family:Arial,sans-serif; font-size:10.0pt;'
+    ' font-weight:bold; background:#110B7A; color:#FFFFFF; text-align:left;'
+    ' border:0.5pt solid #A9C7EC;}'
+    "</style></head><body><table>"
+)
+
+# BOM se v Logic Apps jinak než procentní sekvencí napsat nedá.
 BOM = "decodeUriComponent('%EF%BB%BF')"
-KONEC_RADKU = "decodeUriComponent('%0D%0A')"
 
 
 def lit(text):
@@ -94,15 +119,6 @@ def esc_html(vyraz):
     for znak, entita in (("&", "&amp;"), ("<", "&lt;"), (">", "&gt;")):
         hodnota = f"replace({hodnota}, {lit(znak)}, {lit(entita)})"
     return hodnota
-
-
-def esc_csv(vyraz):
-    """Pole CSV v uvozovkách; vnitřní uvozovka se zdvojuje.
-
-    V uvozovkách přežije středník i konec řádku uvnitř textu — obojí je
-    v názvech aktivit reálně k vidění a bez uvozovek by rozhodilo sloupce.
-    """
-    return f"concat('\"', replace(coalesce({vyraz}, ''), '\"', '\"\"'), '\"')"
 
 
 def pole(nazev):
@@ -133,11 +149,16 @@ def vyraz_radku_html():
     return "@concat(" + ", ".join(casti) + ")"
 
 
-def vyraz_radku_csv():
-    casti = [f"string(int(coalesce({pole('uroven')}, 1)))"]
+def vyraz_radku_xls():
+    """Řádek excelové tabulky. Úroveň je jediná buňka, která smí být číslo."""
+    casti = [
+        lit('<tr><td class="n">'),
+        f"string(int(coalesce({pole('uroven')}, 1)))",
+        lit("</td>"),
+    ]
     for nazev in ("kod", "nazev", "vlastnik", "stav"):
-        casti.append(lit(";"))
-        casti.append(esc_csv(pole(nazev)))
+        casti += [lit("<td>"), esc_html(pole(nazev)), lit("</td>")]
+    casti.append(lit("</tr>"))
     return "@concat(" + ", ".join(casti) + ")"
 
 
@@ -160,17 +181,17 @@ def vyraz_wordu():
     return "concat(" + ", ".join(casti) + ")"
 
 
-def vyraz_csv():
+def vyraz_xls():
     casti = [
         BOM,
-        # sep=; říká Excelu oddělovač bez ohledu na národní nastavení stroje.
-        # Bez toho by se soubor na anglickém Windows otevřel v jednom sloupci.
-        lit("sep=;"),
-        KONEC_RADKU,
-        lit(";".join(SLOUPCE)),
-        KONEC_RADKU,
-        "join(body('Csv_radky'), " + KONEC_RADKU + ")",
-        KONEC_RADKU,
+        lit(HLAVICKA_XLS),
+        lit("<tr>" + "".join(f"<th>{s}</th>" for s in SLOUPCE) + "</tr>"),
+        "join(body('Xls_radky'), '')",
+        lit("</table><p></p><p>Zobrazení: "),
+        esc_html("outputs('Vstup')?['nadpis']"),
+        lit("</p><p>Vygenerováno "),
+        "formatDateTime(utcNow(), 'dd.MM.yyyy HH:mm')",
+        lit("</p></body></html>"),
     ]
     return "concat(" + ", ".join(casti) + ")"
 
@@ -212,9 +233,9 @@ def akce(web):
         "inputs": {"from": "@outputs('Vstup')?['radky']", "select": vyraz_radku_html()},
         "runAfter": {"Vstup": ["Succeeded"]},
     }
-    kroky["Csv_radky"] = {
+    kroky["Xls_radky"] = {
         "type": "Select",
-        "inputs": {"from": "@outputs('Vstup')?['radky']", "select": vyraz_radku_csv()},
+        "inputs": {"from": "@outputs('Vstup')?['radky']", "select": vyraz_radku_xls()},
         "runAfter": {"Html_radky": ["Succeeded"]},
     }
     # Razítko v názvu: dva exporty spuštěné vedle sebe si nesmí přepsat soubor.
@@ -222,12 +243,12 @@ def akce(web):
         "type": "Compose",
         "inputs": ("@concat('procesni_mapa_',"
                    " formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'),"
-                   f" if({format_je('excel')}, '.csv', '.doc'))"),
-        "runAfter": {"Csv_radky": ["Succeeded"]},
+                   f" if({format_je('excel')}, '.xls', '.doc'))"),
+        "runAfter": {"Xls_radky": ["Succeeded"]},
     }
     kroky["Dokument"] = {
         "type": "Compose",
-        "inputs": f"@if({format_je('excel')}, {vyraz_csv()}, {vyraz_wordu()})",
+        "inputs": f"@if({format_je('excel')}, {vyraz_xls()}, {vyraz_wordu()})",
         "runAfter": {"Jmeno": ["Succeeded"]},
     }
     kroky["Uloz"] = {
@@ -370,7 +391,7 @@ def main():
     print(f"  GUID: {CIL_GUID}")
     print(f"  akcí: {len(flow['properties']['definition']['actions'])}")
     print(f"  web: {web}")
-    print(f"  ukládá do: {CILOVA_SLOZKA}/procesni_mapa_<razitko>.doc | .csv")
+    print(f"  ukládá do: {CILOVA_SLOZKA}/procesni_mapa_<razitko>.doc | .xls")
     print("  vstup: jeden text (JSON s klíči nadpis, format, radky)")
     return 0
 

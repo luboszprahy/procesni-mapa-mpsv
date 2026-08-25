@@ -283,7 +283,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =11 + varFs
+            Size: =11
             Text: ="Agendy"
             Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem. Nadřazený prvek nemá, vlastníkem je sekce. Kód má dvě číslice."'
             Width: =148
@@ -314,7 +314,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =11 + varFs
+            Size: =11
             Text: ="Procesy"
             Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem. Patří vždy pod jednu agendu, vlastníkem je odbor. Kód má tvar AA-BB."'
             Width: =148
@@ -345,7 +345,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =11 + varFs
+            Size: =11
             Text: ="Dílčí procesy"
             Tooltip: '="Třetí úroveň: vymezený úsek procesu. Patří vždy pod jeden proces, vlastníkem je odbor. Kód má tvar AA-BB-CCC a teprve pod něj se zařazují aktivity."'
             Width: =148
@@ -380,7 +380,7 @@ Screens:
               Reset(drp_VlastnikC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =11 + varFs
+            Size: =11
             Text: ="Aktivity"
             Tooltip: '="Čtvrtá a nejnižší úroveň: činnost tak, jak má znít v organizačním řádu. Vykonává ji oddělení. Kód má tvar AA-BB-CCC-DDDD. Upravuje se na vlastní obrazovce - klik na řádek ji otevře."'
             Width: =148
@@ -1462,7 +1462,7 @@ Screens:
               )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
-            Size: =11 + varFs
+            Size: =11
             Text: |-
               =If(varCiselnikNova, "Založit", "Uložit změny")
             Visible: =varUrovenTyp <> "aktivita"
@@ -1511,7 +1511,7 @@ Screens:
                   Navigate(scr_Detail, ScreenTransition.Cover)
               )
             PressedFill: =stylRadekVybrany
-            Size: =11 + varFs
+            Size: =11
             Text: |-
               =If(varUrovenTyp = "aktivita", "Nová aktivita", "Nová položka")
             Tooltip: |-
@@ -1647,7 +1647,7 @@ Screens:
             HoverFill: =stylRadekHover
             OnSelect: =Set(varSmazatC, Blank())
             PressedFill: =stylRadekVybrany
-            Size: =11 + varFs
+            Size: =11
             Text: ="Zrušit"
             Visible: =!IsBlank(varSmazatC)
             Width: =140
@@ -1724,7 +1724,7 @@ Screens:
               )
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylNebezpeci
-            Size: =11 + varFs
+            Size: =11
             Text: ="Smazat"
             Tooltip: |-
               =If(

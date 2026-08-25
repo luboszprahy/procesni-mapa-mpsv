@@ -6,8 +6,9 @@ Tři vrstvy jako u check_mapa_flow.py:
    runAfter bez děr, viditelnost odkazů, zápis souboru necílí na runtime
    výraz, zápis flow na všech třech místech balíku,
 2. kontrakt — oba Selecty čtou právě klíče kontraktu, každé textové pole je
-   ošetřené proti rozbití formátu, Response vrací adresu,
-3. význam — výrazy `Html_radky`, `Csv_radky`, `Jmeno` a `Dokument` se
+   HTML escapované, kód má v excelové tabulce vynucený text, Response vrací
+   adresu,
+3. význam — výrazy `Html_radky`, `Xls_radky`, `Jmeno` a `Dokument` se
    **vytáhnou z balíku** a vyhodnotí mini-interpretem nad vzorovým zobrazením,
    pro oba formáty. Testuje se tím to, co se opravdu nasazuje, ne kopie
    logiky v Pythonu.
@@ -20,8 +21,7 @@ Spouštět z kořene projektu:
 """
 
 import argparse
-import csv
-import io
+import html.parser
 import json
 import re
 import sys
@@ -31,11 +31,14 @@ from pathlib import Path
 
 FLOW = "ExportFlow"
 FLOW_GUID = "3f2b6d41-8c55-4a37-9d21-5b8e0c47a9f2"
-AKCE = ["Vstup", "Html_radky", "Csv_radky", "Jmeno", "Dokument", "Uloz", "Adresa", "Odpoved"]
+AKCE = ["Vstup", "Html_radky", "Xls_radky", "Jmeno", "Dokument", "Uloz", "Adresa", "Odpoved"]
 KLICE_RADKU = {"uroven", "kod", "nazev", "vlastnik", "stav"}
 TEXTOVA_POLE = ("kod", "nazev", "vlastnik", "stav")
 ODSAZENI_PT = 18
-SLOUPCU_CSV = 5
+SLOUPCU = 5
+SLOUPCE = ("Úroveň", "Kód", "Název", "Vlastník / vykonává", "Stav")
+# vynucený text v Excelu; bez něj se kód 01-01 uloží jako datum
+TEXTOVY_FORMAT = 'mso-number-format:"' + chr(92) + '@"'
 
 RAZITKO = "01.01.2026 00:00"
 RAZITKO_SOUBOR = "20260101_000000"
@@ -252,7 +255,7 @@ def priprav_kontext(akce_def, radky, nadpis, format_):
     }
     kontext["akce"]["Vstup"] = spust(akce_def["Vstup"]["inputs"], kontext)
 
-    for jmeno in ("Html_radky", "Csv_radky"):
+    for jmeno in ("Html_radky", "Xls_radky"):
         vyraz = akce_def[jmeno]["inputs"]["select"]
         zdroj = spust("@" + akce_def[jmeno]["inputs"]["from"].lstrip("@"), kontext)
         vybrane = []
@@ -333,7 +336,7 @@ def struktura(flow, web):
 
 
 def kontrakt(akce):
-    for jmeno in ("Html_radky", "Csv_radky"):
+    for jmeno in ("Html_radky", "Xls_radky"):
         overit(akce[jmeno]["inputs"]["from"] == "@outputs('Vstup')?['radky']",
                f"{jmeno} nečte 'radky' ze vstupu")
         ctene = set(re.findall(r"item\(\)\?\['([^']+)'\]", akce[jmeno]["inputs"]["select"]))
@@ -347,16 +350,19 @@ def kontrakt(akce):
         overit(re.search(vzorek, html) is not None,
                f"pole {polozka} není HTML escapované — název se znakem < rozbije dokument")
 
-    csv_vyraz = akce["Csv_radky"]["inputs"]["select"]
+    xls = akce["Xls_radky"]["inputs"]["select"]
     for polozka in TEXTOVA_POLE:
-        vzorek = (r"concat\('\"', replace\(coalesce\(item\(\)\?\['" + polozka +
-                  r"'\], ''\), '\"', '\"\"'\), '\"'\)")
-        overit(re.search(vzorek, csv_vyraz) is not None,
-               f"pole {polozka} není v CSV v uvozovkách — středník v názvu rozhodí sloupce")
+        vzorek = (r"replace\(replace\(replace\(coalesce\(item\(\)\?\['" + polozka +
+                  r"'\], ''\), '&'")
+        overit(re.search(vzorek, xls) is not None,
+               f"pole {polozka} není v excelové tabulce escapované")
+    overit(TEXTOVY_FORMAT in akce["Dokument"]["inputs"],
+           "excelová tabulka nevynucuje textový formát buňky — Excel udělá "
+           "z kódu 01-01 datum (v provozu 25.08.2026 přesně tak)")
 
     jmeno = akce["Jmeno"]["inputs"]
-    overit("'.doc'" in jmeno and "'.csv'" in jmeno,
-           "název souboru nerozlišuje formáty .doc a .csv")
+    overit("'.doc'" in jmeno and "'.xls'" in jmeno,
+           "název souboru nerozlišuje formáty .doc a .xls")
     overit("yyyyMMdd_HHmmss" in jmeno,
            "název souboru nenese časové razítko — souběžné exporty se přepíšou")
     overit("outputs('Vstup')?['format']" in akce["Dokument"]["inputs"],
@@ -401,40 +407,87 @@ def vyznam_word(akce, web):
            f"vrácená adresa {kontext['akce']['Adresa']} nemíří na uložený soubor")
 
 
+class Tabulka(html.parser.HTMLParser):
+    """Rozebere HTML tabulku na řádky buněk — ověřuje se struktura, ne text."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.radky = []
+        self.tridy = []
+        self._radek = None
+        self._bunka = None
+        self._trida = None
+
+    def handle_starttag(self, znacka, atributy):
+        if znacka == "tr":
+            self._radek, self._tridy_radku = [], []
+        elif znacka in ("td", "th") and self._radek is not None:
+            self._bunka = []
+            self._trida = dict(atributy).get("class", "")
+
+    def handle_data(self, data):
+        if self._bunka is not None:
+            self._bunka.append(data)
+
+    def handle_endtag(self, znacka):
+        if znacka in ("td", "th") and self._bunka is not None:
+            self._radek.append("".join(self._bunka))
+            self._tridy_radku.append(self._trida)
+            self._bunka = None
+        elif znacka == "tr" and self._radek is not None:
+            self.radky.append(self._radek)
+            self.tridy.append(self._tridy_radku)
+            self._radek = None
+
+
+def rozeber(dokument):
+    parser = Tabulka()
+    parser.feed(dokument)
+    return parser
+
+
 def vyznam_excel(akce):
     try:
         kontext = priprav_kontext(akce, VZOREK, NADPIS, "excel")
     except Chyba as chyba:
-        overit(False, f"csv výraz z balíku se nepodařilo vyhodnotit: {chyba}")
+        overit(False, f"excelový výraz z balíku se nepodařilo vyhodnotit: {chyba}")
         return
-    overit(True, "csv výrazy z balíku jdou vyhodnotit")
+    overit(True, "excelové výrazy z balíku jdou vyhodnotit")
 
     dokument = kontext["akce"]["Dokument"]
     overit(dokument.startswith("﻿"),
-           "CSV nezačíná BOM — Excel by rozsypal diakritiku")
-    overit(dokument[1:].startswith("sep=;\r\n"),
-           "CSV neuvádí sep=; — na jiném národním nastavení skončí v jednom sloupci")
-    overit("<html" not in dokument, "do formátu excel se dostal wordový dokument")
+           "tabulka nezačíná BOM")
+    overit('xmlns:x="urn:schemas-microsoft-com:office:excel"' in dokument,
+           "chybí excelový jmenný prostor — Excel by soubor otevřel jako web")
+    overit("charset=utf-8" in dokument,
+           "chybí hlavička charset — přesně tak se v .csv rozsypala diakritika")
+    overit(TEXTOVY_FORMAT in dokument,
+           "chybí vynucený textový formát buňky — Excel udělá z kódu 01-01 datum")
+    overit("WordSection1" not in dokument, "do formátu excel se dostal wordový dokument")
 
-    # obsah se čte skutečnou čtečkou CSV, ne regulárem: sloupce musí sedět
-    # i u názvu se středníkem a uvozovkami
-    tabulka = list(csv.reader(io.StringIO(dokument[1:].split("\r\n", 1)[1]), delimiter=";"))
-    tabulka = [r for r in tabulka if r]
-    overit(len(tabulka) == len(VZOREK) + 1,
-           f"CSV má {len(tabulka)} řádků, čekám {len(VZOREK) + 1} (s hlavičkou)")
-    overit(all(len(r) == SLOUPCU_CSV for r in tabulka),
-           f"ne každý řádek CSV má {SLOUPCU_CSV} sloupců: "
-           f"{sorted({len(r) for r in tabulka})}")
-    if len(tabulka) == len(VZOREK) + 1:
-        for vzor, radek in zip(VZOREK, tabulka[1:]):
-            overit(radek[0] == str(vzor["uroven"]), f"úroveň {vzor['kod']} sedí")
-            overit(radek[1] == vzor["kod"], f"kód v CSV je {radek[1]}, čekám {vzor['kod']}")
+    # struktura se čte parserem HTML, ne regulárem: v každém řádku musí sedět
+    # počet buněk, i když je v názvu středník nebo uvozovka
+    tabulka = rozeber(dokument)
+    overit(len(tabulka.radky) == len(VZOREK) + 1,
+           f"tabulka má {len(tabulka.radky)} řádků, čekám {len(VZOREK) + 1} (s hlavičkou)")
+    overit(all(len(r) == SLOUPCU for r in tabulka.radky),
+           f"ne každý řádek má {SLOUPCU} buněk: {sorted({len(r) for r in tabulka.radky})}")
+    if len(tabulka.radky) == len(VZOREK) + 1:
+        overit(tabulka.radky[0] == list(SLOUPCE),
+               f"hlavička je {tabulka.radky[0]}, čekám {list(SLOUPCE)}")
+        for vzor, radek, tridy in zip(VZOREK, tabulka.radky[1:], tabulka.tridy[1:]):
+            overit(radek[0] == str(vzor["uroven"]), f"úroveň u {vzor['kod']} nesedí")
+            overit(tridy[0] == "n",
+                   "buňka úrovně nemá třídu s číselným formátem")
+            overit(radek[1] == vzor["kod"],
+                   f"kód v tabulce je {radek[1]}, čekám {vzor['kod']}")
             overit(radek[2] == vzor["nazev"],
-                   f"název v CSV je {radek[2]!r}, čekám {vzor['nazev']!r}")
+                   f"název v tabulce je {radek[2]!r}, čekám {vzor['nazev']!r}")
             overit(radek[3] == (vzor["vlastnik"] or ""),
-                   f"vlastník v CSV je {radek[3]!r}, čekám {vzor['vlastnik'] or ''!r}")
+                   f"vlastník v tabulce je {radek[3]!r}, čekám {vzor['vlastnik'] or ''!r}")
 
-    overit(kontext["akce"]["Jmeno"].endswith(".csv"),
+    overit(NADPIS in dokument, "tabulka neuvádí, jaké zobrazení se exportovalo")
+    overit(kontext["akce"]["Jmeno"].endswith(".xls"),
            f"formát excel dal soubor {kontext['akce']['Jmeno']}")
 
 
@@ -454,10 +507,7 @@ def vyznam_meze(akce):
         except Chyba as chyba:
             overit(False, f"prázdné zobrazení ({format_}) shodilo výraz: {chyba}")
             continue
-        dokument = prazdny["akce"]["Dokument"]
-        pocet = (dokument.count("<tr>") if format_ == "word"
-                 else len([r for r in dokument.split("\r\n") if r]) - 1)
-        overit(pocet == cekam,
+        overit(prazdny["akce"]["Dokument"].count("<tr>") == cekam,
                f"prázdné zobrazení ({format_}) nevyrobilo soubor se samotnou hlavičkou")
 
 
