@@ -1035,53 +1035,118 @@ natvrdo.
 
 ## Náměty na rozšíření (neschválené, k připomenutí)
 
-Sepsáno 23.08.2026 na vyžádání. **Nic z toho není zadané ani rozpracované** —
-je to seznam, ze kterého se vybírá, seřazený podle toho, jak moc to bude
-v provozu chybět.
+Přepracováno 25.08.2026 (původní seznam z 23.08.2026 byl psaný před exportem
+a před zrušením `stav_mapovani`). **Nic z toho není zadané ani rozpracované.**
+Řazeno podle toho, co projektu chybí nejvíc, ne podle náročnosti.
 
-### N-1 · Hromadné pořízení z evidenční karty
+Východisko, ze kterého to počítám: rejstřík má **7 agend, 46 procesů, 250
+dílčích procesů — a 46 aktivit**. Popsaných je 26 dílčích procesů z 251, tedy
+zhruba **desetina**. Do 06/2028 se má zmapovat zbytek a z výsledku vzniknout
+text organizačního řádu. Tomu má odpovídat i pořadí námětů.
 
-Zadavatelka pracuje s excelovými kartami (~45 aktivit na sekci) a sekcí bude
-víc. Appka umí zakládat po jedné; hromadný import existuje jen jako
-`src/import_data.js`, který se vkládá do konzole prohlížeče — to je nástroj
-pro vývojáře, ne pro správce rámce. Až přijde karta další sekce, znamená to
-45× proklikat formulář.
+---
 
-Návrh: flow, které přečte kartu nahranou do knihovny a založí aktivity dávkou,
-s náhledem „co vznikne / co je duplicita" před zápisem. Kódy přiděluje stejný
-mechanismus jako appka.
+### A. Co brzdí běžný provoz
 
-**Proč je to podle mě nejdůležitější:** je to jediná věc ze seznamu, která
-brání běžnému provozu — zbytek jsou vylepšení něčeho, co funguje.
+#### R-1 · Hromadné pořízení aktivit — **podle mě jednoznačně první**
 
-### N-2 · Datum poslední publikace mapy
+Zadavatelka pracuje s excelovými kartami (~45 aktivit na sekci) a sekcí je
+sedm. Appka umí zakládat po jedné; hromadný import existuje jen jako
+`deploy/mpsv/02_import_dat.js` do konzole prohlížeče — nástroj pro vývojáře,
+ne pro správce rámce. Každá další karta dnes znamená 45× proklikat formulář.
 
-„Obnovit HTML" řekne „spuštěno" a tím to končí. Uživatel neví, jestli flow
-doběhlo ani k jakému okamžiku jsou data v mapě. Stačilo by, aby flow zapsalo
-datum do listu `Nastaveni` (PRD s ním počítá) a přehled ho ukázal vedle
-tlačítka.
+**Nově je to levnější, než bylo.** Export do Excelu už umí vyrobit tabulku
+v přesném tvaru rejstříku, takže se nabízí **obousměrná cesta**: exportovat
+prázdnou nebo rozpracovanou větev → vyplnit v Excelu, na který jsou útvary
+zvyklé → nahrát zpět do knihovny → flow založí a aktualizuje.
 
-### N-3 · Pohled „co ještě není zmapováno"
+Klíčové je, aby import **nebyl slepý zápis**: nejdřív náhled „co vznikne /
+co se změní / co je duplicita" a teprve po potvrzení zápis. Kódy přiděluje
+týž mechanismus jako appka.
 
-V datech je 250 dílčích procesů a 46 aktivit — poměr zmapovanosti je hlavní
-metrika projektu do 06/2028. Dashboard ukazuje součty, ale ne rozpad podle
-sekcí a vlastníků, tedy „kdo má co dodělat". Pro řízení projektu je to podle
-mě užitečnější než cokoli dalšího v appce.
+**Odhad:** flow nad knihovnou + obrazovka náhledu v appce. Největší riziko je
+parsování Excelu ve flow — konektor umí jen tabulky (`Get tables`), takže
+šablona musí být formátovaná jako tabulka, ne volná mřížka.
 
-### N-4 · Kdo a kdy záznam změnil
+#### R-2 · Pohled „kdo má co dodělat"
 
-SharePoint drží `Modified` a `Editor`, appka je nezobrazuje. U evidence, ze
-které se stane organizační řád, je dohledatelnost změny na místě — dva řádky
-v detailu aktivity.
+Přehled ukazuje součty, ne rozpad podle sekcí a vlastníků. Přitom poměr
+zmapovanosti je hlavní metrika projektu a řízení potřebuje odpověď na „který
+odbor má kolik dílčích procesů bez jediné aktivity".
 
-### N-5 · Schvalování s rolemi a notifikací
+Data na to jsou — `colStrom` už nese `aktC`/`aktS` na každé úrovni. Chybí
+jen obrazovka: tabulka útvar × (dílčích procesů / z toho popsaných / aktivit
+/ z toho schválených) s prokliky do stromu a exportem přes hotové flow.
+
+---
+
+### B. Co projekt dluží svému zadání
+
+#### R-3 · Generování textu organizačního řádu — **nově laciné, dřív drahé**
+
+`PRD.md` to má jako **FR-4, fáze 2, po 06/2028**. Ten odhad platil, dokud
+nebylo z čeho dokument skládat. Dnes existuje `ExportFlow`, které z plochého
+seznamu řádků staví `.doc` — a pole `text_pro_or` je v listu Aktivity od
+začátku. Chybí tedy jen **třetí volba v nabídce Export**: místo tabulky
+vysázet text v členění podle vykonávajícího útvaru, ve tvaru vzoru
+`VZOR_OŘ - nově sekce 3`.
+
+**Proč to navrhuji předsunout:** je to jediný výstup, kvůli kterému celý
+projekt vznikl. Až bude vidět, jak vygenerovaný text vypadá vedle vzoru,
+ukáže se, jestli je pole `text_pro_or` vyplňované užitečně — a to je lepší
+zjistit u 46 aktivit než u 2 000.
+
+**Riziko:** vzor OŘ má vlastní číslování a formulace („útvar zajišťuje…“),
+které se z holého `text_pro_or` nemusí složit. Než se to postaví, patří se
+projít vzor a doplnit do PRD, co přesně se generuje a co zůstává ruční.
+
+#### R-4 · Schvalování s rolemi a notifikací
 
 Stav „schváleno" dnes přepne kdokoli s přístupem. Metodika má role (vlastník
-procesu, sekční správce), ale bez oprávnění a notifikace je to čestné
-prohlášení. `PRD.md` to řadí do fáze 2, takže to není nedodělek — ale hotové
-schvalování to není.
+procesu, sekční správce, správce rámce), ale bez oprávnění a notifikace je
+schválení čestné prohlášení. U evidence, ze které se stane vnitřní předpis,
+to dřív nebo později někdo napadne.
 
-### N-6 · Drobnosti
+Postavitelné bez Dataverse: skupiny SharePointu na role, `stav` přepínatelný
+jen členem odpovídající skupiny (kontrola v appce + oprávnění na listu),
+notifikace flow do Teams nebo mailem. Vzor na notifikace je ověřený.
+
+#### R-5 · Snímek rejstříku k datu
+
+Až se z rejstříku stane podklad předpisu, bude potřeba odpovědět „jak to
+vypadalo, když se to schvalovalo". SharePoint verzuje jednotlivé položky, ale
+ne rejstřík jako celek a přes appku se k tomu nikdo nedostane.
+
+Levná varianta: publikační flow už umí vyrobit HTML mapu — ať vedle
+`procesni_mapa.html` ukládá i datovanou kopii a v Site Assets vznikne řada
+snímků. Dražší varianta: list `Snimky` s odkazem, datem a poznámkou, co se
+tehdy schvalovalo.
+
+---
+
+### C. Provozní jistoty
+
+#### R-6 · Datum poslední publikace mapy
+
+„Obnovit HTML" řekne „spuštěno" a tím to končí — uživatel neví, jestli flow
+doběhlo ani k jakému okamžiku jsou data v mapě. Flow by mělo zapsat datum do
+listu `Nastaveni` (PRD s ním počítá) a přehled ho ukázat vedle tlačítka.
+
+#### R-7 · Kdo a kdy záznam změnil
+
+SharePoint drží `Modified` a `Editor`, appka je nezobrazuje. Dva řádky
+v detailu aktivity; u podkladu pro organizační řád je dohledatelnost na místě.
+
+#### R-8 · Oprávnění po sekcích
+
+Dnes je v rejstříku jedna sekce a všichni na ni vidí stejně. Jakmile přibudou
+další, sekční správce nemá důvod editovat cizí sekci. Řešitelné oprávněními
+na úrovni položek nebo filtrem + skupinami; stojí za rozhodnutí **dřív**, než
+se naimportuje druhá sekce, protože zpětně se to dělá hůř.
+
+---
+
+### D. Drobnosti
 
 - **Jedinečnost kódu** drží jen optimistický zámek v appce; „Enforce unique
   values" na `Title` by z tiché duplicity udělalo hlášku (viz A-01 v `AUDIT.md`).
@@ -1091,6 +1156,25 @@ schvalování to není.
   a mapa nenaznačí, že jde o tutéž činnost.
 - **Osiřelé vazby** v tabulce `Vazba aktivita–dílčí proces` nemají vlastní
   filtr, protože vazební tabulka nemá obrazovku.
+- **Exporty se hromadí** v Site Assets — každý běh je nový soubor s razítkem.
+  Úklidové flow po N dnech je pár akcí.
+- **Pozice posuvníku stromu** se při návratu z detailu neobnoví (rozbalené
+  větve ano). Power Apps scroll galerie z `pa.yaml` neovlivníš.
+
+---
+
+### Co bych dělal v jakém pořadí
+
+1. **R-1** — bez něj se rejstřík nenaplní a všechno ostatní pracuje s deseti
+   procenty dat.
+2. **R-3 jako pilot na sekci 3** — ukáže, jestli se sbírají správné údaje,
+   dokud je levné to změnit.
+3. **R-2** — jakmile začne dat přibývat, bude potřeba je řídit.
+4. **R-8** — rozhodnout před druhou sekcí, ne po ní.
+
+Zbytek podle toho, co se v provozu ozve. **K1** (předpočítané počty, viz níže)
+se stane povinným kolem 1 500 aktivit — to je zhruba tehdy, až bude R-1
+v provozu a rejstřík poroste.
 
 ---
 
