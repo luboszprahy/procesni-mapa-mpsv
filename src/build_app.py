@@ -129,6 +129,21 @@ def zabal(adresar, cil):
                 balik.write(cesta, cesta.relative_to(adresar).as_posix())
 
 
+def vloz_verzi(cesta_app_yaml, verze):
+    """Dosadí do App.OnStart číslo balíku, aby ho appka uměla ukázat.
+
+    Bez razítka se z běžící appky nedá poznat, jestli po importu proběhla ve
+    Studiu mikro-změna + Save + Publish. Publikovaný dokument vzniká až tam,
+    takže ostatním účtům může dál běžet stará verze — a jediný rozdíl je
+    v obsahu obrazovek, který nikdo nezná zpaměti (nález B-03, kolo 4).
+    """
+    text = cesta_app_yaml.read_text(encoding="utf-8")
+    novy, pocet = re.subn(r'Set\(varVerze, "[^"]*"\)', f'Set(varVerze, "{verze}")', text)
+    if pocet != 1:
+        raise SystemExit(f"CHYBA: razítko verze nahrazeno {pocet}x, čekal jsem 1x")
+    cesta_app_yaml.write_text(novy, encoding="utf-8")
+
+
 MAX_RADKU = 2000
 
 
@@ -204,7 +219,7 @@ def doplnit_sablony(cesta_msapp):
     return doplnene
 
 
-def vymen_zdroje_bez_pac(cesta_msapp):
+def vymen_zdroje_bez_pac(cesta_msapp, verze):
     """Vymění Src/*.pa.yaml přímo v .msapp, bez pac.
 
     Balík zabalený z YAML má v packed.json LoadFromYaml=true, takže Studio čte
@@ -230,6 +245,13 @@ def vymen_zdroje_bez_pac(cesta_msapp):
 
     for nazev in ["App"] + OBRAZOVKY:
         polozky[klic_koncici(f"Src/{nazev}.pa.yaml")] = (APP_SRC / f"{nazev}.pa.yaml").read_bytes()
+
+    klic_app = klic_koncici("Src/App.pa.yaml")
+    zdroj = polozky[klic_app].decode("utf-8-sig")
+    novy, pocet = re.subn(r'Set\(varVerze, "[^"]*"\)', f'Set(varVerze, "{verze}")', zdroj)
+    if pocet != 1:
+        raise SystemExit(f"CHYBA: razítko verze nahrazeno {pocet}x, čekal jsem 1x")
+    polozky[klic_app] = novy.encode("utf-8")
 
     stav = polozky[klic_koncici("Src/_EditorState.pa.yaml")].decode("utf-8-sig")
     for obrazovka in OBRAZOVKY:
@@ -373,7 +395,7 @@ def main():
     print(f"canvas app: {msapp.name}")
 
     if argumenty.bez_pac:
-        vlozeno = vymen_zdroje_bez_pac(msapp)
+        vlozeno = vymen_zdroje_bez_pac(msapp, argumenty.verze)
         print(f"vloženo zdrojů (bez pac): {vlozeno}")
         puvodni_limit = nastav_limit_radku(msapp)
         if puvodni_limit is not None:
@@ -397,7 +419,8 @@ def main():
 
     for nazev in ["App"] + OBRAZOVKY:
         shutil.copy(APP_SRC / f"{nazev}.pa.yaml", src_dir / f"{nazev}.pa.yaml")
-    print(f"vloženo zdrojů: {len(OBRAZOVKY) + 1}")
+    vloz_verzi(src_dir / "App.pa.yaml", argumenty.verze)
+    print(f"vloženo zdrojů: {len(OBRAZOVKY) + 1}, razítko verze {argumenty.verze}")
 
     stav = src_dir / "_EditorState.pa.yaml"
     text = stav.read_text(encoding="utf-8-sig")

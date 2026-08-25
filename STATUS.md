@@ -1,15 +1,80 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-25 (balík 1.0.0.59)
+Aktualizováno: 2026-08-25 (balík 1.0.0.60, audit kolo 4)
 
 ## CO JE NA TOBĚ
 
-**Balík `deploy/procesnimapa_1_0_0_59.zip`** — import jako upgrade, pak
+**Balík `deploy/procesnimapa_1_0_0_60.zip`** — import jako upgrade, pak
 ve Studiu **mikro-změna → Save → Publish**.
 
-Vyzkoušet **Export → Do Excelu (.xls)**: Excel jednou upozorní, že přípona
-neodpovídá obsahu — potvrdit **Ano**. Pak musí sedět diakritika i kódy
-(`01-01`, ne `01.I`).
+Po publikaci najeď myší na název „Procesní mapa MPSV" v modrém pruhu —
+nápověda nově ukazuje **verzi**. Když tam nebude `1.0.0.60`, publikace
+neproběhla a ostatním běží stará appka.
+
+Drobnost k ověření (30 s): založ aktivitu s názvem začínajícím `=1+1`,
+vyexportuj do Excelu a řekni, jestli se v buňce ukáže text `=1+1`, nebo
+číslo `2`. Je to jediná věc z auditu, kterou bez Excelu neověřím (N-05).
+
+## Audit kolo 4 (25.08.2026) — verdikt NÁLEZY (0 blokujících), vše vyřízeno v 1.0.0.60
+
+`powerplatform-auditor` nad balíkem 1.0.0.59: **0 blokujících / 1 vážný /
+1 střední / 1 eskalace**. Všechny brány spustil sám a dvakrát je zkusil obejít
+vlastní mutací balíku — jednou brána vadu chytila, jednou ne, a právě to je
+nález B-02.
+
+### B-01 · VÁŽNÝ — brána i dokumentace podhodnocovaly rozsah adres
+
+`check_solution.py` hledal natvrdo zapsané URL jen v `*.pa.yaml` canvas appky,
+takže `Workflows/*.json` nekontroloval vůbec. Adresa testovacího webu je
+přitom v balíku na **20 místech**: jednou ručně psaná (`varMapaUrl`) a 19× ve
+všech čtyřech flow. `HANDOVER.md` u toho tvrdil, že `varMapaUrl` je „jediné
+místo" — což by při přenosu na MPSV znamenalo neúplný přenos.
+
+**Opraveno:** brána prochází definice flow a **selže**, když některá adresa
+nezačíná adresou webu, na který je připojená canvas app (mutačně ověřeno);
+počet míst vypisuje jako varování. `HANDOVER.md` rozlišuje ručně psanou adresu
+od generovaných a `PLAN.md` krok 12 dostal sedmikrokový postup přenosu.
+
+Podstata: adresy ve flow samy o sobě chyba nejsou — build skripty je berou
+z připojení appky, ne z ruky. Chyba byla v tom, co o nich projekt tvrdil.
+
+### B-02 · STŘEDNÍ — brána kontrolovala textový formát Excelu na špatném místě
+
+`check_export_flow.py` hledal `mso-number-format:"\@"` kdekoli v akci
+`Dokument`. Mutace, která formát smaže jen z pravidla `td` (datové buňky)
+a nechá ho v `th` (hlavičky), branou **prošla** — přitom by to byla přesně ta
+vada, kterou 1.0.0.59 opravovala: Excel by z `01-01` zase udělal datum.
+
+**Opraveno:** `<style>` blok se rozebere a formát se čte z těla pravidla `td`,
+číselný formát z `td.n`. Původní mutace i druhá (`td.n` bez číselného formátu)
+bránu nově shodí. Kontrol 109 → 110.
+
+### B-03 · ESKALACE — uzavřena věcně, ne rozhodnutím
+
+Auditor doložil, že `Controls/*.json` jsou bajtově shodné s 1.0.0.57 a celé
+tlačítko Export i vizuální úpravy existují jen v `Src/*.pa.yaml`; nic v balíku
+prý nedokáže potvrdit, že po importu proběhl povinný ruční krok ve Studiu.
+
+Tenhle důkaz ale mechanismus **potvrzuje**, ne zpochybňuje: Export ve
+`Controls` není, protože 1.0.0.57 je z doby před ním — a přesto s ním
+25.08.2026 v provozu šlo exportovat. Studio tedy appku prokazatelně čte
+z YAML. Tím padá i N-06.
+
+Platná zůstávala jiná část: z běžící appky se nedalo poznat, **která verze**
+je publikovaná. Doplněno razítko — `build_app.py` dosazuje do `App.OnStart`
+`Set(varVerze, "<verze balíku>")` a nápověda u názvu appky ho ukazuje včetně
+vysvětlení, co znamená, když nesedí. Build selže, když razítko v YAML nenajde.
+
+### Neověřeno
+
+- **N-04** `Download()` v appce vložené na SharePoint stránku — dnes se
+  spouští samostatně, ověří se až při umístění na stránku.
+- **N-05** injekce vzorců do buněk (`nazev` začínající `=`) — `mso-number-format`
+  vynucuje zobrazení jako text, ale bez Excelu se nedá ověřit, jestli tím
+  Excel potlačí i vyhodnocení. Viz „CO JE NA TOBĚ".
+
+**Re-audit** oprav běží. Brány po opravách: `check_export_flow` **110**,
+`check_solution` **234/0**, `check_mapa_flow` 139, `check_flow` 17, `check_app`.
 
 ## Excel dostal .xls místo .csv, tlačítka odpojena od písma (25.08.2026) — balík 1.0.0.59
 

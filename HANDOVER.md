@@ -178,9 +178,19 @@ a „flow má jediný trigger".
   krok 11 v `PLAN.md`. Zatím neproběhla, protože transport je blokovaný.
 - **`deploy/navod_sprava.md`** (krok 13) — rozhodnuto 21.08.2026 psát ho až
   podle finální podoby appky, tedy po F6/D.
-- **Adresa mapy `varMapaUrl`** je v `App.pa.yaml` natvrdo (canvas app umí číst
-  jen datasetové env proměnné, textové ne). Při přenosu na MPSV se mění tam —
-  je to jediné místo a `check_solution.py` na to upozorňuje varováním.
+- **Adresa testovacího webu je v balíku na 20 místech**, ne na jednom
+  (nález B-01, kolo 4 — do té doby tu stálo, že je to jen `varMapaUrl`):
+  - `varMapaUrl` v `App.pa.yaml` — **jediné ručně psané**; canvas app umí číst
+    jen datasetové env proměnné, textové ne, takže nemá kam jinam;
+  - 19 míst v definicích všech čtyř flow (parametr `dataset` u SharePoint akcí,
+    GUIDy listů, složená návratová adresa exportu) — ta se **neopravují ručně**:
+    build skripty je berou z připojení canvas appky.
+
+  Postup přenosu je proto: appku v cílovém prostředí připojit na web MPSV ve
+  Studiu → exportovat solution → znovu spustit `build_mapa_flow.py`,
+  `build_export_flow.py` a `add_mapa_schedule.py` → ručně přepsat `varMapaUrl`.
+  `check_solution.py` obojí hlídá: vypíše počet míst a **selže**, pokud některé
+  flow míří na jiný web než appka.
 - **Pozice posuvníku stromu se při návratu z detailu neobnoví.** Rozbalené
   větve drží `colOtevrene`, takže ty se vrátí, ale scroll galerie si Power Apps
   řídí sám a z `pa.yaml` ho neovlivníš. Zatím neřešeno — čeká se, jestli to

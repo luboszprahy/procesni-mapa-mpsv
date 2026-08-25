@@ -76,5 +76,10 @@ App:
       Set(varMenuExport, false);
       Set(varExportBezi, false);
       Set(varPublikuji, false);
-      Set(varSmazatD, Blank())
+      Set(varSmazatD, Blank());
+      // Razítko dosazuje build_app.py při balení. Bez něj se z běžící appky
+      // nedá poznat, jestli po importu proběhla ve Studiu povinná mikro-změna
+      // + Save + Publish — publikovaný dokument totiž vzniká až tam a starý
+      // by běžel dál, aniž by to bylo na čem vidět (nález B-03, kolo 4).
+      Set(varVerze, "vývojová")
     Theme: =PowerAppsTheme

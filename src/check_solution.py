@@ -38,6 +38,58 @@ kontrol = 0
 VYJIMKA_URL = "varMapaUrl"
 
 
+def adresa_webu(customizations):
+    """Adresa webu, na který je připojená canvas app — proti ní se měří flow."""
+    shoda = re.search(r"<ConnectionReferences>(.*?)</ConnectionReferences>",
+                      customizations, re.S)
+    if not shoda:
+        return None
+    data = json.loads(shoda.group(1).replace("&quot;", '"').replace("&amp;", "&"))
+    for spojeni in data.values():
+        datasety = spojeni.get("dataSets") or {}
+        if datasety:
+            return next(iter(datasety))
+    return None
+
+
+def adresy_ve_flow(vystupni, customizations):
+    """Adresy v definicích flow musí mířit na týž web jako canvas app.
+
+    Do 1.0.0.59 se prohledávaly jen `*.pa.yaml` canvas appky, takže brána
+    i HANDOVER.md tvrdily, že jediné natvrdo zapsané místo je `varMapaUrl`.
+    Ve skutečnosti je adresa webu ve **všech** flow (parametr `dataset`
+    a složená návratová adresa) — nález B-01 z kola 4.
+
+    Není to samo o sobě chyba: build skripty adresu berou z připojení appky,
+    ne z ruky. Chyba je, když některé flow míří jinam než appka — to se jinak
+    pozná až za běhu, na cizím webu nebo prázdnou odpovědí.
+    """
+    web = adresa_webu(customizations)
+    overit(web is not None, "v balíku není adresa webu canvas appky")
+    if web is None:
+        return
+
+    celkem = 0
+    for jmeno in vystupni.namelist():
+        cesta = jmeno.replace("\\", "/")
+        if not cesta.startswith("Workflows/") or not cesta.endswith(".json"):
+            continue
+        text = vystupni.read(jmeno).decode("utf-8-sig")
+        adresy = set(re.findall(r"https://[A-Za-z0-9.-]+\.sharepoint\.com[^\"']*", text))
+        cizi = [a for a in adresy if not a.startswith(web)]
+        overit(not cizi,
+               f"{cesta.split('/')[-1]} míří na jiný web než canvas app: {sorted(cizi)[:2]}")
+        celkem += sum(text.count(a) for a in adresy)
+
+    if celkem:
+        varovani.append(
+            f"adresa webu je v definicích flow na {celkem} místech — při přenosu na MPSV "
+            f"se NEopravuje ručně: appku připojit na cílový web ve Studiu, exportovat "
+            f"a znovu spustit build_mapa_flow.py / build_export_flow.py / "
+            f"add_mapa_schedule.py"
+        )
+
+
 def overit(podminka, popis):
     global kontrol
     kontrol += 1
@@ -247,6 +299,8 @@ def main():
                 )
             overit(not [r for r in s_url if VYJIMKA_URL not in r],
                    f"{polozka} obsahuje externí URL")
+
+    adresy_ve_flow(vystupni, cil_custom)
 
     print(f"kontrol: {kontrol}, chyb: {len(chyby)}")
     for text_varovani in varovani:

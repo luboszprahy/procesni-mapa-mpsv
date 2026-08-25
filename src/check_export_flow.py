@@ -356,9 +356,9 @@ def kontrakt(akce):
                   r"'\], ''\), '&'")
         overit(re.search(vzorek, xls) is not None,
                f"pole {polozka} není v excelové tabulce escapované")
-    overit(TEXTOVY_FORMAT in akce["Dokument"]["inputs"],
-           "excelová tabulka nevynucuje textový formát buňky — Excel udělá "
-           "z kódu 01-01 datum (v provozu 25.08.2026 přesně tak)")
+    overit("td {" + TEXTOVY_FORMAT in akce["Dokument"]["inputs"],
+           "textový formát není v pravidle td — na hlavičkách (th) je Excelu k ničemu "
+           "a z kódu 01-01 zase udělá datum (v provozu 25.08.2026 přesně tak)")
 
     jmeno = akce["Jmeno"]["inputs"]
     overit("'.doc'" in jmeno and "'.xls'" in jmeno,
@@ -446,6 +446,17 @@ def rozeber(dokument):
     return parser
 
 
+def css_pravidlo(dokument, selektor):
+    """Tělo jednoho pravidla ze <style> bloku dokumentu, jinak None."""
+    styl = re.search(r"<style>(.*?)</style>", dokument, re.S)
+    if not styl:
+        return None
+    for pravidlo in re.finditer(r"([A-Za-z0-9_.#]+)\s*\{([^}]*)\}", styl.group(1)):
+        if pravidlo.group(1) == selektor:
+            return pravidlo.group(2)
+    return None
+
+
 def vyznam_excel(akce):
     try:
         kontext = priprav_kontext(akce, VZOREK, NADPIS, "excel")
@@ -461,8 +472,17 @@ def vyznam_excel(akce):
            "chybí excelový jmenný prostor — Excel by soubor otevřel jako web")
     overit("charset=utf-8" in dokument,
            "chybí hlavička charset — přesně tak se v .csv rozsypala diakritika")
-    overit(TEXTOVY_FORMAT in dokument,
-           "chybí vynucený textový formát buňky — Excel udělá z kódu 01-01 datum")
+    # Formát se čte z konkrétního CSV pravidla, ne hledáním řetězce kdekoli
+    # v dokumentu: `mso-number-format` na hlavičkách (th) Excelu nic neřekne
+    # o datových buňkách a mutace, která ho smaže jen z `td`, by branou prošla
+    # (nález B-02, kolo 4).
+    telo_td = css_pravidlo(dokument, "td")
+    overit(telo_td is not None and TEXTOVY_FORMAT in telo_td,
+           "datové buňky (td) nemají vynucený textový formát — "
+           "Excel udělá z kódu 01-01 datum")
+    telo_urovne = css_pravidlo(dokument, "td.n")
+    overit(telo_urovne is not None and 'mso-number-format:"0"' in telo_urovne,
+           "sloupec úrovně nemá číselný formát — v Excelu se nedá seřadit ani filtrovat")
     overit("WordSection1" not in dokument, "do formátu excel se dostal wordový dokument")
 
     # struktura se čte parserem HTML, ne regulárem: v každém řádku musí sedět

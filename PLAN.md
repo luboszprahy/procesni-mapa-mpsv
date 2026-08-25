@@ -282,9 +282,22 @@ Vložit** (stránky se nestahují nikdy); mapa v iframu poběží i pod sandboxe
 
 Stejné skripty jako F1, jiný web, data z `runs/normalize/` (ne anonymizovaná).
 
+**Pořadí kroků (adresa webu je v balíku na 20 místech, nález B-01):**
+
+1. provisioning listů na webu MPSV (`setup_sharepoint.js`),
+2. import solution do prostředí MPSV a **zapnutí všech čtyř flow**,
+3. appku ve Studiu **přepojit na web MPSV** a zaregistrovat `ExportFlow`
+   jako datový zdroj (`FlowNameId` přiděluje až cílové prostředí),
+4. mikro-změna → Save → Publish → **export solution**,
+5. lokálně znovu spustit `build_mapa_flow.py`, `build_export_flow.py`
+   a `add_mapa_schedule.py` — adresu i GUIDy listů si vezmou z připojení appky,
+6. ručně přepsat `varMapaUrl` v `src/app_src/App.pa.yaml` (jediné ručně psané
+   místo — canvas app textové env proměnné číst neumí),
+7. `build_app.py` + brány + import výsledku.
+
 **verify:** počty položek = počty v `runs/normalize/*.csv`; kritérium A6 z PRD
-(žádné hardcoded URL — grep přes `src/` a `deploy/` na `sharepoint.com`
-nesmí najít nic mimo dokumentaci).
+— `check_solution.py` musí projít bez chyby (selže, když některé flow míří na
+jiný web než canvas app) a jeho varování o počtu míst musí uvádět web MPSV.
 **edge cases:** jiné názvy útvarů, jiná oprávnění, jiný jazyk webu.
 **risk:** DLP nebo politiky MPSV můžou zakázat custom script v Site Assets →
 fallback na canvas app pro zobrazení mapy (viz krok 10).
