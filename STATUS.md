@@ -20,6 +20,36 @@ SharePoint stránku), které jde ověřit až při umístění appky na stránku
 Zelené trojúhelníčky v rozích buněk exportu jsou Excelí upozornění „číslo
 uložené jako text" — u identifikačních kódů je to přesně žádaný stav.
 
+## Konec dne 25.08.2026 — projekt uklizený, appka 1.0.0.61 v provozu
+
+**Hotovo dnes:** export přehledu do Wordu a Excelu (flow + tlačítko), zúžené
+rozvržení Přehledu, jednotný modrý pruh na všech obrazovkách, razítko verze,
+audit kolo 4 se dvěma koly oprav, složka `deploy/mpsv/` a přepracované náměty
+na rozvoj v `PLAN.md`.
+
+**Next step:** nic rozpracovaného. Rozhodnutí je na zadavateli — v `PLAN.md`
+sekci „Náměty na rozšíření" je osm námětů s doporučeným pořadím
+**R-1 → R-3 → R-2 → R-8**. Jakmile padne volba, rozepíšu ji do kroků s testy.
+
+**Otevřené z auditu:** jediné **N-04** — jestli `Download()` spustí stažení
+i v appce vložené jako webpart na SharePoint stránku. Ověří se až v provozu.
+
+### Úklid složky
+
+- `deploy/` drží **poslední dva balíky** (1.0.0.61 aktuální, 1.0.0.60 jako
+  základna pro `check_solution.py`); 55, 56, 58 a 59 smazané — v git historii
+  zůstávají a dají se kdykoli vytáhnout.
+- snímky obrazovek z kořene `input/` přesunuté do `input/snimky/`,
+  starší základové balíky do `input/archiv/`. V kořeni `input/` zůstaly jen
+  podklady a `procesnimapa_1_0_0_57.zip` (aktuální základ ze Studia).
+- `runs/` vyčištěné od zbytků buildu a běhových testů. **`runs/app_build/pac`
+  zůstává** — je to rozbalený `pac` CLI, který `build_app.py` jinak musí
+  rozbalit znovu z nupkg. Zabírá 178 MB; když má jít taky pryč, stačí říct.
+- kořen projektu je čistý: jen `.md`, `kody.json` a `.gitignore`.
+
+Po úklidu přeběhly brány `check_app`, `check_solution` a `check_export_flow`
+zeleně — nic z toho, co se smazalo, nebylo potřeba.
+
 ## Složka pro nasazení na MPSV — `deploy/mpsv/` (25.08.2026)
 
 Zadáno: „složka, kde budou všechny soubory potřebné pro deploy (hlavně import
