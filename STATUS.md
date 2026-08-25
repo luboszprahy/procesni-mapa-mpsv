@@ -20,6 +20,35 @@ SharePoint stránku), které jde ověřit až při umístění appky na stránku
 Zelené trojúhelníčky v rozích buněk exportu jsou Excelí upozornění „číslo
 uložené jako text" — u identifikačních kódů je to přesně žádaný stav.
 
+## Složka pro nasazení na MPSV — `deploy/mpsv/` (25.08.2026)
+
+Zadáno: „složka, kde budou všechny soubory potřebné pro deploy (hlavně import
+ostrých dat) a návod jak postupovat".
+
+**Generuje ji `src/make_deploy_mpsv.py`, neudržuje se ručně** — jinak by po
+první změně schématu nebo appky obsahovala starou verzi a nikdo by to nepoznal,
+protože soubory uvnitř vypadají pořád stejně.
+
+| soubor | co je |
+|---|---|
+| `README.md` | postup v devíti krocích, od založení listů po ověření běhu |
+| `01_zaloz_listy.js` | provisioning listů a sloupců (do konzole prohlížeče) |
+| `02_import_dat.js` | import **ostrých** dat z `runs/normalize` |
+| `03_vypis_guidy.js` | vypíše GUIDy listů — potřebné pro `build_flow.py` |
+| `sharepoint_schema.md` | dokumentace schématu |
+| `procesnimapa_1_0_0_61.zip` | poslední balík appky |
+
+Návod nese celé pořadí včetně věcí, které se dřív daly zjistit jen čtením
+`PLAN.md` a `HANDOVER.md`: zapnout všechna čtyři flow, registrace `ExportFlow`
+jako datového zdroje (jde jen ve Studiu), přegenerování tří flow build skripty,
+ruční dorovnání `AktualizaceKratkehoNazvu` (GUID listu natvrdo + nová kostra
+z designeru), přepis `varMapaUrl` a závěrečné ověření podle razítka verze.
+
+`make_import.py` má pojistku proti nechtěnému úniku dat — neanonymizovaná sada
+projde jen s `--povolit-realna-data`. Skript ji předává vědomě, protože přesně
+tohle je ten jediný případ, kdy je to na místě. Repozitář je privátní a ostrá
+data v něm už jsou (`input/`, `runs/normalize/`), takže se tím nic neodkrývá.
+
 ## Audit kolo 4 uzavřen — druhé kolo mělo pravdu dvakrát (25.08.2026) — balík 1.0.0.61
 
 Re-audit rozporoval **všechny tři** stavy, které jsem po prvním kole zapsal
