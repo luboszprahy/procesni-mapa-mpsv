@@ -913,28 +913,87 @@ jejíž dílčí proces je jen v jiné sekci.
 Exportuje se **momentální zobrazení**, tedy strom po filtru stavu, hledání
 a chipu osiřelých — ne celý rejstřík.
 
-Rozdělení práce: appka pošle flow serializovaný strom (`JSON(colStrom…)`),
-flow z něj složí dokument, uloží ho do Site Assets a vrátí adresu; appka
-zavolá `Download()`.
+Rozdělení práce: appka pošle flow serializované zobrazení (jeden textový
+vstup s JSON), flow z něj složí dokument, uloží ho do Site Assets a vrátí
+adresu; appka zavolá `Download()`.
 
 > **Formát:** vznikne `.doc` — HTML dokument, který Word otevře a umí uložit
 > jako `.docx`. Skutečné OOXML by ve flow znamenalo premium konektor
 > (Encodian, Word Online), a ten v tomhle tenantu neprojde DLP. Je to vědomý
 > ústupek, ne opomenutí.
 
-**verify:** `check_export_flow.py` — definice flow má právě jeden trigger
-`PowerAppV2` s textovým vstupem, zápis souboru necílí na runtime výraz
-(pravidlo `PatchItem`), akce `Response` vrací adresu; smoke test složí
-dokument z vzorového JSON mimo prostředí a ověří, že obsahuje všechny čtyři
-úrovně a tolik aktivit, kolik bylo na vstupu. Ručně: export s filtrem
-„schváleno" nesmí obsahovat pracovní aktivity.
-**edge cases:** prázdný výběr (export se nespustí a řekne proč); velký strom —
-u dnešních 47 aktivit je JSON malý, u tisíců narazí na limit vstupu flow
-(popsat mez v návodu); souběžné exporty přepisující týž soubor → název nese
-časové razítko.
+**Datový kontrakt** (jediný vstup `text`, JSON):
+
+```json
+{"nadpis": "vše · bez hledání",
+ "radky": [{"uroven": 1, "kod": "01", "nazev": "…", "vlastnik": "…", "stav": ""}]}
+```
+
+`radky` je **plochý, už seřazený a odfiltrovaný** seznam — flow nic
+nestromuje, protože Logic Apps neumí rekurzi. Úroveň 1–4 se v dokumentu
+projeví odsazením buňky a tučností.
+
+#### D1. Flow `ExportWordFlow` — co: `src/build_export_flow.py`
+
+Klon obálky z `MapaPublishFlow` (spojení, uzel `<Workflow>`, RootComponent),
+**pevné vlastní GUID**, trigger `PowerAppV2` s jedním textovým vstupem a šest
+akcí: `Vstup` (json z triggeru) → `Html_radky` (Select na řádky tabulky) →
+`Jmeno` (časové razítko) → `Dokument` (Compose celého HTML) → `Uloz`
+(CreateFile do `/SiteAssets`) → `Adresa` → `Odpoved` (Response).
+
+**verify:** `check_export_flow.py` (D2).
+**edge cases:** prázdné `radky` (dokument vznikne s hlavičkou a bez řádků);
+znaky `& < >` v názvech; chybějící `vlastnik`/`stav` (null → prázdná buňka).
+**risk:** `Response` v PowerAppV2 flow má strop 120 s běhu — u dnešních
+~300 řádků je to daleko, u tisíců ne (popsat mez v návodu).
+
+#### D2. Brána — co: `src/check_export_flow.py`
+
+Tři vrstvy jako u `check_mapa_flow.py`:
+1. **struktura** — právě jeden trigger `PowerAppV2` s jedním textovým
+   vstupem; řetěz `runAfter` bez děr; každý odkaz `outputs('X')`/`body('X')`
+   míří na akci, která je v řetězu před ním; `contentVersion` je `1.0.0.0`;
+   zápis souboru necílí na runtime výraz (pravidlo `PatchItem`);
+2. **kontrakt** — `Response` vrací `adresa`; jméno souboru končí `.doc`;
+   Select čte právě klíče kontraktu;
+3. **význam** — výrazy `Html_radky` a `Dokument` se **vytáhnou z balíku**
+   a vyhodnotí mini-interpretem nad vzorovým zobrazením. Ověří se, že
+   dokument obsahuje všechny čtyři úrovně, tolik řádků, kolik bylo na vstupu,
+   že `<` v názvu je escapované a že hlavička nese text filtru.
+
+**verify:** `python src/check_export_flow.py --solution deploy/…zip` →
+`OK`; mutačně: odebrání escapování shodí bránu.
+**edge cases:** interpret musí zvládnout `concat/replace/coalesce/if/equals/
+string/int/sub/mul/join/json/item/outputs/body/triggerBody/decodeUriComponent/
+formatDateTime/utcNow`; co nezná, musí **spadnout**, ne tiše vrátit prázdno.
+**risk:** interpret se rozejde s Logic Apps — proto se testují jen funkce,
+které flow opravdu používá, a builder nesmí použít jinou.
+
+#### D3. Předání flow uživateli — co: `deploy/flow_ExportWord.md`, balík 1.0.0.56
+
+Balík obsahuje flow, appka se nemění. Návod: import → **flow ručně zapnout**
+→ otevřít appku ve Studiu → **Add data → ExportWordFlow** → mikro-změna →
+Save → Publish → export solution zpět.
+
+**verify:** ruční spuštění flow z designeru s testovacím JSON vyrobí soubor
+v Site Assets, který Word otevře.
 **risk:** appka musí flow registrovat jako datový zdroj, což jde **jen ve
-Studiu** — potřebuji od uživatele nový export solution poté, co flow přidá.
-Bez toho se `.Run()` nedá zavolat a build by ho vyhodil.
+Studiu** — `References/DataSources.json` nese `FlowNameId`, které přiděluje
+až prostředí při importu, takže lokálně se dogenerovat nedá. Bez toho se
+`.Run()` nemá na co navázat a build by ho vyhodil.
+
+#### D4. Tlačítko na Přehledu — co: `src/app_src/scr_Dashboard.pa.yaml` (až po dodání zipu)
+
+`colExport` = plochý seznam z `colStrom` po všech filtrech;
+`ExportWordFlow.Run(JSON(colExport, JSONFormat.Compact))` → `Download(adresa)`.
+Nad ~2 000 řádky se vstup flow nafoukne — tlačítko proto při větším počtu
+řekne, ať se zobrazení zúží.
+
+**verify:** `check_app.py` projde; ručně export s filtrem „schváleno" nesmí
+obsahovat pracovní aktivity.
+**edge cases:** prázdné zobrazení (export se nespustí a řekne proč);
+souběžné exporty přepisující týž soubor → název nese časové razítko.
+**risk:** `Download()` v mobilním klientu otevře prohlížeč — v návodu zmínit.
 
 ### E. Brána a předání
 

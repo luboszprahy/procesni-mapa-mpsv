@@ -68,7 +68,7 @@ App:
       Set(varSekceKodC, "");
       Set(varUtvarKodC, "");
       Set(varSmazatC, Blank());
-      Set(varFs, 0);
+      Set(varFs, -2);
       Set(varDashStav, "");
       Set(varDashOsirele, false);
       Set(varMenuRozbalit, false);

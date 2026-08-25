@@ -1,6 +1,76 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-23 (konec dne, balík 1.0.0.50)
+Aktualizováno: 2026-08-25 (balík 1.0.0.56)
+
+## CO JE NA TOBĚ
+
+**Balík `deploy/procesnimapa_1_0_0_56.zip`** — po importu:
+
+1. **zapnout nové flow `ExportFlow`** (import stav zapnutí nemění),
+2. otevřít appku ve **Studiu → Add data → ExportFlow**,
+3. mikro-změna → **Save** → **Publish**,
+4. **exportovat solution a poslat zpět** — teprve pak jde do appky doplnit
+   tlačítko Export; `.Run()` se bez registrovaného datového zdroje nemá
+   na co navázat a `FlowNameId` přiděluje až prostředí.
+
+Podrobně `deploy/flow_Export.md`.
+
+## Export do Wordu a Excelu + zúžení Přehledu (25.08.2026) — balík 1.0.0.56
+
+**Zadáno:** tlačítko Export vedle „HTML mapa" se dvěma volbami (Word, Excel);
+tlačítko „kód" přesunout mezi „Rozbalit" a „Stav"; tři stupně písma o další
+stupeň dolů; užší a menší informační lišta s počty i horní modrý pruh.
+Do exportu má jít **aktuální pohled** na Přehledu.
+
+### Flow `ExportFlow` — hotové, čeká na registraci ve Studiu
+
+Osm akcí, jeden textový vstup s JSON momentálního zobrazení
+(`nadpis`, `format`, plochý seřazený seznam `radky`). Flow nestromuje —
+Logic Apps neumí rekurzi ani vnořený Foreach, takže strom staví appka.
+
+| formát | soubor | proč |
+|---|---|---|
+| Word | `.doc` (HTML) | Word otevře a uloží jako `.docx`; skutečné OOXML chce premium konektor, který neprojde DLP |
+| Excel | `.csv` UTF-8 + BOM + `sep=;` | Excel otevře **bez varování**; `.xls` s HTML tabulkou hlásí nesoulad přípony a obsahu |
+
+Obě podoby se počítají vždy a `Dokument` z nich vybírá výrazem `if` — větvení
+přes If/Scope by přidalo akce, které by brána musela obcházet, a jedna z podob
+by nikdy nebyla otestovaná.
+
+**Brána `check_export_flow.py`: 100 kontrol, mini-interpret výrazů.** Výrazy
+se **vytáhnou z balíku** a vyhodnotí nad vzorovým zobrazením pro oba formáty —
+testuje se to, co se opravdu nasazuje, ne kopie logiky v Pythonu. CSV se čte
+skutečnou čtečkou `csv`, takže název se středníkem a uvozovkami musí sedět
+do sloupců. Devět mutací (odebrané escapování HTML, odebrané uvozovky v CSV,
+zaseknutý přepínač formátu, chybějící BOM, chybějící `sep=;`, chybějící
+`coalesce`, přehozený `runAfter`, název bez razítka, runtime výraz ve
+`folderPath`) **brána chytila všechny**.
+
+### Rozvržení Přehledu
+
+| co | z | na |
+|---|---|---|
+| horní modrý pruh | 64 px, písmo 15/13 | 48 px, písmo 13/11 |
+| karty s počty | 306×56 px, číslo 20 b | 260×40 px, číslo 16 b |
+| tři stupně písma | −2 / 0 / +2 | **−4 / −2 / 0** |
+| tlačítko „kód" | vpravo za „HTML mapa" | mezi „Rozbalit" a „Stav" |
+| místo pro Export | — | 100 px vedle „HTML mapa" |
+
+Uvolnilo se 40 px svislého místa — strom je o tolik vyšší.
+
+**Nejmenší popisky tím padly na 6 bodů** (`10 + varFs` při `varFs = −4`).
+Je to dolní mez a platí jen v nejmenším ze tří stupňů, kde je hustota celý
+smysl; výchozí (střední) stupeň je dnes na 8 bodech. Kdyby to bylo moc,
+je to změna tří čísel.
+
+**Tlačítko Export v 1.0.0.56 ještě není** — potřebuje registraci flow jako
+datového zdroje, což jde jen ve Studiu. Místo v pruhu je na něj nachystané,
+aby se rozvržení podruhé nepřeskládávalo.
+
+**Brány zeleně:** `check_app`, `check_solution` 225/0, `check_export_flow`
+**100**, `check_mapa_flow` 139, `check_flow` 17, `check_schema`,
+`check_mapa_html` 31, `check_setup.js`, `check_import.js`. Překryv v pruhu
+mutačně ověřen — posun „kód" o 20 px doleva bránu shodí.
 
 ## Číslo, které neřeklo, co počítá (24.08.2026) — balík 1.0.0.55
 
