@@ -11,7 +11,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPrimarni
-            Height: =72
+            Height: =48
             Width: =Parent.Width
             X: =0
             Y: =0
@@ -20,34 +20,34 @@ Screens:
           Properties:
             Color: =RGBA(255, 255, 255, 1)
             Fill: =RGBA(0, 0, 0, 0)
-            Height: =56
+            Height: =40
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.18)
             Icon: =Icon.ChevronLeft
             OnSelect: =Navigate(scr_Detail, ScreenTransition.UnCover)
-            PaddingBottom: =16
-            PaddingLeft: =16
-            PaddingRight: =16
-            PaddingTop: =16
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
             PressedFill: =RGBA(255, 255, 255, 0.28)
             Tooltip: '="Zpět na detail aktivity. Přiřazení dílčích procesů se ukládá hned při kliknutí, takže se odchodem nic neztratí."'
-            Width: =56
+            Width: =40
             X: =16
-            Y: =8
+            Y: =4
       - lbl_NadpisV:
           Control: Label@2.5.1
           Properties:
             Color: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
-            Height: =40
-            Size: =16 + varFs
+            Height: =32
+            Size: =14 + varFs
             Text: |-
               ="Dílčí procesy aktivity " & varAktivita.Title
             VerticalAlign: =VerticalAlign.Middle
             Width: =900
-            X: =88
-            Y: =16
+            X: =68
+            Y: =8
       - lbl_l_Vysvetleni:
           Control: Label@2.5.1
           Properties:
@@ -59,7 +59,7 @@ Screens:
               ="Táž aktivita se může vykonávat ve víc dílčích procesech. Vlevo je seznam, kam už je zařazená; „primární“ je ta z detailu aktivity a odebrat ji tady nelze. Vpravo vyberte další dílčí proces tlačítkem +."
             Width: =1220
             X: =40
-            Y: =80
+            Y: =56
       - lbl_l_Prirazene:
           Control: Label@2.5.1
           Properties:
@@ -70,7 +70,7 @@ Screens:
             Text: ="Přiřazeno"
             Width: =620
             X: =40
-            Y: =132
+            Y: =108
       - gal_Vazby:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -81,7 +81,7 @@ Screens:
             TemplateSize: =64 + varFs * 4
             Width: =620
             X: =40
-            Y: =164
+            Y: =140
           Children:
             - rec_RadekVazby:
                 Control: Rectangle@2.3.0
@@ -173,7 +173,7 @@ Screens:
             Text: ="Přidat další dílčí proces"
             Width: =620
             X: =700
-            Y: =132
+            Y: =108
       - txt_HledatDp:
           Control: Classic/TextInput@2.3.2
           Properties:
@@ -188,7 +188,7 @@ Screens:
             Size: =11 + varFs
             Width: =620
             X: =700
-            Y: =164
+            Y: =140
       - gal_Nabidka:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -203,7 +203,7 @@ Screens:
             TemplateSize: =64 + varFs * 4
             Width: =620
             X: =700
-            Y: =216
+            Y: =192
           Children:
             - rec_RadekNabidka:
                 Control: Rectangle@2.3.0

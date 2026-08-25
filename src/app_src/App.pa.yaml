@@ -73,6 +73,8 @@ App:
       Set(varDashOsirele, false);
       Set(varMenuRozbalit, false);
       Set(varMenuMapa, false);
+      Set(varMenuExport, false);
+      Set(varExportBezi, false);
       Set(varPublikuji, false);
       Set(varSmazatD, Blank())
     Theme: =PowerAppsTheme

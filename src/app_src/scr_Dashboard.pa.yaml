@@ -312,7 +312,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =40
+            Height: =46
             Width: =260
             X: =40
             Y: =60
@@ -320,7 +320,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPruh1
-            Height: =40
+            Height: =46
             Width: =4
             X: =40
             Y: =60
@@ -345,7 +345,7 @@ Screens:
             Size: =16
             Text: =CountRows(colAgendy)
             VerticalAlign: =VerticalAlign.Middle
-            Width: =46
+            Width: =70
             X: =60
             Y: =78
       - lbl_p_KartaAgendy:
@@ -358,14 +358,14 @@ Screens:
             Size: =9
             Text: ="oblastí činnosti"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =176
-            X: =112
+            Width: =158
+            X: =134
             Y: =82
       - rec_KartaProcesy:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =40
+            Height: =46
             Width: =260
             X: =320
             Y: =60
@@ -373,7 +373,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPruh2
-            Height: =40
+            Height: =46
             Width: =4
             X: =320
             Y: =60
@@ -398,7 +398,7 @@ Screens:
             Size: =16
             Text: =CountRows(colProcesy)
             VerticalAlign: =VerticalAlign.Middle
-            Width: =46
+            Width: =70
             X: =340
             Y: =78
       - lbl_p_KartaProcesy:
@@ -411,14 +411,14 @@ Screens:
             Size: =9
             Text: ="v celém rejstříku"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =176
-            X: =392
+            Width: =158
+            X: =414
             Y: =82
       - rec_KartaDilci:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =40
+            Height: =46
             Width: =260
             X: =600
             Y: =60
@@ -426,7 +426,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPruh3
-            Height: =40
+            Height: =46
             Width: =4
             X: =600
             Y: =60
@@ -451,7 +451,7 @@ Screens:
             Size: =16
             Text: =CountRows(colDilci)
             VerticalAlign: =VerticalAlign.Middle
-            Width: =46
+            Width: =70
             X: =620
             Y: =78
       - lbl_p_KartaDilci:
@@ -466,14 +466,14 @@ Screens:
               =varZmapovanoDp & " s aktivitami"
             Tooltip: '="Kolik dílčích procesů už má v evidenci aspoň jednu aktivitu. Zbytek v rejstříku existuje, ale aktivity k němu zatím nikdo nepopsal."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =176
-            X: =672
+            Width: =158
+            X: =694
             Y: =82
       - rec_KartaAktivity:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =40
+            Height: =46
             Width: =Parent.Width - 920
             X: =880
             Y: =60
@@ -481,7 +481,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPruh4
-            Height: =40
+            Height: =46
             Width: =4
             X: =880
             Y: =60
@@ -507,7 +507,7 @@ Screens:
             Text: =CountRows(colAkt)
             Tooltip: '="Počet načtených aktivit. Do 2 000 je to celý rejstřík; nad tím Power Apps ze SharePointu víc najednou nepřečte a číslo je počet prvního okna dat - stejné omezení má i seznam aktivit."'
             VerticalAlign: =VerticalAlign.Middle
-            Width: =46
+            Width: =70
             X: =900
             Y: =78
       - lbl_p_KartaAktivity:
@@ -521,8 +521,8 @@ Screens:
             Text: |-
               =CountRows(Filter(colAkt, stav.Value = "schváleno")) & " schváleno"
             VerticalAlign: =VerticalAlign.Middle
-            Width: =Parent.Width - 992
-            X: =952
+            Width: =Parent.Width - 1014
+            X: =974
             Y: =82
       # ---------- rozpad: strom v řádcích ----------
       # Jedna galerie nad plochou kolekcí colStrom (agendy + procesy + dílčí
@@ -665,7 +665,8 @@ Screens:
             HoverFill: =If(varMenuRozbalit, stylAkceHover, stylRadekHover)
             OnSelect: |-
               =Set(varMenuRozbalit, !varMenuRozbalit);
-              Set(varMenuMapa, false)
+              Set(varMenuMapa, false);
+              Set(varMenuExport, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
@@ -698,7 +699,8 @@ Screens:
             HoverFill: =If(varMenuMapa, stylAkceHover, stylRadekHover)
             OnSelect: |-
               =Set(varMenuMapa, !varMenuMapa);
-              Set(varMenuRozbalit, false)
+              Set(varMenuRozbalit, false);
+              Set(varMenuExport, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
@@ -706,6 +708,55 @@ Screens:
             Tooltip: '="Publikovaná HTML mapa: otevření a obnovení. Mapa data nečte živě - ukazuje stav k okamžiku poslední publikace."'
             Width: =110
             X: =902
+            Y: =116
+      # Nabídka exportu. Sbírá se tu, ne až v položkách: obě volby pak
+      # exportují prokazatelně tentýž pohled a liší se jen formátem.
+      # nazevPlny místo nazev — do dokumentu patří celé znění aktivity,
+      # ne zkrácený popisek do řádku stromu.
+      - btn_ExportMenu:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varMenuExport, RGBA(255, 255, 255, 1), stylAkce)
+            DisplayMode: =If(varExportBezi, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =If(varMenuExport, stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =If(varMenuExport, RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varMenuExport, stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varMenuExport, !varMenuExport);
+              Set(varMenuMapa, false);
+              Set(varMenuRozbalit, false);
+              Set(
+                  varExportNadpis,
+                  If(varDashStav = "", "vše", "jen " & varDashStav)
+                  & If(varDashOsirele, " · jen osiřelé", "")
+                  & If(IsBlank(txt_HledatD.Text), "", " · hledáno: " & txt_HledatD.Text)
+              );
+              ClearCollect(
+                  colExport,
+                  ForAll(
+                      gal_Strom.AllItems As r,
+                      {
+                          uroven: r.uroven,
+                          kod: r.kod,
+                          nazev: r.nazevPlny,
+                          vlastnik: r.utvar,
+                          stav: If(r.uroven = 4, If(r.aktS = 1, "schváleno", "pracovní"), "")
+                      }
+                  )
+              )
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="Export  ▾"
+            Tooltip: '="Uloží to, co je právě vidět ve stromu - po filtru stavu, hledání i chipu osiřelých - jako dokument pro Word nebo tabulku pro Excel. Neexportuje celý rejstřík, ale momentální pohled. Soubor vzniká v knihovně Site Assets a rovnou se stáhne."'
+            Width: =100
+            X: =1016
             Y: =116
       - btn_KodD:
           Control: Classic/Button@2.2.0
@@ -1178,8 +1229,9 @@ Screens:
             Height: =Parent.Height
             OnSelect: |-
               =Set(varMenuRozbalit, false);
-              Set(varMenuMapa, false)
-            Visible: =varMenuRozbalit || varMenuMapa
+              Set(varMenuMapa, false);
+              Set(varMenuExport, false)
+            Visible: =varMenuRozbalit || varMenuMapa || varMenuExport
             Width: =Parent.Width
             X: =0
             Y: =0
@@ -1316,7 +1368,7 @@ Screens:
             Height: =84
             Visible: =varMenuMapa
             Width: =220
-            X: =862
+            X: =792
             Y: =144
       - btn_MapaHtml:
           Control: Classic/Button@2.2.0
@@ -1343,7 +1395,7 @@ Screens:
             Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami bez ohledu na jejich počet. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
             Visible: =varMenuMapa && !IsBlank(varMapaUrl)
             Width: =212
-            X: =866
+            X: =796
             Y: =148
       # Přejmenováno z „Obnovit mapu" na „Obnovit HTML" (23.08.2026): mapa
       # se v appce nemění, mění se ta publikovaná HTML stránka.
@@ -1379,12 +1431,126 @@ Screens:
             Tooltip: '="Přegeneruje publikovanou HTML stránku z dnešního obsahu rejstříku. Stránka data nečte živě - ukazuje stav k okamžiku poslední publikace, takže po každé dávce úprav ji je potřeba obnovit. Běh trvá několik sekund a probíhá na pozadí; hlášení potvrzuje spuštění, ne dokončení. Kromě toho se stránka obnovuje sama každý den v 7:00."'
             Visible: =varMenuMapa
             Width: =212
-            X: =866
+            X: =796
             Y: =184
       # ---------- potvrzení smazání ----------
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
       # obrazovkou. Souřadnice jsou vzorce, takže kontrola překryvu je
       # přeskočí — u překryvné vrstvy je to správně.
+      # ---------- nabídka exportu ----------
+      # Leží až za stínem nabídek: co je v souboru dřív, kreslí se níž,
+      # a stín pod položkami by jinak spolkl klik (viz 1.0.0.41).
+      - rec_MenuExportPanel:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Fill: =stylKarta
+            Height: =84
+            Visible: =varMenuExport
+            Width: =180
+            X: =1016
+            Y: =144
+      - btn_ExportWord:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varExportBezi, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuExport, false);
+              If(
+                  IsEmpty(colExport),
+                  Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning),
+                  Set(varExportBezi, true);
+                  IfError(
+                      Set(
+                          varExportUrl,
+                          ExportFlow.Run(
+                              JSON(
+                                  {
+                                      nadpis: varExportNadpis,
+                                      format: "word",
+                                      radky: colExport
+                                  },
+                                  JSONFormat.Compact
+                              )
+                          ).adresa
+                      );
+                      Download(varExportUrl),
+                      Notify("Export selhal: " & FirstError.Message, NotificationType.Error)
+                  );
+                  Set(varExportBezi, false)
+              )
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Do Wordu (.doc)"
+            Tooltip: '="Uloží momentální pohled jako dokument, který Word otevře a umí uložit jako .docx. Úrovně jsou odsazené jako ve stromu. Aktivity jdou do dokumentu celým zněním, ne zkráceným popiskem z řádku."'
+            Visible: =varMenuExport
+            Width: =172
+            X: =1020
+            Y: =148
+      - btn_ExportExcel:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varExportBezi, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuExport, false);
+              If(
+                  IsEmpty(colExport),
+                  Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning),
+                  Set(varExportBezi, true);
+                  IfError(
+                      Set(
+                          varExportUrl,
+                          ExportFlow.Run(
+                              JSON(
+                                  {
+                                      nadpis: varExportNadpis,
+                                      format: "excel",
+                                      radky: colExport
+                                  },
+                                  JSONFormat.Compact
+                              )
+                          ).adresa
+                      );
+                      Download(varExportUrl),
+                      Notify("Export selhal: " & FirstError.Message, NotificationType.Error)
+                  );
+                  Set(varExportBezi, false)
+              )
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Do Excelu (.csv)"
+            Tooltip: '="Uloží momentální pohled jako tabulku se sloupci úroveň, kód, název, vlastník a stav. Excel ji otevře rovnou do sloupců. Formát .csv místo .xlsx schválně - .xlsx by vyžadoval placený konektor, který v tomhle prostředí není povolený."'
+            Visible: =varMenuExport
+            Width: =172
+            X: =1020
+            Y: =184
       - rec_ModalStinD:
           Control: Rectangle@2.3.0
           Properties:

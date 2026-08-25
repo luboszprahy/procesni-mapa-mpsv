@@ -1,19 +1,74 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-25 (balík 1.0.0.56)
+Aktualizováno: 2026-08-25 (balík 1.0.0.58)
 
 ## CO JE NA TOBĚ
 
-**Balík `deploy/procesnimapa_1_0_0_56.zip`** — po importu:
+**Balík `deploy/procesnimapa_1_0_0_58.zip`** — import jako upgrade, pak
+otevřít appku ve Studiu, **mikro-změna → Save → Publish** (bez ní se
+publikovaná verze pro ostatní účty neaktualizuje). Flow už je zapnuté
+a zaregistrované, nic dalšího netřeba.
 
-1. **zapnout nové flow `ExportFlow`** (import stav zapnutí nemění),
-2. otevřít appku ve **Studiu → Add data → ExportFlow**,
-3. mikro-změna → **Save** → **Publish**,
-4. **exportovat solution a poslat zpět** — teprve pak jde do appky doplnit
-   tlačítko Export; `.Run()` se bez registrovaného datového zdroje nemá
-   na co navázat a `FlowNameId` přiděluje až prostředí.
+Vyzkoušet: **Export → Do Wordu** a **Export → Do Excelu** nad různě
+zafiltrovaným stromem. Soubory vznikají v knihovně **Site Assets** a rovnou
+se stahují; hromadí se tam, takže je občas potřeba je smazat.
 
-Podrobně `deploy/flow_Export.md`.
+## Tlačítko Export, sjednocené hlavičky, oprava karty (25.08.2026) — balík 1.0.0.58
+
+Solution `1.0.0.57` s **registrovaným `ExportFlow`** dodána přes git
+(`input/procesnimapa_1_0_0_57.zip`) — `FlowNameId 4b36e7da-…`. Tím padla
+poslední překážka a export je hotový celý.
+
+### Export z Přehledu
+
+Tlačítko **Export ▾** vedle „HTML mapa" se dvěma volbami:
+`Do Wordu (.doc)` a `Do Excelu (.csv)`.
+
+Exportuje se **momentální pohled**, ne celý rejstřík: `btn_ExportMenu.OnSelect`
+při otevření nabídky sebere `gal_Strom.AllItems` do `colExport` — tedy přesně
+to, co je vidět po filtru stavu, hledání, chipu osiřelých i rozbalení úrovní.
+Obě volby pak posílají **tutéž kolekci** a liší se jediným polem `format`,
+takže se nemají jak rozejít.
+
+Do dokumentu jde `nazevPlny`, ne `nazev` — v řádku stromu je u aktivity
+zkrácený popisek, v dokumentu musí být celé znění činnosti.
+
+`nadpis` nese slovní popis filtru („vše · jen osiřelé · hledáno: …"), aby
+z dokumentu bylo poznat, jaký výřez to je. Prázdný strom export nespustí
+a řekne proč.
+
+### Grafická chyba z provozu: číslo na kartě se zalomilo
+
+Na kartě DÍLČÍ PROCESY se **249 zalomilo na dva řádky** a druhý přetekl pod
+kartu. Příčina: zúžení karet v 1.0.0.56 dalo číslu šířku 46 px, jenže Power
+Apps k popisku připočítá vlastní odsazení 5 px z každé strany — trojmístné
+číslo v 16 bodech potřebuje ~48 px. Karta je nově o 6 px vyšší a číslo má
+70 px, což pobere i čtyřmístné, až rejstřík poroste.
+
+### Modrý pruh 48 px na všech obrazovkách
+
+Přehled měl po 1.0.0.56 pruh 48 px, Číselník, Detail a Vazby dál 72 px.
+Sjednoceno na 48: menší šipka zpět (56 → 40 px), nadpis `16 + varFs` →
+`14 + varFs`, přepínač písma jako na Přehledu. Obsah tří obrazovek se posunul
+o 24 px nahoru (35 + 33 + 6 prvků), seznam v Číselníku o tolik vyrostl,
+aby dole nezbyla díra.
+
+### Výchozí velikost písma
+
+**Už teď je střední** — `App.OnStart` nastavuje `varFs = -2`, což je
+prostřední z trojice −4 / −2 / 0, a prostřední „A" je podle toho zvýrazněné.
+Na snímku byla zvýrazněná nejmenší proto, že byla ručně vybraná; appka se
+sama startuje na střední. Kdyby výchozí měla být největší z trojice, je to
+jedno číslo v `App.OnStart`.
+
+### Rozestoupení nabídek
+
+Nabídka mapy je nově zarovnaná **zprava** ke svému tlačítku (X 792) a exportní
+**zleva** (X 1016). Nikdy se sice nezobrazí naráz, ale kontrola překryvu to
+nepozná — a překrývat se stejně nemají.
+
+**Brány zeleně:** `check_app`, `check_solution` **229/0**, `check_export_flow`
+100, `check_mapa_flow` 139, `check_flow` 17.
 
 ## Export do Wordu a Excelu + zúžení Přehledu (25.08.2026) — balík 1.0.0.56
 

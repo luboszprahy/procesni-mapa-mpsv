@@ -144,7 +144,7 @@ Screens:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylPrimarni
-            Height: =72
+            Height: =48
             Width: =Parent.Width
             X: =0
             Y: =0
@@ -153,28 +153,28 @@ Screens:
           Properties:
             Color: =RGBA(255, 255, 255, 1)
             Fill: =RGBA(0, 0, 0, 0)
-            Height: =56
+            Height: =40
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.18)
             Icon: =Icon.ChevronLeft
             OnSelect: =Navigate(scr_Dashboard, ScreenTransition.UnCover)
-            PaddingBottom: =16
-            PaddingLeft: =16
-            PaddingRight: =16
-            PaddingTop: =16
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
             PressedFill: =RGBA(255, 255, 255, 0.28)
             Tooltip: '="Zpět na přehled. Rozdělaný formulář se zahodí; co je uložené, zůstane."'
-            Width: =56
+            Width: =40
             X: =16
-            Y: =8
+            Y: =4
       - lbl_NadpisC:
           Control: Label@2.5.1
           Properties:
             Color: =RGBA(255, 255, 255, 1)
             Font: =Font.'Open Sans'
             FontWeight: =FontWeight.Semibold
-            Height: =40
-            Size: =16 + varFs
+            Height: =32
+            Size: =14 + varFs
             Text: |-
               ="Číselník — " &
               Switch(
@@ -186,8 +186,8 @@ Screens:
               )
             VerticalAlign: =VerticalAlign.Middle
             Width: =740
-            X: =88
-            Y: =16
+            X: =68
+            Y: =8
       - btn_PismoC1:
           Control: Classic/Button@2.2.0
           Properties:
@@ -198,18 +198,18 @@ Screens:
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =32
+            Height: =26
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
             OnSelect: =Set(varFs, -4)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
-            Size: =10
+            Size: =9
             Text: ="A"
             Tooltip: '="Nejmenší text, vejde se toho nejvíc."'
             Width: =34
             X: =Parent.Width - 502
-            Y: =20
+            Y: =11
       - btn_PismoC2:
           Control: Classic/Button@2.2.0
           Properties:
@@ -220,18 +220,18 @@ Screens:
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =32
+            Height: =26
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
             OnSelect: =Set(varFs, -2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
-            Size: =13
+            Size: =11
             Text: ="A"
             Tooltip: '="Střední text v popiscích i v polích. Výchozí nastavení."'
             Width: =38
             X: =Parent.Width - 464
-            Y: =20
+            Y: =11
       - btn_PismoC3:
           Control: Classic/Button@2.2.0
           Properties:
@@ -242,18 +242,18 @@ Screens:
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
-            Height: =32
+            Height: =26
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
             OnSelect: =Set(varFs, 0)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
-            Size: =16
+            Size: =13
             Text: ="A"
             Tooltip: '="Největší text. Nejdelší hodnoty se můžou v poli oříznout."'
             Width: =42
             X: =Parent.Width - 422
-            Y: =20
+            Y: =11
       # ---------- volba úrovně (platí pro seznam i formulář) ----------
       # Přepnutí vždycky vrátí formulář do režimu zakládání: jinak by u nově
       # zakládané agendy zůstala viset agenda vybraná pro proces a náhled kódu
@@ -288,7 +288,7 @@ Screens:
             Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem. Nadřazený prvek nemá, vlastníkem je sekce. Kód má dvě číslice."'
             Width: =148
             X: =40
-            Y: =88
+            Y: =64
       - btn_UrovenProcesC:
           Control: Classic/Button@2.2.0
           Properties:
@@ -319,7 +319,7 @@ Screens:
             Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem. Patří vždy pod jednu agendu, vlastníkem je odbor. Kód má tvar AA-BB."'
             Width: =148
             X: =197
-            Y: =88
+            Y: =64
       - btn_UrovenDilciC:
           Control: Classic/Button@2.2.0
           Properties:
@@ -350,7 +350,7 @@ Screens:
             Tooltip: '="Třetí úroveň: vymezený úsek procesu. Patří vždy pod jeden proces, vlastníkem je odbor. Kód má tvar AA-BB-CCC a teprve pod něj se zařazují aktivity."'
             Width: =148
             X: =354
-            Y: =88
+            Y: =64
       # Aktivita je čtvrtá úroveň seznamu, ale formulář vpravo ji needituje:
       # má deset polí a zařazení M:N, což se do panelu nevejde. Klik na řádek
       # proto otevře scr_Detail — jednotný je výběr, mazání a filtrování,
@@ -385,7 +385,7 @@ Screens:
             Tooltip: '="Čtvrtá a nejnižší úroveň: činnost tak, jak má znít v organizačním řádu. Vykonává ji oddělení. Kód má tvar AA-BB-CCC-DDDD. Upravuje se na vlastní obrazovce - klik na řádek ji otevře."'
             Width: =148
             X: =511
-            Y: =88
+            Y: =64
       # ---------- levý panel: seznam ----------
       - txt_HledatC:
           Control: Classic/TextInput@2.3.2
@@ -401,7 +401,7 @@ Screens:
             Tooltip: '="Hledá kdekoli uvnitř kódu i názvu, na velikosti písmen nezáleží. Pracuje nad načteným číselníkem, ne nad SharePointem, takže je výsledek úplný bez ohledu na velikost rejstříku."'
             Width: =400
             X: =40
-            Y: =140
+            Y: =116
       - btn_FiltrVseC:
           Control: Classic/Button@2.2.0
           Properties:
@@ -423,7 +423,7 @@ Screens:
             Tooltip: '="Celý číselník zvolené úrovně bez filtru."'
             Width: =100
             X: =452
-            Y: =140
+            Y: =116
       # Chip má na úrovni agendy jiný význam než níž — agenda nadřazenou
       # položku nemá, takže osiřet nemůže; zato může být prázdná.
       - btn_FiltrUklidC:
@@ -455,7 +455,7 @@ Screens:
               )
             Width: =100
             X: =560
-            Y: =140
+            Y: =116
       # Filtry, které si s sebou přinesl zrušený seznam aktivit. Platí jen
       # pro čtvrtou úroveň, u číselníků by neměly co filtrovat — proto celý
       # řádek mizí a seznam se o jeho výšku posune nahoru.
@@ -483,7 +483,7 @@ Screens:
             Visible: =varUrovenTyp = "aktivita"
             Width: =190
             X: =40
-            Y: =184
+            Y: =160
       - drp_UtvarC:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -508,7 +508,7 @@ Screens:
             Visible: =varUrovenTyp = "aktivita"
             Width: =220
             X: =238
-            Y: =184
+            Y: =160
       - drp_StavC:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -524,7 +524,7 @@ Screens:
             Visible: =varUrovenTyp = "aktivita"
             Width: =194
             X: =466
-            Y: =184
+            Y: =160
       - lbl_PocetC:
           Control: Label@2.5.1
           Properties:
@@ -549,15 +549,15 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =620
             X: =40
-            Y: =If(varUrovenTyp = "aktivita", 228, 184)
+            Y: =If(varUrovenTyp = "aktivita", 204, 160)
       - rec_KartaSeznamC:
           Control: Rectangle@2.3.0
           Properties:
             Fill: =stylKarta
-            Height: =If(varUrovenTyp = "aktivita", 452, 496)
+            Height: =If(varUrovenTyp = "aktivita", 476, 520)
             Width: =620
             X: =40
-            Y: =If(varUrovenTyp = "aktivita", 256, 212)
+            Y: =If(varUrovenTyp = "aktivita", 232, 188)
       # Hlavičky řadí klikem, stejně jako je řadil zrušený seznam aktivit.
       - lbl_h_KodC:
           Control: Label@2.5.1
@@ -578,7 +578,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =140
             X: =56
-            Y: =If(varUrovenTyp = "aktivita", 262, 218)
+            Y: =If(varUrovenTyp = "aktivita", 238, 194)
       - lbl_h_NazevC:
           Control: Label@2.5.1
           Properties:
@@ -598,7 +598,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =258
             X: =212
-            Y: =If(varUrovenTyp = "aktivita", 262, 218)
+            Y: =If(varUrovenTyp = "aktivita", 238, 194)
       - lbl_h_VlastnikC:
           Control: Label@2.5.1
           Properties:
@@ -619,7 +619,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
             X: =470
-            Y: =If(varUrovenTyp = "aktivita", 262, 218)
+            Y: =If(varUrovenTyp = "aktivita", 238, 194)
       - lbl_PrazdnoC:
           Control: Label@2.5.1
           Properties:
@@ -644,12 +644,12 @@ Screens:
             Visible: =CountRows(gal_CiselnikC.AllItems) = 0
             Width: =588
             X: =56
-            Y: =If(varUrovenTyp = "aktivita", 304, 260)
+            Y: =If(varUrovenTyp = "aktivita", 280, 236)
       - gal_CiselnikC:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_OneTextOneImageVariant_ver5.0
           Properties:
-            Height: =If(varUrovenTyp = "aktivita", 418, 462)
+            Height: =If(varUrovenTyp = "aktivita", 442, 486)
             Items: |-
               =Sort(
                   Search(
@@ -675,7 +675,7 @@ Screens:
             TemplateSize: =44 + varFs * 4
             Width: =620
             X: =40
-            Y: =If(varUrovenTyp = "aktivita", 290, 246)
+            Y: =If(varUrovenTyp = "aktivita", 266, 222)
           Children:
             - rec_RadekC:
                 Control: Rectangle@2.3.0
@@ -854,7 +854,7 @@ Screens:
             Height: =620
             Width: =620
             X: =700
-            Y: =88
+            Y: =64
       - rec_PruhFormC:
           Control: Rectangle@2.3.0
           Properties:
@@ -862,7 +862,7 @@ Screens:
             Height: =4
             Width: =620
             X: =700
-            Y: =88
+            Y: =64
       - lbl_FormNadpisC:
           Control: Label@2.5.1
           Properties:
@@ -892,7 +892,7 @@ Screens:
             VerticalAlign: =VerticalAlign.Middle
             Width: =572
             X: =724
-            Y: =104
+            Y: =80
       - lbl_NapovedaC:
           Control: Label@2.5.1
           Properties:
@@ -916,7 +916,7 @@ Screens:
               )
             Width: =572
             X: =724
-            Y: =136
+            Y: =112
       - lbl_l_AgendaC:
           Control: Label@2.5.1
           Properties:
@@ -929,7 +929,7 @@ Screens:
               =varUrovenTyp <> "agenda" && varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
-            Y: =192
+            Y: =168
       - drp_AgendaC:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -957,7 +957,7 @@ Screens:
               =varUrovenTyp <> "agenda" && varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
-            Y: =214
+            Y: =190
       - lbl_l_ProcesC:
           Control: Label@2.5.1
           Properties:
@@ -969,7 +969,7 @@ Screens:
             Visible: =varUrovenTyp = "dilci"
             Width: =572
             X: =724
-            Y: =262
+            Y: =238
       - drp_ProcesC:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -1003,7 +1003,7 @@ Screens:
             Visible: =varUrovenTyp = "dilci"
             Width: =572
             X: =724
-            Y: =284
+            Y: =260
       - lbl_l_NazevC:
           Control: Label@2.5.1
           Properties:
@@ -1015,7 +1015,7 @@ Screens:
             Visible: =varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
-            Y: =334
+            Y: =310
       - txt_NazevC:
           Control: Classic/TextInput@2.3.2
           Properties:
@@ -1043,7 +1043,7 @@ Screens:
             Tooltip: '="Povinné. Název položky číselníku. Delší text SharePoint ořízne na 255 znaků, proto je pole na tuhle délku omezené. Název jde později přejmenovat, přidělený kód už ne — vazby v rejstříku i v mapě stojí na kódu."'
             Width: =572
             X: =724
-            Y: =356
+            Y: =332
       - lbl_l_VlastnikC:
           Control: Label@2.5.1
           Properties:
@@ -1057,7 +1057,7 @@ Screens:
             Visible: =varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
-            Y: =446
+            Y: =422
       - drp_VlastnikC:
           Control: Classic/DropDown@2.3.1
           Properties:
@@ -1093,7 +1093,7 @@ Screens:
             Tooltip: '="Nepovinné, doplnit jde kdykoli později. Metodika říká, že vlastníkem agendy je sekce a vlastníkem procesu i dílčího procesu odbor — nabídka se podle úrovně mění. Ukládá se kód útvaru, ne celý řádek s názvem, aby se evidence nerozešla s číselníkem při přejmenování útvaru."'
             Width: =572
             X: =724
-            Y: =468
+            Y: =444
       - lbl_l_NahledKodC:
           Control: Label@2.5.1
           Properties:
@@ -1106,7 +1106,7 @@ Screens:
             Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =724
-            Y: =520
+            Y: =496
       # Náhled počítá nad kolekcemi z App.OnStart — dotaz na SharePoint při
       # každém překreslení by obrazovku zbytečně brzdil. Skutečný kód se při
       # uložení počítá znovu nad zdrojem, takže náhled je odhad, ne slib;
@@ -1179,7 +1179,7 @@ Screens:
             Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =724
-            Y: =542
+            Y: =518
       - lbl_ChybaC:
           Control: Label@2.5.1
           Properties:
@@ -1192,7 +1192,7 @@ Screens:
             Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =1016
-            Y: =520
+            Y: =496
       - btn_UlozitC:
           Control: Classic/Button@2.2.0
           Properties:
@@ -1474,7 +1474,7 @@ Screens:
               ) & " Nová hodnota se rovnou objeví v seznamu vlevo i v nabídkách a po návratu na přehled ve stromu - appka se kvůli tomu nemusí restartovat."
             Width: =200
             X: =724
-            Y: =596
+            Y: =572
       - btn_NovaC:
           Control: Classic/Button@2.2.0
           Properties:
@@ -1523,7 +1523,7 @@ Screens:
             Width: =200
             X: |-
               =If(varUrovenTyp = "aktivita", 724, 944)
-            Y: =596
+            Y: =572
       - lbl_PoznamkaC:
           Control: Label@2.5.1
           Properties:
@@ -1541,7 +1541,7 @@ Screens:
               )
             Width: =572
             X: =724
-            Y: =648
+            Y: =624
       # ---------- potvrzení smazání ----------
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
       # obrazovkou. Stín zachytí kliknutí mimo kartu, aby pod dialogem nešlo
