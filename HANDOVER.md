@@ -190,7 +190,14 @@ a „flow má jediný trigger".
   Studiu → exportovat solution → znovu spustit `build_mapa_flow.py`,
   `build_export_flow.py` a `add_mapa_schedule.py` → ručně přepsat `varMapaUrl`.
   `check_solution.py` obojí hlídá: vypíše počet míst a **selže**, pokud některé
-  flow míří na jiný web než appka.
+  flow míří na jiný web než appka, na cizího hostitele, nebo uvádí cizí tenant
+  bez schématu.
+
+  **Výjimka: `AktualizaceKratkehoNazvu`.** Jediné flow, které se rerunem
+  skriptu nespraví — `src/build_flow.py` má GUID listu Aktivity natvrdo
+  v konstantě `LIST_AKTIVITY` (runtime výraz by flow znemožnil zapnout)
+  a jeho trigger je nad tím listem, takže se musí založit nová kostra
+  v designeru nad webem MPSV. Rozepsáno v `PLAN.md` kroku 12, bodu 5b.
 - **Pozice posuvníku stromu se při návratu z detailu neobnoví.** Rozbalené
   větve drží `colOtevrene`, takže ty se vrátí, ale scroll galerie si Power Apps
   řídí sám a z `pa.yaml` ho neovlivníš. Zatím neřešeno — čeká se, jestli to

@@ -38,7 +38,8 @@ ODSAZENI_PT = 18
 SLOUPCU = 5
 SLOUPCE = ("Úroveň", "Kód", "Název", "Vlastník / vykonává", "Stav")
 # vynucený text v Excelu; bez něj se kód 01-01 uloží jako datum
-TEXTOVY_FORMAT = 'mso-number-format:"' + chr(92) + '@"'
+TEXT_HODNOTA = '"' + chr(92) + '@"'          # hodnota vlastnosti = vynucený text
+TEXTOVY_FORMAT = "mso-number-format:" + TEXT_HODNOTA
 
 RAZITKO = "01.01.2026 00:00"
 RAZITKO_SOUBOR = "20260101_000000"
@@ -446,15 +447,25 @@ def rozeber(dokument):
     return parser
 
 
-def css_pravidlo(dokument, selektor):
-    """Tělo jednoho pravidla ze <style> bloku dokumentu, jinak None."""
+def css_hodnota(dokument, selektor, vlastnost):
+    """Účinná hodnota vlastnosti pro selektor — poslední, jak to dělá kaskáda.
+
+    Číst první pravidlo nestačí: druhé pravidlo se stejným selektorem to první
+    přebije a Excel použije jeho hodnotu. Brána, která by se zastavila u první
+    shody, by takové rušící pravidlo přehlédla — přesně ta mezera zůstala po
+    první opravě B-02 (kolo 4, druhé kolo). Selektory oddělené čárkou se
+    rozebírají, aby `td, th { … }` platilo pro obojí.
+    """
     styl = re.search(r"<style>(.*?)</style>", dokument, re.S)
     if not styl:
         return None
-    for pravidlo in re.finditer(r"([A-Za-z0-9_.#]+)\s*\{([^}]*)\}", styl.group(1)):
-        if pravidlo.group(1) == selektor:
-            return pravidlo.group(2)
-    return None
+    hodnota = None
+    for pravidlo in re.finditer(r"([^{}]+)\{([^}]*)\}", styl.group(1)):
+        if selektor not in [s.strip() for s in pravidlo.group(1).split(",")]:
+            continue
+        for shoda in re.finditer(re.escape(vlastnost) + r"\s*:\s*([^;}]*)", pravidlo.group(2)):
+            hodnota = shoda.group(1).strip()
+    return hodnota
 
 
 def vyznam_excel(akce):
@@ -472,17 +483,18 @@ def vyznam_excel(akce):
            "chybí excelový jmenný prostor — Excel by soubor otevřel jako web")
     overit("charset=utf-8" in dokument,
            "chybí hlavička charset — přesně tak se v .csv rozsypala diakritika")
-    # Formát se čte z konkrétního CSV pravidla, ne hledáním řetězce kdekoli
-    # v dokumentu: `mso-number-format` na hlavičkách (th) Excelu nic neřekne
-    # o datových buňkách a mutace, která ho smaže jen z `td`, by branou prošla
-    # (nález B-02, kolo 4).
-    telo_td = css_pravidlo(dokument, "td")
-    overit(telo_td is not None and TEXTOVY_FORMAT in telo_td,
-           "datové buňky (td) nemají vynucený textový formát — "
+    # Formát se čte jako účinná hodnota z kaskády, ne hledáním řetězce kdekoli
+    # v dokumentu: `mso-number-format` na hlavičkách (th) neřekne nic o datových
+    # buňkách a druhé pravidlo `td {}` by to první přebilo. Obojí branou prošlo
+    # (nález B-02, obě kola).
+    overit(css_hodnota(dokument, "td", "mso-number-format") == TEXT_HODNOTA,
+           "datové buňky (td) nemají účinný textový formát — "
            "Excel udělá z kódu 01-01 datum")
-    telo_urovne = css_pravidlo(dokument, "td.n")
-    overit(telo_urovne is not None and 'mso-number-format:"0"' in telo_urovne,
+    overit(css_hodnota(dokument, "td.n", "mso-number-format") == '"0"',
            "sloupec úrovně nemá číselný formát — v Excelu se nedá seřadit ani filtrovat")
+    # inline styl buňky by kaskádu přebil a ve <style> bloku by nebyl vidět
+    overit("<td style=" not in dokument,
+           "buňka excelové tabulky má vlastní styl — ten pravidlo td přebije")
     overit("WordSection1" not in dokument, "do formátu excel se dostal wordový dokument")
 
     # struktura se čte parserem HTML, ne regulárem: v každém řádku musí sedět

@@ -291,6 +291,19 @@ Stejné skripty jako F1, jiný web, data z `runs/normalize/` (ne anonymizovaná)
 4. mikro-změna → Save → Publish → **export solution**,
 5. lokálně znovu spustit `build_mapa_flow.py`, `build_export_flow.py`
    a `add_mapa_schedule.py` — adresu i GUIDy listů si vezmou z připojení appky,
+5b. **`AktualizaceKratkehoNazvu` se tímhle nespraví** a je to jediné flow,
+   které chce ruční zásah (nález B-01, kolo 4):
+   - `src/build_flow.py` má na řádku 20 konstantu `LIST_AKTIVITY` — GUID listu
+     Aktivity. **Přepsat na GUID téhož listu na MPSV** (vypíše ho
+     `setup_sharepoint.js` nebo `export_sp_schema.js`). Runtime výraz tam
+     nejde: flow se naimportuje, ale nepůjde zapnout (pravidlo `PatchItem`).
+   - Trigger flow je nad listem Aktivity, takže se **nedá přepojit úpravou
+     definice** — v Power Automate designeru nad webem MPSV se založí nová
+     kostra (trigger „When an item is created or modified" nad listem Aktivity
+     + jedna akce Compose), exportuje se a `build_flow.py` do ní dopíše zbytek.
+   - Teprve pak dá `check_solution.py` zelenou; do té doby správně selže na
+     tomhle flow.
+
 6. ručně přepsat `varMapaUrl` v `src/app_src/App.pa.yaml` (jediné ručně psané
    místo — canvas app textové env proměnné číst neumí),
 7. `build_app.py` + brány + import výsledku.

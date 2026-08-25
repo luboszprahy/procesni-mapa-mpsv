@@ -155,7 +155,7 @@ Screens:
             Text: ="Procesní mapa MPSV"
             Tooltip: |-
               ="Procesní mapa MPSV — verze " & varVerze &
-              ". Když číslo neodpovídá naposledy importovanému balíku, neproběhla po importu ve Studiu mikro-změna, Save a Publish a běží pořád stará publikovaná verze."
+              ". Když se tahle nápověda neukáže vůbec nebo číslo neodpovídá naposledy importovanému balíku, neproběhla po importu ve Studiu mikro-změna, Save a Publish a běží pořád stará publikovaná verze."
             VerticalAlign: =VerticalAlign.Middle
             Width: =240
             X: =40

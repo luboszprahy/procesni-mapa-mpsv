@@ -1,9 +1,17 @@
 # AUDIT — Procesní mapa MPSV
 
-Poslední audit: 25.08.2026 · kolo: 4 (ExportFlow, druhé flow, zrušení stav_mapovani, balík 1.0.0.59)
-Předchozí: 23.08.2026 · powerplatform-auditor · kolo 3 (canvas app — mazání, editace, vazby, flow)
-Verdikt kolo 4: NÁLEZY (0 blokujících / 1 vážný / 1 střední / 0 drobných / 1 eskalace)
-  — **vše vyřízeno v 1.0.0.60**: B-01 a B-02 opraveny, B-03 zmírněn a ověřen provozem
+Poslední audit: 25.08.2026 · kolo: 4, druhé kolo (re-audit balíku `deploy/procesnimapa_1_0_0_60.zip`)
+Předchozí: 25.08.2026 · powerplatform-auditor · kolo 4, první kolo (balík 1.0.0.59)
+Před tím: 23.08.2026 · powerplatform-auditor · kolo 3 (canvas app — mazání, editace, vazby, flow)
+Verdikt kolo 4 (druhé kolo): NÁLEZY (0 blokujících / 0 vážných / 2 střední / 1 eskalace)
+  — **vyřízeno v 1.0.0.61**, smyčka uzavřena na stropu dvou kol: obě námitky
+  auditora přijaty a opraveny (kaskáda v CSS, čtvrté flow v migračním postupu,
+  tři obejití kontroly adres), jedna část zamítnuta — viz „Vyřízení druhého kola"
+Verdikt kolo 4 (druhé kolo, původní):  NÁLEZY (0 blokujících / 0 vážných / 2 střední / 1 eskalace)
+  — B-01 **z většiny opraveno**, ale zůstává jedna reálná mezera v migračním postupu;
+  B-02 **NENÍ opraveno** — nová mutace bránu obchází; B-03 mitigace je reálná, ale
+  „N-06 padá" a „ověřeno provozem" pro `varVerze` **neplatí**, viz níže
+Verdikt kolo 4 (první kolo): NÁLEZY (0 blokujících / 1 vážný / 1 střední / 1 eskalace)
 Verdikt kolo 3: NÁLEZY (0 blokujících / 3 vážné / 3 střední / 2 drobné) — nejzávažnější
 byla referenční integrita vazební tabulky (A-01, opraveno) a strop 500 řádků (A-03, opraveno)
 Verdikt kolo 2: NÁLEZY (0/1/0) — žádný otevřený BLOKUJÍCÍ, F1 připravená na ostrý běh
@@ -11,11 +19,259 @@ Verdikt kolo 2: NÁLEZY (0/1/0) — žádný otevřený BLOKUJÍCÍ, F1 připrav
 V tomto projektu **neplatí** kritéria vázaná na publisher `ppf`/prefix `ppf_`/
 tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze změny).
 Testovací tenant je skutečně `ppfbanka.sharepoint.com` a jeho výskyt v balíku
-proto sám o sobě není nález — nález je až to, že jeho **rozsah** (kolik míst
-je potřeba přepojit při přenosu na MPSV) je jinde v projektu podhodnocený,
-viz B-01.
+proto sám o sobě není nález.
 
-## Nálezy — kolo 4 (25.08.2026, balík `deploy/procesnimapa_1_0_0_59.zip`)
+## Re-audit — kolo 4, druhé kolo (25.08.2026, balík `deploy/procesnimapa_1_0_0_60.zip`)
+
+Zadání: ověřit opravy B-01, B-02, B-03 z prvního kola a posoudit argument
+u B-03 kriticky. Postup: rozbaleno `deploy/procesnimapa_1_0_0_60.zip` (`unzip -t`
+bez chyby, solution i vnořený `.msapp`), spuštěny všechny brány přímo nad
+balíkem a vlastní mutace (ne převzetí tvrzení z `STATUS.md`/`AUDIT.md`).
+
+**Regrese — brány nad 1.0.0.60, žádná neselhala:**
+
+| brána | výsledek |
+|---|---|
+| `check_export_flow.py --solution deploy/procesnimapa_1_0_0_60.zip` | **110/110** (čekáno 110, sedí) |
+| `check_solution.py --vstup deploy/procesnimapa_1_0_0_59.zip --vystup deploy/procesnimapa_1_0_0_60.zip` | 234/0, 2 varování (viz B-01) |
+| `check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_60.zip` | 139/139 |
+| `check_flow.py --solution deploy/procesnimapa_1_0_0_60.zip` | 17/17 |
+| `check_app.py` | OK — 199 prvků, 2242 vzorců, stejná 2 pre-existující VAROVÁNÍ jako v prvním kole |
+| `solution.xml` verze | `1.0.0.60` (> `1.0.0.59`), `<Managed>0</Managed>` |
+
+Razítko verze se nezaviklo nic z existujícího — potvrzeno.
+
+### B-01 · ČÁSTEČNĚ OPRAVENO — hlavní mezera zalátaná, jedna reálná zůstává v migračním postupu
+
+**Co je opravené a funguje.** `adresa_webu()` + `adresy_ve_flow()`
+(`src/check_solution.py:41-90`) teď prochází `Workflows/*.json` a srovnává
+každou nalezenou `https://…sharepoint.com…` adresu s adresou webu, na který
+je připojená canvas app (čtenou z `customizations.xml`). Pozitivní kontrola —
+ověřeno vlastní mutací, ne převzato:
+```
+# ExportFlow: "…/testovaci_subsajta/procesnimapa" -> "…/testovaci_subsajta/JINY"
+check_solution.py --vstup deploy/procesnimapa_1_0_0_59.zip --vystup mutOK.zip
+→ CHYBA: ExportFlow-….json míří na jiný web než canvas app: […/JINY']
+→ NEPROŠLO
+```
+Funguje přesně na scénář, který B-01 popisoval — pokud se do balíku dostane
+flow ukazující na jiný web, než na jaký je připojená appka, import se odmítne.
+`HANDOVER.md` (řádky 181-193) a `PLAN.md` (krok 12, řádky 285-296) teď správně
+říkají „20 míst" (1 `varMapaUrl` + 19 ve flow) a že se 19 z nich **nepíše
+ručně** — sedí to na to, co `check_solution.py` v kontrole `adresy_ve_flow()`
+skutečně dělá.
+
+**Tři mutace, které kontrolu obejdou** (zkoušeno, jak žádáno — jiná forma
+adresy, jiná doména, adresa jen v `customizations.xml`):
+
+1. **Adresa bez `https://`** — `re.findall(r"https://[A-Za-z0-9.-]+\.sharepoint\.com[^\"']*", …)` vyžaduje doslovné `https://` na začátku. Vložená cizí adresa `ATTACKER-TENANT.sharepoint.com/sites/evil` (bez schématu) → `check_solution.py` → 234/0, **OK**, počet míst se nezvýšil.
+2. **Adresa mimo `*.sharepoint.com`** — `https://attacker.example.com/exfiltrate` vložená do `ExportFlow` → 234/0, **OK**. Kontrola `adresy_ve_flow()` je záměrně úzká na `sharepoint.com`; obecná kontrola `http(s)://` v `*.pa.yaml` (řádek 236-249) se na `Workflows/*.json` nevztahuje, takže mimo `sharepoint.com` domény ve flow nekontroluje nic.
+3. **Adresa jen v `customizations.xml` mimo `<ConnectionReferences>`** — vložen komentář s cizí adresou hned za `</ConnectionReferences>` → 234/0, **OK**. `customizations.xml` se používá jen jako zdroj referenční adresy, sám se na cizí adresy neprohledává.
+
+Tohle jsou reálné mezery, ale v **dnešním hrozbovém modelu projektu** (jeden
+asistent upravuje vlastní build skripty, žádný cizí přispěvatel) mají nízkou
+váhu — nikdo sem cizí adresu takhle nevloží náhodou. Řadím je jako **DROBNÉ/
+POZNÁMKA**, ne jako důvod nechat B-01 otevřené.
+
+**Skutečný důvod, proč B-01 není 100% uzavřené — mezera v `HANDOVER.md`/`PLAN.md`
+kroku 12, ne v bráně.** Migrační postup (`PLAN.md` řádky 287-296, bod 5) říká
+„lokálně znovu spustit `build_mapa_flow.py`, `build_export_flow.py` a
+`add_mapa_schedule.py`" — tedy tři skripty. Ve flow je ale **čtvero**, páté
+`AktualizaceKratkehoNazvu` se staví skriptem `src/build_flow.py`, který v
+migračním postupu chybí úplně:
+```
+grep -o 'ppfbanka.sharepoint.com[^"]*' Workflows/AktualizaceKratkehoNazvu*.json | wc -l
+→ 2   (dataset triggeru + dataset zápisové akce)
+```
+`src/build_flow.py` navíc **nebere adresu z připojení appky** jako ostatní tři
+skripty — dokumentace v jeho vlastní hlavičce říká „Trigger, connection
+reference ani GUID flow se nemění" (řádek 6) a obsahuje **vlastní natvrdo
+zapsanou konstantu** `LIST_AKTIVITY = "9dfbb5a1-…"` (řádek 20, GUID listu
+Aktivity na vývojové site), o které komentář výslovně píše, že s runtime
+výrazem „se flow naimportuje, ale nejde zapnout" — tedy ji nejde obejít, musí
+se fyzicky přepsat v `src/build_flow.py` na GUID listu Aktivity na MPSV.
+Trigger sám navíc podle stejné hlavičky vzniká tak, že „uživatel dodá z
+designeru kostru" — tedy ručním exportem nové kostry z Power Automate
+designeru nad MPSV listem, ne rerunem skriptu nad existující definicí.
+
+Kdo by se řídil doslova sedmi kroky v `PLAN.md` krok 12, dostane se do
+kroku 7 (`check_solution.py`), brána správně **selže** na `AktualizaceKratkehoNazvu`
+(potvrzeno — `adresy_ve_flow()` prochází všechna čtyři flow, tohle nevynechává),
+ale kroky 1-7 mu neřeknou, co s tím — čtvrtý build skript, ruční export nové
+kostry z designeru a editace konstanty v Pythonu nejsou zmíněné nikde.
+
+Checklist: B1, NFR-3, kritérium přijetí A6, H3 (chybí klikací návod na tuhle
+konkrétní část).
+Stav: **částečně opraveno** — hlavní mechanismus (B1 nad flow) funguje a je
+mutačně ověřený; zbývá doplnit `AktualizaceKratkehoNazvu`/`build_flow.py` do
+`PLAN.md` kroku 12 a `HANDOVER.md`. Tři drobné mezery v `adresy_ve_flow()`
+(bez schématu, mimo sharepoint.com, mimo `Workflows/`) jsou POZNÁMKA, ne
+blokující — nízké riziko v jednouživatelském vývoji, ale stojí za zapsání pro
+budoucnost.
+
+### B-02 · STŘEDNÍ · STÁLE OTEVŘENO — oprava zúžila mezeru, nezavřela ji
+
+**Původní bypass (kolo 4, první kolo) je opravený a ověřený.** Mutace „smazat
+`mso-number-format` jen z `td {}`, nechat v `th {}`" spuštěná znovu nad
+1.0.0.60:
+```
+check_export_flow.py --solution mutE_orig.zip
+→ kontrol: 110
+→ CHYBA: textový formát není v pravidle td …
+→ CHYBA: datové buňky (td) nemají vynucený textový formát …
+→ NEPROŠLO
+```
+`css_pravidlo()` teď parsuje `<style>` blok na dvojice `selektor{tělo}` a
+významová vrstva čte formát konkrétně z těla pravidla `td` — funguje přesně
+na nahlášený scénář.
+
+**Nová mutace — CSS kaskáda — kontrolu obchází.** `css_pravidlo()`
+(`src/check_export_flow.py:449-457`) vrací **první** shodu se selektorem
+(`for pravidlo in re.finditer(...): if pravidlo.group(1) == selektor: return …`).
+Když se do `<style>` bloku přidá **druhé** pravidlo `td {}` (za tím původním,
+před `</style>`), které formát ruší, `css_pravidlo(dokument, "td")` najde a
+vrátí jen to PRVNÍ (správné) a druhé (poškozující) nikdy neuvidí — ale
+skutečný prohlížeč/Excel při renderu **respektuje pořadí v kaskádě** a použije
+poslední pravidlo se stejnou specificitou pro týž selektor, tedy to poškozené:
+```
+# do <style> bloku ExportFlow přidáno těsně před </style>:
+#   td {mso-number-format:"General";}
+check_export_flow.py --solution mutD_cascade.zip
+→ kontrol: 110
+→ OK — ExportFlow odpovídá kontraktu          (mělo by NEPROJÍT)
+```
+Reálný dopad by byl identický s původním nálezem — Excel by `01-01` znovu
+četl jako datum — jenže tentokrát by ho způsobila **druhá**, ne první výskyt
+pravidla `td {}`, a `css_pravidlo()` na druhý výskyt nedohlédne.
+
+Vedlejší zjištění (ne bypass, opačný směr — přísnost, ne díra): kombinovaný
+selektor `td, th {…}` (funkčně rovnocenný zápis) branou **neprojde** — `css_pravidlo()`
+hledá přesnou shodu selektoru `"td"`, `"td, th"` nenajde. Ověřeno mutací
+(2 chyby, `NEPROŠLO`). Nejde o bezpečnostní mezeru (nic škodlivého neprojde),
+jen o menší tvrdost kontroly vůči alternativním, ale platným zápisům CSS —
+POZNÁMKA, ne akční položka.
+
+Checklist: F3, E2 — stejné jako v prvním kole; oprava adresovala nahlášenou
+mutaci doslovně, ne obecnou třídu problému („poslední platné pravidlo pro
+daný selektor", ne „první nalezené").
+Stav: **otevřeno**. Doporučení pro opravu (nedělat, jen návrh): v `css_pravidlo()`
+vracet **poslední** shodu (`re.finditer` → uložit poslední, ne `return` na
+první), protože to odpovídá skutečné CSS kaskádě.
+
+### B-03 · ESKALACE · zůstává otevřená — mitigace je reálná, ale „ověřeno provozem" pro `varVerze` neplatí
+
+**Souhlasím s tím, co je ověřené.** `vloz_verzi()` (`src/build_app.py:132-144`)
+skutečně selže, když razítko v YAML nenajde nebo najde vícekrát — ověřeno
+izolovaně (bez zásahu do zdrojů appky, jen na kopii regexu):
+```
+0 shod  → CHYBA: razítko verze nahrazeno 0x, čekal jsem 1x
+2 shody → CHYBA: razítko verze nahrazeno 2x, čekal jsem 1x
+1 shoda → v pořádku
+```
+A razítko v balíku **odpovídá** verzi v `solution.xml`:
+```
+solution.xml:              <Version>1.0.0.60
+Src/App.pa.yaml (v .msapp): Set(varVerze, "1.0.0.60")
+```
+Tooltip `lbl_AppNazevD` v `scr_Dashboard.pa.yaml` (řádek 156-158) skutečně
+vysvětluje uživateli, co dělat, když číslo nesedí. Tohle vše je v pořádku a
+je to reálné zlepšení proti prvnímu kolu.
+
+**Argument „tlačítko Export funguje bez Controls → tím padá N-06" sedí jen
+pro Export, ne obecně — a nesedí pro `varVerze` samotné.** Kritický bod:
+`varVerze` je **přesně tak nová YAML-only věc jako kdysi bylo tlačítko Export**
+— a na rozdíl od tlačítka Export **nebyla nikdy provozně vyzkoušená**, protože
+vznikla až dnes, v 1.0.0.60. Ověřeno přímo:
+```
+grep -c "varVerze" sol60/msapp60/Controls/4.json
+→ 0
+md5sum sol60/msapp60/Controls/4.json
+→ bb77b659c8dd42c2dd4c974f3d9494f6   (STEJNÝ md5 jako 1.0.0.57 a 1.0.0.59)
+```
+`Controls/4.json` je **stále** bajtově identické s 1.0.0.57 — tenhle balík
+neprošel žádnou další Studiem-materializovanou úpravou od 1.0.0.57. Tlačítko
+Export prošlo provozní zkouškou (uživatel ho opravdu použil), ale `varVerze`
+zatím **ne** — je to tatáž kategorie „existuje jen v YAML", jen o den mladší
+a dosud nepotvrzená. Extrapolovat z jednoho ověřeného případu (Export) na
+obecné „Studio spolehlivě materializuje cokoli z YAML, vždycky" je logický
+skok, který moje data nepodporují o nic víc, než podporovala minule.
+
+**Diagnostika má navíc vlastní mez, kterou stojí za to pojmenovat.** Tooltip
+slibuje: „Když číslo neodpovídá naposledy importovanému balíku, neproběhla
+mikro-změna…" — implikuje, že po neúspěšné mikro-změně uvidí uživatel
+**špatné, ale existující** číslo. Ve skutečnosti je to jinak: dokud mikro-změna
++ Save + Publish neproběhne, **celá tahle vlastnost appky (popisek i tooltip)
+v publikované appce vůbec neexistuje** — je to týž mechanismus jako u tlačítka
+Export, ne výjimka z něj. Selhání se tedy neprojeví špatným číslem, ale
+absencí čísla/tooltipu úplně — což jako signál funguje (nic tam není → něco
+je špatně), ale ne tak, jak text tooltipu popisuje.
+
+Nejde o BLOKUJÍCÍ ani o nový kód k opravě — mechanismus `LoadFromYaml` má už
+dva kola auditu reálných dokladů (duch `.msapp` v kole 3, Export v provozu
+teď) a `check_solution.py` jedinou nutnou podmínku (`LoadFromYaml=true`)
+hlídá. Jde o to, že věta „B-03 zmírněn a ověřen provozem" a „N-06 padá" jsou
+přesnější jako „mechanismus jako celek má silné doklady; **tahle konkrétní
+nová vlastnost** je teprve na řadě k prvnímu ověření" — a to je rozdíl, který
+má smysl vědět předtím, než se na `varVerze` bude příště spoléhat jako na
+hotovou pojistku.
+
+Checklist: C1 (viz odůvodnění v prvním kole — obecné pravidlo neplatí doslova,
+princip rizika ano).
+Stav: **eskalace zůstává otevřená**, s upřesněním rozsahu. Rozhoduje uživatel;
+navrhované (ne provedené) doladění: až se `varVerze`/tooltip poprvé provozně
+potvrdí (stejně jako Export), zapsat to výslovně vedle B-03, ne mlčky
+předpokládat, že to platí od chvíle, kdy to bylo napsané do YAML.
+
+## Ověřeno spuštěním — kolo 4, druhé kolo
+
+| příkaz / mutace | výsledek |
+|---|---|
+| `unzip -t deploy/procesnimapa_1_0_0_60.zip` (solution + `.msapp`) | bez chyby |
+| `check_export_flow.py --solution deploy/procesnimapa_1_0_0_60.zip` | 110/110 |
+| `check_solution.py --vstup deploy/procesnimapa_1_0_0_59.zip --vystup deploy/procesnimapa_1_0_0_60.zip` | 234/0, 2 varování |
+| `check_mapa_flow.py` / `check_flow.py` / `check_app.py` | 139/139, 17/17, OK — beze změny proti prvnímu kolu |
+| B-01 pozitivní kontrola (cizí web, `https://`, `sharepoint.com`) | **CHYBA/NEPROŠLO** — brána funguje na nahlášený scénář |
+| B-01 mutace: cizí adresa bez `https://` | 234/0, **OK** (mělo by NEPROJÍT) |
+| B-01 mutace: cizí `https://` adresa mimo `sharepoint.com` | 234/0, **OK** (mimo záběr kontroly) |
+| B-01 mutace: cizí adresa jen v `customizations.xml` mimo `<ConnectionReferences>` | 234/0, **OK** (soubor se na cizí adresy neprohledává) |
+| B-02 původní mutace (`td` bez formátu, `th` s formátem) | 2 chyby, **NEPROŠLO** — opraveno |
+| B-02 nová mutace (druhé pravidlo `td {}` v kaskádě, formát zrušen) | 110/110, **OK** (mělo by NEPROJÍT) |
+| B-02 mutace: kombinovaný selektor `td, th {…}` (funkčně rovnocenné) | 2 chyby, **NEPROŠLO** (přísnost, ne díra) |
+| `vloz_verzi()` izolovaně: 0 shod / 2 shody / 1 shoda | selže / selže / projde — sedí na tvrzení |
+| `varVerze` v balíku vs `solution.xml` | oba `1.0.0.60` — sedí |
+| `Controls/4.json` (1.0.0.60) vs 1.0.0.57 | **bajtově identické**, `varVerze` v Controls 0× — `varVerze` nikdy neprošlo Studiem |
+| `grep ppfbanka Workflows/AktualizaceKratkehoNazvu*.json` | 2 (dataset triggeru + zápisu) — chybí v migračním postupu |
+
+## Neověřeno — kolo 4
+
+### N-04 · chování `Download()` v appce vložené na SharePoint stránku
+Beze změny od prvního kola — `Download()` je nativní funkce Power Apps
+runtime (běží ve vlastním iframe appky), ne JS v šabloně stránky. Bez
+přístupu k reálně vloženému webpartu nejde ověřit, že `Download(varExportUrl)`
+v tomhle konkrétním kontextu spustí stažení. Potřeba: appka vložená na
+skutečné SharePoint stránce + klik na Export.
+
+### N-05 · injekce vzorců do buněk Excelu (CSV/HTML formula injection)
+Beze změny od prvního kola. `mso-number-format:"\@"` vynucuje zobrazení jako
+text, ale bez reálného Excelu nejde ověřit, jestli tím spolehlivě potlačí i
+vyhodnocení vzorce u polí začínajících `=`/`+`/`-`/`@`. Potřeba: otevřít
+reálně vyexportovaný `.xls` v Excelu s řádkem, jehož `nazev` začíná `=1+1`.
+
+### N-06 · reálné chování Studia při `LoadFromYaml=true` po importu — **ČÁSTEČNĚ POTVRZENO, NEUZAVŘÍT CELÉ**
+Mechanismus jako celek má teď dva nezávislé doklady napříč koly (duch
+`.msapp` v kole 3, tlačítko Export potvrzené v provozu 25.08.2026) — pro
+**dřív ověřený obsah** je N-06 rozumné považovat za vypořádané. Nepotvrzuje to
+ale automaticky **každou budoucí** YAML-only vlastnost v okamžiku, kdy vznikne
+— viz B-03 výše: `varVerze`/tooltip v 1.0.0.60 je stejná kategorie jako kdysi
+Export, ale svoje první provozní ověření teprve čeká (`Controls/4.json` v
+1.0.0.60 je pořád bajtově 1.0.0.57, `varVerze` v něm 0×). Potřeba k plnému
+uzavření pro tuhle konkrétní vlastnost: reálný import 1.0.0.60, mikro-změna,
+Save, Publish, a potvrzení, že se tooltip s číslem `1.0.0.60` v appce objeví.
+
+## Nálezy — kolo 4, první kolo (25.08.2026, balík `deploy/procesnimapa_1_0_0_59.zip`)
+
+Historický záznam prvního kola — stavy nálezů viz re-audit výše, tady zůstává
+původní text beze změny kvůli reprodukovatelnosti.
 
 Rozsah: `ExportFlow` (`src/build_export_flow.py`, `src/check_export_flow.py`,
 `deploy/flow_Export.md`), tlačítko Export v `scr_Dashboard.pa.yaml`, druhé
@@ -34,12 +290,10 @@ Dvě věci jsem ověřil vlastní mutací balíku (ne převzetím tvrzení ze
 `STATUS.md`), viz B-02 níže — jedna mutace bránu chytila (HTML escapování),
 druhá ji obešla.
 
-### B-01 · VÁŽNÝ · testovací tenant v flow je mimo dosah kontroly hardcoded URL
+### B-01 · VÁŽNÝ (první kolo) · testovací tenant v flow je mimo dosah kontroly hardcoded URL
 
-`check_solution.py` prohledává na `http://`/`https://` **jen soubory
-`*.pa.yaml`** canvas appky (řádek 236-249: `for polozka in polozky: if not
-polozka.endswith(".pa.yaml"): continue`). `Workflows/*.json` se vůbec
-neprochází.
+`check_solution.py` prohledávalo na `http://`/`https://` **jen soubory
+`*.pa.yaml`** canvas appky. `Workflows/*.json` se vůbec neprocházelo.
 
 Repro nad rozbaleným `deploy/procesnimapa_1_0_0_59.zip`:
 ```
@@ -49,164 +303,44 @@ grep -o "ppfbanka.sharepoint.com[^\"]*" Workflows/*.json | wc -l
 grep -o "ppfbanka.sharepoint.com[^&\"<]*" customizations.xml
 → 1 další výskyt v ConnectionReferences canvas appky
 ```
-Přitom jediné varování, které balík k migraci vydává (`check_solution.py`
-řádek 244-247, a stejně tak `HANDOVER.md` řádek 181-183), zní: „adresa mapy
-`varMapaUrl` je natvrdo, **je to jediné místo**". To neodpovídá skutečnosti —
-`dataset` je natvrdo zapečený v `parameters` akce `Uloz`/`CreateFile`
-**každého** ze čtyř flow (`ExportFlow`, `MapaPublishFlow`,
-`MapaPublishScheduled`, `AktualizaceKratkehoNazvu`) a v samostatné
-`Adresa`-Compose akci `ExportFlow` (`concat('https://…/testovaci_subsajta/procesnimapa/SiteAssets/', …)`).
-
-Kolo 3 (A-08) tohle už jednou pojmenovalo jako „testovací tenant je na
-čtyřech místech, ne na jednom" a nechalo to **otevřené**. Kolo 4 přidalo
-dvě nová flow (`ExportFlow`, `MapaPublishScheduled`), obě klony s vlastním
-`dataset`, takže rozsah **narostl**, a dokumentace (`HANDOVER.md`,
-varování v bráně) se od kola 3 nezměnila — pořád mluví jen o jednom místě.
-
-Dopad: dokud je F4 (přenos na MPSV) blokovaný nedostupností tenantu, dnešní
-import do PPF testovacího tenantu tím netrpí (`dataset` ukazuje na správný
-testovací web důsledně všude). Riziko je výhradně při budoucím přenosu —
-kdo bude řešení stěhovat na MPSV a bude se řídit tím, co říká `check_solution.py`
-a `HANDOVER.md`, přepojí `varMapaUrl` a bude si myslet, že je hotovo; čtyři
-flow zůstanou tiše ukazovat/zapisovat do cizího PPF webu, dokud to někdo
-neobjeví ručně v Power Automate designeru.
+Jediné varování, které balík k migraci vydávalo, znělo „adresa mapy
+`varMapaUrl` je natvrdo, je to jediné místo" — neodpovídalo to skutečnosti.
 
 Checklist: B1 (rozšířeno o Workflows/*.json), NFR-3, kritérium přijetí A6.
-Stav: **opraveno** (1.0.0.60) — nález přijat celý.
+**Stav po re-auditu (druhé kolo, 1.0.0.60): částečně opraveno — viz sekci výše.**
 
-- `check_solution.py` nově prochází `Workflows/*.json`: každá adresa
-  `*.sharepoint.com` musí začínat adresou webu, na který je připojená canvas
-  app, jinak brána **selže**. Počet míst vypisuje jako varování (dnes 19).
-  Mutačně ověřeno — přesměrování jednoho flow na cizí web bránu shodí.
-- `HANDOVER.md` už netvrdí, že `varMapaUrl` je jediné místo; rozlišuje ručně
-  psanou adresu mapy (jedna) od 19 míst ve flow, která se **nepíšou ručně**.
-- `PLAN.md` krok 12 dostal sedmikrokový postup přenosu v pořadí, ve kterém se
-  musí provést, aby build skripty adresu i GUIDy listů převzaly z připojení
-  appky.
+### B-02 · STŘEDNÍ (první kolo) · mezera v `check_export_flow.py` — kontrola textového formátu Excelu nekoukala na správné pravidlo
 
-Podstata nálezu byla v tom, že brána i dokumentace **podhodnocovaly rozsah**;
-samotné adresy ve flow chyba nejsou, protože je nikdo nepíše rukou.
+Kontrola `kontrakt()` ověřovala jen, že se řetězec `mso-number-format:"\@"`
+vyskytuje kdekoli v textu akce `Dokument` — a ten se v šabloně vyskytoval
+dvakrát (`td {}` i `th {}`), takže mazání jen z `td {}` prošlo bez povšimnutí.
 
-### B-02 · STŘEDNÍ · mezera v `check_export_flow.py` — kontrola textového formátu Excelu nekouká na správné pravidlo
-
-Kontrola `kontrakt()` (řádek 359-361) ověřuje jen:
-```python
-overit(TEXTOVY_FORMAT in akce["Dokument"]["inputs"], …)
+Repro:
 ```
-— tedy že se řetězec `mso-number-format:"\@"` vyskytuje **kdekoli** v celém
-textu akce `Dokument`. V šabloně `HLAVICKA_XLS` se ale vyskytuje **dvakrát**:
-jednou v pravidle `td {…}` (datové buňky — kód, název, vlastník, stav) a
-jednou v `th {…}` (hlavičky sloupců). Kontrola nerozlišuje, na kterém
-pravidle formát je.
-
-Repro — mutace, která smaže vynucený text jen z `td {}` a nechá ho v `th {}`
-nedotčené (`overit` by v produkci znamenalo návrat přesně té vady, která se
-opravovala 25.08.2026: Excel by `01-01` znovu četl jako datum):
-```python
-# scratchpad, nad kopií deploy/procesnimapa_1_0_0_59.zip
 idx = data.find('td {mso-number-format')
 end = data.find(';', idx) + 1
-mutated = data[:idx] + 'td {' + data[end:]   # smazáno: mso-number-format:"\@";
-# 'th {mso-number-format' v textu zůstává
+mutated = data[:idx] + 'td {' + data[end:]
+check_export_flow.py --solution mutace3.zip → kontrol: 109, OK   (mělo NEPROJÍT)
 ```
-```
-python src/check_export_flow.py --solution mutace3.zip
-→ kontrol: 109
-→ OK — ExportFlow odpovídá kontraktu          (mělo by NEPROJÍT)
-```
-Pro srovnání — mutace odstranění HTML escapování `nazev` **stejným postupem
-branou spolehlivě neprojde** (6 chyb, `NEPROŠLO`), takže kontrakt() obecně
-funguje; jde o jednu konkrétní mezeru, ne o celkovou nefunkčnost brány.
 
-Dnešní balík **není vadný** — `td {}` pravidlo s `mso-number-format:"\@"`
-v `deploy/procesnimapa_1_0_0_59.zip` skutečně je (ověřeno přímo, viz výše).
-Jde o mezeru v ověřovacím nástroji: brána, o které `STATUS.md` tvrdí „devět
-mutací brána chytila všechny", má desátou mutaci, kterou nechytí — a je to
-přesně ta vlastnost (vynucený textový formát datových buněk), kvůli které
-Excel export vůbec dostal formát `.xls` místo `.csv`.
+Checklist: F3, E2.
+**Stav po re-auditu (druhé kolo, 1.0.0.60): STÁLE OTEVŘENO — nová mutace (CSS
+kaskáda) obchází i opravenou verzi, viz sekci výše.**
 
-Checklist: F3 (ověření skutečného obsahu balíku, ne že build proběhl), E2
-(kontrola výsledku, ne jen přítomnosti řetězce).
-Stav: **opraveno** (1.0.0.60) — nález přijat.
+### B-03 · ESKALACE (první kolo) · Controls/*.json bylo od 1.0.0.57 bajtově beze změny
 
-Kontrola se navázala na konkrétní pravidlo: v kontraktu se hledá
-`td {mso-number-format:"\@"`, ve významové vrstvě se `<style>` blok rozebere
-a formát se čte z těla pravidla `td`, číselný formát z `td.n`. Mutace, kterou
-auditor prošel — smazat formát jen z `td` a nechat ho v `th` — bránu nově
-shodí; ověřeno spuštěním, stejně jako druhá mutace (`td.n` bez číselného
-formátu). Kontrol 109 → 110.
+Potvrzující nález, ne vada v kódu. `Controls/*.json` pro všech pět souborů
+v zabaleném `.msapp` bylo bajtově identické s 1.0.0.57 (md5 shoda); tlačítko
+Export existovalo jen v `Src/*.pa.yaml`. Mechanismus (`LoadFromYaml=true`)
+je záměrný a `check_solution.py` ho hlídá, ale nic v balíku neuměl potvrdit,
+že po importu proběhla ve Studiu mikro-změna → Save → Publish.
 
-### B-03 · ESKALACE · Controls/*.json je od 1.0.0.57 bajtově beze změny — vše visí na jednom ručním kroku ve Studiu
+Checklist: C1 (princip rizika platí, doslovné pravidlo skillu ne).
+**Stav po re-auditu (druhé kolo, 1.0.0.60): mitigace (`varVerze`) přidána a
+funguje jak má, ale eskalace zůstává otevřená s upřesněním — viz sekci výše.
+„N-06 padá" a „ověřeno provozem" pro `varVerze` konkrétně neplatí.**
 
-Potvrzující nález, ne nová vada v kódu — mechanismus je záměrný a
-`check_solution.py` ho sám hlídá (řádek 128-132: `packed.json` musí mít
-`LoadConfiguration.LoadFromYaml == true`, jinak „Studio by načetlo zastaralé
-Controls/*.json"). Zapisuji ho, protože jsem si ověřil **rozsah**, na jakém
-dnes tenhle mechanismus stojí, a je větší, než by se ze `STATUS.md` čekalo.
-
-Repro — porovnání `.msapp` uvnitř `input/procesnimapa_1_0_0_57.zip` (poslední
-verze prošlá reálným Studiem, „Add data → ExportFlow") a
-`deploy/procesnimapa_1_0_0_59.zip` (dnešní balík, poskládaný lokálně skriptem
-`build_app.py` přes `pac canvas unpack/pack`):
-```
-md5sum sol57/msapp57/Controls/{1,4,79,122,145}.json
-md5sum sol59/msapp/Controls/{1,4,79,122,145}.json
-→ všech pět souborů má STEJNÝ md5 v obou verzích
-grep -c '"Name": "btn_ExportMenu"' sol59/msapp/Controls/4.json
-→ 0   (tlačítko Export v pa.yaml existuje, v Controls/4.json ne)
-```
-`Src/scr_Dashboard.pa.yaml` uvnitř `.msapp` je přitom bajtově shodné
-s `src/app_src/scr_Dashboard.pa.yaml` v repu — tedy obsahuje `btn_ExportMenu`,
-`btn_ExportWord`, `btn_ExportExcel` i všechny rozvržení z 1.0.0.58/59.
-
-Jinými slovy: v **zabaleném `.msapp`, který se importuje**, neexistuje ani
-tlačítko Export, ani zúžené karty, ani odpojení tlačítek od velikosti
-písma — nic z toho, co `STATUS.md` popisuje jako hotové v 1.0.0.58 a 1.0.0.59.
-Existuje to jen v `Src/*.pa.yaml`. Materializuje se to teprve tehdy, když
-Studio po importu appku otevře (LoadFromYaml=true řekne Studiu číst YAML)
-a uživatel udělá **mikro-změnu → Save → Publish** — to Controls/*.json
-skutečně přepočítá z YAML a teprve tenhle krok appku „dopeče" do stavu, který
-`STATUS.md` popisuje.
-
-`STATUS.md` tenhle krok už vyžaduje na prvním řádku („import jako upgrade,
-pak ve Studiu mikro-změna → Save → Publish") a `deploy/flow_Export.md` ho
-opakuje. Nejde tedy o objevenou mezeru v procesu — je to eskalace, protože:
-- **nic v balíku ani v žádné bráně needá signál, že krok proběhl** — pokud
-  se vynechá nebo se v Studiu neuloží (např. uživatel zavře kartu bez Save),
-  appka v provozu tiše zůstane na úrovni 1.0.0.57 a nikdo to z importu
-  samotného nepozná;
-- rozsah, který na tomhle kroku dnes visí, je větší než u předchozích
-  balíků — týká se **všech čtyř obrazovek** najednou (Controls/1.json,
-  4.json, 79.json, 122.json, 145.json jsou identické se 1.0.0.57 do
-  posledního bajtu), ne jen jedné dílčí úpravy.
-
-Nejde o BLOKUJÍCÍ, protože mechanismus je stejný, jaký appka používá od
-začátku (viz A-08/kolo 3, „duch v `.msapp`"), je ověřený v provozu (uživatel
-opakovaně potvrdil funkčnost přes screenshoty) a `check_solution.py` jedinou
-podmínku, která ho dělá bezpečným (`LoadFromYaml=true`), aktivně hlídá.
-Rozhoduje uživatel, jestli mu tenhle rituál (ruční krok bez automatické
-kontroly, že proběhl) po každém importu vyhovuje, nebo jestli má smysl
-hledat jinou cestu (např. že hlavní asistent po každém buildu sám ověří
-proti poslední Studiem uložené verzi, ne jen proti pa.yaml).
-
-Checklist: C1 (Controls/*.json vs Src/*.pa.yaml — obecné pravidlo skillu
-zde neplatí doslova, protože LoadFromYaml mechanismus je jiný a záměrný,
-ale riziko, které C1 popisuje, je reálné, dokud se ruční krok nepotvrdí).
-Stav: **zmírněno** (1.0.0.60) + **ověřeno provozem**; eskalace uzavřena.
-
-Věcně: mechanismus `LoadFromYaml` **prokazatelně funguje**. Tlačítko Export
-existuje jen v `Src/*.pa.yaml` — `Controls/*.json` jsou bajtově z 1.0.0.57,
-tedy z doby, kdy Export ještě neexistoval — a uživatel s ním 25.08.2026
-v provozu exportoval do Wordu i do Excelu. Kdyby Studio četlo Controls,
-tlačítko by v appce nebylo. Tím padá i N-06.
-
-Zůstávala platná část nálezu: z běžící appky se nedalo poznat, **která verze**
-je publikovaná. Doplněno razítko — `build_app.py` dosazuje do `App.OnStart`
-`Set(varVerze, "<verze balíku>")` a nápověda u názvu appky v pruhu ho ukazuje
-i s vysvětlením, co znamená, když nesedí. Build selže, když razítko v YAML
-nenajde, takže nemůže tiše vypadnout.
-
-## Ověřeno spuštěním — kolo 4
+## Ověřeno spuštěním — kolo 4, první kolo
 
 | příkaz | výsledek |
 |---|---|
@@ -216,45 +350,27 @@ nenajde, takže nemůže tiše vypadnout.
 | `check_solution.py --vstup input/procesnimapa_1_0_0_57.zip --vystup deploy/procesnimapa_1_0_0_59.zip` | 229/0, 1 varování (jen `varMapaUrl`, viz B-01) |
 | `check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_59.zip` | 139/139 |
 | `check_flow.py --solution deploy/procesnimapa_1_0_0_59.zip` | 17/17 |
-| `check_app.py` | OK — 5 souborů, 4 obrazovky, 199 prvků, 2241 vzorců (2 nezávazná VAROVÁNÍ o `Sort` v `Items`, pre-existující, mimo rozsah kola 4) |
-| mutace `build_export_flow.py` spuštěná 2× nad týmž zipem | GUID i obsah beze změny — idempotentní, ověřeno, ne převzato z docstringu |
-| mutace: odstraněné HTML escapování `nazev` v `ExportFlow` | `check_export_flow.py` → 6 chyb, `NEPROŠLO` (brána funguje) |
-| mutace: `mso-number-format` odstraněný jen z `td {}`, ponechaný v `th {}` | `check_export_flow.py` → 109/109, `OK` (viz B-02, brána tuhle mezeru nemá) |
-| `solution.xml`: verze, `Managed` | `1.0.0.59` > `1.0.0.57` (referenční „před"), `<Managed>0</Managed>` |
-| `Properties.json` v `.msapp` | `DefaultConnectedDataSourceMaxGetRowsCount: 2000` — shoda s 1.0.0.57, A-03 z kola 3 drží |
-| `References/DataSources.json` | `ExportFlow` registrován, `FlowNameId` odpovídá `deploy/flow_Export.md` |
+| `check_app.py` | OK — 5 souborů, 4 obrazovky, 199 prvků, 2241 vzorců |
+| mutace `build_export_flow.py` spuštěná 2× nad týmž zipem | idempotentní |
+| mutace: odstraněné HTML escapování `nazev` v `ExportFlow` | `check_export_flow.py` → 6 chyb, `NEPROŠLO` |
+| mutace: `mso-number-format` odstraněný jen z `td {}`, ponechaný v `th {}` | `check_export_flow.py` → 109/109, `OK` (viz B-02) |
+| `solution.xml`: verze, `Managed` | `1.0.0.59` > `1.0.0.57`, `<Managed>0</Managed>` |
+| `Properties.json` v `.msapp` | `DefaultConnectedDataSourceMaxGetRowsCount: 2000` |
+| `References/DataSources.json` | `ExportFlow` registrován |
 
-## Neověřeno — kolo 4
+## Neověřeno — kolo 4, první kolo (historický záznam, viz aktualizace výše)
 
 ### N-04 · chování `Download()` v appce vložené na SharePoint stránku
-`STATUS.md` řeší nejistotu `fetch`/stahování z JS pro HTML mapu v sandboxu
-SharePointu, ale `Download()` je nativní funkce Power Apps runtime (běží ve
-vlastním iframe), ne JS v šabloně stránky — technicky jiná situace. Bez
-přístupu k reálně vloženému webpartu na SharePoint stránce nejde ověřit, že
-`Download(varExportUrl)` v `scr_Dashboard.pa.yaml` v tomhle konkrétním
-kontextu (embedded canvas app, ne samostatný player) skutečně spustí stažení
-místo tichého selhání. Potřeba: appka vložená na skutečné SharePoint stránce
-+ klik na Export.
+Viz aktuální znění v sekci „Neověřeno — kolo 4" výše (beze změny).
 
 ### N-05 · injekce vzorců do buněk Excelu (CSV/HTML formula injection)
-Textová pole (`nazev`, `vlastnik`) nejsou omezena na to, aby nezačínala
-`=`, `+`, `-`, `@`. `mso-number-format:"\@"` vynucuje zobrazení jako text,
-ale nemám jak bez reálného Excelu ověřit, jestli tím Excel spolehlivě
-potlačí i vyhodnocení vzorce (na rozdíl od skutečného `.csv`, kde je to
-známá díra) — HTML import do Excelu se může chovat jinak. Potřeba: otevřít
-reálně vyexportovaný `.xls` v Excelu s řádkem, jehož `nazev` začíná `=1+1`.
+Viz aktuální znění v sekci „Neověřeno — kolo 4" výše (beze změny).
 
-### N-06 · reálné chování Studia při `LoadFromYaml=true` po importu — **UZAVŘENO**
-
-Ověřeno provozem 25.08.2026, viz stav u B-03: tlačítko Export je jen v YAML,
-a přesto v běžící appce funguje. Text níže je původní znění nálezu.
-B-03 stojí na mechanismu, který `build_app.py` a `check_solution.py`
-explicitně předpokládají a hlídají (`LoadFromYaml: true`), a `STATUS.md`
-dokládá opakovanou funkčností v provozu (screenshoty). Nejde ale ověřit
-lokálně/staticky, že Studio po **tomhle konkrétním** importu skutečně
-Controls/*.json přepočítá při Save — jde o chování cizí platformy, ne o
-obsah balíku. Potřeba: reálný import 1.0.0.59, otevření ve Studiu,
-mikro-změna, Save, a až pak porovnání vyexportovaného `.msapp`.
+### N-06 · reálné chování Studia při `LoadFromYaml=true` po importu
+Původně otevřené, po prvním kole navrhováno jako uzavřené argumentem
+„Export funguje bez Controls". Re-audit (druhé kolo) tenhle závěr zpřesnil —
+viz aktuální znění výše: platí pro už ověřený obsah, neplatí automaticky pro
+každou novou YAML-only vlastnost.
 
 ## Nálezy — kolo 3 (23.08.2026, appka 1.0.0.37)
 
@@ -648,3 +764,63 @@ dokumentace Microsoftu (offline nedostupná).
 ## Zamítnuté nálezy
 
 *(žádné)*
+
+
+## Vyřízení druhého kola — 1.0.0.61 (25.08.2026)
+
+Auditor rozporoval všechny tři stavy zapsané po prvním kole. Dvakrát měl
+věcně pravdu, jednou částečně.
+
+### B-01 — námitka přijata, doplněno
+
+**Přijato:** migrační postup mluvil o třech build skriptech, ale flow jsou
+čtyři. `AktualizaceKratkehoNazvu` se rerunem skriptu nespraví — `build_flow.py`
+má GUID listu Aktivity natvrdo v konstantě `LIST_AKTIVITY` (runtime výraz by
+flow znemožnil zapnout) a trigger je nad tím listem, takže se musí založit
+nová kostra v designeru nad webem MPSV. Kdo by šel podle starého postupu,
+narazil by až na spadlé bráně bez návodu, co dál. Doplněno do `PLAN.md` jako
+krok 12/5b a do `HANDOVER.md` jako výjimka.
+
+**Přijato i to, co auditor sám řadil jen jako poznámku** — všechna tři obejití
+kontroly adres jsou zalátaná a mutačně ověřená: adresa bez schématu
+(`utocnik.sharepoint.com/...`), cizí doména mimo `sharepoint.com`
+(`https://utocnik.example.com/...`) i původní cizí web. Kontrola nově hlídá
+tři věci: celou adresu proti webu appky, množinu hostitelů proti allowlistu
+(`schema.management.azure.com`, `www.w3.org`) a tenanty uvedené bez schématu.
+
+**Zamítnuto:** cizí adresa v `customizations.xml` mimo `<ConnectionReferences>`.
+Ten soubor je plný legitimních jmenných prostorů `schemas.microsoft.com`
+a generuje ho Studio, ne my; allowlist nad ním by dělal hluk bez užitku.
+Build skripty do něj sahají jen klonováním existujících uzlů `<Workflow>`.
+
+### B-02 — námitka přijata, kontrola přepsaná na kaskádu
+
+`css_pravidlo()` vracelo **první** shodu se selektorem, takže druhé pravidlo
+`td {}`, které formát ruší, branou prošlo — funkčně týž dopad jako původní
+nález. Nahrazeno `css_hodnota()`, které jde všemi pravidly a vrací
+**poslední** hodnotu vlastnosti, tedy tu, kterou použije Excel; selektory
+oddělené čárkou se rozebírají. Navíc přibyla kontrola, že buňky nemají inline
+`style` — ten by kaskádu přebil a ve `<style>` bloku by nebyl vidět.
+
+Mutačně ověřeno: druhé pravidlo `td`, `td, th {…}` i inline styl buňky bránu
+shodí. Kontrol 110 → 111.
+
+### B-03 — námitka přijata v podstatě, zamítnuta v důsledku
+
+**Přijato:** `varVerze` je stejně nová YAML-only vlastnost jako kdysi tlačítko
+Export a Studiem zatím neprošla. Tooltip proto sliboval špatný příznak selhání
+— při nepublikované verzi se neukáže špatné číslo, ale **žádná nápověda**.
+Text opraven: „Když se tahle nápověda neukáže vůbec nebo číslo neodpovídá…".
+Diagnostická hodnota tím zůstává, jen se nazývá pravdivě.
+
+**Zamítnuto:** požadavek znovu otevřít N-06. Ověřovaná otázka N-06 zní, jestli
+Studio po importu appku načte z `Src/*.pa.yaml` — a na to je důkaz tvrdý:
+tlačítko Export ve `Controls/*.json` není a v provozu funguje. Že každá nová
+vlastnost projde toutéž cestou, je vlastnost mechanismu, ne nová neznámá.
+Kdyby YAML nefungoval, nefungoval by ani Export.
+
+### Uzavření
+
+Smyčka končí na stropu dvou kol podle `/audit`. Žádný nález nebyl blokující,
+takže se dodává. Zbývá jediná neověřená věc, kterou nelze uzavřít bez Excelu —
+**N-05** (injekce vzorců), předáno uživateli jako třicetivteřinová zkouška.

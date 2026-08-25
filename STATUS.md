@@ -1,19 +1,78 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-25 (balík 1.0.0.60, audit kolo 4)
+Aktualizováno: 2026-08-25 (balík 1.0.0.61, audit kolo 4 uzavřen)
 
 ## CO JE NA TOBĚ
 
-**Balík `deploy/procesnimapa_1_0_0_60.zip`** — import jako upgrade, pak
+**Balík `deploy/procesnimapa_1_0_0_61.zip`** — import jako upgrade, pak
 ve Studiu **mikro-změna → Save → Publish**.
 
 Po publikaci najeď myší na název „Procesní mapa MPSV" v modrém pruhu —
-nápověda nově ukazuje **verzi**. Když tam nebude `1.0.0.60`, publikace
-neproběhla a ostatním běží stará appka.
+nápověda ukazuje **verzi**. Když se neukáže vůbec nebo tam nebude `1.0.0.61`,
+publikace neproběhla a ostatním běží stará appka.
 
 Drobnost k ověření (30 s): založ aktivitu s názvem začínajícím `=1+1`,
 vyexportuj do Excelu a řekni, jestli se v buňce ukáže text `=1+1`, nebo
 číslo `2`. Je to jediná věc z auditu, kterou bez Excelu neověřím (N-05).
+
+## Audit kolo 4 uzavřen — druhé kolo mělo pravdu dvakrát (25.08.2026) — balík 1.0.0.61
+
+Re-audit rozporoval **všechny tři** stavy, které jsem po prvním kole zapsal
+jako vyřízené. Dvakrát věcně správně.
+
+### B-02 — moje oprava mezeru zúžila, nezavřela
+
+`css_pravidlo()` vracelo **první** pravidlo se selektorem `td`. Druhé
+pravidlo `td {}`, které formát zruší, tedy branou prošlo — a Excel by přitom
+podle kaskády použil to poslední, poškozené. Funkčně týž dopad jako původní
+nález, jen o patro dál.
+
+Nahrazeno `css_hodnota()`, které projde všechna pravidla a vrátí **poslední**
+hodnotu vlastnosti; selektory oddělené čárkou se rozebírají. Navíc kontrola,
+že buňky nemají inline `style` — ten by kaskádu přebil a ve `<style>` bloku
+by nebyl vidět. Kontrol 110 → 111.
+
+### B-01 — migrační postup vynechával čtvrté flow
+
+Napsal jsem, že se při přenosu na MPSV znovu spustí tři build skripty. Flow
+jsou ale **čtyři** a `AktualizaceKratkehoNazvu` se rerunem nespraví:
+`build_flow.py` má GUID listu Aktivity natvrdo v konstantě `LIST_AKTIVITY`
+(runtime výraz by flow znemožnil zapnout) a jeho trigger je nad tím listem,
+takže se musí založit nová kostra v designeru nad webem MPSV. Kdo by šel podle
+starého postupu, narazil by až na spadlé bráně bez návodu, co dál.
+
+Doplněno jako krok 12/5b v `PLAN.md` a výjimka v `HANDOVER.md`.
+
+Zalátal jsem i tři obejití, která auditor sám řadil jen jako poznámku —
+adresa bez schématu, cizí doména mimo `sharepoint.com`, cizí web. Kontrola
+hlídá tři věci: celou adresu proti webu appky, hostitele proti allowlistu
+a tenanty uvedené bez schématu. **Šest mutací, všechny chycené.**
+
+### B-03 — přijato v podstatě, zamítnuto v důsledku
+
+Auditor má pravdu, že `varVerze` je stejně nová YAML-only vlastnost jako kdysi
+Export a Studiem zatím neprošla, takže tooltip sliboval špatný příznak selhání:
+při nepublikované verzi se neukáže špatné číslo, ale **žádná nápověda**. Text
+opraven.
+
+**Zamítl jsem** požadavek znovu otevřít N-06. Ověřovaná otázka zní, jestli
+Studio načte appku z YAML — a důkaz je tvrdý: tlačítko Export ve `Controls`
+není a v provozu funguje. Že každá nová vlastnost jde toutéž cestou, je
+vlastnost mechanismu, ne nová neznámá.
+
+**Zamítl jsem** taky kontrolu cizích adres v `customizations.xml` mimo blok
+`ConnectionReferences` — ten soubor je plný legitimních jmenných prostorů
+`schemas.microsoft.com`, generuje ho Studio a build skripty do něj sahají jen
+klonováním existujících uzlů. Allowlist by tam dělal hluk bez užitku.
+
+### Uzavření
+
+Smyčka končí na stropu dvou kol. **Žádný nález nebyl blokující**, takže se
+dodává. Otevřená zůstává jediná věc, kterou bez Excelu uzavřít nejde — N-05
+(injekce vzorců), viz „CO JE NA TOBĚ".
+
+**Brány:** `check_export_flow` **111**, `check_solution` **240/0**,
+`check_mapa_flow` 139, `check_flow` 17, `check_app`.
 
 ## Audit kolo 4 (25.08.2026) — verdikt NÁLEZY (0 blokujících), vše vyřízeno v 1.0.0.60
 

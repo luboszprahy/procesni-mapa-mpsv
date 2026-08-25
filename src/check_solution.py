@@ -37,6 +37,10 @@ kontrol = 0
 # na MPSV nezapomnělo; kdekoli jinde je URL dál chyba.
 VYJIMKA_URL = "varMapaUrl"
 
+# Hostitelé, kteří v definici flow být smí a s webem appky nesouvisí:
+# schéma Logic Apps a jmenný prostor HTML v šabloně exportovaného dokumentu.
+POVOLENI_HOSTI = {"schema.management.azure.com", "www.w3.org"}
+
 
 def adresa_webu(customizations):
     """Adresa webu, na který je připojená canvas app — proti ní se měří flow."""
@@ -69,16 +73,32 @@ def adresy_ve_flow(vystupni, customizations):
     if web is None:
         return
 
+    host_appky = re.match(r"https://([^/]+)", web).group(1).lower()
     celkem = 0
     for jmeno in vystupni.namelist():
         cesta = jmeno.replace("\\", "/")
         if not cesta.startswith("Workflows/") or not cesta.endswith(".json"):
             continue
+        soubor = cesta.split("/")[-1]
         text = vystupni.read(jmeno).decode("utf-8-sig")
+
+        # 1) celá adresa musí mířit na web appky, ne jen na jeho tenant
         adresy = set(re.findall(r"https://[A-Za-z0-9.-]+\.sharepoint\.com[^\"']*", text))
         cizi = [a for a in adresy if not a.startswith(web)]
-        overit(not cizi,
-               f"{cesta.split('/')[-1]} míří na jiný web než canvas app: {sorted(cizi)[:2]}")
+        overit(not cizi, f"{soubor} míří na jiný web než canvas app: {sorted(cizi)[:2]}")
+
+        # 2) jakýkoli cizí hostitel, i mimo sharepoint.com — bod 1 by adresu
+        #    na úplně jiné doméně nechal projít (nález B-02/POZNÁMKA, kolo 4)
+        hosti = {h.lower() for h in re.findall(r"https?://([A-Za-z0-9.-]+)", text)}
+        neznami = sorted(hosti - {host_appky} - POVOLENI_HOSTI)
+        overit(not neznami, f"{soubor} obsahuje adresu na cizího hostitele: {neznami}")
+
+        # 3) adresa bez schématu projde obojím nepovšimnuta
+        bez_schematu = {h.lower() for h in
+                        re.findall(r"(?<![A-Za-z0-9./-])([A-Za-z0-9-]+\.sharepoint\.com)", text)}
+        overit(bez_schematu <= {host_appky},
+               f"{soubor} uvádí bez schématu cizí tenant: {sorted(bez_schematu - {host_appky})}")
+
         celkem += sum(text.count(a) for a in adresy)
 
     if celkem:
