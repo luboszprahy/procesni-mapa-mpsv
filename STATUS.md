@@ -11,9 +11,14 @@ Po publikaci najeď myší na název „Procesní mapa MPSV" v modrém pruhu —
 nápověda ukazuje **verzi**. Když se neukáže vůbec nebo tam nebude `1.0.0.61`,
 publikace neproběhla a ostatním běží stará appka.
 
-Drobnost k ověření (30 s): založ aktivitu s názvem začínajícím `=1+1`,
-vyexportuj do Excelu a řekni, jestli se v buňce ukáže text `=1+1`, nebo
-číslo `2`. Je to jediná věc z auditu, kterou bez Excelu neověřím (N-05).
+**Audit je uzavřený celý.** Poslední otevřená otázka (N-05, injekce vzorců)
+padla 25.08.2026: aktivita s názvem `=1+1` se v Excelu zobrazí jako **text**,
+ne jako `2`. Vynucený formát tedy potlačuje i vyhodnocení vzorce, nejen
+zobrazení. Z auditu zůstává jen N-04 (`Download()` v appce vložené na
+SharePoint stránku), které jde ověřit až při umístění appky na stránku.
+
+Zelené trojúhelníčky v rozích buněk exportu jsou Excelí upozornění „číslo
+uložené jako text" — u identifikačních kódů je to přesně žádaný stav.
 
 ## Audit kolo 4 uzavřen — druhé kolo mělo pravdu dvakrát (25.08.2026) — balík 1.0.0.61
 

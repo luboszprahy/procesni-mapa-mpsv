@@ -251,11 +251,22 @@ přístupu k reálně vloženému webpartu nejde ověřit, že `Download(varExpo
 v tomhle konkrétním kontextu spustí stažení. Potřeba: appka vložená na
 skutečné SharePoint stránce + klik na Export.
 
-### N-05 · injekce vzorců do buněk Excelu (CSV/HTML formula injection)
-Beze změny od prvního kola. `mso-number-format:"\@"` vynucuje zobrazení jako
-text, ale bez reálného Excelu nejde ověřit, jestli tím spolehlivě potlačí i
-vyhodnocení vzorce u polí začínajících `=`/`+`/`-`/`@`. Potřeba: otevřít
-reálně vyexportovaný `.xls` v Excelu s řádkem, jehož `nazev` začíná `=1+1`.
+### N-05 · injekce vzorců do buněk Excelu — **UZAVŘENO 25.08.2026**
+
+Ověřeno v reálném Excelu. Aktivita `01-01-001-0004` s názvem `=1+1`
+vyexportovaná do `.xls` se zobrazí jako **text `=1+1`**, ne jako výsledek `2`.
+`mso-number-format:"\@"` tedy potlačuje i vyhodnocení vzorce, nejen jeho
+zobrazení — na rozdíl od skutečného `.csv`, kde je formula injection známá
+díra. Doloženo snímkem od uživatele.
+
+Vedlejší pozorování z téhož snímku: kódy jsou textem (`01-01`,
+`01-01-001-0004`), diakritika sedí, úroveň je číslo. Zelené trojúhelníčky
+v rozích buněk jsou Excelí upozornění „číslo uložené jako text" — u
+identifikačních kódů je to přesně žádaný stav, ne vada.
+
+Původní znění: `mso-number-format:"\@"` vynucuje zobrazení jako text, ale bez
+reálného Excelu nejde ověřit, jestli tím spolehlivě potlačí i vyhodnocení
+vzorce u polí začínajících `=`/`+`/`-`/`@`.
 
 ### N-06 · reálné chování Studia při `LoadFromYaml=true` po importu — **ČÁSTEČNĚ POTVRZENO, NEUZAVŘÍT CELÉ**
 Mechanismus jako celek má teď dva nezávislé doklady napříč koly (duch
@@ -363,8 +374,8 @@ funguje jak má, ale eskalace zůstává otevřená s upřesněním — viz sekc
 ### N-04 · chování `Download()` v appce vložené na SharePoint stránku
 Viz aktuální znění v sekci „Neověřeno — kolo 4" výše (beze změny).
 
-### N-05 · injekce vzorců do buněk Excelu (CSV/HTML formula injection)
-Viz aktuální znění v sekci „Neověřeno — kolo 4" výše (beze změny).
+### N-05 · injekce vzorců do buněk Excelu — **UZAVŘENO**
+Ověřeno v reálném Excelu 25.08.2026, viz sekci „Neověřeno — kolo 4" výše.
 
 ### N-06 · reálné chování Studia při `LoadFromYaml=true` po importu
 Původně otevřené, po prvním kole navrhováno jako uzavřené argumentem
@@ -822,5 +833,8 @@ Kdyby YAML nefungoval, nefungoval by ani Export.
 ### Uzavření
 
 Smyčka končí na stropu dvou kol podle `/audit`. Žádný nález nebyl blokující,
-takže se dodává. Zbývá jediná neověřená věc, kterou nelze uzavřít bez Excelu —
-**N-05** (injekce vzorců), předáno uživateli jako třicetivteřinová zkouška.
+takže se dodává. **N-05 uzavřeno** týž den: uživatel vyexportoval aktivitu s názvem `=1+1`
+a Excel ji ukázal jako text. Vynucený textový formát tedy potlačuje
+i vyhodnocení vzorce. Z kola 4 nezůstává otevřené nic kromě **N-04**
+(`Download()` v appce vložené na SharePoint stránku), které jde ověřit
+až při umístění appky na stránku.
