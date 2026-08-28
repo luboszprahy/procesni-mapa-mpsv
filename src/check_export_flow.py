@@ -29,6 +29,9 @@ import urllib.parse
 import zipfile
 from pathlib import Path
 
+sys.path.insert(0, "src")
+import env_promenne as ep  # noqa: E402
+
 FLOW = "ExportFlow"
 FLOW_GUID = "3f2b6d41-8c55-4a37-9d21-5b8e0c47a9f2"
 AKCE = ["Vstup", "Html_radky", "Xls_radky", "Jmeno", "Dokument", "Uloz", "Adresa", "Odpoved"]
@@ -46,6 +49,10 @@ RAZITKO_SOUBOR = "20260101_000000"
 
 chyby = []
 kontrol = 0
+
+# Adresa webu z canvas appky. Interpret ji dosazuje za proměnnou prostředí,
+# aby šlo ověřit adresu, kterou flow vrací appce.
+WEB_APPKY = ""
 
 
 def overit(podminka, popis):
@@ -225,6 +232,12 @@ def vyhodnot(uzel, kontext):
         if hodnoty[0] not in kontext["akce"]:
             raise Chyba(f"odkaz na akci {hodnoty[0]}, kterou interpret nezná")
         return kontext["akce"][hodnoty[0]]
+    if jmeno == "parameters":
+        # Proměnná prostředí. Za běhu ji dosadí platforma; tady dosadíme web,
+        # na který je připojená appka, aby se složená adresa dala ověřit.
+        if hodnoty[0] not in kontext["parametry"]:
+            raise Chyba(f"odkaz na proměnnou {hodnoty[0]}, kterou balík nedeklaruje")
+        return kontext["parametry"][hodnoty[0]]
     raise Chyba(f"interpret nezná funkci {jmeno}()")
 
 
@@ -253,6 +266,7 @@ def priprav_kontext(akce_def, radky, nadpis, format_):
         "item": None,
         "triggerBody": {"text": json.dumps(vstup, ensure_ascii=False)},
         "akce": {},
+        "parametry": {ep.klic(ep.WEB): WEB_APPKY},
     }
     kontext["akce"]["Vstup"] = spust(akce_def["Vstup"]["inputs"], kontext)
 
@@ -311,14 +325,16 @@ def struktura(flow, web):
             overit(odkaz in poradi and poradi[odkaz] < poradi[jmeno],
                    f"{jmeno} čte {odkaz}, které v řetězu není před ní")
 
-    # zápis souboru nesmí cílit na runtime výraz (pravidlo PatchItem)
+    # Web bere zápis z proměnné prostředí. Do 1.0.0.61 se tu naopak vyžadovala
+    # konkrétní adresa — s odvoláním na pravidlo PatchItem, které ale pro
+    # CreateFile neplatí: Clearstream i Průvodní list mají v produkci CreateFile
+    # s datasetem z proměnné. Složka zůstává literál, je relativní k webu.
     parametry = akce["Uloz"]["inputs"]["parameters"]
-    overit(not str(parametry.get("dataset", "")).startswith("@"),
-           "dataset zápisové akce je runtime výraz — flow by nešlo zapnout")
+    overit(parametry.get("dataset") == ep.web(),
+           "dataset zápisové akce nebere web z proměnné mpsv_procesnimapaSite — "
+           "s natvrdo zadanou adresou se flow na cizím tenantu nedá zapnout")
     overit(not str(parametry.get("folderPath", "")).startswith("@"),
            "folderPath zápisové akce je runtime výraz")
-    overit(parametry.get("dataset") == web,
-           "zápis nemíří na web, na který je připojená appka")
     overit(akce["Uloz"]["inputs"]["host"]["operationId"] == "CreateFile",
            "zápis souboru nepoužívá CreateFile")
 
@@ -587,6 +603,8 @@ def main():
     overit(FLOW_GUID.upper() in klic, f"soubor flow nenese očekávané GUID: {klic}")
 
     web = nacti_web(polozky["customizations.xml"].decode("utf-8-sig"))
+    global WEB_APPKY
+    WEB_APPKY = web
     overit(web is not None, "v balíku není adresa webu canvas appky")
 
     flow = json.loads(polozky[klic].decode("utf-8-sig"))

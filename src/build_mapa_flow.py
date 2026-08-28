@@ -19,6 +19,9 @@ import sys
 import zipfile
 from pathlib import Path
 
+sys.path.insert(0, "src")
+import env_promenne as ep  # noqa: E402
+
 FLOW_PREFIX = "Workflows/MapaPublishFlow"
 SABLONA_CESTA = "/SiteAssets/mapa_template.html"
 CILOVA_SLOZKA = "/SiteAssets"
@@ -98,18 +101,20 @@ def akce(web, tabulky):
     kroky = {}
     kroky["Sablona"] = sp_akce(
         "GetFileContentByPath",
-        {"dataset": web, "path": SABLONA_CESTA, "inferContentType": True},
+        {"dataset": ep.web(), "path": SABLONA_CESTA, "inferContentType": True},
         None)
 
     predchozi = "Sablona"
     for zobrazovany, krok, _ in LISTY:
+        # Do flow jde proměnná, ne GUID. Napojení appky se přesto ověřuje:
+        # kdyby v ní list chyběl, byla by chyba i tak, jen o krok dál.
         if zobrazovany not in tabulky:
             raise SystemExit(
-                f"CHYBA: appka nemá připojený list '{zobrazovany}' — GUID nelze zjistit")
+                f"CHYBA: appka nemá připojený list '{zobrazovany}'")
         jmeno = f"Nacti_{krok}"
         kroky[jmeno] = sp_akce(
             "GetItems",
-            {"dataset": web, "table": tabulky[zobrazovany], "$top": STRANKOVANI},
+            {"dataset": ep.web(), "table": ep.list_param(zobrazovany), "$top": STRANKOVANI},
             predchozi)
         # Bez pagination načte konektor jen prvních 100 položek a mapa vypadá,
         # že v rejstříku chybí data. Tichá chyba, nic nespadne.
@@ -172,7 +177,7 @@ def akce(web, tabulky):
 
     kroky["Uloz_mapu"] = sp_akce(
         "CreateFile",
-        {"dataset": web, "folderPath": CILOVA_SLOZKA, "name": CILOVY_SOUBOR,
+        {"dataset": ep.web(), "folderPath": CILOVA_SLOZKA, "name": CILOVY_SOUBOR,
          "body": "@outputs('Stranka')"},
         "Stranka")
     return kroky
@@ -228,7 +233,8 @@ def main():
     spojeni = next(iter(flow["properties"]["connectionReferences"].values()))
     print(f"flow doplněno: {klic.split('/')[-1]}")
     print(f"  akcí: {len(definice['actions'])}")
-    print(f"  web: {web}")
+    print(f"  web z proměnné: {ep.web()}")
+    print(f"  web napojený v appce (jen kontrola): {web}")
     print(f"  spojení: {spojeni['connection']['connectionReferenceLogicalName']}")
     print(f"  ukládá: {CILOVA_SLOZKA}/{CILOVY_SOUBOR}")
     return 0

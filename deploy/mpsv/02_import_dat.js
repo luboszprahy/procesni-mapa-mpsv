@@ -2408,7 +2408,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-009-0001",
@@ -2421,7 +2421,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-009-0002",
@@ -2434,7 +2434,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-009-0003",
@@ -2447,7 +2447,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-004-0001",
@@ -2460,7 +2460,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0001",
@@ -2473,7 +2473,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0002",
@@ -2486,7 +2486,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-01-001-0001",
@@ -2499,7 +2499,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-01-001-0002",
@@ -2512,7 +2512,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-01-004-0001",
@@ -2525,7 +2525,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-01-004-0002",
@@ -2538,7 +2538,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-01-004-0003",
@@ -2551,7 +2551,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-05-001-0001",
@@ -2564,7 +2564,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-05-002-0001",
@@ -2577,7 +2577,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-004-0002",
@@ -2590,7 +2590,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-05-003-0001",
@@ -2603,7 +2603,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-004-0003",
@@ -2616,7 +2616,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-11-001-0001",
@@ -2629,7 +2629,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-11-002-0001",
@@ -2642,7 +2642,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-11-002-0002",
@@ -2655,7 +2655,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-002-0001",
@@ -2668,7 +2668,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-002-0002",
@@ -2681,7 +2681,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-002-0003",
@@ -2694,7 +2694,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-006-0001",
@@ -2707,7 +2707,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-04-005-0001",
@@ -2720,7 +2720,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-01-003-0001",
@@ -2733,7 +2733,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-01-003-0002",
@@ -2746,7 +2746,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-01-003-0003",
@@ -2759,7 +2759,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "01-01-004-0001",
@@ -2772,7 +2772,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0003",
@@ -2785,7 +2785,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0004",
@@ -2798,7 +2798,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0005",
@@ -2811,7 +2811,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0006",
@@ -2824,7 +2824,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0007",
@@ -2837,7 +2837,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0008",
@@ -2850,7 +2850,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-001-0009",
@@ -2863,7 +2863,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-002-0001",
@@ -2876,7 +2876,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-004-0001",
@@ -2889,7 +2889,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-004-0002",
@@ -2902,7 +2902,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-003-0001",
@@ -2915,7 +2915,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-005-0001",
@@ -2928,7 +2928,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-005-0002",
@@ -2941,7 +2941,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-007-0001",
@@ -2954,7 +2954,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-007-0002",
@@ -2967,7 +2967,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-006-0001",
@@ -2980,7 +2980,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    },
    {
     "Title": "07-08-008-0001",
@@ -2993,7 +2993,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "3",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-08-25T00:00:00Z"
+    "datum_aktualizace": "2026-08-28T00:00:00Z"
    }
   ]
  },

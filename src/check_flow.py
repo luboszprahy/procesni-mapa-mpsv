@@ -23,9 +23,9 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from check_schema import zkratit  # noqa: E402
+import env_promenne as ep  # noqa: E402
 
 MAXLEN = 150
-LIST_AKTIVITY = "9dfbb5a1-65a6-4fd4-b9f9-fdd35fa246cd"
 
 chyby = []
 kontrol = 0
@@ -234,8 +234,11 @@ def main():
     trigger = next(iter(definice["triggers"].values()))
     overit(trigger["inputs"]["host"]["operationId"] == "GetOnUpdatedItems",
            "trigger není 'when an item is created or modified'")
-    overit(trigger["inputs"]["parameters"]["table"] == LIST_AKTIVITY,
-           "trigger nemíří na list Aktivity")
+    overit(trigger["inputs"]["parameters"]["table"] == ep.param("mpsv_listAktivity"),
+           "trigger nebere list z proměnné mpsv_listAktivity — na cizím tenantu "
+           "by hlídal list, který tam neexistuje")
+    overit(trigger["inputs"]["parameters"]["dataset"] == ep.web(),
+           "trigger nebere web z proměnné mpsv_procesnimapaSite")
     overit("shared_sharepointonline" in json.dumps(flow["properties"].get("connectionReferences", {})),
            "chybí connection reference na SharePoint")
 
@@ -245,10 +248,15 @@ def main():
         parametry = zapis["inputs"]["parameters"]
         overit(zapis["inputs"]["host"]["operationId"] == "PatchItem",
                "zápis není PatchItem (Update item)")
-        overit(parametry.get("table") == LIST_AKTIVITY,
-               "zápisová akce nemá GUID listu natvrdo — s runtime výrazem nejde flow zapnout")
-        overit(not str(parametry.get("dataset", "")).startswith("@"),
-               "zápisová akce má web jako runtime výraz")
+        # Do 1.0.0.61 se tu vyžadoval GUID natvrdo, protože skill tvrdí, že
+        # PatchItem runtime výraz nesnese. Rozbor produkčních balíků PPF
+        # (Clearstream, Průvodní list, Správa notifikací, MessageCenter) ukázal,
+        # že s DATASETOVOU proměnnou (typ 100000004) PatchItem běží; padá to
+        # jen s textovou nebo s proměnnou bez vyplněné hodnoty.
+        overit(parametry.get("table") == ep.param("mpsv_listAktivity"),
+               "zápisová akce nebere list z proměnné mpsv_listAktivity")
+        overit(parametry.get("dataset") == ep.web(),
+               "zápisová akce nebere web z proměnné mpsv_procesnimapaSite")
         overit(parametry.get("item/nazev_kratky") == "@outputs('Cil')",
                "zápis neplní nazev_kratky výstupem Cil")
         # Flow smí do řádku poslat jen to, co samo spočítalo, a `Title`, podle

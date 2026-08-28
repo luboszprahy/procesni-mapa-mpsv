@@ -1218,7 +1218,7 @@ Screens:
               If(IsBlank(txt_NazevC.Text), Set(varChybaC, "Vyplň název."));
               If(
                   !IsBlank(varChybaC),
-                  Notify(varChybaC, NotificationType.Warning),
+                  Notify(varChybaC, NotificationType.Warning, varNotifyMs),
                   Set(
                       varVlastnikC,
                       If(
@@ -1307,7 +1307,7 @@ Screens:
                                   "Kód " & varNovyKodC & " mezitím někdo zabral, zkus uložit znovu.",
                                   "Kód " & varNovyKodC & " je volný jen zdánlivě — leží pod ním osiřelé položky po dřívější položce se stejným kódem. Ukliď je nejdřív přepínačem osiřelých, jinak by se pod novou položkou objevily jako její vlastní."
                               ),
-                              NotificationType.Warning
+                              NotificationType.Warning, varNotifyMs
                           ),
                           IfError(
                               If(
@@ -1407,10 +1407,10 @@ Screens:
                                   )
                               );
                               Set(varAktStale, true);
-                              Notify("Založeno jako " & varNovyKodC & ".", NotificationType.Success);
+                              Notify("Založeno jako " & varNovyKodC & ".", NotificationType.Success, varNotifyMs);
                               Reset(txt_NazevC);
                               Reset(drp_VlastnikC),
-                              Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
+                              Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                           )
                       ),
                       IfError(
@@ -1454,8 +1454,8 @@ Screens:
                               { nazev: txt_NazevC.Text, vlastnik: varVlastnikC }
                           );
                           Set(varAktStale, true);
-                          Notify("Uloženo — " & varCiselnikKod & ".", NotificationType.Success),
-                          Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
+                          Notify("Uloženo — " & varCiselnikKod & ".", NotificationType.Success, varNotifyMs),
+                          Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                       )
                   )
               )
@@ -1717,9 +1717,9 @@ Screens:
                       Reset(txt_NazevC);
                       Reset(drp_VlastnikC)
                   );
-                  Notify("Smazáno: " & varSmazatC.kod & ".", NotificationType.Success);
+                  Notify("Smazáno: " & varSmazatC.kod & ".", NotificationType.Success, varNotifyMs);
                   Set(varSmazatC, Blank()),
-                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error);
+                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs);
                   Set(varSmazatC, Blank())
               )
             PressedColor: =RGBA(255, 255, 255, 1)

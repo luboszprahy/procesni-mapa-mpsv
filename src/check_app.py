@@ -823,6 +823,41 @@ def kontrola_adresy_mapy(vzorce):
             )
 
 
+def kontrola_notify(vzorce, soubory):
+    """Notify bez třetího argumentu svítí výchozích deset vteřin.
+
+    Potvrzení („Smazáno: …") tím překáží při další práci, proto má zhasnout
+    do vteřiny. U chyby je to naopak — musí zbýt čas ji přečíst, takže má
+    vlastní, delší dobu. Obě hodnoty drží App.OnStart, aby se ladily
+    z jednoho místa; volání je 27 a přepisovat je po jednom nikdo nebude.
+    """
+    for cesta, prop, text in vzorce:
+        for shoda in re.finditer(r"\bNotify\s*\(", text):
+            zavorka = text.index("(", shoda.start())
+            args = rozdel_argumenty(argumenty_volani(text, zavorka))
+            if len(args) != 3:
+                chyby.append(
+                    f"{cesta}.{prop}: Notify má {len(args)} argumenty místo tří — "
+                    f"bez doby zobrazení svítí hláška deset vteřin"
+                )
+                continue
+            ceka = "varNotifyChybaMs" if "NotificationType.Error" in args[1] else "varNotifyMs"
+            if args[2] != ceka:
+                chyby.append(
+                    f"{cesta}.{prop}: Notify s {args[1].strip()} má dobu "
+                    f"'{args[2]}', čekám {ceka}"
+                )
+
+    app = next((c for c in soubory if Path(c).name == "App.pa.yaml"), None)
+    text_app = io.open(app, encoding="utf-8").read() if app else ""
+    for jmeno in ("varNotifyMs", "varNotifyChybaMs"):
+        if not re.search(rf"Set\(\s*{jmeno}\s*,\s*\d+\s*\)", text_app):
+            chyby.append(
+                f"App.OnStart: chybí Set({jmeno}, <ms>) — Notify by dostal "
+                f"prázdnou dobu a hláška by nezhasla vůbec"
+            )
+
+
 def kontrola_stareho_result(vzorce):
     """`Split` i `Distinct` vracejí sloupec `Value`, ne `Result`.
 
@@ -1290,6 +1325,7 @@ def main():
     kontrola_stareho_result(vzorce)
     kontrola_prekryvu(soubory)
     kontrola_adresy_mapy(vzorce)
+    kontrola_notify(vzorce, soubory)
     kontrola_potvrzeni_mazani(soubory)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)

@@ -679,7 +679,7 @@ Screens:
               If(IsBlank(txt_Nazev.Text), Set(varChyba, "Vyplň znění aktivity."));
               If(
                   !IsBlank(varChyba),
-                  Notify(varChyba, NotificationType.Warning),
+                  Notify(varChyba, NotificationType.Warning, varNotifyMs),
                   Set(varStaryDp, If(varNova, "", varAktivita.dilci_proces_kod));
                   Set(varPrefix, Left(drp_Dilci.Selected.Value, 9) & "-");
                   Set(
@@ -700,7 +700,7 @@ Screens:
                   );
                   If(
                       varNova && !IsBlank(LookUp(Aktivity, Title = varNovyKod)),
-                      Notify("Kód " & varNovyKod & " mezitím někdo použil, zkus uložit znovu.", NotificationType.Warning),
+                      Notify("Kód " & varNovyKod & " mezitím někdo použil, zkus uložit znovu.", NotificationType.Warning, varNotifyMs),
                       IfError(
                           Patch(
                               Aktivity,
@@ -743,7 +743,7 @@ Screens:
                               )
                           );
                           Set(varAktStale, true);
-                          Notify("Uloženo jako " & varNovyKod & ".", NotificationType.Success);
+                          Notify("Uloženo jako " & varNovyKod & ".", NotificationType.Success, varNotifyMs);
                           Set(varUrovenTyp, "aktivita");
                           Set(varCiselnikNova, false);
                           Set(varCiselnikKod, varNovyKod);
@@ -753,7 +753,7 @@ Screens:
                               Navigate(scr_Dashboard, ScreenTransition.UnCover),
                               Navigate(scr_Ciselnik, ScreenTransition.UnCover)
                           ),
-                          Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error)
+                          Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                       )
                   )
               )
@@ -781,13 +781,13 @@ Screens:
                   RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varAktivita.Title);
                   Remove(Aktivity, varAktivita);
                   Set(varAktStale, true);
-                  Notify("Aktivita " & varAktivita.Title & " smazána i s vazbami.", NotificationType.Success);
+                  Notify("Aktivita " & varAktivita.Title & " smazána i s vazbami.", NotificationType.Success, varNotifyMs);
                   Set(varUrovenTyp, "aktivita");
                   Set(varCiselnikNova, true);
                   Set(varCiselnikKod, "");
                   Set(varRodicC, "");
                   Navigate(scr_Ciselnik, ScreenTransition.UnCover),
-                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error)
+                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
               )
             Size: =11
             Text: ="Smazat"

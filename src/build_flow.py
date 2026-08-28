@@ -15,10 +15,15 @@ import sys
 import zipfile
 from pathlib import Path
 
-# GUID listu Aktivity na vývojové site (z F1). Zápisová akce ho musí mít
-# natvrdo — s runtime výrazem se flow naimportuje, ale nejde zapnout.
-LIST_AKTIVITY = "9dfbb5a1-65a6-4fd4-b9f9-fdd35fa246cd"
+sys.path.insert(0, "src")
+import env_promenne as ep  # noqa: E402
 
+# Web i list bere flow z proměnných prostředí — včetně triggeru a zápisové
+# akce. Do 1.0.0.61 tu byl GUID vývojového listu natvrdo, protože skill tvrdí,
+# že zápisová akce runtime výraz nesnese. Rozbor produkčních balíků PPF
+# (Clearstream, Průvodní list, Správa notifikací) to vyvrátil: PatchItem,
+# PostItem i trigger nad listem s proměnnou běží. Podmínkou je typ proměnné —
+# datasetová (100000004), ne textová. Viz src/env_promenne.py.
 MAXLEN = 150
 VYPUSTKA = "decodeUriComponent('%E2%80%A6')"
 
@@ -77,8 +82,8 @@ def akce():
                 "type": "OpenApiConnection",
                 "inputs": {
                     "parameters": {
-                        "dataset": DATASET,
-                        "table": LIST_AKTIVITY,
+                        "dataset": ep.web(),
+                        "table": ep.param("mpsv_listAktivity"),
                         "id": "@triggerBody()?['ID']",
                         # Povinné sloupce listu musí v těle být, i když se nemění.
                         # Bez nich aktivace flow spadne na
@@ -133,12 +138,13 @@ def main():
     operace = trigger.get("inputs", {}).get("host", {}).get("operationId")
     if operace != "GetOnUpdatedItems":
         raise SystemExit(f"CHYBA: trigger je '{operace}', čekal jsem GetOnUpdatedItems")
-    tabulka = trigger["inputs"]["parameters"].get("table")
-    if tabulka != LIST_AKTIVITY:
-        raise SystemExit(f"CHYBA: trigger míří na list {tabulka}, ne na Aktivity ({LIST_AKTIVITY})")
 
-    global DATASET
-    DATASET = trigger["inputs"]["parameters"]["dataset"]
+    # Web a list v triggeru přepisujeme taky, jinak by flow po importu na cizí
+    # tenant hlídalo list, který tam neexistuje. Který list kostra ze Studia
+    # ukazovala, je od téhle chvíle jedno — vybírá se v průvodci importem.
+    puvodni = dict(trigger["inputs"]["parameters"])
+    trigger["inputs"]["parameters"]["dataset"] = ep.web()
+    trigger["inputs"]["parameters"]["table"] = ep.param("mpsv_listAktivity")
 
     definice["actions"] = akce()
     definice["contentVersion"] = "1.0.0.0"
@@ -149,12 +155,12 @@ def main():
             balik.writestr(jmeno, data)
 
     print(f"flow doplněno: {klic.split('/')[-1]}")
-    print(f"  akcí: {len(definice['actions'])}, zápis do listu {LIST_AKTIVITY}")
-    print(f"  web z triggeru: {DATASET}")
+    print(f"  akcí: {len(definice['actions'])}")
+    print(f"  trigger i zápis nově z proměnných: {ep.web()} / "
+          f"{ep.param('mpsv_listAktivity')}")
+    print(f"  kostra ukazovala na: {puvodni.get('dataset')} / {puvodni.get('table')}")
     return 0
 
-
-DATASET = None
 
 if __name__ == "__main__":
     sys.exit(main())

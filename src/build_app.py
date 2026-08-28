@@ -23,6 +23,9 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, "src")
+import env_promenne  # noqa: E402
+
 APP_SRC = Path("src/app_src")
 VYCHOZI_SOLUTION = Path("input/procesnimapa_1_0_0_1.zip")
 VYSTUP = Path("deploy")
@@ -343,6 +346,14 @@ def dokonci(solution_dir, verze):
             raise SystemExit("CHYBA: AppVersion canvas appky se nepodařilo přepsat")
         customizations.write_text(novy, encoding="utf-8")
         print(f"AppVersion canvas appky: {razitko}")
+
+    # Proměnné prostředí, ze kterých flow berou web a listy. Vkládají se tady,
+    # tedy do každého balíku — kdyby definice chyběla, odkaz @parameters ve flow
+    # by se neměl na co navázat a flow by po importu nešlo zapnout.
+    vlozene, smazane = env_promenne.vloz_do_slozky(solution_dir, verze)
+    print(f"proměnné prostředí: {len(vlozene)} definic ({', '.join(vlozene)})")
+    for soubor in smazane:
+        print(f"  odstraněno z balíku: {soubor}")
 
     VYSTUP.mkdir(parents=True, exist_ok=True)
     vystupni_zip = VYSTUP / f"procesnimapa_{verze.replace('.', '_')}.zip"

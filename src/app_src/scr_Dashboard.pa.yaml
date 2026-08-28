@@ -1422,8 +1422,8 @@ Screens:
               Set(varPublikuji, true);
               IfError(
                   MapaPublishFlow.Run();
-                  Notify("Publikace spuštěna. Přegenerování chvíli trvá - pak stránku otevři volbou Zobrazit v HTML.", NotificationType.Information),
-                  Notify("Publikace selhala: " & FirstError.Message, NotificationType.Error)
+                  Notify("Publikace spuštěna. Přegenerování chvíli trvá - pak stránku otevři volbou Zobrazit v HTML.", NotificationType.Information, varNotifyMs),
+                  Notify("Publikace selhala: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
               );
               Set(varPublikuji, false)
             PaddingLeft: =12
@@ -1473,7 +1473,7 @@ Screens:
               =Set(varMenuExport, false);
               If(
                   IsEmpty(colExport),
-                  Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning),
+                  Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning, varNotifyMs),
                   Set(varExportBezi, true);
                   IfError(
                       Set(
@@ -1490,7 +1490,7 @@ Screens:
                           ).adresa
                       );
                       Download(varExportUrl),
-                      Notify("Export selhal: " & FirstError.Message, NotificationType.Error)
+                      Notify("Export selhal: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                   );
                   Set(varExportBezi, false)
               )
@@ -1523,7 +1523,7 @@ Screens:
               =Set(varMenuExport, false);
               If(
                   IsEmpty(colExport),
-                  Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning),
+                  Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning, varNotifyMs),
                   Set(varExportBezi, true);
                   IfError(
                       Set(
@@ -1540,7 +1540,7 @@ Screens:
                           ).adresa
                       );
                       Download(varExportUrl),
-                      Notify("Export selhal: " & FirstError.Message, NotificationType.Error)
+                      Notify("Export selhal: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                   );
                   Set(varExportBezi, false)
               )
@@ -1682,11 +1682,11 @@ Screens:
                       RemoveIf('Vazba aktivita–dílčí proces', aktivita_kod = varSmazatD.kod);
                       Remove(Aktivity, LookUp(Aktivity, Title = varSmazatD.kod))
                   );
-                  Notify("Smazáno: " & varSmazatD.kod & ".", NotificationType.Success);
+                  Notify("Smazáno: " & varSmazatD.kod & ".", NotificationType.Success, varNotifyMs);
                   Set(varSmazatD, Blank());
                   Set(varAktStale, true);
                   Navigate(scr_Dashboard, ScreenTransition.None),
-                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error);
+                  Notify("Smazání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs);
                   Set(varSmazatD, Blank())
               )
             PressedColor: =RGBA(255, 255, 255, 1)

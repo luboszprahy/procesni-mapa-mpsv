@@ -44,6 +44,9 @@ import sys
 import zipfile
 from pathlib import Path
 
+sys.path.insert(0, "src")
+import env_promenne as ep  # noqa: E402
+
 ZDROJ = "MapaPublishFlow"
 CIL = "ExportFlow"
 # Pevné GUID: opakované spuštění musí dát TOTÉŽ flow, jinak by každý build
@@ -221,7 +224,7 @@ def trigger():
     }
 
 
-def akce(web):
+def akce():
     kroky = {}
     kroky["Vstup"] = {
         "type": "Compose",
@@ -255,7 +258,7 @@ def akce(web):
         "type": "OpenApiConnection",
         "inputs": {
             "parameters": {
-                "dataset": web,
+                "dataset": ep.web(),
                 "folderPath": CILOVA_SLOZKA,
                 "name": "@outputs('Jmeno')",
                 "body": "@outputs('Dokument')",
@@ -267,9 +270,12 @@ def akce(web):
     }
     # Adresu skládáme sami z webu a názvu, ne z odpovědi CreateFile: pole
     # odpovědi konektoru nejsou v dokumentaci závazná a mlčky se mění.
+    # Web se bere z téže proměnné jako dataset, aby odkaz nemohl ukázat jinam,
+    # než kam se soubor uložil.
     kroky["Adresa"] = {
         "type": "Compose",
-        "inputs": f"@concat({lit(web + CILOVA_SLOZKA + '/')}, outputs('Jmeno'))",
+        "inputs": (f"@concat({ep.vyraz(ep.WEB)}, {lit(CILOVA_SLOZKA + '/')}, "
+                   f"outputs('Jmeno'))"),
         "runAfter": {"Uloz": ["Succeeded"]},
     }
     kroky["Odpoved"] = {
@@ -347,7 +353,7 @@ def main():
                 "contentVersion": "1.0.0.0",
                 "parameters": vzor["properties"]["definition"].get("parameters", {}),
                 "triggers": trigger(),
-                "actions": akce(web),
+                "actions": akce(),
                 "outputs": {},
             },
         },
@@ -390,7 +396,8 @@ def main():
     print(f"přidáno flow: {CIL}")
     print(f"  GUID: {CIL_GUID}")
     print(f"  akcí: {len(flow['properties']['definition']['actions'])}")
-    print(f"  web: {web}")
+    print(f"  web z proměnné: {ep.web()}")
+    print(f"  web napojený v appce (jen kontrola): {web}")
     print(f"  ukládá do: {CILOVA_SLOZKA}/procesni_mapa_<razitko>.doc | .xls")
     print("  vstup: jeden text (JSON s klíči nadpis, format, radky)")
     return 0

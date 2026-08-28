@@ -144,8 +144,8 @@ Screens:
                   OnSelect: |-
                     =IfError(
                         Remove('Vazba aktivita–dílčí proces', ThisItem);
-                        Notify("Vazba odebrána.", NotificationType.Success),
-                        Notify("Odebrání selhalo: " & FirstError.Message, NotificationType.Error)
+                        Notify("Vazba odebrána.", NotificationType.Success, varNotifyMs),
+                        Notify("Odebrání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                     )
                   PaddingBottom: =10
                   PaddingLeft: =10
@@ -252,7 +252,7 @@ Screens:
                   OnSelect: |-
                     =If(
                         !IsBlank(LookUp('Vazba aktivita–dílčí proces', Title = varAktivita.Title & "__" & ThisItem.Title)),
-                        Notify("Aktivita už v tomto dílčím procesu je.", NotificationType.Warning),
+                        Notify("Aktivita už v tomto dílčím procesu je.", NotificationType.Warning, varNotifyMs),
                         IfError(
                             Patch(
                                 'Vazba aktivita–dílčí proces',
@@ -264,8 +264,8 @@ Screens:
                                     primarni: { Value: "ne" }
                                 }
                             );
-                            Notify("Přidáno do " & ThisItem.Title & ".", NotificationType.Success),
-                            Notify("Přidání selhalo: " & FirstError.Message, NotificationType.Error)
+                            Notify("Přidáno do " & ThisItem.Title & ".", NotificationType.Success, varNotifyMs),
+                            Notify("Přidání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                         )
                     )
                   PaddingBottom: =10

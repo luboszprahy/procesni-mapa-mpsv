@@ -21,6 +21,13 @@ import sys
 import zipfile
 from pathlib import Path
 
+sys.path.insert(0, "src")
+import env_promenne as ep  # noqa: E402
+from build_mapa_flow import LISTY  # noqa: E402
+
+# název kroku ve flow -> zobrazovaný název listu, podle kterého se hledá proměnná
+KROK_LIST = {krok: zobrazovany for zobrazovany, krok, _ in LISTY}
+
 SABLONA = Path("src/mapa_template.html")
 MODEL = Path("runs/anonym/model.json")
 KOTVY = ("__DATA_JSON__", "__GEN__")
@@ -123,7 +130,7 @@ def viditelne(akce, jmeno):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True)
-    parser.add_argument("--base", default="input/procesnimapa_1_0_0_18.zip",
+    parser.add_argument("--base", default="deploy/procesnimapa_1_0_0_61.zip",
                         help="výchozí export, proti kterému se hlídá, co se nesmělo změnit")
     argumenty = parser.parse_args()
 
@@ -214,8 +221,10 @@ def main():
         overit(strankovani >= 5000,
                f"{jmeno}: bez pagination načte konektor jen 100 položek a mapa "
                "bude tiše neúplná")
-        overit(re.fullmatch(r"[0-9a-f-]{36}", str(parametry.get("table", ""))),
-               f"{jmeno}: table musí být GUID listu natvrdo, ne runtime výraz")
+        # Od 1.0.0.62 je list proměnná prostředí, ne GUID: s GUID vývojového
+        # listu se flow na cizím tenantu nedá zapnout ani opravit v designeru.
+        overit(parametry.get("table") == ep.list_param(KROK_LIST[krok]),
+               f"{jmeno}: table nebere list z proměnné {ep.LIST_PROMENNA[KROK_LIST[krok]]}")
 
     tabulky = [akce[f"Nacti_{k}"]["inputs"]["parameters"]["table"]
                for k in ("Agendy", "Procesy", "DilciProcesy", "Aktivity", "Vazby")

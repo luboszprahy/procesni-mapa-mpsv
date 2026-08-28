@@ -1033,6 +1033,224 @@ natvrdo.
 
 ---
 
+## F8 — Kratší notifikace a přenositelnost přes env proměnné (zadáno 28.08.2026)
+
+Dvě zadání z 28.08.2026:
+
+1. **Notifikace v appce svítí moc dlouho** — zkrátit; příklad „po výmazu záznamu".
+2. **Import na tenant MPSV selhal na flow** — nešlo napojit SharePoint tabulky.
+   Appku se napojit podařilo. Zadání: převést řešení na proměnné, aby bylo
+   napojení na nové tabulky snadné.
+
+### Příčina bodu 2 (ověřeno v balíku 1.0.0.61)
+
+Ve všech čtyřech flow je **adresa vývojového webu PPF a GUIDy vývojových listů
+natvrdo** — u každé SharePoint akce parametr `dataset`, u čtení a zápisu do
+listu `table`. Na MPSV ten web neexistuje, akce jsou neplatné a designer
+nenabídne list k přepnutí. Appka je jinde: váže se přes connection reference,
+kterou průvodce importem přepojí sám.
+
+Rozsah: `MapaPublishFlow` 7 akcí, `MapaPublishScheduled` 7, `ExportFlow` 1,
+`AktualizaceKratkehoNazvu` trigger + 1 akce. Celkem **16 míst** ve flow
+a jedno v appce (`varMapaUrl`).
+
+### Oprava dřívějšího tvrzení o zápisových akcích (28.08.2026)
+
+Skill `power-Apps-skill` tvrdí, že **zápisová akce nesmí mít list jako runtime
+výraz** (`PatchItem`/`PostItem` si schéma těla odvozují z konkrétního listu),
+a na ten výklad jsem nejdřív napsal, že `AktualizaceKratkehoNazvu` převést nejde.
+**Plošně to neplatí.** Rozbor šesti produkčních balíků PPF
+(repo `luboszprahy/powerApps-vzory-aplikaci-pro-claude` + vzory ve skillu):
+
+| parametr z proměnné | operace | v kolika balících |
+|---|---|---|
+| `table` | `PatchItem` | 4 |
+| `table` | `PostItem` | 3 |
+| `table` | `GetOnNewItems` (trigger) | 3 |
+| `dataset` | `CreateFile` | 2 |
+| `dataset` | `PatchItem` | 6 |
+
+Rozhodující je, že `FloorPlan_1_0_0_19` — balík, ze kterého pochází varování ve
+skillu — má `dataset` z proměnné, ale **`table` natvrdo**. Právě jeho přepnutím
+ve verzi 1.0.0.21 to tehdy spadlo. Ostatní balíky (Clearstream, Průvodní list,
+Správa notifikací, MiddleOffice, MessageCenter) to dělají a běží.
+
+Nejpravděpodobnější skutečná příčina pádu FloorPlanu: proměnná bez vyplněné
+hodnoty v cílovém prostředí (skill má tenhle režim selhání doložený jinde),
+ne druh akce. Poznámku ve skillu opravit — viz krok 7.
+
+### Tvar proměnné, který funguje
+
+Rozhoduje **typ**. Textová proměnná (typ `100000000`) na dataset/table nestačí.
+Funguje **datasetová (typ `100000004`)**, která nese `apiid` konektoru
+a `parameterkey`, a u listu navíc `parentdefinitionid` s odkazem na proměnnou
+webu. Průvodce importem pak ukáže výběr webu a rozbalovátko listů toho webu,
+ne textové pole na GUID.
+
+```xml
+<environmentvariabledefinition schemaname="mpsv_listAktivity">
+  <apiid>/providers/microsoft.powerapps/apis/shared_sharepointonline</apiid>
+  <displayname default="Procesni mapa - Aktivity"> ... </displayname>
+  <parameterkey>table</parameterkey>
+  <parentdefinitionid><schemaname>mpsv_procesnimapaSite</schemaname></parentdefinitionid>
+  <iscustomizable>1</iscustomizable><isrequired>0</isrequired>
+  <secretstore>0</secretstore><type>100000004</type>
+</environmentvariabledefinition>
+```
+
+Odkaz ve flow: `@parameters('Procesni mapa - Aktivity (mpsv_listAktivity)')`.
+
+**Definice záměrně nenese `<defaultvalue>` a balík neobsahuje
+`environmentvariablevalues.json`.** Kdyby default byl, import na MPSV by tiše
+prošel s adresou PPF — přesně dnešní chyba, jen přesunutá o patro dál. Bez
+defaultu se průvodce zeptat musí. Po prvním vyplnění si prostředí hodnotu drží,
+další import se už neptá. V `RootComponents` se env proměnné neuvádějí (ověřeno
+na všech vzorech), stačí složka `environmentvariabledefinitions/`.
+
+### Rozhodnutí (28.08.2026)
+
+- Notifikace: potvrzení/varování **1000 ms**, chyby **2000 ms**, laditelné
+  z jednoho místa v `App.OnStart`.
+- `AktualizaceKratkehoNazvu` **zůstává** a převede se stejně jako ostatní.
+  (Původní záměr flow zrušit a zkracovat po slovech v Power Fx padl s opravou
+  výše — převod je teď levnější než přepis do appky.)
+- Napojení **canvas appky** přes `datasetOverride`/`tableNameOverride` se
+  odkládá do F8/5 jako volitelné, až budou flow ověřená na DEV.
+
+### Proměnné, které vzniknou
+
+| schemaname | displayname | parameterkey | rodič |
+|---|---|---|---|
+| `mpsv_procesnimapaSite` | `Procesni mapa - web` | `dataset` | — |
+| `mpsv_listAgendy` | `Procesni mapa - Agendy` | `table` | site |
+| `mpsv_listProcesy` | `Procesni mapa - Procesy` | `table` | site |
+| `mpsv_listDilciProcesy` | `Procesni mapa - Dilci procesy` | `table` | site |
+| `mpsv_listAktivity` | `Procesni mapa - Aktivity` | `table` | site |
+| `mpsv_listVazby` | `Procesni mapa - Vazby` | `table` | site |
+
+Prefix `mpsv_` podle publishera balíku (canvas app `mpsv_procesnimapa_319bc`).
+Zobrazované názvy bez diakritiky — jdou do `@parameters(...)` uvnitř JSON flow
+i do XML definice.
+
+### Kroky
+
+```
+0. [Prostředí] — co: .venv na tomto stroji (chybí; není ani pac)
+   verify: .venv/Scripts/python.exe -c "import yaml, openpyxl" projde bez chyby;
+           check_app.py doběhne a vypíše stejné počty jako HANDOVER (163 prvků,
+           1584 vzorců)
+   edge cases: stroj bez pac -> build_app.py --bez-pac; základem musí být
+           deploy/procesnimapa_1_0_0_61.zip (nese LoadFromYaml=true), NE
+           input/procesnimapa_1_0_0_57.zip (export ze Studia, YAML nenese)
+   risk: runs/app_build/pac je gitignorovaný a na tomto stroji chybí -> build
+           s pac by spadl; --bez-pac to obchází
+
+1. [Notify] — co: src/app_src/App.pa.yaml (OnStart) + 27 volání Notify
+      v scr_Ciselnik/scr_Dashboard/scr_Detail/scr_Vazby.pa.yaml
+   Set(varNotifyMs, 1000); Set(varNotifyChybaMs, 2000) v OnStart;
+   každé Notify dostane třetí argument podle typu.
+   verify: nová brána kontrola_notify() v check_app.py — každé Notify má právě
+           3 argumenty, NotificationType.Error používá varNotifyChybaMs,
+           ostatní varNotifyMs, obě proměnné jsou v App.OnStart nastavené.
+           Mutační test: (a) ubrat třetí argument u jednoho Notify,
+           (b) prohodit varNotifyMs za varNotifyChybaMs u chyby,
+           (c) smazat Set z OnStart — brána musí spadnout ve všech třech.
+   edge cases: Notify(varChybaC, NotificationType.Warning) je varování, ne chyba
+           -> 1000 ms; víceřádkové Notify přes YAML blok (scr_Ciselnik:1304)
+   risk: parsování víceřádkových volání regulárem; brána musí počítat argumenty
+           až po složení celého vzorce, ne po řádcích
+
+2. [Modul proměnných] — co: nový src/env_promenne.py
+   DEFINICE (6 položek), xml(schema) -> obsah definičního souboru,
+   param(schema) -> odkaz @parameters, vloz_do_solution(polozky) -> doplní
+   environmentvariabledefinitions/*.
+   verify: nová brána src/check_env.py — XML je well-formed (ElementTree),
+           má type 100000004, apiid konektoru, správný parameterkey,
+           pět listových má parentdefinitionid na site, žádná nemá
+           defaultvalue, tvar param() sedí na očekávaný regulár.
+   edge cases: XML entity v displayname (žádná diakritika ani ampersand)
+   risk: špatný parameterkey by import přijal a flow by pak nešlo zapnout
+
+3. [Flow na proměnné] — co: build_mapa_flow.py, build_export_flow.py,
+      build_flow.py, add_mapa_schedule.py + build_app.py (vložení definic)
+   Místo konkrétní adresy/GUIDu emitovat param(...); build_app.dokonci()
+   vloží definiční soubory do zipu.
+   verify: rozšířený check_solution.py — (a) v žádném Workflows/*.json není
+           řetězec sharepoint.com, (b) každý dataset/table SharePoint akce
+           i triggeru je odkaz na deklarovanou proměnnou, (c) každá
+           deklarovaná proměnná je aspoň jednou použitá, (d) v zipu je šest
+           definičních souborů a žádný environmentvariablevalues.json.
+           Mutační test: vrátit natvrdo URL do jedné akce -> brána spadne.
+   edge cases: add_mapa_schedule klonuje MapaPublishFlow — klon musí vyjít
+           bajtově shodný v akcích (hlídá check_mapa_flow);
+           build_flow.py dnes tvrdě ověřuje, že trigger míří na GUID Aktivit —
+           kontrola se přesouvá na "trigger je GetOnUpdatedItems", GUID
+           nahradí proměnná
+   risk: check_export_flow.py:316 dnes tvrdí opak ("dataset zápisové akce je
+           runtime výraz — flow by nešlo zapnout"). Podle rozboru šesti
+           produkčních balíků je to tvrzení nesprávné; kontrola se obrací
+           a do komentáře patří doklad (Clearstream a Průvodní list mají
+           CreateFile s datasetem z proměnné). Potvrdí to až zapnutí na DEV.
+
+4. [Build 1.0.0.62] — co: build_app.py --bez-pac --solution
+      deploy/procesnimapa_1_0_0_61.zip --verze 1.0.0.62, pak čtyři flow buildery
+      nad výstupem
+   verify: všechny brány zeleně (check_app, check_solution, check_schema,
+           check_mapa_html, check_mapa_beh, check_mapa_flow, check_flow,
+           check_setup.js, check_import.js) + nová check_env.py;
+           zipfile.testzip() nad výsledkem; razítko verze v App.pa.yaml = 1.0.0.62
+   edge cases: check_mapa_beh potřebuje headless Edge/Chrome — když na stroji
+           není, vypsat to jako přeskočené, ne tiše minout
+   risk: brány psané proti natvrdo zadané adrese začnou padat legitimně;
+           každou takovou opravit vědomě, ne vypnout
+
+5. [Nasazení] — co: make_deploy_mpsv.py, deploy/mpsv/README.md, HANDOVER.md
+   README dostane krok "vyplnit šest proměnných v průvodci importem" a ztratí
+   krok o ruční kostře AktualizaceKratkehoNazvu v designeru (odpadá).
+   03_vypis_guidy.js zůstává jako kontrola, GUIDy se do buildu už neopisují.
+   verify: README krok za krokem projít proti seznamu souborů ve složce;
+           check_solution potvrdí, že zip ve složce je 1.0.0.62
+   edge cases: na DEV se průvodce po upgradu zeptá taky (dosud hodnoty neměl)
+   risk: uživatel průvodce proklikne bez vyplnění -> flow spadnou na prázdném
+           datasetu; patří do README tučně
+
+6. [Ověření na DEV] — co: uživatel importuje 1.0.0.62 na PPF DEV
+   verify: (a) průvodce nabídne šest proměnných a u listů rozbalovátko,
+           (b) všechna čtyři flow jdou zapnout — tím padne/potvrdí riziko
+           z kroku 3, (c) Obnovit HTML doběhne a mapa se přegeneruje,
+           (d) export do Wordu i Excelu stáhne soubor,
+           (e) změna názvu aktivity srovná nazev_kratky,
+           (f) notifikace zhasnou do vteřiny, chybová do dvou.
+   risk: kdyby CreateFile s runtime datasetem přece jen nešlo zapnout, fallback
+           je nechat to jediné pole natvrdo a generovat ho build skriptem
+
+7. [Skill] — co: doplnit do power-Apps-skill opravu tvrzení o zápisových akcích
+   verify: v skillu je uvedeno, které balíky to dokládají, a rozlišení
+           typ 100000000 vs 100000004
+   risk: bez toho se stejná chybná úvaha vrátí v dalším projektu
+```
+
+### F8/5 — Napojení canvas appky přes proměnné (volitelné, odloženo)
+
+Appka dnes drží web a GUIDy listů v `<ConnectionReferences>` v
+`customizations.xml`. Jde je převést stejným mechanismem — VendorManagement
+i Průvodní list to v produkci dělají přes `datasetOverride` / `tableNameOverride`:
+
+```json
+"dataSets": {"<web>_mpsv_procesnimapaSite": {
+  "datasetOverride": {"name": "<web>", "environmentVariableName": "mpsv_procesnimapaSite"},
+  "dataSources": {"Agendy": {"tableName": "<guid>",
+     "tableNameOverride": {"name": "<guid>", "environmentVariableName": "mpsv_listAgendy"}}}}}
+```
+
+**Proč se to odkládá:** appku se uživateli na MPSV napojit podařilo, takže to
+neřeší dnešní blokaci; skill má doložené, že **jedna proměnná bez hodnoty
+shodí napojení celé connection**, tedy i listů, které s ní nesouvisejí; a sahá
+se tím do `.msapp` (`References/DataSources.json`), což offline neověřím.
+Dělat až po zeleném kroku 6, jako samostatný balík.
+
+---
+
 ## Náměty na rozšíření (neschválené, k připomenutí)
 
 Přepracováno 25.08.2026 (původní seznam z 23.08.2026 byl psaný před exportem

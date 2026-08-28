@@ -27,6 +27,10 @@ App:
       ClearCollect(colSekceNabidka, { Value: "(vše)" });
       Collect(colSekceNabidka, Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev));
       Set(varMapaUrl, "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/Forms/AllItems.aspx?viewid=4a3b2f8d%2D3719%2D4669%2D856a%2D21cf49ae628e&id=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets%2Fprocesni%5Fmapa%2Ehtml&parent=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets");
+      // Doba svícení notifikací v ms. Potvrzení má zmizet dřív, než začne
+      // překážet; u chyby musí zbýt čas ji přečíst. Ladí se jen tady.
+      Set(varNotifyMs, 1000);
+      Set(varNotifyChybaMs, 2000);
       Set(stylPrimarni, RGBA(17, 11, 122, 1));
       Set(stylAkce, RGBA(16, 126, 150, 1));
       Set(stylAkceHover, RGBA(14, 111, 131, 1));

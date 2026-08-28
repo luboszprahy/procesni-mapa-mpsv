@@ -10,9 +10,10 @@ Zadání drží `PRD.md`.
 > prvky, nová paleta, mapa bez jména správce, filtr stavu a chip osiřelých).
 > Poslední potvrzeně naběhlá verze je 1.0.0.50.
 >
-> **Osm bran zeleně:** `check_app`, `check_solution` 225/0, `check_schema`,
-> `check_mapa_html` 31, `check_mapa_beh` 25, `check_mapa_flow` 142,
-> `check_flow` 17, `check_setup.js`, `check_import.js`.
+> **Jedenáct bran zeleně** (28.08.2026, balík 1.0.0.62): `check_app`,
+> `check_env`, `check_solution` 270/0, `check_schema`, `check_mapa_html` 31,
+> `check_mapa_beh` 25, `check_mapa_flow` 139, `check_flow` 18,
+> `check_export_flow` 110, `check_setup.js`, `check_import.js`.
 >
 > `.venv` se přes git nepřenáší; na novém stroji viz Rozjezd.
 >
@@ -180,24 +181,26 @@ a „flow má jediný trigger".
   podle finální podoby appky, tedy po F6/D.
 - **Adresa testovacího webu je v balíku na 20 místech**, ne na jednom
   (nález B-01, kolo 4 — do té doby tu stálo, že je to jen `varMapaUrl`):
-  - `varMapaUrl` v `App.pa.yaml` — **jediné ručně psané**; canvas app umí číst
-    jen datasetové env proměnné, textové ne, takže nemá kam jinam;
-  - 19 míst v definicích všech čtyř flow (parametr `dataset` u SharePoint akcí,
-    GUIDy listů, složená návratová adresa exportu) — ta se **neopravují ručně**:
-    build skripty je berou z připojení canvas appky.
+  - `varMapaUrl` v `App.pa.yaml` — **jediné ručně psané místo**; canvas app umí
+    číst jen datasetové env proměnné, textové ne, takže nemá kam jinam;
+  - napojení **canvas appky** na listy (`<ConnectionReferences>`) — přepojuje se
+    ve Studiu, na proměnné zatím převedené není (viz `PLAN.md`, F8/5).
 
-  Postup přenosu je proto: appku v cílovém prostředí připojit na web MPSV ve
-  Studiu → exportovat solution → znovu spustit `build_mapa_flow.py`,
-  `build_export_flow.py` a `add_mapa_schedule.py` → ručně přepsat `varMapaUrl`.
-  `check_solution.py` obojí hlídá: vypíše počet míst a **selže**, pokud některé
-  flow míří na jiný web než appka, na cizího hostitele, nebo uvádí cizí tenant
-  bez schématu.
+  **Flow už mezi ně nepatří.** Od 1.0.0.62 berou web i listy z proměnných
+  prostředí (typ 100000004, `parameterkey` + `parentdefinitionid`), takže se
+  vybírají v průvodci importem a v definici žádná adresa ani GUID nejsou. Do
+  1.0.0.61 jich tam bylo 16 a přesně na tom padl import na MPSV 28.08.2026.
 
-  **Výjimka: `AktualizaceKratkehoNazvu`.** Jediné flow, které se rerunem
-  skriptu nespraví — `src/build_flow.py` má GUID listu Aktivity natvrdo
-  v konstantě `LIST_AKTIVITY` (runtime výraz by flow znemožnil zapnout)
-  a jeho trigger je nad tím listem, takže se musí založit nová kostra
-  v designeru nad webem MPSV. Rozepsáno v `PLAN.md` kroku 12, bodu 5b.
+  `check_solution.py` to hlídá dvěma bránami: `adresy_ve_flow` nepřipustí ve
+  `Workflows/*.json` **žádnou** adresu SharePointu, `promenne_ve_flow` navíc
+  vyžaduje, aby každý `dataset`/`table` mířil na deklarovanou proměnnou, aby
+  v balíku bylo všech šest definic a žádný `environmentvariablevalues.json`.
+  Obě jsou ověřené šesti mutacemi.
+
+  Postup přenosu je pak: naimportovat balík a **v průvodci vyplnit šest
+  proměnných** → zapnout čtyři flow → ve Studiu přepojit datové zdroje appky
+  a zaregistrovat `ExportFlow` → přepsat `varMapaUrl` a přestavět appku.
+  Flow se znovu negenerují. Rozepsáno v `deploy/mpsv/README.md`.
 - **Pozice posuvníku stromu se při návratu z detailu neobnoví.** Rozbalené
   větve drží `colOtevrene`, takže ty se vrátí, ale scroll galerie si Power Apps
   řídí sám a z `pa.yaml` ho neovlivníš. Zatím neřešeno — čeká se, jestli to
@@ -215,28 +218,64 @@ $py = ".venv/Scripts/python.exe"
 & $py src/normalize.py            # podklady -> runs/normalize/
 & $py src/build_mapa.py           # šablona -> viz/mapa_prototyp.html + deploy kopie
 & $py src/check_mapa_html.py      # 31 statických kontrol šablony a výstupu
-& $py src/check_mapa_beh.py       # 18 kontrol v headless Edge/Chrome
+& $py src/check_mapa_beh.py       # 25 kontrol v headless Edge/Chrome
 
-# --- canvas app ---
-& $py src/check_app.py            # zdroje appky: YAML, sloupce, delegace, překryvy
-& $py src/build_app.py --solution "input/procesnimapa_1_0_0_50.zip" --verze 1.0.0.34
-& $py src/check_solution.py --vstup "input/procesnimapa_1_0_0_50.zip" `
-                            --vystup "deploy/procesnimapa_1_0_0_50.zip"
+# --- kontroly bez buildu ---
+& $py src/check_app.py            # zdroje appky: YAML, sloupce, delegace, Notify
+& $py src/check_env.py            # tvar definic proměnných prostředí
+& $py src/check_schema.py
+node src/check_setup.js
+node src/check_import.js
+```
 
-# --- flows ---
-# dvojče s denním během; idempotentní, píše zpátky do vstupní solution
-& $py src/add_mapa_schedule.py --solution "input/procesnimapa_1_0_0_50.zip" --hodina 7
-& $py src/check_mapa_flow.py --solution "deploy/procesnimapa_1_0_0_50.zip"
-& $py src/check_flow.py      --solution "deploy/procesnimapa_1_0_0_50.zip"
+### Sestavení balíku — POŘADÍ NENÍ LIBOVOLNÉ
+
+`build_app.py` musí běžet **jako poslední**. Odebírá z `PatchItem` ve flow
+`AktualizaceKratkehoNazvu` pole `item/nazev` a `item/dilci_proces_kod`
+(`oprav_flow_kratky_nazev`) a vkládá definice proměnných prostředí. Kdyby
+běžel první, `build_flow.py` by ta pole vrátila zpátky a flow by přepisovalo
+novější data starým snímkem z triggeru — tiše, bez chyby.
+
+Flow buildery upravují zip **na místě**, takže se pracuje na kopii, ne na
+vydaném balíku. Pracovní kopie nesmí ležet v `runs/app_build/` — `build_app.py`
+tu složku na začátku maže.
+
+```powershell
+$zaklad = "$env:TEMP/base.zip"
+Copy-Item deploy/procesnimapa_1_0_0_61.zip $zaklad
+
+& $py src/build_mapa_flow.py   --solution $zaklad
+& $py src/build_export_flow.py --solution $zaklad
+& $py src/add_mapa_schedule.py --solution $zaklad --hodina 7
+& $py src/build_flow.py        --solution $zaklad
+& $py src/build_app.py --bez-pac --solution $zaklad --verze 1.0.0.62
+```
+
+`--bez-pac` vymění `Src/*.pa.yaml` přímo v už zabaleném balíku. Jde to jen
+proti balíku **zabalenému z YAML** (má `LoadFromYaml=true`), tedy proti
+dřívějšímu výstupu `build_app.py` — ne proti exportu ze Studia. Na stroji
+s `pac` (rozšíření VS Code Power Platform Tools) se přepínač vynechá.
+
+```powershell
+# --- brány nad hotovým balíkem ---
+$z = "deploy/procesnimapa_1_0_0_62.zip"
+& $py src/check_solution.py --vstup deploy/procesnimapa_1_0_0_61.zip --vystup $z
+& $py src/check_mapa_flow.py   --solution $z
+& $py src/check_export_flow.py --solution $z
+& $py src/check_flow.py        --solution $z
+
+# --- složka pro nasazení ---
+& $py src/make_deploy_mpsv.py
 
 # --- náhled mapy v prohlížeči (file:// bývá blokované) ---
 & $py -m http.server 8765 --bind 127.0.0.1
 # http://127.0.0.1:8765/viz/mapa_prototyp.html
 ```
 
-**Vstupní solution pro build je `input/procesnimapa_1_0_0_50.zip`** — je to
-poslední export ze Studia a jako jediný nese `MapaPublishFlow` mezi datovými
-zdroji appky (Add flow). Stavět z něj, dokud uživatel nedodá novější export.
+**Poslední export ze Studia je `input/procesnimapa_1_0_0_57.zip`** — z něj se
+staví na stroji s `pac`. Na stroji bez `pac` se staví z posledního vlastního
+balíku (`deploy/procesnimapa_1_0_0_61.zip` a novější) přes `--bez-pac`; export
+ze Studia tak upravit nejde, protože YAML zdroje nenese.
 
 ## 6. Dělba práce u canvas appky
 
@@ -314,11 +353,12 @@ v publikačním flow (po rozšíření mimo sekci 3 bude hlavička mapy lhát),
 | brána | rozsah | co hlídá |
 |---|---|---|
 | `check_app.py` | 163 prvků, 1584 vzorců | YAML bez duplicit, sloupce proti schématu **i proti vlastním kolekcím**, delegace podle argumentů volání, překryvy, mazání v galerii, adresa mapy |
-| `check_solution.py` | 189 kontrol | publisher, verze, GUID listů, flow nezmizelo, `.Run()` má datový zdroj, **úvodní obrazovka**, žádné externí URL |
+| `check_solution.py` | 270 kontrol | publisher, verze, GUID listů, flow nezmizelo, `.Run()` má datový zdroj, **úvodní obrazovka**, žádné externí URL |
 | `check_mapa_html.py` | 31 kontrol | id v JS vs. HTML, syntaxe skriptu šablony i výstupu, žádná velikost v px mimo přepínač, **shoda deploy kopií se zdrojem** |
 | `check_mapa_beh.py` | 18 kontrol | proklik ovládacích prvků mapy v headless prohlížeči |
-| `check_mapa_flow.py` | 129 kontrol | kontrakt publikačního flow, pagination, zapékání kotev |
-| `check_flow.py` | 19 kontrol | flow nad `nazev_kratky` počítá totéž co `zkratit()` |
+| `check_mapa_flow.py` | 139 kontrol | kontrakt publikačního flow, pagination, zapékání kotev |
+| `check_flow.py` | 18 kontrol | flow nad `nazev_kratky` počítá totéž co `zkratit()`, web i list bere z proměnných |
+| `check_env.py` | 6 proměnných | tvar definic env proměnných: typ 100000004, `parameterkey`, vazba listu na web, žádná výchozí hodnota |
 | `check_setup.js` / `check_import.js` | 32 + 26 | provisioning a import proti falešnému SharePointu |
 
 Když brána spadne na něčem, co je vědomý ústupek, patří to do jejího seznamu
