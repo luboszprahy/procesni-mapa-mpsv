@@ -26,7 +26,7 @@ App:
       Collect(colUtvarNabidka, Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev));
       ClearCollect(colSekceNabidka, { Value: "(vše)" });
       Collect(colSekceNabidka, Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev));
-      Set(varMapaUrl, "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa/SiteAssets/Forms/AllItems.aspx?viewid=4a3b2f8d%2D3719%2D4669%2D856a%2D21cf49ae628e&id=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets%2Fprocesni%5Fmapa%2Ehtml&parent=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets");
+      Set(varMapaUrl, "https://mpsvcr.sharepoint.com/sites/MPSV-App-Mapovani-Procesu-OR/procesnimapaApk/SiteAssets/Forms/AllItems.aspx?id=%2Fsites%2FMPSV%2DApp%2DMapovani%2DProcesu%2DOR%2FprocesnimapaApk%2FSiteAssets%2Fprocesni%5Fmapa%2Ehtml&parent=%2Fsites%2FMPSV%2DApp%2DMapovani%2DProcesu%2DOR%2FprocesnimapaApk%2FSiteAssets");
       // Doba svícení notifikací v ms. Potvrzení má zmizet dřív, než začne
       // překážet; u chyby musí zbýt čas ji přečíst. Ladí se jen tady.
       Set(varNotifyMs, 3000);

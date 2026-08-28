@@ -25,6 +25,7 @@ import env_promenne as ep  # noqa: E402
 # PostItem i trigger nad listem s proměnnou běží. Podmínkou je typ proměnné —
 # datasetová (100000004), ne textová. Viz src/env_promenne.py.
 MAXLEN = 150
+AKTUALNI = "body('Nacti_aktivitu')"
 VYPUSTKA = "decodeUriComponent('%E2%80%A6')"
 
 
@@ -51,7 +52,27 @@ def akce():
     mezera = f"lastIndexOf({rez}, ' ')"
 
     kroky = {
-        "Nazev_syrovy": compose("@coalesce(triggerBody()?['nazev'], '')", None),
+        # Čerstvý stav řádku. Trigger dává snímek starý až o minutu (polling
+        # po 1 min), takže z něj smí přijít jen ID — jinak flow zapíše povinná
+        # pole v podobě, v jaké byla PŘED editací, a novější hodnotu přepíše.
+        "Nacti_aktivitu": {
+            "type": "OpenApiConnection",
+            "inputs": {
+                "parameters": {
+                    "dataset": ep.web(),
+                    "table": ep.param("mpsv_listAktivity"),
+                    "id": "@triggerBody()?['ID']",
+                },
+                "host": {
+                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                    "operationId": "GetItem",
+                    "connectionName": "shared_sharepointonline",
+                },
+            },
+            "runAfter": {},
+        },
+        "Nazev_syrovy": compose(
+            f"@coalesce({AKTUALNI}?['nazev'], '')", "Nacti_aktivitu"),
         "Bez_bilych_znaku": compose(
             "@trim(replace(replace(replace(replace(replace(replace("
             "outputs('Nazev_syrovy'), decodeUriComponent('%0D'), ' '), "
@@ -74,7 +95,7 @@ def akce():
     kroky["Lisi_se"] = {
         "type": "If",
         "expression": {"and": [{"not": {"equals": [
-            "@coalesce(triggerBody()?['nazev_kratky'], '')",
+            f"@coalesce({AKTUALNI}?['nazev_kratky'], '')",
             "@outputs('Cil')",
         ]}}]},
         "actions": {
@@ -85,14 +106,16 @@ def akce():
                         "dataset": ep.web(),
                         "table": ep.param("mpsv_listAktivity"),
                         "id": "@triggerBody()?['ID']",
-                        # Povinné sloupce listu musí v těle být, i když se nemění.
-                        # Bez nich aktivace flow spadne na
-                        # OpenApiOperationParameterValidationFailed (ověřeno importem
-                        # 1.0.0.9: "missing required property 'item/Title'").
-                        # Posílají se beze změny z triggeru, takže nic nepřepíšou.
-                        "item/Title": "@triggerBody()?['Title']",
-                        "item/nazev": "@triggerBody()?['nazev']",
-                        "item/dilci_proces_kod": "@triggerBody()?['dilci_proces_kod']",
+                        # Povinné sloupce listu musí v těle být, i když se nemění —
+                        # bez nich se flow nedá aktivovat (OpenApiOperation-
+                        # ParameterValidationFailed, "missing required property
+                        # 'item/Title'"; ověřeno importem 1.0.0.9 na PPF a znovu
+                        # 1.0.0.63 na MPSV). Berou se z Nacti_aktivitu, tedy ze stavu
+                        # z okamžiku zápisu — z triggeru by to byl snímek starý až
+                        # o minutu a novější editace by se tiše vrátila zpátky.
+                        "item/Title": f"@{AKTUALNI}?['Title']",
+                        "item/nazev": f"@{AKTUALNI}?['nazev']",
+                        "item/dilci_proces_kod": f"@{AKTUALNI}?['dilci_proces_kod']",
                         "item/nazev_kratky": "@outputs('Cil')",
                     },
                     "host": {

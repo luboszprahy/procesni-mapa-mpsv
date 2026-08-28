@@ -230,11 +230,17 @@ node src/check_import.js
 
 ### Sestavení balíku — POŘADÍ NENÍ LIBOVOLNÉ
 
-`build_app.py` musí běžet **jako poslední**. Odebírá z `PatchItem` ve flow
-`AktualizaceKratkehoNazvu` pole `item/nazev` a `item/dilci_proces_kod`
-(`oprav_flow_kratky_nazev`) a vkládá definice proměnných prostředí. Kdyby
-běžel první, `build_flow.py` by ta pole vrátila zpátky a flow by přepisovalo
-novější data starým snímkem z triggeru — tiše, bez chyby.
+`build_app.py` musí běžet **jako poslední** — vkládá definice proměnných
+prostředí a jako poslední krok ověřuje flow `AktualizaceKratkehoNazvu`
+(`zkontroluj_flow_kratky_nazev`).
+
+Do 1.0.0.63 tahle funkce pole `item/nazev` a `item/dilci_proces_kod`
+z `PatchItem` **odebírala**, protože se braly ze snímku triggeru starého až
+o minutu a přepisovaly novější editaci. Tím se ale balík stal
+neaktivovatelným na čistém prostředí (MPSV 28.08.2026): bez povinných polí
+flow nejde zapnout. Od 1.0.0.64 se pole posílají, ale plní se z akce
+`Nacti_aktivitu` (`GetItem` těsně před zápisem), takže platí obojí —
+a `build_app.py` už jen kontroluje, že to tak zůstalo.
 
 Flow buildery upravují zip **na místě**, takže se pracuje na kopii, ne na
 vydaném balíku. Pracovní kopie nesmí ležet v `runs/app_build/` — `build_app.py`
@@ -260,7 +266,7 @@ s `pac` (rozšíření VS Code Power Platform Tools) se přepínač vynechá.
 # --- brány nad hotovým balíkem ---
 $z = "deploy/procesnimapa_1_0_0_63.zip"
 & $py src/check_solution.py --vstup deploy/procesnimapa_1_0_0_62.zip --vystup $z
-& $py src/check_mapa_flow.py   --solution $z
+& $py src/check_mapa_flow.py   --solution $z   # --base = předchozí balík
 & $py src/check_export_flow.py --solution $z
 & $py src/check_flow.py        --solution $z
 

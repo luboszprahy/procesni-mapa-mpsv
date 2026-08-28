@@ -307,18 +307,27 @@ def main():
             overit(prvni == UVODNI_OBRAZOVKA,
                    f"úvodní obrazovka je '{prvni}', čekal jsem '{UVODNI_OBRAZOVKA}'")
 
-            # Flow nad krátkým názvem smí přepsat jen to, co samo spočítalo.
-        # Kdyby posílalo i nazev nebo dilci_proces_kod z triggerBody, vrátilo
-        # by opravu uloženou krátce po sobě zpátky na starou hodnotu.
+            # Flow nad krátkým názvem musí povinné sloupce listu posílat
+        # (jinak ho v cílovém prostředí nejde aktivovat), ale nikdy ze snímku
+        # triggeru — ten je starý až o minutu a přepsal by novější editaci.
+        # Obojí splní jen čtení přes `Nacti_aktivitu` těsně před zápisem.
         for jmeno in vystupni.namelist():
             if "AktualizaceKratkehoNazvu" not in jmeno.replace("\\", "/"):
                 continue
-            text_flow = vystupni.read(jmeno).decode("utf-8-sig")
-            for pole in ("item/nazev\"", "item/dilci_proces_kod"):
-                overit(pole not in text_flow,
-                       f"flow AktualizaceKratkehoNazvu posílá do PatchItem '{pole}' "
-                       f"z triggerBody — přepsalo by novější hodnotu uloženou "
-                       f"krátce po sobě")
+            flow_json = json.loads(vystupni.read(jmeno).decode("utf-8-sig"))
+            definice = flow_json["properties"]["definition"]
+            zapis = (definice["actions"].get("Lisi_se", {})
+                     .get("actions", {}).get("Zapsat_kratky_nazev", {}))
+            parametry = zapis.get("inputs", {}).get("parameters", {})
+            for pole in ("item/Title", "item/nazev", "item/dilci_proces_kod"):
+                overit(parametry.get(pole) == "@body('Nacti_aktivitu')?['%s']"
+                       % pole.split("/", 1)[1],
+                       f"flow AktualizaceKratkehoNazvu neposílá do PatchItem '{pole}' "
+                       f"ze stavu čteného těsně před zápisem (je tam "
+                       f"'{parametry.get(pole)}') — bez povinných polí nejde flow "
+                       f"aktivovat, ze snímku triggeru by přepsalo novější hodnotu")
+            overit("Nacti_aktivitu" in definice["actions"],
+                   "flow AktualizaceKratkehoNazvu nemá akci Nacti_aktivitu")
 
     # datové zdroje musí zůstat připojené i uvnitř appky
         datasources = cti(msapp, "References/DataSources.json")

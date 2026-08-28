@@ -1,50 +1,68 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-28 10:09 (balík 1.0.0.63 ověřený na PPF DEV, čeká se na nasazení na MPSV)
+Aktualizováno: 2026-08-28 21:48 (1.0.0.64 — oprava aktivace čtvrtého flow na MPSV)
 
 ## CO JE NA TOBĚ
 
-**Večer: instalace na tenant MPSV.** Postup krok za krokem drží
-`deploy/mpsv/README.md` (sedm kroků). Níže je jen to, co je nové oproti
-dřívějším pokusům, a co budu potřebovat zpátky.
+**Naimportuj `deploy/procesnimapa_1_0_0_64.zip` jako upgrade** (kopie je
+i v `deploy/mpsv/`). Opravuje to, na čem dnes večer uvázlo nasazení na MPSV.
 
-### Co se od minula změnilo
+Po importu:
 
-Import na MPSV dřív padal na tom, že flow měla adresu webu PPF a GUIDy
-vývojových listů natvrdo. **To už neplatí** — web i listy se vybírají
-v průvodci importem. V kroku 3 se tě zeptá na šest proměnných: u
-`mpsv_procesnimapaSite` zadáš adresu webu MPSV, pět listů pak vybereš
-z rozbalovátka listů toho webu.
+1. **flow `AktualizaceKratkehoNazvu` zapni ručně** — import stav zapnutí nemění,
+   takže vypnuté zůstane i po opravě,
+2. appku otevři ve Studiu → mikro-změna → **Save** → **Publish** (jinak ostatní
+   účty uvidí starou verzi),
+3. **ověř adresu mapy** — tlačítko mapy v appce má nově adresu MPSV, kterou jsem
+   složil z odkazu na knihovnu. Když se mapa místo zobrazení stáhne do Downloads,
+   pošli výstup `src/zjisti_url_mapy.js` (F12 na webu MPSV) a adresu opravím.
 
-**Průvodce neproklikávej.** Proměnná bez hodnoty se neprojeví při importu,
-ale až tím, že flow nejde zapnout — a vypadá to jako chyba balíku.
+### Co 1.0.0.64 mění
 
-Odpadly dva dřívější kroky: přegenerování flow build skripty a ruční stavba
-kostry `AktualizaceKratkehoNazvu` v designeru.
+**Flow `AktualizaceKratkehoNazvu` šlo dnes na MPSV naimportovat, ale ne
+aktivovat** (protokol importu: „Aktivace pracovního postupu … Nezpracováno";
+designer u akce `Zapsat kratky nazev` hlásil *Invalid parameters* a chtěl
+`Název aktivity (úplný)` a `Primární dílčí proces (kód)`).
 
-### Co zbývá ručně a proč
+Příčina byla v balíku, ne v prostředí — dva kusy buildu si odporovaly:
 
-Appka se na proměnné zatím nepřevedla, drží web a GUIDy listů ve svém
-napojení. Takže po importu ve Studiu:
+| soubor | co dělal | proč |
+|---|---|---|
+| `build_flow.py` | povinná pole do `PatchItem` **vkládal** | bez nich flow nejde aktivovat (doloženo importem 1.0.0.9) |
+| `build_app.py` | tatáž pole **odebíral** | brala se z triggeru → přepsala novější editaci (nález A-07) |
 
-1. přepnout datové zdroje na listy MPSV,
-2. **Add data → ExportFlow** (`FlowNameId` přiděluje až cílové prostředí,
-   lokálně se dogenerovat nedá),
-3. mikro-změna → **Save** → **Publish**,
-4. export solution.
+`build_app.py` běží poslední, takže v balíku pole nebyla. Na PPF DEV to
+neprasklo: tam bylo flow zapnuté už z dřívějška a **import stav zapnutí nemění**,
+takže se aktivace vůbec nespouštěla. MPSV je první čisté nasazení.
 
-### Co mi pošli, až to bude
+**Oprava drží obojí:** před zápis přišla akce `Nacti_aktivitu` (`GetItem` podle
+`ID` z triggeru) a povinná pole se plní z ní — tedy stavem čteným těsně před
+zápisem, ne snímkem starým až o minutu. Z čerstvé hodnoty se počítá i samotný
+krátký název a proti ní se porovnává v `Lisi_se`.
 
-1. **adresu webu MPSV**,
-2. **výstup `src/zjisti_url_mapy.js`** — vlož do konzole (F12) na webu MPSV
-   až po první publikaci mapy. Potřebuju z něj `varMapaUrl`. Musí to být
-   adresa náhledu v knihovně (`AllItems.aspx?id=…`), ne přímý odkaz na
-   `.html`: na přímou cestu pošle SharePoint `Content-Disposition: attachment`
-   a mapa se místo zobrazení stáhne do Downloads,
-3. **exportovanou solution** ze Studia (krok 4 výše).
+Adresa mapy v `App.pa.yaml` je nově MPSV (`varMapaUrl`), složená z knihovny
+`…/procesnimapaApk/SiteAssets` ve tvaru `AllItems.aspx?id=…&parent=…`.
 
-Z toho postavím balík pro MPSV. Kdyby něco spadlo, pošli text chyby —
-u zapnutí flow bývá adresný, u appky ne.
+### Brány nad 1.0.0.64
+
+| brána | stav |
+|---|---|
+| `check_flow` | 26 kontrol, 0 chyb (nově `Nacti_aktivitu`, zákaz `triggerBody` v zápisu) |
+| `check_solution` | 274 kontrol, 0 chyb (kontrola obrácená: pole tam **musí** být, ale z `Nacti_aktivitu`) |
+| `check_app` / `check_env` | zelené |
+| `check_mapa_flow` / `check_export_flow` | 139 / 110, zelené |
+
+Mutačně ověřeno třemi zásahy — pole vrácené na `triggerBody`, odebrané
+`item/dilci_proces_kod`, smazaná `Nacti_aktivitu`. Všechny tři chytily obě brány.
+
+`check_mapa_flow.py` měl navíc výchozí `--base` na balík 1.0.0.61, který se při
+úklidu smazal (bez parametru padal na chybějící soubor) — přepnuto na 1.0.0.63.
+
+## Co zbývá po importu
+
+Pořád platí, že appka drží web a GUIDy listů ve svém napojení, takže po importu
+je nutné ve Studiu přepnout datové zdroje na listy MPSV a znovu udělat
+**Add data → ExportFlow** (`FlowNameId` přiděluje až cílové prostředí).
 
 ## Stav k 28.08.2026 — hotovo a ověřeno
 

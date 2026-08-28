@@ -111,6 +111,12 @@ def vyhodnot(uzel, vystupy, polozka):
 
     if jmeno == "triggerBody":
         return polozka
+    if jmeno == "body":
+        # Nacti_aktivitu vrací tentýž řádek, jen čtený těsně před zápisem —
+        # pro vyhodnocení výrazů je to stejná položka jako z triggeru.
+        if a[0] != "Nacti_aktivitu":
+            raise ValueError(f"body('{a[0]}') — neznámá akce")
+        return polozka
     if jmeno == "outputs":
         if a[0] not in vystupy:
             raise ValueError(f"outputs('{a[0]}') — takova akce pred nim neni")
@@ -259,23 +265,39 @@ def main():
                "zápisová akce nebere web z proměnné mpsv_procesnimapaSite")
         overit(parametry.get("item/nazev_kratky") == "@outputs('Cil')",
                "zápis neplní nazev_kratky výstupem Cil")
-        # Flow smí do řádku poslat jen to, co samo spočítalo, a `Title`, podle
-        # kterého SharePoint řádek najde. `nazev` a `dilci_proces_kod` odsud
-        # 23.08.2026 zmizely (auditní nález A-07): posílaly se ze snímku
-        # triggeru starého až o minutu, takže opravu názvu uloženou krátce po
-        # prvním zápisu flow tiše vrátilo na starou hodnotu. Odebírá je
-        # `oprav_flow_kratky_nazev()` v build_app.py — kontrola tady tedy musí
-        # čekat dvojici, ne původní čtveřici, jinak si obě strany odporují
-        # (rozešly se a spadlo to až 24.08.2026).
+        # Povinné sloupce listu (Title, nazev, dilci_proces_kod) musí v těle
+        # BÝT — bez nich se flow nedá aktivovat (1.0.0.63 na MPSV, 28.08.2026:
+        # aktivace skončila "Nezpracováno" a designer hlásil Invalid parameters).
+        # Zároveň nesmí pocházet z triggeru: ten dává snímek starý až o minutu,
+        # takže opravu názvu uloženou krátce po prvním zápisu flow tiše vrátí
+        # zpátky (auditní nález A-07, 23.08.2026). Obojí platí jen tehdy, když
+        # se čtou z `Nacti_aktivitu`, tedy ze stavu těsně před zápisem.
         polozky = {k: v for k, v in parametry.items() if k.startswith("item/")}
-        overit(set(polozky) == {"item/Title", "item/nazev_kratky"},
-               f"zápis nemá právě Title + nazev_kratky: {sorted(polozky)}")
+        overit(set(polozky) == {"item/Title", "item/nazev", "item/dilci_proces_kod",
+                                "item/nazev_kratky"},
+               f"zápis nemá právě čtveřici povinná pole + nazev_kratky: {sorted(polozky)}")
         for sloupec, hodnota in polozky.items():
             if sloupec == "item/nazev_kratky":
                 continue
-            ocekavano = "@triggerBody()?['%s']" % sloupec.split("/", 1)[1]
+            ocekavano = "@body('Nacti_aktivitu')?['%s']" % sloupec.split("/", 1)[1]
             overit(hodnota == ocekavano,
-                   f"{sloupec} se nevrací beze změny z triggeru (je tam '{hodnota}')")
+                   f"{sloupec} se nebere z Nacti_aktivitu (je tam '{hodnota}')")
+        overit(not any("triggerBody" in str(v) for v in polozky.values()),
+               "zápis bere hodnotu ze snímku triggeru — přepíše novější editaci")
+
+    # Čtení čerstvého stavu řádku. Bez něj by povinná pole musela přijít
+    # z triggeru a flow by přepisovalo novější data.
+    nacti = akce.get("Nacti_aktivitu")
+    overit(nacti is not None, "chybí akce Nacti_aktivitu (čerstvý stav řádku)")
+    if nacti:
+        overit(nacti["inputs"]["host"]["operationId"] == "GetItem",
+               "Nacti_aktivitu není GetItem")
+        overit(nacti["inputs"]["parameters"].get("table") == ep.param("mpsv_listAktivity"),
+               "Nacti_aktivitu nebere list z proměnné mpsv_listAktivity")
+        overit(nacti["inputs"]["parameters"].get("dataset") == ep.web(),
+               "Nacti_aktivitu nebere web z proměnné mpsv_procesnimapaSite")
+        overit(nacti["inputs"]["parameters"].get("id") == "@triggerBody()?['ID']",
+               "Nacti_aktivitu nečte řádek podle ID z triggeru")
 
     podminka = json.dumps(akce.get("Lisi_se", {}).get("expression", {}), ensure_ascii=False)
     overit("not" in podminka and "Cil" in podminka and "nazev_kratky" in podminka,
