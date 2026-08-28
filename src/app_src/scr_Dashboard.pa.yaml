@@ -207,11 +207,15 @@ Screens:
             Width: =160
             X: =428
             Y: =0
-      # Velikost písma (varFs = -4 / -2 / 0) vpravo u jména uživatele. Stupně
+      # Velikost písma (varFs = -4 / -2 / +2) vpravo u jména uživatele. Stupně
       # se posunuly o dva body dolů 24.08.2026 a znovu 25.08.2026 — výchozí
       # (střední) stupeň je dnes o čtyři body pod původním. Nejmenší popisky
       # tím padly na 6 bodů; je to dolní mez a platí jen v nejmenším ze tří
       # stupňů, kde je hustota celý smysl.
+      # Největší stupeň vyrostl 28.08.2026 z 0 na +2 (zadání po testu na DEV),
+      # takže krok mezi středním a největším je dnes 4 body, ne 2. Rostou s ním
+      # i výšky řádků a šířka sloupce kódu — všechno visí na varFs, nikde není
+      # velikost napsaná napevno.
       # Mění se text
       # v seznamu a ve stromu a výška jejich řádků — prvky uvnitř mají
       # Height = TemplateHeight - 1, takže rostou s řádkem a neořežou se.
@@ -266,15 +270,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =26
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 0)
+            OnSelect: =Set(varFs, 2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =13

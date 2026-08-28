@@ -124,15 +124,15 @@ Screens:
           Properties:
             BorderColor: =RGBA(255, 255, 255, 0.35)
             BorderThickness: =1
-            Color: =If(varFs = 0, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
-            Fill: =If(varFs = 0, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
+            Color: =If(varFs = 2, RGBA(255, 255, 255, 1), RGBA(214, 220, 234, 1))
+            Fill: =If(varFs = 2, RGBA(255, 255, 255, 0.22), RGBA(0, 0, 0, 0))
             FocusedBorderColor: =RGBA(255, 255, 255, 1)
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =26
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 255, 255, 0.14)
-            OnSelect: =Set(varFs, 0)
+            OnSelect: =Set(varFs, 2)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =RGBA(255, 255, 255, 0.30)
             Size: =13

@@ -10,7 +10,7 @@ Zadání drží `PRD.md`.
 > prvky, nová paleta, mapa bez jména správce, filtr stavu a chip osiřelých).
 > Poslední potvrzeně naběhlá verze je 1.0.0.50.
 >
-> **Jedenáct bran zeleně** (28.08.2026, balík 1.0.0.62): `check_app`,
+> **Jedenáct bran zeleně** (28.08.2026, balík 1.0.0.63): `check_app`,
 > `check_env`, `check_solution` 270/0, `check_schema`, `check_mapa_html` 31,
 > `check_mapa_beh` 25, `check_mapa_flow` 139, `check_flow` 18,
 > `check_export_flow` 110, `check_setup.js`, `check_import.js`.
@@ -242,13 +242,13 @@ tu složku na začátku maže.
 
 ```powershell
 $zaklad = "$env:TEMP/base.zip"
-Copy-Item deploy/procesnimapa_1_0_0_61.zip $zaklad
+Copy-Item deploy/procesnimapa_1_0_0_62.zip $zaklad
 
 & $py src/build_mapa_flow.py   --solution $zaklad
 & $py src/build_export_flow.py --solution $zaklad
 & $py src/add_mapa_schedule.py --solution $zaklad --hodina 7
 & $py src/build_flow.py        --solution $zaklad
-& $py src/build_app.py --bez-pac --solution $zaklad --verze 1.0.0.62
+& $py src/build_app.py --bez-pac --solution $zaklad --verze 1.0.0.63
 ```
 
 `--bez-pac` vymění `Src/*.pa.yaml` přímo v už zabaleném balíku. Jde to jen
@@ -258,8 +258,8 @@ s `pac` (rozšíření VS Code Power Platform Tools) se přepínač vynechá.
 
 ```powershell
 # --- brány nad hotovým balíkem ---
-$z = "deploy/procesnimapa_1_0_0_62.zip"
-& $py src/check_solution.py --vstup deploy/procesnimapa_1_0_0_61.zip --vystup $z
+$z = "deploy/procesnimapa_1_0_0_63.zip"
+& $py src/check_solution.py --vstup deploy/procesnimapa_1_0_0_62.zip --vystup $z
 & $py src/check_mapa_flow.py   --solution $z
 & $py src/check_export_flow.py --solution $z
 & $py src/check_flow.py        --solution $z
@@ -274,7 +274,7 @@ $z = "deploy/procesnimapa_1_0_0_62.zip"
 
 **Poslední export ze Studia je `input/procesnimapa_1_0_0_57.zip`** — z něj se
 staví na stroji s `pac`. Na stroji bez `pac` se staví z posledního vlastního
-balíku (`deploy/procesnimapa_1_0_0_61.zip` a novější) přes `--bez-pac`; export
+balíku (`deploy/procesnimapa_1_0_0_62.zip` a novější) přes `--bez-pac`; export
 ze Studia tak upravit nejde, protože YAML zdroje nenese.
 
 ## 6. Dělba práce u canvas appky

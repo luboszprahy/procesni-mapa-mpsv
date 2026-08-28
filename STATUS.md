@@ -1,51 +1,61 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-28 (balík 1.0.0.62 — flow na proměnné prostředí, kratší notifikace)
+Aktualizováno: 2026-08-28 (balík 1.0.0.63 — notifikace 3 s, největší stupeň písma o dva body výš)
 
 ## CO JE NA TOBĚ
 
-**Balík `deploy/procesnimapa_1_0_0_62.zip`** (a táž kopie v `deploy/mpsv/`).
+**Balík `deploy/procesnimapa_1_0_0_63.zip`** (a táž kopie v `deploy/mpsv/`).
 
-### 1. Import na PPF DEV — ověření, že to drží
+Import jako upgrade → **mikro-změna → Save → Publish**. Na proměnné se
+průvodce už neptá, hodnoty si prostředí drží z minulého importu.
 
-Import jako upgrade. **Průvodce se nově zeptá na šest proměnných** — u webu
-zadej adresu vývojového webu, u pěti listů je vyber z rozbalovátka. Dosud
-proměnné nebyly, takže je to poprvé a hodnoty ještě nikde uložené nejsou.
-
-Pak **zapni všechna čtyři flow** a ve Studiu **mikro-změna → Save → Publish**.
-
-Co ověřit (v tomhle pořadí, každý bod se týká něčeho jiného):
+Co ověřit:
 
 | co | čím se pozná |
 |---|---|
-| verze | nápověda u názvu v modrém pruhu ukazuje `1.0.0.62` |
-| notifikace | potvrzení po výmazu zhasne do vteřiny, chybová do dvou |
-| `MapaPublishFlow` | *Obnovit HTML* doběhne a mapa se přegeneruje |
-| `ExportFlow` | *Export → Do Wordu* i *Do Excelu* stáhne soubor |
-| `AktualizaceKratkehoNazvu` | úprava názvu aktivity srovná zkrácený název |
+| verze | nápověda u názvu v modrém pruhu ukazuje `1.0.0.63` |
+| notifikace | potvrzení svítí 3 s, chybová 4 s |
+| největší písmo | třetí „A" ve dvojici `aAA` dá text o **4 body** nad středním stupněm (dřív o 2) |
 
-**Nejdůležitější je, že jdou zapnout všechna čtyři flow.** To je jediná věc
-z celé změny, kterou nešlo ověřit offline — viz „Jediné otevřené riziko" níže.
+## Stav po testu 1.0.0.62 na PPF DEV (28.08.2026)
 
-### 2. Teprve pak MPSV
+**Prošlo.** Tím padlo jediné riziko, které nešlo ověřit offline: všechna čtyři
+flow šla zapnout a proběhla — včetně triggeru nad listem z proměnné,
+`PatchItem` s rozloženými klíči `item/<sloupec>` a `CreateFile` s datasetem
+z proměnné. Zapsáno do `power-Apps-skill` jako ověřené v provozu, ne jen
+odvozené ze vzorů.
 
-`deploy/mpsv/README.md` je přepsaný. Postup se zkrátil z devíti kroků na sedm:
-odpadlo přegenerování tří flow build skripty i ruční stavba kostry
-`AktualizaceKratkehoNazvu` v designeru. Zbývá ruční jen přepojení datových
-zdrojů **appky** a `varMapaUrl`.
+Zbývá z auditu **N-04** (`Download()` v appce vložené jako webpart na
+SharePoint stránku) — ověří se až v provozu.
 
-## CO JSEM UDĚLAL 28.08.2026
+## Změny v 1.0.0.63
 
-### Notifikace zkrácené (zadání 1)
+### Notifikace 3 s
 
-Všech 27 volání `Notify` dostalo třetí argument. Potvrzení a varování
-**1000 ms**, chyby **2000 ms** — chybu musí jít přečíst. Obě hodnoty drží
-`App.OnStart` (`varNotifyMs`, `varNotifyChybaMs`), takže se ladí z jednoho
-místa. Nová brána `kontrola_notify` v `check_app.py` hlídá, že žádné volání
-o třetí argument nepřijde a že chyba dostane tu delší dobu; ověřená třemi
-mutacemi.
+`varNotifyMs` 1000 → **3000**, `varNotifyChybaMs` 2000 → **4000**. Chybu jsem
+posunul spolu s potvrzením, aby nezhasínala dřív než ono — kdyby stačily
+3 s i u chyby, je to změna jednoho čísla v `App.OnStart`.
 
-### Flow převedená na proměnné prostředí (zadání 2)
+### Největší stupeň písma o dva body výš
+
+`varFs` má nově hodnoty **-4 / -2 / +2** (dřív -4 / -2 / 0), takže krok mezi
+středním a největším je 4 body místo dvou. Nikde se nemuselo přepisovat víc
+než tři místa na obrazovku: všechny velikosti, výšky řádků galerií i šířka
+sloupce s kódem jsou vyjádřené jako `N + varFs` nebo `N + varFs * k`.
+
+Co s tím při největším stupni vyroste:
+
+| prvek | dřív | nově |
+|---|---|---|
+| řádek stromu na Přehledu | 40 px | 48 px |
+| řádek číselníku | 44 px | 52 px |
+| řádek vazeb | 64 px | 72 px |
+| sloupec s kódem | 130 px | 154 px |
+
+Glyfy `A` na samotných tlačítkách (9 / 11 / 13 b) jsem **nechal** — ukazují
+poměr, ne absolutní velikost. Když mají povyrůst taky, je to jedno číslo.
+
+## Předchozí: 1.0.0.62 — flow na proměnné prostředí
 
 **Příčina pádu importu na MPSV:** ve všech čtyřech flow byla adresa
 vývojového webu PPF a GUIDy vývojových listů natvrdo — 16 míst. Na MPSV ten
@@ -53,17 +63,14 @@ web neexistuje, akce jsou neplatné, flow nejde zapnout a designer list ani
 nenabídne k přepnutí. Appka je jinde: váže se přes connection reference,
 kterou průvodce importem přepojí sám, proto ta šla.
 
-Balík teď deklaruje šest proměnných prostředí (`mpsv_procesnimapaSite`
-a pět listových) a **v definicích flow není ani jedna adresa nebo GUID**.
+Balík deklaruje šest proměnných prostředí (`mpsv_procesnimapaSite` a pět
+listových) a **v definicích flow není ani jedna adresa nebo GUID**.
 
-### Oprava vlastního tvrzení — a proč to bylo důležité
+### Oprava vlastního tvrzení
 
 Nejdřív jsem napsal, že převést jdou jen tři flow ze čtyř: skill
 `power-Apps-skill` tvrdí, že zápisová akce ani trigger nad listem runtime
-výraz nesnesou. Na základě toho padlo rozhodnutí `AktualizaceKratkehoNazvu`
-zrušit a zkracování přepsat do Power Fx.
-
-Rozbor šesti produkčních balíků PPF (repo
+výraz nesnesou. Rozbor šesti produkčních balíků PPF (repo
 `luboszprahy/powerApps-vzory-aplikaci-pro-claude`, dodal uživatel) to
 vyvrátil:
 
@@ -77,27 +84,24 @@ vyvrátil:
 
 Rozhodující je `FloorPlan_1_0_0_19` — balík, ze kterého to varování ve skillu
 pochází. Má `dataset` z proměnné, ale **`table` natvrdo**; právě jeho
-přepnutím ve verzi 1.0.0.21 to tehdy spadlo. Ostatních pět balíků to má
-a běží.
+přepnutím ve verzi 1.0.0.21 to tehdy spadlo.
 
 **Nerozhoduje druh akce, ale typ proměnné.** Textová (`100000000`) nestačí;
 funguje datasetová (`100000004`) s `apiid` konektoru a `parameterkey`, u listu
 navíc `parentdefinitionid` na proměnnou webu. Ta dvojice je zároveň důvod,
-proč průvodce importem umí nabídnout **výběr webu a pak rozbalovátko jeho
-listů** místo textového pole na GUID.
+proč průvodce importem umí nabídnout výběr webu a pak rozbalovátko jeho listů
+místo textového pole na GUID.
 
-Po opravě se rozhodnutí obrátilo: čtvrté flow **zůstává** a jen se převedlo
-jako ostatní. Do appky se kvůli němu nesahalo.
-
-Poznámka ve skillu je opravená včetně dokladů a rozlišení obou typů.
+Po opravě se rozhodnutí obrátilo: čtvrté flow **zůstalo** a jen se převedlo
+jako ostatní. Do appky se kvůli němu nesahalo. Test na DEV to potvrdil.
 
 ### Proč definice nemají výchozí hodnotu
 
 Kdyby ji měly, průvodce by na MPSV předvyplnil adresu webu PPF a import by
-tiše prošel se špatným napojením — tedy přesně dnešní chyba, jen přesunutá
+tiše prošel se špatným napojením — tedy přesně původní chyba, jen přesunutá
 o patro dál. Bez ní se musí vyplnit vědomě. Prostředí si hodnotu po prvním
-vyplnění drží, další import se neptá. Z balíku se zároveň odstraňuje
-`environmentvariablevalues.json`, aby import nepřepisoval nastavení cíle.
+vyplnění drží. Z balíku se zároveň odstraňuje `environmentvariablevalues.json`,
+aby import nepřepisoval nastavení cíle.
 
 ### Brány
 
@@ -105,7 +109,7 @@ vyplnění drží, další import se neptá. Z balíku se zároveň odstraňuje
 |---|---|---|
 | `check_app` | zelená | `kontrola_notify`, 3 mutace |
 | `check_env` | **nová** | tvar definic proměnných proti vzoru Clearstream |
-| `check_solution` | 270 kontrol | `adresy_ve_flow` je nově absolutní (žádná adresa ve flow), `promenne_ve_flow` je nová; **6 mutací** |
+| `check_solution` | 270 kontrol | `adresy_ve_flow` nově absolutní (žádná adresa ve flow), `promenne_ve_flow` nová; **6 mutací** |
 | `check_flow` | 18 | tři kontroly obrácené — web i list musí být proměnná |
 | `check_mapa_flow` | 139 | `table` proti proměnné, ne proti GUID |
 | `check_export_flow` | 110 | dataset proti proměnné; interpret umí `parameters()` |
@@ -122,31 +126,34 @@ a adresa na cizí doméně. Všechny chycené.
 `build_app.py` musí běžet **jako poslední**. Odebírá z `PatchItem` pole
 `item/nazev` a `item/dilci_proces_kod`; kdyby běžel první, `build_flow.py` by
 je vrátil a flow by přepisovalo novější data starým snímkem z triggeru —
-tiše, bez chyby. Pracovní kopie navíc nesmí ležet v `runs/app_build/`,
-tu složka `build_app.py` na začátku maže. Celé v `HANDOVER.md` §5.
+tiše, bez chyby. Pracovní kopie navíc nesmí ležet v `runs/app_build/`, tu
+`build_app.py` na začátku maže. Celé v `HANDOVER.md` §5.
 
-## Jediné otevřené riziko
+## Co zbývá k nasazení na MPSV
 
-`CreateFile` s datasetem z proměnné je doložený dvěma produkčními balíky
-(Clearstream, Průvodní list), ale **offline se ověřit nedá** — potvrdí to až
-zapnutí flow na DEV. Kdyby přece jen nešlo, fallback je nechat u té jediné
-akce adresu natvrdo a generovat ji build skriptem; zbytek změny na tom
-nestojí.
+Balík je tentýž — flow jsou přenositelná. Ruční zůstávají dvě věci, které
+předem připravit nejde:
 
-Z auditu dál zůstává **N-04** (`Download()` v appce vložené jako webpart na
-SharePoint stránku) — ověří se až v provozu.
+1. **přepojení datových zdrojů appky** ve Studiu na listy MPSV a
+   `Add data → ExportFlow` (`FlowNameId` přiděluje až cílové prostředí),
+2. **`varMapaUrl`** — musí to být adresa náhledu v knihovně, ne přímý odkaz na
+   `.html`, jinak SharePoint mapu místo zobrazení stáhne. Vytáhne se až po
+   první publikaci mapy na MPSV skriptem `src/zjisti_url_mapy.js` do konzole.
 
-## Co dál, až tohle projde
+**Od uživatele potřebuju** adresu webu MPSV a výstup toho skriptu; z toho
+vznikne balík pro MPSV. Postup je v `deploy/mpsv/README.md` (sedm kroků).
+
+`PLAN.md` F8/5 drží odloženou půlku změny: převést na proměnné i napojení
+**canvas appky** (`datasetOverride` / `tableNameOverride`, dělá to
+VendorManagement i Průvodní list). Tím by zmizel i bod 1. Odloženo schválně —
+appka na MPSV už napojená byla, skill má doložené, že proměnná bez hodnoty
+shodí napojení celé connection, a sahá se tím do `.msapp`, což offline
+neověřím.
+
+## Co dál, až bude MPSV nasazené
 
 `PLAN.md` sekce „Náměty na rozšíření": osm námětů, doporučené pořadí
 **R-1 → R-3 → R-2 → R-8**. Nic z toho není zadané.
-
-`PLAN.md` F8/5 drží odloženou půlku téhle změny: převést na proměnné i
-napojení **canvas appky** (`datasetOverride` / `tableNameOverride`, dělá to
-VendorManagement i Průvodní list). Tím by z přenosu na další tenant zmizel
-i ruční krok ve Studiu. Odloženo schválně — appka na MPSV už napojená je,
-skill má doložené, že proměnná bez hodnoty shodí napojení celé connection,
-a sahá se tím do `.msapp`, což offline neověřím.
 
 ## Konec dne 25.08.2026 — projekt uklizený, appka 1.0.0.61 v provozu
 
