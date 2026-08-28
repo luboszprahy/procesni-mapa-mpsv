@@ -26,6 +26,21 @@ import env_promenne as ep  # noqa: E402
 # datasetová (100000004), ne textová. Viz src/env_promenne.py.
 MAXLEN = 150
 AKTUALNI = "body('Nacti_aktivitu')"
+
+# GUID listu Aktivity v CÍLOVÉM prostředí. Jediné místo v celém balíku, kde je
+# identifikátor listu natvrdo — a je to nutné zlo:
+#
+#   PatchItem si schéma těla odvozuje z konkrétního listu. Když je `table`
+#   runtime výraz (proměnná prostředí), schéma se nerozbalí a rozložené klíče
+#   `item/<sloupec>` přestanou být platné. Flow se naimportuje, ale zapnout
+#   nejde — "The API operation 'PatchItem' is missing required property 'item'"
+#   (MPSV, 28.08.2026, balík 1.0.0.64; totéž FloorPlan 1.0.0.21).
+#
+# `dataset` (web) proměnnou snese, ta je pro tělo bez významu — přesně tuhle
+# kombinaci má i produkční FloorPlan. Ostatní tři flow zůstávají celá na
+# proměnných; tohle jediné se při přenosu na další tenant musí přegenerovat
+# s novým GUID (`--list-aktivity`).
+LIST_AKTIVITY_MPSV = "b1daaa38-53df-4c7b-b9f8-03b36d46bc60"
 VYPUSTKA = "decodeUriComponent('%E2%80%A6')"
 
 
@@ -46,7 +61,7 @@ def orez(zdroj):
     return f"@if(contains(' ,;.', {posledni}), {bez_posledniho}, {x})"
 
 
-def akce():
+def akce(list_aktivity):
     b = "outputs('Bez_bilych_znaku')"
     rez = "outputs('Rez')"
     mezera = f"lastIndexOf({rez}, ' ')"
@@ -60,7 +75,7 @@ def akce():
             "inputs": {
                 "parameters": {
                     "dataset": ep.web(),
-                    "table": ep.param("mpsv_listAktivity"),
+                    "table": list_aktivity,
                     "id": "@triggerBody()?['ID']",
                 },
                 "host": {
@@ -104,7 +119,7 @@ def akce():
                 "inputs": {
                     "parameters": {
                         "dataset": ep.web(),
-                        "table": ep.param("mpsv_listAktivity"),
+                        "table": list_aktivity,
                         "id": "@triggerBody()?['ID']",
                         # Povinné sloupce listu musí v těle být, i když se nemění —
                         # bez nich se flow nedá aktivovat (OpenApiOperation-
@@ -136,6 +151,9 @@ def akce():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True, help="solution zip s exportovaným flow")
+    parser.add_argument("--list-aktivity", default=LIST_AKTIVITY_MPSV,
+                        help="GUID listu Aktivity v cílovém prostředí (PatchItem "
+                             "ho runtime výrazem nesnese, viz komentář u konstanty)")
     argumenty = parser.parse_args()
 
     cesta = Path(argumenty.solution)
@@ -167,9 +185,9 @@ def main():
     # ukazovala, je od téhle chvíle jedno — vybírá se v průvodci importem.
     puvodni = dict(trigger["inputs"]["parameters"])
     trigger["inputs"]["parameters"]["dataset"] = ep.web()
-    trigger["inputs"]["parameters"]["table"] = ep.param("mpsv_listAktivity")
+    trigger["inputs"]["parameters"]["table"] = argumenty.list_aktivity
 
-    definice["actions"] = akce()
+    definice["actions"] = akce(argumenty.list_aktivity)
     definice["contentVersion"] = "1.0.0.0"
     polozky[klic] = json.dumps(flow, ensure_ascii=False, indent=1).encode("utf-8")
 
@@ -179,8 +197,9 @@ def main():
 
     print(f"flow doplněno: {klic.split('/')[-1]}")
     print(f"  akcí: {len(definice['actions'])}")
-    print(f"  trigger i zápis nově z proměnných: {ep.web()} / "
-          f"{ep.param('mpsv_listAktivity')}")
+    print(f"  web z proměnné: {ep.web()}")
+    print(f"  list Aktivity natvrdo (PatchItem runtime výraz nesnese): "
+          f"{argumenty.list_aktivity}")
     print(f"  kostra ukazovala na: {puvodni.get('dataset')} / {puvodni.get('table')}")
     return 0
 

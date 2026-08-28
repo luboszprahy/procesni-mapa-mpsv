@@ -228,6 +228,23 @@ node src/check_setup.js
 node src/check_import.js
 ```
 
+### Flow AktualizaceKratkehoNazvu je vázané na konkrétní tenant
+
+`PatchItem` si schéma těla odvozuje z konkrétního listu. S `table` z proměnné
+se schéma nerozbalí, rozložené klíče `item/<sloupec>` přestanou platit a flow
+**nejde zapnout** ("The API operation 'PatchItem' is missing required property
+'item'", MPSV 28.08.2026). Celé flow proto drží GUID listu Aktivity — trigger,
+čtení i zápis. `dataset` (web) proměnnou snese.
+
+Při přenosu na další prostředí se musí přegenerovat s novým GUID:
+
+```powershell
+& $py src/build_flow.py --solution $zaklad --list-aktivity <GUID listu Aktivity>
+```
+
+GUID zjistí `deploy/mpsv/03_vypis_guidy.js` vložený do konzole na cílovém webu.
+Ostatní tři flow jsou celá na proměnných a přegenerovat se nemusí.
+
 ### Sestavení balíku — POŘADÍ NENÍ LIBOVOLNÉ
 
 `build_app.py` musí běžet **jako poslední** — vkládá definice proměnných

@@ -25,6 +25,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from check_schema import zkratit  # noqa: E402
 import env_promenne as ep  # noqa: E402
 
+GUID = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+
 MAXLEN = 150
 
 chyby = []
@@ -240,9 +242,12 @@ def main():
     trigger = next(iter(definice["triggers"].values()))
     overit(trigger["inputs"]["host"]["operationId"] == "GetOnUpdatedItems",
            "trigger není 'when an item is created or modified'")
-    overit(trigger["inputs"]["parameters"]["table"] == ep.param("mpsv_listAktivity"),
-           "trigger nebere list z proměnné mpsv_listAktivity — na cizím tenantu "
-           "by hlídal list, který tam neexistuje")
+    # Trigger drží GUID ze stejného důvodu jako zápis: celé flow míří na jeden
+    # konkrétní list a míchat proměnnou s GUIDem by znamenalo, že trigger hlídá
+    # jiný list, než do kterého se zapisuje.
+    overit(re.fullmatch(GUID, str(trigger["inputs"]["parameters"]["table"])) is not None,
+           f"trigger nemá list jako GUID (je tam "
+           f"'{trigger['inputs']['parameters']['table']}')")
     overit(trigger["inputs"]["parameters"]["dataset"] == ep.web(),
            "trigger nebere web z proměnné mpsv_procesnimapaSite")
     overit("shared_sharepointonline" in json.dumps(flow["properties"].get("connectionReferences", {})),
@@ -254,13 +259,14 @@ def main():
         parametry = zapis["inputs"]["parameters"]
         overit(zapis["inputs"]["host"]["operationId"] == "PatchItem",
                "zápis není PatchItem (Update item)")
-        # Do 1.0.0.61 se tu vyžadoval GUID natvrdo, protože skill tvrdí, že
-        # PatchItem runtime výraz nesnese. Rozbor produkčních balíků PPF
-        # (Clearstream, Průvodní list, Správa notifikací, MessageCenter) ukázal,
-        # že s DATASETOVOU proměnnou (typ 100000004) PatchItem běží; padá to
-        # jen s textovou nebo s proměnnou bez vyplněné hodnoty.
-        overit(parametry.get("table") == ep.param("mpsv_listAktivity"),
-               "zápisová akce nebere list z proměnné mpsv_listAktivity")
+        # `table` MUSÍ být GUID natvrdo. S runtime výrazem si PatchItem
+        # nerozbalí schéma těla, rozložené klíče `item/<sloupec>` přestanou
+        # platit a flow nejde zapnout: "The API operation 'PatchItem' is
+        # missing required property 'item'" (MPSV 28.08.2026, 1.0.0.64).
+        # `dataset` proměnnou snese — pro tělo nemá význam.
+        overit(re.fullmatch(GUID, str(parametry.get("table"))) is not None,
+               f"zápisová akce nemá list jako GUID (je tam '{parametry.get('table')}') "
+               f"— PatchItem runtime výraz nesnese")
         overit(parametry.get("dataset") == ep.web(),
                "zápisová akce nebere web z proměnné mpsv_procesnimapaSite")
         overit(parametry.get("item/nazev_kratky") == "@outputs('Cil')",
@@ -292,8 +298,8 @@ def main():
     if nacti:
         overit(nacti["inputs"]["host"]["operationId"] == "GetItem",
                "Nacti_aktivitu není GetItem")
-        overit(nacti["inputs"]["parameters"].get("table") == ep.param("mpsv_listAktivity"),
-               "Nacti_aktivitu nebere list z proměnné mpsv_listAktivity")
+        overit(re.fullmatch(GUID, str(nacti["inputs"]["parameters"].get("table"))) is not None,
+               "Nacti_aktivitu nemá list jako GUID")
         overit(nacti["inputs"]["parameters"].get("dataset") == ep.web(),
                "Nacti_aktivitu nebere web z proměnné mpsv_procesnimapaSite")
         overit(nacti["inputs"]["parameters"].get("id") == "@triggerBody()?['ID']",

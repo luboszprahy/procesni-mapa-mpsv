@@ -3,7 +3,7 @@
 Tahle složka se **generuje** skriptem `src/make_deploy_mpsv.py`. Neupravuj
 soubory v ní ručně — po příští změně schématu nebo appky se přepíšou.
 
-Balík appky: **`procesnimapa_1_0_0_64.zip`**
+Balík appky: **`procesnimapa_1_0_0_65.zip`**
 
 ## Co se bude importovat
 
@@ -73,7 +73,7 @@ build nepotřebuje (listy se vybírají v průvodci), hodí se jen ke kontrole,
 
 ### 3. Naimportovat solution a VYPLNIT PROMĚNNÉ
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_64.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_65.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se postupně zeptá na:

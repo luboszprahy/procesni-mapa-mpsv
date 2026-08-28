@@ -120,6 +120,9 @@ def adresy_ve_flow(vystupni, customizations):
         overit(not neznami, f"{soubor} obsahuje adresu na cizího hostitele: {neznami}")
 
 
+GUID_LISTU = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+
+
 def promenne_ve_flow(vystupni):
     """Každá SharePoint akce bere web i list z deklarované proměnné prostředí.
 
@@ -133,6 +136,14 @@ def promenne_ve_flow(vystupni):
 
     for jmeno, soubor in _flow_soubory(vystupni):
         definice = json.loads(vystupni.read(jmeno).decode("utf-8-sig"))["properties"]["definition"]
+        # AktualizaceKratkehoNazvu je výjimka a musí jí zůstat: PatchItem si
+        # schéma těla odvozuje z konkrétního listu, takže s `table` z proměnné
+        # se rozložené klíče `item/<sloupec>` nerozbalí a flow nejde zapnout
+        # ("missing required property 'item'", MPSV 28.08.2026). Celé flow proto
+        # drží jeden GUID — trigger, čtení i zápis, ať nemíří každý jinam.
+        # `dataset` (web) proměnnou snese i tady; pro tělo nemá význam.
+        list_natvrdo = "AktualizaceKratkehoNazvu" in soubor
+        guidy = set()
         for akce, operace, parametry in _sharepointove_akce(definice):
             if "dataset" in parametry:
                 overit(parametry["dataset"] == ocekavany_web,
@@ -140,10 +151,19 @@ def promenne_ve_flow(vystupni):
                        f"{ep.WEB}, ale {parametry['dataset']!r}")
                 pouzite.add(parametry["dataset"])
             if "table" in parametry:
-                overit(parametry["table"] in listove,
-                       f"{soubor}/{akce} ({operace}): table není žádná z proměnných "
-                       f"listů, ale {parametry['table']!r}")
-                pouzite.add(parametry["table"])
+                if list_natvrdo:
+                    overit(re.fullmatch(GUID_LISTU, str(parametry["table"])) is not None,
+                           f"{soubor}/{akce} ({operace}): table musí být GUID "
+                           f"(PatchItem runtime výraz nesnese), ale je "
+                           f"{parametry['table']!r}")
+                    guidy.add(parametry["table"])
+                else:
+                    overit(parametry["table"] in listove,
+                           f"{soubor}/{akce} ({operace}): table není žádná z proměnných "
+                           f"listů, ale {parametry['table']!r}")
+                    pouzite.add(parametry["table"])
+        overit(len(guidy) <= 1,
+               f"{soubor}: trigger, čtení a zápis míří na různé listy: {sorted(guidy)}")
 
     slozky = {c.split("/")[1] for c in
               (n.replace("\\", "/") for n in vystupni.namelist())

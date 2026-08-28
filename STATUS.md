@@ -1,68 +1,70 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-28 21:48 (1.0.0.64 — oprava aktivace čtvrtého flow na MPSV)
+Aktualizováno: 2026-08-28 22:20 (1.0.0.65 — PatchItem vrácen na GUID listu)
 
 ## CO JE NA TOBĚ
 
-**Naimportuj `deploy/procesnimapa_1_0_0_64.zip` jako upgrade** (kopie je
-i v `deploy/mpsv/`). Opravuje to, na čem dnes večer uvázlo nasazení na MPSV.
+**Naimportuj `deploy/procesnimapa_1_0_0_65.zip`** (kopie v `deploy/mpsv/`),
+pak flow `AktualizaceKratkehoNazvu` **zapni ručně** a ověř, že se zapnout dá.
 
-Po importu:
+Dvě věci, které při importu nepřekvap:
 
-1. **flow `AktualizaceKratkehoNazvu` zapni ručně** — import stav zapnutí nemění,
-   takže vypnuté zůstane i po opravě,
-2. appku otevři ve Studiu → mikro-změna → **Save** → **Publish** (jinak ostatní
-   účty uvidí starou verzi),
-3. **ověř adresu mapy** — tlačítko mapy v appce má nově adresu MPSV, kterou jsem
-   složil z odkazu na knihovnu. Když se mapa místo zobrazení stáhne do Downloads,
-   pošli výstup `src/zjisti_url_mapy.js` (F12 na webu MPSV) a adresu opravím.
+- **Průvodce se zeptá i na list Aktivity** (`mpsv_listAktivity`). Vyplň ho,
+  ale flow ho už nepoužívá — zůstává pro budoucí převod appky na proměnné
+  (F8/5). Neškodí, jen to není potřeba.
+- **Hodnota proměnné se občas neuloží** (u tebe `mpsv_listAgendy`). Doplň ji
+  ručně: Řešení → *procesni mapa* → Proměnné prostředí → vybrat → hodnota →
+  Uložit. Definice Agend je bajtově stejná jako u ostatních pěti, takže to není
+  vada balíku, ale chování průvodce u proměnných bez výchozí hodnoty. **Bez
+  vyplnění hodnoty flow nejde zapnout** — a hláška o tom nemluví.
 
-### Co 1.0.0.64 mění
+## 1.0.0.65 — PatchItem nesnese list z proměnné (potvrzeno v provozu)
 
-**Flow `AktualizaceKratkehoNazvu` šlo dnes na MPSV naimportovat, ale ne
-aktivovat** (protokol importu: „Aktivace pracovního postupu … Nezpracováno";
-designer u akce `Zapsat kratky nazev` hlásil *Invalid parameters* a chtěl
-`Název aktivity (úplný)` a `Primární dílčí proces (kód)`).
+Zapnutí `AktualizaceKratkehoNazvu` na MPSV skončilo:
 
-Příčina byla v balíku, ne v prostředí — dva kusy buildu si odporovaly:
+```
+InvalidOpenApiFlow … OpenApiOperationParameterValidationFailed
+Input parameter 'item' validation failed in workflow operation
+'Zapsat_kratky_nazev': The API operation 'PatchItem' is missing
+required property 'item'.
+```
 
-| soubor | co dělal | proč |
-|---|---|---|
-| `build_flow.py` | povinná pole do `PatchItem` **vkládal** | bez nich flow nejde aktivovat (doloženo importem 1.0.0.9) |
-| `build_app.py` | tatáž pole **odebíral** | brala se z triggeru → přepsala novější editaci (nález A-07) |
+**Tohle je jiná chyba než ta ráno.** Nejde o chybějící povinné sloupce
+(`item/Title`), ale o **celé tělo `item`**: `PatchItem` si schéma těla odvozuje
+z konkrétního listu, a když je `table` runtime výraz, schéma se nerozbalí —
+rozložené klíče `item/<sloupec>` tím přestanou být platné.
 
-`build_app.py` běží poslední, takže v balíku pole nebyla. Na PPF DEV to
-neprasklo: tam bylo flow zapnuté už z dřívějška a **import stav zapnutí nemění**,
-takže se aktivace vůbec nespouštěla. MPSV je první čisté nasazení.
+Původní tvrzení skillu (`u zápisových akcí nesmí být list runtime výraz`) tedy
+**platí** a dnešní ranní „vyvrácení" bylo mylné. Rozbor produkčních balíků PPF
+ukázal `table` z proměnné u `PatchItem`, ale to nestačí jako důkaz — rozhodující
+je, jestli se tělo posílá rozložené (`item/<sloupec>`), nebo jako celý objekt.
+Ověření na PPF DEV bylo neplatné z jiného důvodu: flow tam bylo zapnuté
+z dřívějška a **import stav zapnutí nemění**, takže se aktivace nespouštěla.
 
-**Oprava drží obojí:** před zápis přišla akce `Nacti_aktivitu` (`GetItem` podle
-`ID` z triggeru) a povinná pole se plní z ní — tedy stavem čteným těsně před
-zápisem, ne snímkem starým až o minutu. Z čerstvé hodnoty se počítá i samotný
-krátký název a proti ní se porovnává v `Lisi_se`.
+**Oprava:** celé flow `AktualizaceKratkehoNazvu` drží **GUID listu Aktivity**
+(`b1daaa38-…`) — trigger, `Nacti_aktivitu` i zápis, ať nemíří každý jinam.
+`dataset` (web) zůstává z proměnné; pro tělo nemá význam a přesně tuhle
+kombinaci má i produkční FloorPlan. Ostatní tři flow jsou beze změny celá na
+proměnných.
 
-Adresa mapy v `App.pa.yaml` je nově MPSV (`varMapaUrl`), složená z knihovny
-`…/procesnimapaApk/SiteAssets` ve tvaru `AllItems.aspx?id=…&parent=…`.
+**Cena:** tohle jediné flow je vázané na konkrétní tenant. Přenos na další
+prostředí = přegenerovat `build_flow.py --list-aktivity <GUID>`. Je to zapsané
+u konstanty `LIST_AKTIVITY_MPSV` i v `HANDOVER.md`.
 
-### Brány nad 1.0.0.64
+Oprava z 1.0.0.64 (`Nacti_aktivitu` = čerstvý stav řádku před zápisem) **platí
+dál** — řeší druhou, nezávislou past: povinná pole se posílat musí, ale ze
+snímku triggeru by přepsala novější editaci.
 
-| brána | stav |
-|---|---|
-| `check_flow` | 26 kontrol, 0 chyb (nově `Nacti_aktivitu`, zákaz `triggerBody` v zápisu) |
-| `check_solution` | 274 kontrol, 0 chyb (kontrola obrácená: pole tam **musí** být, ale z `Nacti_aktivitu`) |
-| `check_app` / `check_env` | zelené |
-| `check_mapa_flow` / `check_export_flow` | 139 / 110, zelené |
+### Brány nad 1.0.0.65
 
-Mutačně ověřeno třemi zásahy — pole vrácené na `triggerBody`, odebrané
-`item/dilci_proces_kod`, smazaná `Nacti_aktivitu`. Všechny tři chytily obě brány.
+`check_flow` 26 · `check_solution` 278 · `check_env` · `check_app` ·
+`check_mapa_flow` 139 · `check_export_flow` 110 — vše zelené.
 
-`check_mapa_flow.py` měl navíc výchozí `--base` na balík 1.0.0.61, který se při
-úklidu smazal (bez parametru padal na chybějící soubor) — přepnuto na 1.0.0.63.
-
-## Co zbývá po importu
-
-Pořád platí, že appka drží web a GUIDy listů ve svém napojení, takže po importu
-je nutné ve Studiu přepnout datové zdroje na listy MPSV a znovu udělat
-**Add data → ExportFlow** (`FlowNameId` přiděluje až cílové prostředí).
+Mutačně ověřeno šesti zásahy. Nové tři: `table` vrácený na proměnnou (regrese,
+která shodila MPSV), trigger hlídající jiný list než ten, do kterého se zapisuje,
+a web natvrdo místo proměnné. Kontrola v `check_solution` má pro tohle jediné
+flow výjimku, ale zároveň vynucuje, že všechny tři akce míří na **týž** GUID —
+jinak by výjimka propustila rozpojené flow.
 
 ## Stav k 28.08.2026 — hotovo a ověřeno
 
