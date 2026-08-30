@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 17:55 (F9: balík 1.0.0.68 hotový, brány zeleně; čeká se na GUID Aktivity z PPF DEV)
+Aktualizováno: 2026-08-30 18:15 (F10 a F11 zadány: zánik+vznik, oddělená záloha a import)
 
 ## CO JE NA TOBĚ
 
@@ -14,6 +14,37 @@ Aktualizováno: 2026-08-30 17:55 (F9: balík 1.0.0.68 hotový, brány zeleně; �
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
 3. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
+4. **Otestuj konektor Excel Online (Business)** — až budeš u toho. Ručně
+   v designeru jedno flow o jedné akci `List rows present in a table` nad
+   testovacím `.xlsx` (musí mít formátovanou **Tabulku**, ne volnou mřížku).
+   Zajímá mě, jestli akce projde DLP a běh doběhne — v **obou** tenantech.
+   Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
+   jinak a je lepší to vědět teď než po týdnu stavění.
+
+## F10 a F11 zadány — rozhodnutí z 30.08.2026 18:08
+
+Podrobné kroky, testy a rizika jsou v `PLAN.md`. Sem jen to, co se rozhodlo:
+
+- **Přesun položky pod jiného rodiče = zánik a vznik (varianta C).** Kód se
+  nikdy nepřepisuje: starý se uzavře do listu `HistorieKodu`, nový vznikne pod
+  novým rodičem a obě strany na sebe ukazují. Uzavřený kód se nerecykluje.
+  Cena: přesun procesu uzavře celý podstrom, protože prefix se mění všem.
+- **Záloha a import zůstávají oddělené.** Import = pravý `.xlsx` se šablonou
+  formátovanou jako Tabulka, čtený konektorem Excel Online (Business).
+  Záloha = JSON snímek plánovaným flow. Sdílí se tvar tabulky a náhledový
+  engine, ne formát a ne operace. Pořadí: záloha → import → restore.
+
+### Nález při rozboru: přesun aktivity dnes nechává starý kód
+
+Appka přesun o úroveň níž už umí a řeší ho tiše variantou A. `drp_Dilci` je
+editovatelný i u existující aktivity (`scr_Detail.pa.yaml:235`), při uložení se
+přepíše `dilci_proces_kod` a přesype vazební tabulka (řádky 712–741), ale
+`varNovyKod` je u existujícího záznamu `varAktivita.Title` (řádek 698) — **kód
+zůstane starý a prefix od té chvíle ukazuje jinam než rodič.** Tooltip u toho
+dropdownu přitom slibuje „určuje kód aktivity".
+
+Zjištěno čtením YAML, ne během appky. Opraví to F10 krok 2 — je to zároveň
+nejmenší instance téže operace, takže ověří návrh dřív než kaskáda nad procesem.
 
 ## F9 — přenositelnost mezi tenanty (30.08.2026)
 
@@ -2468,8 +2499,10 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
 Kroky 5 a 6 (build a import na PPF DEV, pak zpět na MPSV) čekají na GUID listu
 Aktivity z PPF DEV** — domluveno na 31.08.2026, viz „CO JE NA TOBĚ" nahoře.
 Bez něj se druhý balík postavit nedá, `PatchItem` runtime výraz nesnese.
-Do té doby nic dalšího nerozpracovávám; náměty ze sekce „Náměty na rozšíření"
-jsou neschválené.
+
+**Po F9 následují F10 a F11** — zadané 30.08.2026 večer, plán v `PLAN.md`.
+Zatím jen naplánované, nerozpracované; pořadí je F9/5–6 → F11 krok 2 (test DLP,
+je to deset minut a rozhoduje o zbytku F11) → F10 → zbytek F11.
 
 Dělba práce u canvas apps je zavedená a zapsaná ve skillu `power-Apps-skill`
 i v paměti projektu: uživatel založí appku ve Studiu a pošle solution,

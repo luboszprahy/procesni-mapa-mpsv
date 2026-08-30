@@ -1423,6 +1423,271 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
 
 ---
 
+## F10 — Životní cyklus kódu: přesun jako zánik + vznik (zadáno 30.08.2026)
+
+**Rozhodnutí zadavatele (30.08.2026 18:08): varianta C — zánik a vznik.**
+Přesun položky pod jiného rodiče neznamená přepis kódu. Starý kód se uzavře
+a zůstane v evidenci jako doklad, nový kód vznikne pod novým rodičem a obě
+strany na sebe ukazují.
+
+Tím kód navždy znamená jednu jedinou věc — což je vlastnost, kterou po
+schválení organizačního řádu už nejde dodělat zpětně. Volba je konzervativnější
+než přečíslování a nikdy se nebude migrovat.
+
+### Co to stojí — ať to není překvapení
+
+Přesun **procesu** s 8 dílčími procesy a 40 aktivitami uzavře 49 kódů a založí
+49 nových, protože každému potomkovi se mění prefix. To je podstata varianty C:
+uzavírá se každý záznam, jehož kód se mění, ne jen ten, který se fyzicky
+přesouvá. V mapovací fázi, kdy jsou opravy zařazení časté, tak evidence poroste
+rychleji, než by rostla přečíslováním.
+
+Proto **uzavřené kódy nejdou do živých listů**, ale do samostatného listu
+`HistorieKodu` (viz krok 1). Živé listy tím zůstanou čisté a nepřiblíží se
+delegačnímu stropu 2 000 rychleji, než musí (souvislost s K1–K4 níže).
+
+### Pravidla, která z varianty C plynou
+
+1. **Uzavřený kód se nikdy nerecykluje.** Přidělovací vzorec musí brát maximum
+   přes živý list **i přes historii**.
+2. **Uzavřený záznam se nemaže.** Je to doklad, ne odpad.
+3. **Uzavřené kódy nejdou do mapy, do stromu ani do textu OŘ.** Dohledatelné
+   jsou přes filtr „zobrazit historii" a přes odkaz z nástupce.
+4. **Přesun je kaskáda.** Uzavírá se celý podstrom, protože prefix se mění všem.
+5. **Kaskáda je jedna transakce s protokolem.** Metodika vyžaduje, aby změny
+   byly verzované a schvalované — protokol je to, co se schvaluje.
+
+### Nález, kvůli kterému to není hypotetické (30.08.2026)
+
+Appka dnes přesun o úroveň níž **umí a řeší ho tiše variantou A** (kód zůstane,
+rodič se změní, prefix začne lhát):
+
+- `drp_Dilci` je editovatelný i u existující aktivity
+  (`DisplayMode.Edit`, `scr_Detail.pa.yaml:235`),
+- při uložení se přepíše `dilci_proces_kod` a přesype vazební tabulka
+  (`scr_Detail.pa.yaml:712–741`),
+- ale `varNovyKod` je u existujícího záznamu `varAktivita.Title`
+  (`scr_Detail.pa.yaml:698`) — **kód zůstane starý.**
+
+Tooltip u toho dropdownu přitom tvrdí „určuje kód aktivity a její primární
+zařazení", což platí jen při zakládání. Zjištěno čtením YAML, ne během appky.
+
+Proto je krok 2 první na řadě: je to nejmenší instance téže operace a ověří
+celý návrh na reálných datech dřív, než se pustíme do kaskády nad procesem.
+
+### Kroky
+
+```
+1. [List HistorieKodu a sloupce nástupnictví] — co: src/schema.json,
+     src/make_setup.py, src/check_schema.py
+   Nový list `HistorieKodu` (jeden pro všechny úrovně):
+     Title = uzavřený kód (přirozený klíč), uroven (Choice: agenda/proces/
+     dilci_proces/aktivita), nazev, nastupce_kod (Text, prázdné = zrušeno bez
+     náhrady), duvod (Note), datum (DateTime), kdo (Text).
+   Živé listy Procesy / DilciProcesy / Aktivity dostanou `puvodni_kod` (Text)
+     — odkaz na předchůdce; prázdné u položek, které vznikly rovnou.
+   POZOR na názvosloví: list Aktivity už má sloupec `stav`
+     (pracovní/schváleno) — to je schvalovací stav, ne životní cyklus kódu.
+     Proto se sem žádný druhý `stav` nezavádí; uzavřenost je dána tím,
+     že kód JE v HistorieKodu.
+   verify: `check_schema.py` projde; `node src/check_setup.js` (32 kontrol)
+     rozšířen o nový list — musí ohlásit chybu, když sloupec chybí.
+     Mutace: odeber `nastupce_kod` ze schématu → check_setup musí spadnout.
+   edge cases: interní názvy bez diakritiky (konvence projektu);
+     `Options = 13` u zakládání sloupců, ať jsou vidět ve výchozím zobrazení.
+   risk: nový list = sedmá proměnná prostředí navíc (celkem osm). Musí se
+     doplnit do env_promenne.py, jinak appka po přenosu zdroj nenajde.
+
+2. [Přesun aktivity = uzavření + vznik] — co: src/app_src/scr_Detail.pa.yaml
+   Změna výběru dílčího procesu u EXISTUJÍCÍ aktivity už nesmí jen přepsat
+   `dilci_proces_kod`. Nově: potvrzovací modál („kód 07-08-001-0006 se uzavře,
+   vznikne nový pod 03-02-005"), pak Patch do HistorieKodu, založení nové
+   aktivity s novým kódem a `puvodni_kod`, převod VŠECH vazeb (primární
+   i vedlejší) na nový kód, smazání vazeb starého.
+   verify: `check_app.py` — nová kontrola, že žádný vzorec nepatchuje
+     `dilci_proces_kod` na existujícím záznamu bez zápisu do HistorieKodu.
+     Mutace: vrať původní chování → kontrola musí spadnout.
+     Ruční test na PPF DEV: přesuň aktivitu, ověř, že starý kód je v historii
+     s vyplněným `nastupce_kod`, nový má `puvodni_kod`, vazby sedí a mapa
+     ukazuje aktivitu jen jednou, pod novým dílčím procesem.
+   edge cases: aktivita zařazená do víc dílčích procesů — přesouvá se
+     PRIMÁRNÍ zařazení, vedlejší se musí přenést, ne zahodit;
+     dvojí kliknutí během ukládání; přesun zpět tam, odkud přišla
+     (musí vzniknout TŘETÍ kód, ne oživit první — pravidlo 1).
+   risk: nejsložitější místo je vazební tabulka. Když se převod vazeb udělá
+     půlkou, vzniknou osiřelé vazby na neexistující kód. Proto pořadí:
+     nejdřív založ nové vazby, pak smaž staré — sirotek je pak nanejvýš
+     duplicita, ne ztráta.
+
+3. [Přidělování kódů respektuje historii] — co: scr_Ciselnik.pa.yaml
+     (4 místa: agenda 1129/1244, proces, dílčí proces 1143/1165/1255/1273),
+     scr_Detail.pa.yaml:686 (aktivita)
+   Maximum se nově bere přes živý list I HistorieKodu pro týž prefix.
+   verify: `check_app.py` — kontrola, že každý přidělovací vzorec sahá na obě
+     množiny. Mutace: uber jednu z nich → spadne.
+     Datový test: uzavři kód 05-03, založ nový proces pod agendou 05 →
+     MUSÍ dostat 05-04, ne 05-03.
+   edge cases: prázdná historie (`Right("",4)` → prázdno → +1 = 1, dnešní
+     chování zachovat); prefix, který v historii je a v živém listu ne.
+   risk: `StartsWith` je delegovatelný, `Sort` nad filtrovaným listem taky —
+     ale dvojnásobek dotazů na každém založení. Měřit, ne odhadovat.
+
+4. [Přesun dílčího procesu a procesu — kaskáda] — co: nové flow
+     `PresunFlow` + obrazovka náhledu v appce
+   Kaskáda je nad možnosti Power Fx (musela by rekurzivně přepsat stovky
+   řádků v jedné transakci) → dělá to flow. Appka pošle: co se přesouvá,
+   kam, a důvod. Flow vrátí NEJDŘÍV náhled („uzavře se 49 kódů, vzniknou
+   tyhle") a teprve po potvrzení zapíše.
+   verify: `check_presun_flow.py` — mini-interpret nad výrazy vytaženými
+     ZE ZIPU (ne z kopie logiky v Pythonu), vzorová větev 1 proces /
+     3 dílčí procesy / 7 aktivit → očekávaný seznam dvojic starý→nový kód
+     znak po znaku. Mutace: rozbij skládání prefixu → spadne.
+   edge cases: cílová agenda nemá volné BB (99 procesů) → flow musí
+     odmítnout, ne přetéct; přesun do agendy, kde už proces téhož názvu je;
+     souběžná editace aktivity uvnitř přesouvané větve.
+   risk: Logic Apps neumí vnořený Foreach — kaskáda přes tři úrovně se musí
+     složit jako sourozenecké kroky uvnitř Until, stejně jako vyprazdňování
+     složek v servisníUtilitě. Počítat s tím při návrhu, ne až při ladění.
+
+5. [Historie ve stromu a v mapě] — co: scr_Ciselnik, scr_Detail,
+     src/mapa_template.html
+   Uzavřené kódy se nikde nezobrazují, kromě: filtru „zobrazit historii"
+   v číselníku a řádku „vzniklo z <kód>" v detailu.
+   verify: `check_mapa_html.py` + `check_mapa_beh.py` — uzavřený kód se
+     v HTML mapě nesmí objevit ani v datovém bloku. Mutace: zapeč ho tam
+     → kontrola spadne.
+   risk: publikační flow zapéká data do HTML — filtr musí být VE FLOW,
+     ne až v JS, jinak uzavřené kódy odejdou do souboru a jsou vidět
+     ve zdroji stránky.
+```
+
+### Co zůstane otevřené
+
+- **Agenda se přesunout nedá** (nemá rodiče), ale zrušit ano. Kroky výše to
+  pokrývají: záznam v HistorieKodu s prázdným `nastupce_kod`.
+- **Sloučení dvou položek** (dva procesy → jeden) varianta C neřeší; potřebovalo
+  by `nastupce_kod` jako víceznačný odkaz. Až se to objeví, ne dřív.
+
+---
+
+## F11 — Záloha a hromadný import (zadáno 30.08.2026)
+
+**Rozhodnutí zadavatele (30.08.2026 18:08): import a záloha oddělené.**
+Sdílí tvar tabulky a validační/náhledový engine, ale ne formát a ne operaci.
+
+Důvody, proč to nejde spojit do jednoho tlačítka:
+
+- záloha musí být **úplná a věrná** (všechny sloupce včetně odvozených),
+  import **minimální a validovaný** (kdo zakládá 30 aktivit, nesmí vyplňovat
+  `nazev_kratky` ani si vymýšlet kódy),
+- import **přidává**, restore **přepisuje a maže**.
+
+### Formát: proč Excel jen na import
+
+**Logic Apps neumí sestavit `.xlsx`** — je to zip. `ExportFlow` proto vyrábí
+HTML s příponou `.xls`; to se v Excelu otevře, ale zpátky se z toho číst nedá
+spolehlivě (Excel ho při uložení přepíše). **Jako záloha to neobstojí.**
+
+CSV je vyloučené a je to změřené (viz `power-Apps-skill`): Excel udělá z kódu
+`01-01` datum a z `01` číslo `1`. U evidence, kde je kód klíč, je to fatální.
+
+| směr | formát | jak |
+|---|---|---|
+| import | pravý `.xlsx` se šablonou formátovanou jako **Tabulka** | Excel Online (Business), `List rows present in a table` |
+| záloha | **JSON** snímek | plánované flow do knihovny `Zalohy` |
+
+### Co už je zadarmo a nestaví se znovu
+
+`make_setup.py:157` zapíná na listech **verzování s limitem 500 verzí**.
+K tomu koš (93 dní) a obnova na úrovni tenantu. To pokrývá „někdo smazal řádek"
+i „vrať mi předchozí znění položky".
+
+Snímek přidává to, co tím pokryté není:
+- jak rejstřík vypadal, když se schvalovala verze OŘ (dřívější námět R-5),
+- **rollback rozjetého hromadného importu** — ten mění stovky řádků naráz
+  a koš pomáhá jen se smazanými, ne se změněnými,
+- přenos mezi tenanty, což tenhle projekt reálně dělá.
+
+### Pořadí je záloha → import → restore
+
+Stavět nástroj, který hromadně píše do dat, dřív než je čím to vrátit, je
+pozpátku. Záloha je pojistka k importu, ne samostatné přání.
+
+### Kroky
+
+```
+1. [Snímek rejstříku] — co: nové flow `ZalohaFlow` + plánované dvojče
+   Čte všech šest (po F10 sedm) listů a zapisuje
+   `Zalohy/rejstrik_<RRRR-MM-DD_HHMM>.json`: verze schématu, razítko,
+   všechny řádky se všemi sloupci.
+   Flow má právě jeden trigger → ruční a plánovaná varianta jsou DVĚ flow,
+   akce klonované skriptem z jednoho zdroje (vzor: MapaPublishFlow + jeho
+   plánované dvojče, add_mapa_schedule.py).
+   verify: `check_zaloha_flow.py` — počet čtených listů odpovídá schématu;
+     pagination zapnutá u každého `Get items`; výstup se naparsuje jako JSON
+     a počty řádků sedí na vzorová data. Mutace: vypni pagination u jednoho
+     listu → kontrola spadne. Plus porovnání akcí obou flow (kdyby se
+     rozešly, plán by zálohoval něco jiného než tlačítko a nikdo by si
+     nevšiml).
+   edge cases: >2 000 řádků na listu — bez pagination se snímek TIŠE ořízne
+     a je to nejhorší možná vada zálohy; prázdný list; diakritika v datech
+     (`ensure_ascii=False` ekvivalent — JSON z flow musí být UTF-8).
+   risk: soubory se hromadí. Úklidové flow po N dnech je pár akcí, ale musí
+     nechat naživu poslední snímek každého měsíce, ne mazat podle stáří slepě.
+
+2. [Test DLP pro Excel Online (Business)] — co: jedno testovací flow, ručně
+     v designeru, PŘED čímkoli dalším z kroku 3
+   Jedna akce `List rows present in a table` nad testovacím .xlsx v knihovně.
+   Tři kontrolní body: akce se objeví ve vyhledávání, flow jde uložit,
+   běh doběhne zeleně a vrátí řádky.
+   verify: běh flow, ne úvaha. Ověřit v OBOU tenantech (PPF DEV i MPSV) —
+     DLP politiky se liší a projít musí obě.
+   edge cases: soubor musí mít formátovanou Tabulku, ne volnou mřížku —
+     konektor jinak neuvidí nic a vypadá to jako chyba oprávnění.
+   risk: kdyby konektor neprošel, R-1 se musí postavit jinak — fallback je
+     povýšit `deploy/mpsv/02_import_dat.js` z vývojářského skriptu na
+     nástroj pro správce. To rozhodnutí padne TADY, ne po týdnu stavění.
+
+3. [Šablona a hromadný import] — co: src/make_sablona.py (generuje .xlsx
+     ze schématu), knihovna `Import`, flow `ImportFlow`, obrazovka náhledu
+   Šablona se generuje ZE SCHÉMATU, aby se nemohla rozejít s listy.
+   Sloupce, které si systém drží sám (kód, `nazev_kratky`,
+   `datum_aktualizace`, `puvodni_kod`), v šabloně NEJSOU.
+   Import je dvoufázový: nahrání → náhled („založí se X, změní se Y,
+   tohle je duplicita, tohle je chyba na řádku N") → potvrzení → zápis.
+   verify: `check_import_flow.py` nad výrazy ze zipu + `check_sablona.py`
+     (sloupce šablony = sloupce schématu minus systémové; mutace: přidej
+     do schématu sloupec a ověř, že kontrola šablony spadne).
+     Datový test: vzorový soubor s 3 platnými řádky, 1 duplicitou,
+     1 chybějícím povinným polem a 1 odkazem na neexistující dílčí proces
+     → náhled musí vypsat přesně tohle rozdělení a NIC nezapsat.
+   edge cases: kód v souboru vyplněný ručně (musí se odmítnout, ne
+     respektovat); název delší než 255; středník uvnitř názvu útvaru;
+     prázdné řádky na konci tabulky; soubor nahraný dvakrát.
+   risk: největší je slepý zápis. Náhled není komfort, je to pojistka —
+     bez potvrzovacího kroku se krok 3 nenasazuje.
+
+4. [Restore ze snímku] — co: flow `RestoreFlow` + tatáž obrazovka náhledu
+   Nikdy plánovaně, vždy ručně, vždy s dry-runem a protokolem do knihovny.
+   Tvrdé pravidlo: kód ze snímku se vrací TÉMUŽ záznamu; kdyby ten kód mezitím
+   patřil něčemu jinému, restore skončí chybou a nezapíše nic.
+   verify: `check_restore_flow.py` — mutace „vypusť kontrolu shody kódu"
+     musí kontrolu shodit. Datový test na PPF DEV: smaž 5 řádků, obnov ze
+     snímku, ověř, že se vrátily s týmiž kódy a vazbami.
+   edge cases: snímek starší než změna schématu (verze schématu v souboru
+     se musí kontrolovat a při neshodě odmítnout); záznam, který mezitím
+     vznikl a ve snímku není (restore ho NESMÍ smazat, jen ohlásit).
+   risk: jediná destruktivní operace v projektu. Nasazovat až po zeleném
+     kroku 1 a 3, a otestovat na PPF DEV, nikdy poprvé na MPSV.
+```
+
+### Vztah k dřívějším námětům
+
+Tenhle plán nahrazuje námět **R-1** (hromadné pořízení aktivit) a naplňuje
+**R-5** (snímek rejstříku k datu). Oba zůstávají v seznamu níže jen jako
+historický kontext.
+
+---
 ## Náměty na rozšíření (neschválené, k připomenutí)
 
 Přepracováno 25.08.2026 (původní seznam z 23.08.2026 byl psaný před exportem
