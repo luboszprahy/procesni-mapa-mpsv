@@ -1,8 +1,10 @@
 # Zdroj canvas appky "procesni mapa" — App.
 # Generováno ručně podle deploy/app_navrh.md, schéma listů src/schema.json.
-# varMapaUrl je JEDINÉ místo s adresou publikované mapy. Canvas app umí číst
-# jen datasetové proměnné prostředí, textové ne — dokud nevznikne list
-# Nastaveni (F3), musí adresa být tady. Při přenosu na MPSV se mění tady.
+# varMapaUrl se odsud NEnastavuje. Canvas app umí číst jen datasetové
+# proměnné prostředí, textové ne — adresu mapy proto dodá ExportFlow, které
+# ji složí z proměnné webu (volání `ExportFlow.Run("__mapa__")` v OnSelect
+# tlačítka mapy). Díky tomu je adresa vždy z toho prostředí, kde appka běží,
+# a při přenosu na jiný tenant se nic nepřepisuje.
 #
 # Adresa MUSÍ být náhled knihovny (AllItems.aspx?id=<cesta k souboru>), NE přímý
 # odkaz na .html. Ověřeno 20.08.2026: na přímou cestu k souboru pošle SharePoint
@@ -26,7 +28,10 @@ App:
       Collect(colUtvarNabidka, Distinct(Filter(colUtvary, uroven.Value <> "sekce"), Title & " · " & nazev));
       ClearCollect(colSekceNabidka, { Value: "(vše)" });
       Collect(colSekceNabidka, Distinct(Filter(colUtvary, uroven.Value = "sekce"), Title & " · " & nazev));
-      Set(varMapaUrl, "https://mpsvcr.sharepoint.com/sites/MPSV-App-Mapovani-Procesu-OR/procesnimapaApk/SiteAssets/Forms/AllItems.aspx?id=%2Fsites%2FMPSV%2DApp%2DMapovani%2DProcesu%2DOR%2FprocesnimapaApk%2FSiteAssets%2Fprocesni%5Fmapa%2Ehtml&parent=%2Fsites%2FMPSV%2DApp%2DMapovani%2DProcesu%2DOR%2FprocesnimapaApk%2FSiteAssets");
+      // Adresa mapy se sem dotáhne z ExportFlow až při kliknutí na tlačítko
+      // (flow ji složí z proměnné prostředí, takže sedí na to prostředí,
+      // kde appka běží). Tady jen prázdno, aby proměnná existovala.
+      Set(varMapaUrl, "");
       // Doba svícení notifikací v ms. Potvrzení má zmizet dřív, než začne
       // překážet; u chyby musí zbýt čas ji přečíst. Ladí se jen tady.
       Set(varNotifyMs, 3000);

@@ -1393,14 +1393,25 @@ Screens:
             HoverFill: =stylRadekHover
             OnSelect: |-
               =Set(varMenuMapa, false);
-              Launch(varMapaUrl, {}, LaunchTarget.New)
+              If(
+                  IsBlank(varMapaUrl),
+                  IfError(
+                      Set(varMapaUrl, ExportFlow.Run("__mapa__").adresa),
+                      Set(varMapaUrl, "")
+                  )
+              );
+              If(
+                  IsBlank(varMapaUrl),
+                  Notify("Adresu mapy se nepodařilo zjistit - ověř, že tok ExportFlow je zapnutý.", NotificationType.Error, varNotifyChybaMs),
+                  Launch(varMapaUrl, {}, LaunchTarget.New)
+              )
             PaddingLeft: =12
             PressedColor: =stylAkceStisk
             PressedFill: =stylRadekVybrany
             Size: =11
             Text: ="Zobrazit v HTML"
             Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami bez ohledu na jejich počet. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
-            Visible: =varMenuMapa && !IsBlank(varMapaUrl)
+            Visible: =varMenuMapa
             Width: =212
             X: =796
             Y: =148

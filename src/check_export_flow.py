@@ -34,7 +34,12 @@ import env_promenne as ep  # noqa: E402
 
 FLOW = "ExportFlow"
 FLOW_GUID = "3f2b6d41-8c55-4a37-9d21-5b8e0c47a9f2"
-AKCE = ["Vstup", "Html_radky", "Xls_radky", "Jmeno", "Dokument", "Uloz", "Adresa", "Odpoved"]
+AKCE = ["Vstup", "Html_radky", "Xls_radky", "Jmeno", "Dokument", "Ulozeni",
+        "Cesta_webu", "Adresa", "Odpoved"]
+# Zápis souboru je jediná akce uvnitř podmínky `Ulozeni`: v režimu mapy se
+# nesmí provést, jinak by export přepsal samotnou mapu.
+VNORENA_ZAPISOVA = "Uloz"
+REZIM_MAPA = "__mapa__"
 KLICE_RADKU = {"uroven", "kod", "nazev", "vlastnik", "stav"}
 TEXTOVA_POLE = ("kod", "nazev", "vlastnik", "stav")
 ODSAZENI_PT = 18
@@ -222,6 +227,12 @@ def vyhodnot(uzel, kontext):
         return hodnoty[0] * hodnoty[1]
     if jmeno == "join":
         return hodnoty[1].join(_text(h) for h in hodnoty[0])
+    if jmeno == "split":
+        return _text(hodnoty[0]).split(hodnoty[1])
+    if jmeno == "skip":
+        return hodnoty[0][hodnoty[1]:]
+    if jmeno == "encodeUriComponent":
+        return urllib.parse.quote(_text(hodnoty[0]), safe="")
     if jmeno == "json":
         return json.loads(hodnoty[0])
     if jmeno == "decodeUriComponent":
@@ -259,12 +270,17 @@ VZOREK = [
 NADPIS = "vše · bez hledání"
 
 
-def priprav_kontext(akce_def, radky, nadpis, format_):
-    """Projde akce v pořadí řetězu a spočítá je stejně, jako to udělá Logic Apps."""
+def priprav_kontext(akce_def, radky, nadpis, format_, text=None):
+    """Projde akce v pořadí řetězu a spočítá je stejně, jako to udělá Logic Apps.
+
+    `text` dovolí poslat vstup, který není JSON — tak si appka říká o adresu
+    mapy (`__mapa__`). Kdyby ho `Vstup` nechytil, `json()` by na něm spadl.
+    """
     vstup = {"nadpis": nadpis, "format": format_, "radky": radky}
     kontext = {
         "item": None,
-        "triggerBody": {"text": json.dumps(vstup, ensure_ascii=False)},
+        "triggerBody": {"text": text if text is not None
+                        else json.dumps(vstup, ensure_ascii=False)},
         "akce": {},
         "parametry": {ep.klic(ep.WEB): WEB_APPKY},
     }
@@ -280,7 +296,7 @@ def priprav_kontext(akce_def, radky, nadpis, format_):
         kontext["item"] = None
         kontext["akce"][jmeno] = vybrane
 
-    for jmeno in ("Jmeno", "Dokument", "Adresa"):
+    for jmeno in ("Jmeno", "Dokument", "Cesta_webu", "Adresa"):
         kontext["akce"][jmeno] = spust(akce_def[jmeno]["inputs"], kontext)
     return kontext
 
@@ -329,13 +345,25 @@ def struktura(flow, web):
     # konkrétní adresa — s odvoláním na pravidlo PatchItem, které ale pro
     # CreateFile neplatí: Clearstream i Průvodní list mají v produkci CreateFile
     # s datasetem z proměnné. Složka zůstává literál, je relativní k webu.
-    parametry = akce["Uloz"]["inputs"]["parameters"]
+    ulozeni = akce["Ulozeni"]
+    overit(ulozeni.get("type") == "If",
+           "zápis souboru není v podmínce — v režimu mapy by přepsal samotnou mapu")
+    vnorene = (ulozeni.get("actions") or {})
+    overit(list(vnorene) == [VNORENA_ZAPISOVA],
+           f"v podmínce Ulozeni čekám jen {VNORENA_ZAPISOVA}, je {list(vnorene)}")
+    if list(vnorene) != [VNORENA_ZAPISOVA]:
+        return None
+    podminka = json.dumps(ulozeni.get("expression"), ensure_ascii=False)
+    overit(REZIM_MAPA in podminka and '"not"' in podminka,
+           f"podmínka zápisu nevylučuje režim {REZIM_MAPA}: {podminka}")
+
+    parametry = vnorene[VNORENA_ZAPISOVA]["inputs"]["parameters"]
     overit(parametry.get("dataset") == ep.web(),
            "dataset zápisové akce nebere web z proměnné mpsv_procesnimapaSite — "
            "s natvrdo zadanou adresou se flow na cizím tenantu nedá zapnout")
     overit(not str(parametry.get("folderPath", "")).startswith("@"),
            "folderPath zápisové akce je runtime výraz")
-    overit(akce["Uloz"]["inputs"]["host"]["operationId"] == "CreateFile",
+    overit(vnorene[VNORENA_ZAPISOVA]["inputs"]["host"]["operationId"] == "CreateFile",
            "zápis souboru nepoužívá CreateFile")
 
     spojeni = flow["properties"].get("connectionReferences") or {}
@@ -584,6 +612,44 @@ def nacti_web(customizations):
     return None
 
 
+def vyznam_mapa(akce, web):
+    """Vstup `__mapa__` musí vrátit odkaz na náhled knihovny, ne na .html.
+
+    Přímá cesta k souboru skončí kvůli Strict browser file handling stažením
+    do Downloads místo zobrazení (ověřeno 20.08.2026), proto se kontroluje
+    tvar `AllItems.aspx?id=`, ne jen to, že adresa vede na správný web.
+    """
+    kontext = priprav_kontext(akce, VZOREK, NADPIS, "word", text=REZIM_MAPA)
+    adresa = kontext["akce"]["Adresa"]
+
+    overit(adresa.startswith(web + "/"),
+           f"adresa mapy nevede na web appky: {adresa}")
+    overit("/SiteAssets/Forms/AllItems.aspx?id=" in adresa,
+           f"adresa mapy není odkaz na náhled knihovny — soubor by se stáhl "
+           f"místo zobrazení: {adresa}")
+    overit(".html" not in adresa.split("?")[0],
+           f"adresa mapy míří přímo na soubor, ne na náhled: {adresa}")
+
+    cast_id = adresa.split("?id=")[1].split("&")[0] if "?id=" in adresa else ""
+    cesta = urllib.parse.unquote(cast_id)
+    overit(cesta.endswith("/SiteAssets/procesni_mapa.html"),
+           f"parametr id nevede na publikovanou mapu: {cesta!r}")
+    overit(cesta.startswith("/sites/"),
+           f"parametr id není server-relative cesta: {cesta!r}")
+    overit("%2F" in cast_id,
+           "parametr id není URL-enkódovaný — SharePoint by cestu nerozpoznal")
+
+    rodic = urllib.parse.unquote(adresa.split("&parent=")[1]) if "&parent=" in adresa else ""
+    overit(rodic == cesta.rsplit("/", 1)[0],
+           f"parent neukazuje na složku souboru: {rodic!r} vs {cesta!r}")
+
+    # Exportní větev se tím nesmí rozbít: týž řetěz musí pro běžný vstup dál
+    # vracet odkaz na vyexportovaný soubor, ne na mapu.
+    bezny = priprav_kontext(akce, VZOREK, NADPIS, "word")["akce"]["Adresa"]
+    overit("AllItems.aspx" not in bezny,
+           f"běžný export dostal adresu mapy: {bezny}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True)
@@ -614,6 +680,7 @@ def main():
         vyznam_word(akce, web)
         vyznam_excel(akce)
         vyznam_meze(akce)
+        vyznam_mapa(akce, web)
     zapis_v_baliku(polozky, klic)
     return vypis()
 

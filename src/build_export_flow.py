@@ -54,6 +54,12 @@ CIL = "ExportFlow"
 CIL_GUID = "3f2b6d41-8c55-4a37-9d21-5b8e0c47a9f2"
 
 CILOVA_SLOZKA = "/SiteAssets"
+# Smluvená hodnota vstupu, kterou si appka říká o adresu publikované mapy
+# místo exportu. Schéma volání (pošli text -> dostaň adresu) se tím nemění,
+# takže flow nepotřebuje novou registraci ve Studiu. Kdyby se měnilo, musel
+# by uživatel appku znovu projít přes Add data.
+REZIM_MAPA = "__mapa__"
+MAPA_SOUBOR = "procesni_mapa.html"
 HOST_SP = "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
 
 # Klíče datového kontraktu. Drží je deploy/flow_Export.md a kontroluje
@@ -224,11 +230,32 @@ def trigger():
     }
 
 
+def je_mapa():
+    """Výraz, kterým se pozná dotaz na adresu mapy místo exportu."""
+    return f"equals(triggerBody()['text'], {lit(REZIM_MAPA)})"
+
+
+def vyraz_adresy_mapy():
+    """Odkaz na náhled knihovny, ne přímá cesta k .html souboru.
+
+    Na přímou cestu pošle SharePoint kvůli Strict browser file handling
+    hlavičku Content-Disposition: attachment a mapa se místo zobrazení stáhne
+    do Downloads (ověřeno 20.08.2026). Klik v knihovně používá právě tenhle tvar.
+    """
+    soubor = f"concat(outputs('Cesta_webu'), {lit(CILOVA_SLOZKA + '/' + MAPA_SOUBOR)})"
+    slozka = f"concat(outputs('Cesta_webu'), {lit(CILOVA_SLOZKA)})"
+    return (f"concat({ep.vyraz(ep.WEB)}, "
+            f"{lit(CILOVA_SLOZKA + '/Forms/AllItems.aspx?id=')}, "
+            f"encodeUriComponent({soubor}), {lit('&parent=')}, "
+            f"encodeUriComponent({slozka}))")
+
+
 def akce():
     kroky = {}
     kroky["Vstup"] = {
         "type": "Compose",
-        "inputs": "@json(triggerBody()['text'])",
+        "inputs": ("@json(if(" + je_mapa() + ", " + lit('{"radky":[]}')
+                   + ", triggerBody()['text']))"),
         "runAfter": {},
     }
     kroky["Html_radky"] = {
@@ -254,19 +281,36 @@ def akce():
         "inputs": f"@if({format_je('excel')}, {vyraz_xls()}, {vyraz_wordu()})",
         "runAfter": {"Jmeno": ["Succeeded"]},
     }
-    kroky["Uloz"] = {
-        "type": "OpenApiConnection",
-        "inputs": {
-            "parameters": {
-                "dataset": ep.web(),
-                "folderPath": CILOVA_SLOZKA,
-                "name": "@outputs('Jmeno')",
-                "body": "@outputs('Dokument')",
-            },
-            "host": {"apiId": HOST_SP, "operationId": "CreateFile",
-                     "connectionName": "shared_sharepointonline"},
+    # V režimu mapy se nesmí uložit nic: název by vyšel na procesni_mapa.html
+    # a export by přepsal samotnou mapu. Proto zápis, a jen ten, jde do podmínky.
+    kroky["Ulozeni"] = {
+        "type": "If",
+        "expression": {"not": {"equals": ["@triggerBody()['text']", REZIM_MAPA]}},
+        "actions": {
+            "Uloz": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                    "parameters": {
+                        "dataset": ep.web(),
+                        "folderPath": CILOVA_SLOZKA,
+                        "name": "@outputs('Jmeno')",
+                        "body": "@outputs('Dokument')",
+                    },
+                    "host": {"apiId": HOST_SP, "operationId": "CreateFile",
+                             "connectionName": "shared_sharepointonline"},
+                },
+                "runAfter": {},
+            }
         },
         "runAfter": {"Dokument": ["Succeeded"]},
+    }
+    # Server-relative cesta webu (/sites/…/podweb) — z ní se skládá odkaz na
+    # náhled knihovny. Web má tvar https://<host>/sites/…, takže první tři
+    # díly po rozdělení lomítkem jsou schéma, prázdno a host.
+    kroky["Cesta_webu"] = {
+        "type": "Compose",
+        "inputs": f"@concat('/', join(skip(split({ep.vyraz(ep.WEB)}, '/'), 3), '/'))",
+        "runAfter": {"Ulozeni": ["Succeeded"]},
     }
     # Adresu skládáme sami z webu a názvu, ne z odpovědi CreateFile: pole
     # odpovědi konektoru nejsou v dokumentaci závazná a mlčky se mění.
@@ -274,9 +318,10 @@ def akce():
     # než kam se soubor uložil.
     kroky["Adresa"] = {
         "type": "Compose",
-        "inputs": (f"@concat({ep.vyraz(ep.WEB)}, {lit(CILOVA_SLOZKA + '/')}, "
-                   f"outputs('Jmeno'))"),
-        "runAfter": {"Uloz": ["Succeeded"]},
+        "inputs": (f"@if({je_mapa()}, {vyraz_adresy_mapy()}, "
+                   f"concat({ep.vyraz(ep.WEB)}, {lit(CILOVA_SLOZKA + '/')}, "
+                   f"outputs('Jmeno')))"),
+        "runAfter": {"Cesta_webu": ["Succeeded"]},
     }
     kroky["Odpoved"] = {
         "type": "Response",
@@ -308,7 +353,11 @@ def nacti_web(customizations):
         if datasety:
             if len(datasety) != 1:
                 raise SystemExit(f"CHYBA: čekám právě jeden web, appka jich má {len(datasety)}")
-            return next(iter(datasety))
+            klic, popis = next(iter(datasety.items()))
+            # S napojením přes proměnné nese klíč suffix se schemaname; čistá
+            # adresa je v datasetOverride.name (tvar podle vzorů MiddleOffice
+            # a VendorManagement).
+            return (popis.get("datasetOverride") or {}).get("name") or klic
     raise SystemExit("CHYBA: v ConnectionReferences není žádný web")
 
 

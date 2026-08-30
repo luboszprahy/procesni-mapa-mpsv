@@ -17,7 +17,10 @@ sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
 
 VERZE = "1.0.0.62"
-POCET = 6
+# Web + jeden list na každou tabulku, kterou používá flow nebo appka.
+# Číslo je psané ručně schválně: kdyby proměnná někde přibyla nedopatřením,
+# průvodce importem se na ni zeptá a nikdo nebude vědět proč.
+POCET = 7
 
 chyby = []
 
@@ -98,9 +101,12 @@ def zkontroluj_odkazy():
 def zkontroluj_listy():
     from build_mapa_flow import LISTY
     zobrazovane = [l[0] for l in LISTY]
-    overit(set(zobrazovane) == set(ep.LIST_PROMENNA),
-           f"LIST_PROMENNA nesedí na LISTY v build_mapa_flow: "
-           f"{sorted(set(zobrazovane) ^ set(ep.LIST_PROMENNA))}")
+    # Publikační flow čte podmnožinu listů — Útvary potřebuje jen appka, která
+    # si od F9 bere napojení z týchž proměnných. Rovnost by tu proto byla
+    # falešná; každý list flow ale svou proměnnou mít musí.
+    overit(set(zobrazovane) <= set(ep.LIST_PROMENNA),
+           f"LISTY v build_mapa_flow nemají proměnnou: "
+           f"{sorted(set(zobrazovane) - set(ep.LIST_PROMENNA))}")
     schemata = {d[0] for d in ep.DEFINICE}
     for zobrazovany, schema in ep.LIST_PROMENNA.items():
         overit(schema in schemata, f"{zobrazovany}: proměnná {schema} není deklarovaná")

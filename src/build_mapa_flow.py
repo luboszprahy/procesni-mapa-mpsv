@@ -88,11 +88,19 @@ def nacti_metadata(customizations):
         raise SystemExit("CHYBA: v customizations.xml není blok ConnectionReferences canvas appky")
     text = shoda.group(1).replace("&quot;", '"').replace("&amp;", "&")
     data = json.loads(text)
-    spojeni = next(iter(data.values()))
+    # Ne první connection reference, ale ta SharePointová: pořadí klíčů není
+    # dané a v exportu ze Studia stojí první logicflows (dataSets prázdné).
+    spojeni = next((s for s in data.values()
+                    if "shared_sharepointonline" in s.get("id", "")), None)
+    if spojeni is None:
+        raise SystemExit("CHYBA: v appce není SharePoint connection reference")
     datasety = spojeni["dataSets"]
     if len(datasety) != 1:
         raise SystemExit(f"CHYBA: čekám právě jeden web, appka jich má {len(datasety)}")
     web, obsah = next(iter(datasety.items()))
+    # S napojením přes proměnné nese klíč suffix se schemaname (viz build_app.py);
+    # čistá adresa webu je v datasetOverride.name.
+    web = (obsah.get("datasetOverride") or {}).get("name") or web
     tabulky = {n: v["tableName"] for n, v in obsah["dataSources"].items()}
     return web, tabulky
 

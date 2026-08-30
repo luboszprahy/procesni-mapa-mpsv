@@ -1,17 +1,98 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 16:45 (nová základna 1.0.0.66 — export z běžícího MPSV)
+Aktualizováno: 2026-08-30 17:35 (F9: appka i adresa mapy přes proměnné, 1.0.0.67)
 
-## CO JE NA TOBĚ — dvě zbývající ověření v provozu
+## CO JE NA TOBĚ
 
-1. **Ověř tlačítko mapy.** `varMapaUrl` má adresu, kterou jsem složil z odkazu
-   na knihovnu; když se mapa místo zobrazení stáhne do Downloads, pošli výstup
-   `src/zjisti_url_mapy.js`.
-2. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
+1. **Pošli mi GUID listu Aktivity na PPF DEV.** Zjistí ho `deploy/mpsv/03_vypis_guidy.js`
+   vložený do konzole prohlížeče (F12) na PPF webu. Bez něj neumím postavit
+   balík pro PPF — je to jediná hodnota, kterou z proměnné vzít nejde
+   (`PatchItem` runtime výraz nesnese, ověřeno 28.08. v provozu).
+   Balík `deploy/procesnimapa_1_0_0_67.zip` je zatím postavený s GUIDem MPSV.
+2. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
+   ale z `ExportFlow`, takže tenhle test platí až pro balík 67 a dál.
+3. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
 
-Kroky 1 a 2 z 28.08. (registrace ExportFlow + export solution) jsou hotové —
-viz níže.
+## F9 — přenositelnost mezi tenanty (30.08.2026)
+
+**Zadání:** testovat se bude dál i na PPF DEV, aniž by se střídavými importy
+rozbíjelo to, co běží na druhém tenantu. Plán je v `PLAN.md` sekce F9.
+
+Do 1.0.0.66 by import balíku z jednoho tenantu na druhý appku rozbil: napojení
+na sedm zdrojů je zapsané natvrdo v `<ConnectionReferences>`, takže by appka
+ukazovala na listy, které tam nejsou, a `App.OnStart` by spadl na prvním
+`ClearCollect`. Od 1.0.0.67 si napojení bere z proměnných prostředí.
+
+### Co se změnilo
+
+**Napojení appky přes proměnné** (`build_app.py`, funkce
+`napoj_appku_na_promenne`). Klíč datasetu má tvar `<url>_<schemaname>`, uvnitř
+`datasetOverride` a u každého listu `tableNameOverride` — tvar 1:1 podle
+produkčních vzorů `MiddleOfficeParametrizace` a `VendorManagement`.
+
+Klíčové zjištění, kvůli kterému to šlo udělat teď a ne až po dalším kole se
+Studiem: **overidy žijí jen v `customizations.xml`**. V `.msapp` zůstává
+`DataSources.json` na čisté URL a holém GUIDu i ve vzorech. Odpadl tím hlavní
+důvod, proč se F8/5 od 28.08. odkládalo.
+
+**Sedmá proměnná** `mpsv_listUtvary` — appka má napojených sedm zdrojů,
+proměnné byly jen pro pět. `Útvary` používá jen appka, ne flow.
+
+**Knihovna `Dokumenty` odebrána z appky.** Byla v napojení od založení appky
+ve Studiu a žádný vzorec ji nepoužíval. Nechat ji tam by znamenalo dát jí
+vlastní proměnnou — v jednom bloku `dataSets` nesmí zůstat zdroj bez overridu.
+
+**Adresa mapy se už nepíše do kódu.** Appka si o ni řekne `ExportFlow`
+smluvenou hodnotou vstupu `__mapa__`; flow ji složí z proměnné webu, takže je
+vždy z toho prostředí, kde appka běží. Schéma volání (pošli text → dostaň
+adresu) se tím nemění, takže flow nepotřebuje novou registraci ve Studiu.
+Volá se až z `OnSelect` tlačítka mapy a výsledek se drží v `varMapaUrl`, takže
+start appky se nezdrží a druhé kliknutí flow už nevolá.
+
+Zápis souboru je kvůli tomu v podmínce `Ulozeni` — v režimu mapy se provést
+nesmí, jinak by export přepsal samotnou mapu.
+
+### Dvě opravy, na které se přišlo cestou
+
+- `build_mapa_flow.py` bral **první** connection reference místo SharePointové.
+  Fungovalo to jen díky pořadí klíčů; v exportu z MPSV stojí první `logicflows`
+  s prázdným `dataSets`, takže build spadl na „čekám právě jeden web, appka
+  jich má 0". Obě `nacti_*` funkce teď hledají podle `shared_sharepointonline`.
+- Tytéž funkce umí i klíč se suffixem (berou `datasetOverride.name`), jinak by
+  z balíku, který přes proměnné jednou prošel, nešlo stavět podruhé. Ověřeno
+  druhým průchodem: suffix se nenabaluje.
+
+### Brány
+
+| brána | stav | co přibylo |
+|---|---|---|
+| `check_solution` | 300 kontrol | `napojeni_appky`: každý zdroj má override, proměnná je deklarovaná, klíč má suffix, nezůstal zdroj bez overridu |
+| `check_export_flow` | 123 kontrol | `vyznam_mapa`: vstup `__mapa__` vrátí odkaz na náhled knihovny, ne na `.html`; export tím neutrpěl |
+| `check_env` | zelená | `POCET` 7; LISTY flow smí být podmnožina `LIST_PROMENNA` (Útvary má jen appka) |
+| `check_app`, `check_flow`, `check_mapa_flow` | zelené | beze změny |
+
+**Mutačně ověřeno, 11 mutací:** `src/mutace_napojeni.py` 5/5 (chybějící
+override, nedeklarovaná proměnná, klíč bez suffixu, zdroj navíc bez overridu,
+rozejitý GUID) a `src/mutace_export_mapa.py` 6/6 (přímý odkaz na `.html`,
+neenkódovaná cesta, špatný `parent`, zápis mimo podmínku, podmínka nevylučující
+režim mapy, běžný export vracející adresu mapy).
+
+### Co zůstane ruční i po F9
+
+- **GUID listu Aktivity** — parametr `--list-aktivity`, tedy dva balíky
+  z jednoho zdroje. Z proměnné to nejde.
+- **Vyplnění proměnných** při prvním importu do prostředí (nově sedm místo
+  šesti). Prostředí si je pak drží.
+- **Mikro-změna + Save + Publish** ve Studiu po importu a **ruční zapnutí flow**.
+
+### Neověřené — čeká na import
+
+Tvar adresy mapy skládaný ve flow (`AllItems.aspx?id=` s `encodeUriComponent`)
+se liší od dnešního zapečeného tvaru v tom, že pomlčky, podtržítka a tečky
+nechává neenkódované. Brána ověří tvar, ne chování SharePointu. Když se mapa
+místo zobrazení stáhne, je to tohle — a řeší se doplněním náhrad ve
+`vyraz_adresy_mapy()` v `build_export_flow.py`.
 
 ## Nová základna: 1.0.0.66, export z běžícího MPSV (30.08.2026)
 
