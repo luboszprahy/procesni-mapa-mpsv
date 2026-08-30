@@ -123,7 +123,7 @@ def adresy_ve_flow(vystupni, customizations):
 GUID_LISTU = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 
 
-def promenne_ve_flow(vystupni):
+def promenne_ve_flow(vystupni, promenne_appky=frozenset()):
     """Každá SharePoint akce bere web i list z deklarované proměnné prostředí.
 
     Samotná nepřítomnost adresy nestačí: GUID listu adresu neobsahuje, takže
@@ -177,6 +177,9 @@ def promenne_ve_flow(vystupni):
            f"balík nese uložené hodnoty proměnných {hodnoty} — každý import by jimi "
            f"přepsal nastavení cílového prostředí")
 
+    # Proměnnou nemusí používat flow — od F9 si přes ni bere napojení i appka
+    # (`Útvary` jsou jen v appce). Nepoužitá je teprve ta, kterou nezná ani jedno.
+    pouzite |= {ep.param(schema) for schema in promenne_appky}
     nepouzite = sorted({ep.param(d[0]) for d in ep.DEFINICE} - pouzite)
     overit(not nepouzite,
            f"deklarovaná, ale nepoužitá proměnná: {nepouzite} — průvodce importem "
@@ -221,6 +224,21 @@ def guidy_listu(text_customizations):
     return nalezene
 
 
+def napojeni_appky(text_customizations):
+    """Vrátí blok dataSets SharePoint connection reference, nebo None."""
+    shoda = re.search(r"<ConnectionReferences>(.*?)</ConnectionReferences>", text_customizations, re.S)
+    if not shoda:
+        return None
+    try:
+        reference = json.loads(shoda.group(1))
+    except json.JSONDecodeError:
+        return None
+    for odkaz in reference.values():
+        if "shared_sharepointonline" in odkaz.get("id", ""):
+            return odkaz.get("dataSets") or {}
+    return None
+
+
 def main():
     for cesta in (VSTUP, VYSTUP):
         if not cesta.exists():
@@ -250,8 +268,36 @@ def main():
         nove = guidy_listu(cil_custom)
         overit(set(nove) >= OCEKAVANE_LISTY,
                f"v connection reference chybí listy: {sorted(OCEKAVANE_LISTY - set(nove))}")
-        overit(puvodni == nove,
+        # Zdroje, které build odebírá jako nepoužívané, ve výstupu chybět mají.
+        zbyle = {k: v for k, v in puvodni.items() if k not in ep.NEPOUZIVANE_ZDROJE}
+        overit(zbyle == nove,
                "GUIDy připojených listů se proti vstupní solution změnily")
+        overit(not (set(nove) & set(ep.NEPOUZIVANE_ZDROJE)),
+               f"ve výstupu zůstal nepoužívaný zdroj: "
+               f"{sorted(set(nove) & set(ep.NEPOUZIVANE_ZDROJE))}")
+
+        # --- appka musí být napojená přes proměnné prostředí, ne natvrdo ---
+        # Bez toho ukazuje po importu na listy prostředí, ze kterého se
+        # exportovala, a App.OnStart spadne na prvním ClearCollect.
+        datasety = napojeni_appky(cil_custom)
+        overit(datasety is not None,
+               "v customizations.xml není SharePoint connection reference")
+        deklarovane = {d[0] for d in ep.DEFINICE}
+        for adresa, dataset in (datasety or {}).items():
+            prepis = dataset.get("datasetOverride") or {}
+            overit(prepis.get("environmentVariableName") == ep.WEB,
+                   f"dataset {adresa} nemá datasetOverride na {ep.WEB}")
+            overit(adresa == f"{prepis.get('name')}_{ep.WEB}",
+                   f"klíč datasetu není '<url>_{ep.WEB}': {adresa}")
+            for jmeno, popis in (dataset.get("dataSources") or {}).items():
+                prepis_listu = popis.get("tableNameOverride") or {}
+                promenna = prepis_listu.get("environmentVariableName")
+                overit(promenna is not None,
+                       f"zdroj {jmeno} nemá tableNameOverride — po importu jinam se nenapojí")
+                overit(promenna in deklarovane,
+                       f"zdroj {jmeno} odkazuje na nedeklarovanou proměnnou {promenna}")
+                overit(prepis_listu.get("name") == popis.get("tableName"),
+                       f"zdroj {jmeno}: tableNameOverride.name nesedí na tableName")
 
     # --- flow ze vstupní solution nesmí přebalením zmizet ---
     # Kdyby se stavělo ze staršího balíku, flow by ve výstupu nebylo a upgrade
@@ -403,7 +449,18 @@ def main():
                    f"{polozka} obsahuje externí URL")
 
     adresy_ve_flow(vystupni, cil_custom)
-    promenne_ve_flow(vystupni)
+
+    # Proměnné, které si bere napojení appky (datasetOverride/tableNameOverride).
+    promenne_appky = set()
+    for dataset in (napojeni_appky(cil_custom) or {}).values():
+        prepis = dataset.get("datasetOverride") or {}
+        if prepis.get("environmentVariableName"):
+            promenne_appky.add(prepis["environmentVariableName"])
+        for popis in (dataset.get("dataSources") or {}).values():
+            prepis_listu = popis.get("tableNameOverride") or {}
+            if prepis_listu.get("environmentVariableName"):
+                promenne_appky.add(prepis_listu["environmentVariableName"])
+    promenne_ve_flow(vystupni, promenne_appky)
 
     print(f"kontrol: {kontrol}, chyb: {len(chyby)}")
     for text_varovani in varovani:

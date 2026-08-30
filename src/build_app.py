@@ -324,6 +324,101 @@ def _projdi_akce(akce):
                 yield from _projdi_akce(vnorene)
 
 
+def odeber_nepouzivane_zdroje(cesta_msapp):
+    """Vyhodí z appky datové zdroje, na které se neodkazuje žádný vzorec.
+
+    Knihovna Dokumenty přibyla ze Studia při zakládání appky. Sama o sobě
+    neškodí, ale při napojení přes proměnné by musela dostat vlastní
+    proměnnou — v jednom `dataSets` bloku nesmí zůstat zdroj bez overridu.
+    Že ji opravdu nikdo nepoužívá, hlídá check_app nad YAML zdroji.
+    """
+    with zipfile.ZipFile(cesta_msapp) as balik:
+        polozky = {n: balik.read(n) for n in balik.namelist()}
+
+    klic = next((n for n in polozky
+                 if n.replace("\\", "/").endswith("References/DataSources.json")), None)
+    if klic is None:
+        raise SystemExit("CHYBA: v .msapp není References/DataSources.json")
+
+    data = json.loads(polozky[klic].decode("utf-8-sig"))
+    puvodni = len(data["DataSources"])
+    odebrane = [d["Name"] for d in data["DataSources"]
+                if d.get("Name") in env_promenne.NEPOUZIVANE_ZDROJE]
+    data["DataSources"] = [d for d in data["DataSources"]
+                           if d.get("Name") not in env_promenne.NEPOUZIVANE_ZDROJE]
+    if len(data["DataSources"]) == puvodni:
+        return []
+
+    polozky[klic] = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    with zipfile.ZipFile(cesta_msapp, "w", zipfile.ZIP_DEFLATED) as balik:
+        for jmeno, obsah in polozky.items():
+            balik.writestr(jmeno, obsah)
+    return odebrane
+
+
+def napoj_appku_na_promenne(solution_dir):
+    """Přepíše napojení canvas appky na proměnné prostředí.
+
+    Bez toho drží appka v `<ConnectionReferences>` adresu webu a GUIDy listů
+    toho prostředí, ze kterého se exportovala — po importu jinam ukazuje na
+    listy, které tam nejsou, a `App.OnStart` spadne na prvním ClearCollect.
+    S overridy si napojení vezme z proměnných, které se vyplňují při importu.
+
+    Tvar podle produkčních vzorů MiddleOfficeParametrizace a VendorManagement:
+    klíč datasetu je `<url>_<schemaname webu>`, uvnitř `datasetOverride`
+    a u každého zdroje `tableNameOverride`. Do `.msapp` se přitom nesahá —
+    `DataSources.json` zůstává na čisté URL a holém GUID i ve vzorech.
+    """
+    cesta = solution_dir / "customizations.xml"
+    text = cesta.read_text(encoding="utf-8-sig")
+    nalez = re.search(r"<ConnectionReferences>(.*?)</ConnectionReferences>", text, re.S)
+    if nalez is None:
+        raise SystemExit("CHYBA: customizations.xml nemá blok ConnectionReferences")
+
+    reference = json.loads(nalez.group(1))
+    napojene, odebrane = [], []
+    for odkaz in reference.values():
+        if "shared_sharepointonline" not in odkaz.get("id", ""):
+            continue
+
+        odkaz["dataSources"] = [z for z in odkaz.get("dataSources", [])
+                                if z not in env_promenne.NEPOUZIVANE_ZDROJE]
+
+        nove_datasety = {}
+        for adresa, dataset in (odkaz.get("dataSets") or {}).items():
+            # Klíč už suffix nese, když se staví z balíku, který přes proměnné
+            # jednou prošel — jinak by se nabaloval podruhé.
+            cista = adresa[: -len("_" + env_promenne.WEB)] if adresa.endswith("_" + env_promenne.WEB) else adresa
+            zdroje = {}
+            for jmeno, popis in (dataset.get("dataSources") or {}).items():
+                if jmeno in env_promenne.NEPOUZIVANE_ZDROJE:
+                    odebrane.append(jmeno)
+                    continue
+                promenna = env_promenne.LIST_PROMENNA.get(jmeno)
+                if promenna is None:
+                    raise SystemExit(
+                        f"CHYBA: zdroj '{jmeno}' nemá proměnnou v LIST_PROMENNA — "
+                        "doplň ji, nebo zdroj zařaď mezi nepoužívané")
+                guid = popis.get("tableName")
+                zdroje[jmeno] = {
+                    "tableName": guid,
+                    "tableNameOverride": {"name": guid, "environmentVariableName": promenna},
+                }
+                napojene.append(f"{jmeno}={promenna}")
+            nove_datasety[f"{cista}_{env_promenne.WEB}"] = {
+                "datasetOverride": {"name": cista, "environmentVariableName": env_promenne.WEB},
+                "dataSources": zdroje,
+            }
+        odkaz["dataSets"] = nove_datasety
+
+    if not napojene:
+        raise SystemExit("CHYBA: nenašel jsem SharePoint connection reference k napojení")
+
+    novy = json.dumps(reference, separators=(",", ":"), ensure_ascii=False)
+    cesta.write_text(text[: nalez.start(1)] + novy + text[nalez.end(1):], encoding="utf-8")
+    return napojene, odebrane
+
+
 def zbav_flow_vychozich_hodnot(solution_dir):
     """Smaže defaultValue u parametrů proměnných prostředí v definicích flow.
 
@@ -351,6 +446,10 @@ def zbav_flow_vychozich_hodnot(solution_dir):
 
 def dokonci(solution_dir, verze):
     """Přepíše verzi v manifestu a složí solution zip."""
+    napojene, odebrane = napoj_appku_na_promenne(solution_dir)
+    print(f"napojení appky přes proměnné: {len(napojene)} zdrojů ({', '.join(napojene)})")
+    if odebrane:
+        print(f"  odebrané nepoužívané zdroje: {', '.join(sorted(set(odebrane)))}")
     zbavene = zbav_flow_vychozich_hodnot(solution_dir)
     if zbavene:
         print(f"odstraněné výchozí hodnoty proměnných ve flow: {', '.join(zbavene)}")
@@ -451,6 +550,9 @@ def main():
         doplneno = doplnit_sablony(msapp)
         if doplneno:
             print(f"doplněné šablony controlů: {', '.join(doplneno)}")
+        odebrane_zdroje = odeber_nepouzivane_zdroje(msapp)
+        if odebrane_zdroje:
+            print(f"odebrané nepoužívané zdroje z appky: {', '.join(odebrane_zdroje)}")
         return dokonci(solution_dir, argumenty.verze)
 
     zdroje = PRACOVNI / "sources"
@@ -490,6 +592,10 @@ def main():
     doplneno = doplnit_sablony(novy_msapp)
     if doplneno:
         print(f"doplněné šablony controlů: {', '.join(doplneno)}")
+
+    odebrane_zdroje = odeber_nepouzivane_zdroje(novy_msapp)
+    if odebrane_zdroje:
+        print(f"odebrané nepoužívané zdroje z appky: {', '.join(odebrane_zdroje)}")
 
     shutil.copy(novy_msapp, msapp)
 

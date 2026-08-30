@@ -1251,6 +1251,166 @@ Dělat až po zeleném kroku 6, jako samostatný balík.
 
 ---
 
+## F9 — Přenositelnost mezi tenanty bez ručních kroků (zadáno 30.08.2026)
+
+**Zadání:** testovat se bude dál i na PPF DEV, aniž by se střídavými importy
+rozbíjelo to, co na druhém tenantu běží.
+
+### Co dnes brání (ověřeno v balících 1.0.0.63 a 1.0.0.66)
+
+Balík z MPSV základny naimportovaný na PPF DEV appku **rozbije**: v
+`<ConnectionReferences>` v `customizations.xml` je adresa
+`mpsvcr.sharepoint.com/...` a sedm GUIDů tamních listů (1.0.0.63, které na PPF
+běželo, tam má `ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa`).
+Po importu by appka ukazovala na listy, které na PPF nejsou, `App.OnStart`
+spadne na prvním `ClearCollect(colAgendy, …)` a nenačte **nic** — týž režim
+selhání jako 28.08. na MPSV, jen obráceně.
+
+Tři místa se liší mezi tenanty:
+
+| co | kde | dnes |
+|---|---|---|
+| napojení appky na 7 zdrojů | `<ConnectionReferences>` | ručně ve Studiu, 7× odebrat a přidat |
+| `varMapaUrl` | `App.OnStart` natvrdo | ruční změna v YAML |
+| GUID listu Aktivity | `PatchItem` ve flow | `build_flow.py --list-aktivity <GUID>` — hotovo |
+
+### Klíčové zjištění průzkumu: do `.msapp` se nesahá
+
+Vzory `MiddleOfficeParametrizace_1_2_0_3` a `VendorManagement_1_0_0_5` mají
+overridy **jen v `customizations.xml`**. V `.msapp/References/DataSources.json`
+zůstává `DatasetName` čistá URL a `TableName` holý GUID — žádný override tam
+není. Tím padá hlavní důvod, proč se F8/5 odkládalo („sahá se do `.msapp`,
+což offline neověřím").
+
+Ověřený tvar (MiddleOffice, produkce) — klíč datasetu je **URL + `_` + schemaname**:
+
+```json
+"dataSets": {
+  "https://…/testovaci_subsajta_ppf_sourceSiteParametrizace": {
+    "datasetOverride": {
+      "name": "https://…/testovaci_subsajta",
+      "environmentVariableName": "ppf_sourceSiteParametrizace"},
+    "dataSources": {
+      "middleOfficeScenarioDefinitions": {
+        "tableName": "60e610d7-…",
+        "tableNameOverride": {
+          "name": "60e610d7-…",
+          "environmentVariableName": "ppf_middleOfficeScenarioDefinitions"}}}}}
+```
+
+### Adresa mapy: levněji než listem `Nastaveni`
+
+Původní návrh byl list `Nastaveni` (F3 v námětech). Průzkum ukázal levnější
+cestu, která **nepotřebuje nový list, nové napojení ani kolo přes Studio**:
+
+`ExportFlow` už dnes bere vstup `text` (které zobrazení exportovat) a vrací
+`{ adresa: string }` — appka tu adresu používá pro `Download()`. Schéma je
+v appce zapečené jako WADL v `References/DataSources.json` a **měnit se nesmí**
+(skill: „schéma odpovědi se měnit nesmí"). Měnit ho ale netřeba: stačí poslat
+smluvenou hodnotu `text` a nechat flow vrátit adresu mapy místo exportu.
+Adresu složí z proměnné `mpsv_procesnimapaSite`, takže je vždy z toho
+prostředí, kde appka běží.
+
+Volání patří **až do `OnSelect` tlačítka mapy**, ne do `App.OnStart` — start
+appky se tím nezdrží a nedostupné flow neshodí načtení dat.
+
+### Kroky
+
+```
+1. [Proměnná pro Útvary, mrtvý zdroj pryč] — co: src/env_promenne.py
+   Appka má napojených 7 zdrojů, proměnné existují pro 5. Chybí `Útvary`
+   (v schema.json je, proměnnou nemá) a `Dokumenty` (knihovna, kterou
+   ŽÁDNÝ vzorec appky nepoužívá — grep přes src/app_src je prázdný).
+   Útvary: doplnit `mpsv_listUtvary` do POLOZKY i do mapy zobrazovaný→schema.
+   Dokumenty: odebrat z appky jako mrtvý zdroj (z `dataSets` v
+   customizations.xml i z DataSources.json v .msapp).
+   verify: `check_env` vypíše 7 definic (web + 6 listů) a seznam odpovídá
+     listům v schema.json; `check_app` zůstane zelený — tím je doložené,
+     že žádný vzorec `Dokumenty` nepoužívá.
+   edge cases: název s diakritikou (`Útvary`) jako klíč v JSON i v XML;
+     `Vazba aktivita–dílčí proces` má v názvu pomlčku U+2013.
+   risk: kdyby `Dokumenty` přece jen někde figurovaly, appka po importu
+     spadne na neznámém zdroji. Proto to ověřuje check_app, ne můj úsudek.
+
+2. [Overridy do customizations.xml] — co: src/build_app.py, nová funkce
+     `napoj_appku_na_promenne(solution_dir)` volaná z `dokonci()`
+   Přepíše blok `dataSets` u SharePoint connection reference: klíč datasetu
+   na `<url>_<schemaname webu>`, přidá `datasetOverride` a každému zdroji
+   `tableNameOverride` podle mapy z env_promenne.py.
+   verify: brána z kroku 3 + ruční diff proti vzoru MiddleOffice — stejné
+     klíče, stejná vnořenost, `name` drží původní hodnotu.
+   edge cases: obě connection reference na logicflows mají `dataSets: {}` —
+     do těch se sahat nesmí; JSON je v XML HTML-escapovaný, takže se musí
+     unescapovat, upravit a znovu escapovat týmž způsobem.
+   risk: špatně poskládaný klíč = appka po importu napojení nenajde.
+     Ověří se až importem, offline jen tvarem proti vzoru.
+
+3. [Brána nad overridy] — co: src/check_solution.py, kontrola `napojeni_appky`
+   Kontroly: (a) každý zdroj v `dataSources` má `tableNameOverride`,
+   (b) jeho `environmentVariableName` je proměnná deklarovaná v balíku,
+   (c) klíč datasetu = `datasetOverride.name` + "_" + schemaname webu,
+   (d) v `dataSets` nezůstal zdroj bez overridu.
+   verify: čtyři mutace — vynechaný `tableNameOverride`, odkaz na
+     nedeklarovanou proměnnou, klíč bez suffixu, přidaný zdroj bez overridu.
+     Každá MUSÍ bránu shodit; zelená brána bez mutací nedokazuje nic.
+   edge cases: appka bez overridů (starší základna) — brána musí říct
+     „nenapojeno přes proměnné", ne spadnout na chybějícím klíči.
+   risk: brána kontroluje tvar, ne funkci. Funkci ověří jedině import.
+
+4. [Adresa mapy z ExportFlow] — co: generátor ExportFlow,
+     src/app_src/App.pa.yaml, src/app_src/scr_Dashboard.pa.yaml
+   Flow: hned za triggerem větev na `triggerBody()?['text'] = '__mapa__'`
+   → Response s adresou složenou z proměnné webu a cesty k souboru v tvaru
+   `SiteAssets/Forms/AllItems.aspx?id=…` (náhled knihovny, NE přímý odkaz —
+   jinak se mapa stáhne místo zobrazení, ověřeno 20.08.2026).
+   Appka: `App.OnStart` nechá `varMapaUrl` prázdné; `OnSelect` tlačítka mapy
+   adresu dotáhne přes `IfError(ExportFlow.Run("__mapa__").adresa, "")`
+   a teprve pak `Launch()`.
+   verify: `check_export_flow` — nový vzorek vstupu `__mapa__` projde
+     mini-interpretem a vrátí adresu obsahující `AllItems.aspx?id=`;
+     mutace: rozbít skládání adresy a ověřit, že brána spadne.
+     `check_solution` kontrola `adresy_ve_flow` musí zůstat zelená — adresa
+     se skládá z proměnné, v definici nesmí být natvrdo.
+   edge cases: flow vypnuté nebo nedostupné → `IfError` vrátí prázdno
+     a tlačítko nesmí spustit `Launch("")`; dvojí kliknutí během čekání.
+   risk: schéma WADL se nesmí změnit ani o vlastnost. Kontrola: WADL blok
+     v DataSources.json musí zůstat bajtově shodný se základnou.
+
+5. [Build a import na PPF DEV] — co: deploy/procesnimapa_1_0_0_67.zip
+   Pořadí buildu drží HANDOVER.md §5: build_flow.py PŘED build_app.py.
+   `--list-aktivity` = GUID listu Aktivity na PPF DEV (vypíše
+   `deploy/mpsv/03_vypis_guidy.js` spuštěný na PPF webu).
+   verify: import jako upgrade → v Solutions → Environment variables vyplnit
+     web a šest listů PPF → appku otevřít ve Studiu (mikro-změna, Save,
+     Publish) → spustit: strom se načte, číselník i vazby ukazují data,
+     tlačítko mapy otevře mapu, export do Wordu i Excelu stáhne soubor.
+     Flow po importu ručně zapnout.
+   edge cases: proměnná, jejíž hodnota se při importu nepropíše (stalo se
+     28.08. u `mpsv_listAgendy`) — zkontrolovat všech sedm PŘED zapínáním flow.
+   risk: první import s overridy. Když appka nenačte data, je to buď
+     nevyplněná proměnná, nebo špatný tvar overridu — rozliší se pohledem
+     do panelu Data, na co je zdroj napojený.
+
+6. [Zpět na MPSV] — co: druhý balík z téže základny
+   Po zeleném PPF: `--list-aktivity` na GUID MPSV, build, import na MPSV,
+   vyplnit proměnné, ověřit stejným seznamem jako v kroku 5.
+   verify: obě prostředí běží ze stejného zdroje a liší se jen tím GUIDem.
+   risk: jediný, ale reálný — MPSV je prostředí, kde už appku někdo používá.
+     Import dělat po dohodě, ne mimochodem.
+```
+
+### Co zůstane ruční i po F9
+
+- **GUID listu Aktivity** v `PatchItem` — z proměnné to nejde (ověřeno
+  28.08. v provozu, `OpenApiOperationParameterValidationFailed`). Zůstává
+  parametr `--list-aktivity`, tedy dva balíky z jednoho zdroje.
+- **Vyplnění proměnných** při prvním importu do prostředí. Prostředí si je
+  pak drží, další import se neptá.
+- **Mikro-změna + Save + Publish** ve Studiu po každém importu a **ruční
+  zapnutí flow** — to import neumí a nikdy neuměl.
+
+---
+
 ## Náměty na rozšíření (neschválené, k připomenutí)
 
 Přepracováno 25.08.2026 (původní seznam z 23.08.2026 byl psaný před exportem

@@ -38,6 +38,7 @@ DEFINICE = [
     ("mpsv_listAktivity", "Procesni mapa - Aktivity", "List Aktivity.", "table", WEB),
     ("mpsv_listVazby", "Procesni mapa - Vazby",
      "Vazebni list aktivita - dilci proces.", "table", WEB),
+    ("mpsv_listUtvary", "Procesni mapa - Utvary", "Ciselnik utvaru.", "table", WEB),
 ]
 
 # Zobrazovaný název listu v appce -> proměnná. Klíč je týž, jakým listy
@@ -48,7 +49,14 @@ LIST_PROMENNA = {
     "Dílčí procesy": "mpsv_listDilciProcesy",
     "Aktivity": "mpsv_listAktivity",
     "Vazba aktivita–dílčí proces": "mpsv_listVazby",
+    "Útvary": "mpsv_listUtvary",
 }
+
+# Zdroj, který appka má v napojení, ale žádný vzorec ho nepoužívá. Knihovna
+# Dokumenty přibyla ze Studia při zakládání appky. Kdyby zůstala, musela by
+# dostat vlastní proměnnou (v jednom `dataSets` bloku nesmí být zdroj bez
+# overridu), a to jen proto, aby ji nikdo nepoužil. Odebírá se při buildu.
+NEPOUZIVANE_ZDROJE = ["Dokumenty"]
 
 _PODLE_SCHEMA = {d[0]: d for d in DEFINICE}
 
