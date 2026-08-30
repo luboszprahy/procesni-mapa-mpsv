@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 18:15 (F10 a F11 zadány: zánik+vznik, oddělená záloha a import)
+Aktualizováno: 2026-08-30 18:16 (konec dne; zítra pokračování z jiného stroje)
 
 ## CO JE NA TOBĚ
 
@@ -20,6 +20,20 @@ Aktualizováno: 2026-08-30 18:15 (F10 a F11 zadány: zánik+vznik, oddělená z�
    Zajímá mě, jestli akce projde DLP a běh doběhne — v **obou** tenantech.
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
+
+### Zítra se pokračuje z jiného stroje (31.08.2026)
+
+Vše podstatné je v gitu — `input/procesnimapa_1_0_0_66.zip` (základna, ze které
+se staví), `deploy/procesnimapa_1_0_0_68.zip`, `kody.json`, `src/schema.json`
+i `HANDOVER.md`. Poslední commit `c6e0945`, remote
+`luboszprahy/procesni-mapa-mpsv`.
+
+Na novém stroji: `git pull`, pak **Rozjezd v `HANDOVER.md`** — `.venv` se přes
+git nepřenáší (`python -m venv .venv`, `pip install openpyxl pyyaml`).
+Bez `pac` se staví přes `--bez-pac`; proti balíku 68 to jde, je zabalený z YAML.
+
+Pořadí zítra: GUID Aktivity → build balíku pro PPF DEV → import → mezitím
+test DLP pro Excel Online (Business).
 
 ## F10 a F11 zadány — rozhodnutí z 30.08.2026 18:08
 
