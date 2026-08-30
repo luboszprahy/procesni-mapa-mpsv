@@ -324,8 +324,36 @@ def _projdi_akce(akce):
                 yield from _projdi_akce(vnorene)
 
 
+def zbav_flow_vychozich_hodnot(solution_dir):
+    """Smaže defaultValue u parametrů proměnných prostředí v definicích flow.
+
+    Designer je tam dopíše aktuální hodnotou z prostředí, jakmile se flow
+    jednou uloží — export z MPSV takhle nesl adresu tamního webu (1.0.0.66).
+    Na cizím tenantu by pak flow s nevyplněnou proměnnou tiše běželo proti
+    původnímu webu místo aby selhalo. Systémové $authentication a $connections
+    se nechávají, jejich prázdný defaultValue je součást tvaru definice.
+    """
+    zbavene = []
+    for cesta in sorted((solution_dir / "Workflows").glob("*.json")):
+        data = json.loads(cesta.read_text(encoding="utf-8-sig"))
+        parametry = data["properties"]["definition"].get("parameters", {})
+        zmeneno = False
+        for nazev, definice in parametry.items():
+            if nazev.startswith("$") or not isinstance(definice, dict):
+                continue
+            if definice.pop("defaultValue", None) is not None:
+                zbavene.append(f"{cesta.name.split('-')[0]}/{nazev}")
+                zmeneno = True
+        if zmeneno:
+            cesta.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return zbavene
+
+
 def dokonci(solution_dir, verze):
     """Přepíše verzi v manifestu a složí solution zip."""
+    zbavene = zbav_flow_vychozich_hodnot(solution_dir)
+    if zbavene:
+        print(f"odstraněné výchozí hodnoty proměnných ve flow: {', '.join(zbavene)}")
     pocet = zkontroluj_flow_kratky_nazev(solution_dir)
     print(f"flow — povinná pole zápisu ověřena ({pocet}), žádné z triggeru")
 

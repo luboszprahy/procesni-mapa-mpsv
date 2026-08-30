@@ -1,21 +1,68 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-28 22:50 (MPSV: appka běží, všechna čtyři flow zapnutá)
+Aktualizováno: 2026-08-30 16:45 (nová základna 1.0.0.66 — export z běžícího MPSV)
 
-## CO JE NA TOBĚ — dokončení nasazení
+## CO JE NA TOBĚ — dvě zbývající ověření v provozu
 
-Appka na MPSV načítá data a flow jdou zapnout. Zbývají čtyři kroky; když už
-dnes nemáš sílu, nic z toho neuteče:
-
-1. **Add data → ExportFlow** ve Studiu (`FlowNameId` přiděluje až cílové
-   prostředí, lokálně se dogenerovat nedá) → mikro-změna → **Save** → **Publish**.
-2. **Export solution** ze Studia a pošli mi ji — z ní postavím finální balík
-   pro MPSV s registrovaným ExportFlow.
-3. **Ověř tlačítko mapy.** `varMapaUrl` má adresu, kterou jsem složil z odkazu
+1. **Ověř tlačítko mapy.** `varMapaUrl` má adresu, kterou jsem složil z odkazu
    na knihovnu; když se mapa místo zobrazení stáhne do Downloads, pošli výstup
    `src/zjisti_url_mapy.js`.
-4. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
+2. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
+
+Kroky 1 a 2 z 28.08. (registrace ExportFlow + export solution) jsou hotové —
+viz níže.
+
+## Nová základna: 1.0.0.66, export z běžícího MPSV (30.08.2026)
+
+Uživatel dodal `procesnimapa_1_0_0_66.zip` — export solution z MPSV, kde
+appka běží. **Všechny další úpravy vycházejí z ní**, uloženo jako
+`input/procesnimapa_1_0_0_66.zip` (dosavadní základ 1.0.0.57 je v `input/archiv/`).
+
+```powershell
+& $py src/build_app.py --solution input/procesnimapa_1_0_0_66.zip --verze 1.0.0.67
+```
+
+Co export dokládá:
+
+- **`ExportFlow` je zaregistrovaný jako datový zdroj appky** —
+  `FlowNameId 4b36e7da-c006-4859-af44-e22c8a790738`, tedy **stejné ID jako
+  v mém balíku 1.0.0.65**. MPSV ID z importované solution převzalo, nepřidělilo
+  vlastní; dvoukolový postup (balík s flow → Add data → druhý balík) tady
+  vyšel na jedno kolo. Registrované jsou obě flow volané z appky
+  (`MapaPublishFlow` i `ExportFlow`).
+- Appka byla ve Studiu uložena 28.08. 22:46 (`LastSavedDateTimeUTC`), takže
+  mikro-změna + Save + Publish po importu proběhly.
+- `packed.json` je pryč a `Controls/*.json` jsou dogenerované Studiem —
+  potvrzení, že z YAML zabalený balík se ve Studiu opravdu doauthoroval.
+  **Důsledek: z téhle základny nejde stavět přes `--bez-pac`** (ta cesta
+  vyžaduje `LoadFromYaml=true`); build hlásí jasnou chybu, `pac` si najde sám
+  ve VS Code rozšíření.
+
+### Jedna past, kterou export přinesl — a je opravená
+
+Flow `AktualizaceKratkehoNazvu` mělo v definici
+`parameters.<proměnná>.defaultValue` s adresou webu MPSV. Designer ji tam
+dopíše aktuální hodnotou z prostředí, jakmile se flow jednou uloží — a právě
+tohle flow se na MPSV 28.08. v designeru řešilo. Ostatní tři flow ji nemají.
+
+Proč to vadí: na dalším tenantu by flow s nevyplněnou proměnnou tiše běželo
+proti webu MPSV, místo aby selhalo. Je to tentýž režim selhání, kvůli kterému
+se z balíku vynechává `<defaultvalue>` v definicích proměnných — jen o patro
+níž, v definici flow.
+
+Chytila to brána `check_solution` (kontrola `adresy_ve_flow`, 278 kontrol,
+1 chyba). Oprava je v `build_app.py` — funkce `zbav_flow_vychozich_hodnot()`
+volaná z `dokonci()` maže `defaultValue` u všech nesystémových parametrů
+definic flow a vypisuje, které to byly. `$authentication` a `$connections`
+se nechávají, jejich prázdný `defaultValue` je součást tvaru definice.
+
+### Brány nad zkušebním buildem 1.0.0.67 z nové základny
+
+`check_app` · `check_env` · `check_solution` 278 · `check_flow` 26 ·
+`check_mapa_flow` 139 · `check_export_flow` 110 — vše zelené. Balík se
+nikam nenasazoval a je smazaný; nasazená verze zůstává **1.0.0.65**.
+Přegeneruje se jedním příkazem výše.
 
 ## Jak dopadl večer 28.08.2026 — tři nezávislé pasti
 
