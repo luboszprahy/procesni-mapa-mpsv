@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 18:10 (F9: enkódování adresy mapy na ověřený tvar, 1.0.0.68)
+Aktualizováno: 2026-08-30 17:50 (F9: enkódování adresy mapy na ověřený tvar, 1.0.0.68)
 
 ## CO JE NA TOBĚ
 
@@ -87,7 +87,7 @@ režim mapy, běžný export vracející adresu mapy).
   šesti). Prostředí si je pak drží.
 - **Mikro-změna + Save + Publish** ve Studiu po importu a **ruční zapnutí flow**.
 
-### Enkódování adresy mapy dorovnáno na ověřený tvar — 1.0.0.68 (30.08.2026 18:10)
+### Enkódování adresy mapy dorovnáno na ověřený tvar — 1.0.0.68 (30.08.2026 17:50)
 
 Riziko zapsané u balíku 67 („brána ověří tvar, ne chování SharePointu") šlo
 zavřít offline, protože zlatý vzorek v repu je: adresa z **reálného kliknutí**
