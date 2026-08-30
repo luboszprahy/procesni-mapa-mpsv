@@ -235,6 +235,20 @@ def je_mapa():
     return f"equals(triggerBody()['text'], {lit(REZIM_MAPA)})"
 
 
+def enkoduj_cestu(vyraz):
+    """Enkódování cesty v tom tvaru, jaký v odkazu vyrábí sám SharePoint.
+
+    `encodeUriComponent` nechává `-`, `_` a `.` být — jsou to unreserved znaky.
+    Odkaz z reálného kliknutí v knihovně je má jako `%2D`, `%5F` a `%2E`
+    (ověřeno 20.08.2026). Náhrady se dělají až po enkódování; žádná z nich
+    nevytvoří znak, který by chytla další, takže na pořadí nezáleží.
+    """
+    hotovo = f"encodeUriComponent({vyraz})"
+    for znak, kod in (("-", "%2D"), ("_", "%5F"), (".", "%2E")):
+        hotovo = f"replace({hotovo}, {lit(znak)}, {lit(kod)})"
+    return hotovo
+
+
 def vyraz_adresy_mapy():
     """Odkaz na náhled knihovny, ne přímá cesta k .html souboru.
 
@@ -246,8 +260,8 @@ def vyraz_adresy_mapy():
     slozka = f"concat(outputs('Cesta_webu'), {lit(CILOVA_SLOZKA)})"
     return (f"concat({ep.vyraz(ep.WEB)}, "
             f"{lit(CILOVA_SLOZKA + '/Forms/AllItems.aspx?id=')}, "
-            f"encodeUriComponent({soubor}), {lit('&parent=')}, "
-            f"encodeUriComponent({slozka}))")
+            f"{enkoduj_cestu(soubor)}, {lit('&parent=')}, "
+            f"{enkoduj_cestu(slozka)})")
 
 
 def akce():

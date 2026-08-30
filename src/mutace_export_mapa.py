@@ -27,7 +27,14 @@ def uprav_flow(zip_cesta, zmena):
     klic = next(n for n in polozky
                 if n.replace("\\", "/").startswith(f"Workflows/{FLOW}"))
     flow = json.loads(polozky[klic].decode("utf-8-sig"))
+    puvodni = json.dumps(flow, ensure_ascii=False, sort_keys=True)
     zmena(flow["properties"]["definition"]["actions"])
+    novy = json.dumps(flow, ensure_ascii=False, sort_keys=True)
+    # Mutace, která se do definice netrefí (změní se tvar výrazu a `str.replace`
+    # přestane nacházet), by se tvářila jako platný test. Zelená brána nad
+    # nezměněným balíkem nedokazuje nic.
+    if puvodni == novy:
+        raise SystemExit("CHYBA: mutace nic nezměnila — test by nic nedokazoval")
     polozky[klic] = json.dumps(flow, ensure_ascii=False).encode("utf-8")
 
     with zipfile.ZipFile(zip_cesta, "w", zipfile.ZIP_DEFLATED) as balik:
@@ -76,8 +83,19 @@ def rezim_v_exportu(akce):
         "@if(equals(triggerBody()['text'], '__mapa__')", "@if(true")
 
 
+def bez_nahrad_enkodovani(akce):
+    """Cesta se enkóduje jen přes encodeUriComponent, bez %2D/%5F/%2E."""
+    vyraz = akce["Adresa"]["inputs"]
+    for kod in ("%2D", "%5F", "%2E"):
+        znak = chr(int(kod[1:], 16))
+        vyraz = vyraz.replace(f"replace(", "", 1).replace(
+            f", '{znak}', '{kod}')", "", 1)
+    akce["Adresa"]["inputs"] = vyraz
+
+
 MUTACE = [
     ("adresa mapy jako přímý odkaz na .html", primy_odkaz),
+    ("enkódování bez náhrad %2D/%5F/%2E", bez_nahrad_enkodovani),
     ("cesta v parametru id není enkódovaná", neenkodovana_cesta),
     ("parent ukazuje jinam než na složku souboru", spatny_parent),
     ("zápis souboru mimo podmínku", zapis_mimo_podminku),

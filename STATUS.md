@@ -1,16 +1,17 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 17:35 (F9: appka i adresa mapy přes proměnné, 1.0.0.67)
+Aktualizováno: 2026-08-30 18:10 (F9: enkódování adresy mapy na ověřený tvar, 1.0.0.68)
 
 ## CO JE NA TOBĚ
 
-1. **Pošli mi GUID listu Aktivity na PPF DEV.** Zjistí ho `deploy/mpsv/03_vypis_guidy.js`
-   vložený do konzole prohlížeče (F12) na PPF webu. Bez něj neumím postavit
-   balík pro PPF — je to jediná hodnota, kterou z proměnné vzít nejde
-   (`PatchItem` runtime výraz nesnese, ověřeno 28.08. v provozu).
-   Balík `deploy/procesnimapa_1_0_0_67.zip` je zatím postavený s GUIDem MPSV.
+1. **Pošli mi GUID listu Aktivity na PPF DEV** — domluveno na **31.08.2026**,
+   až budeš v práci. Zjistí ho `deploy/mpsv/03_vypis_guidy.js` vložený do
+   konzole prohlížeče (F12) na PPF webu. Bez něj neumím postavit balík pro PPF
+   — je to jediná hodnota, kterou z proměnné vzít nejde (`PatchItem` runtime
+   výraz nesnese, ověřeno 28.08. v provozu). Kroky 5 a 6 plánu F9 na tom stojí.
+   Balík `deploy/procesnimapa_1_0_0_68.zip` je zatím postavený s GUIDem MPSV.
 2. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
-   ale z `ExportFlow`, takže tenhle test platí až pro balík 67 a dál.
+   ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
 3. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
 
@@ -86,13 +87,54 @@ režim mapy, běžný export vracející adresu mapy).
   šesti). Prostředí si je pak drží.
 - **Mikro-změna + Save + Publish** ve Studiu po importu a **ruční zapnutí flow**.
 
+### Enkódování adresy mapy dorovnáno na ověřený tvar — 1.0.0.68 (30.08.2026 18:10)
+
+Riziko zapsané u balíku 67 („brána ověří tvar, ne chování SharePointu") šlo
+zavřít offline, protože zlatý vzorek v repu je: adresa z **reálného kliknutí**
+na mapu v knihovně PPF DEV z 20.08.2026, zapečená tehdy do `App.OnStart`.
+
+`encodeUriComponent` nechává `-`, `_` a `.` být — jsou to unreserved znaky —
+zatímco SharePoint je v odkazu píše jako `%2D`, `%5F` a `%2E`. Skládaná adresa
+se tím od ověřené lišila. `enkoduj_cestu()` v `build_export_flow.py` teď
+náhrady doplňuje; dělají se až po enkódování a žádná nevytvoří znak, který by
+chytla další, takže na pořadí nezáleží.
+
+**Nová kontrola `vyznam_mapa_vzorek`** složí adresu pro web PPF DEV a porovná
+ji **znak po znaku** s tou ověřenou (bez `viewid` — je to GUID zobrazení,
+v cizím prostředí neznámý; náhled si bez něj vezme výchozí). Kontroly tvaru
+projdou i adrese, která se liší jen enkódováním — a právě tím se pozná, jestli
+SharePoint mapu zobrazí, nebo pošle do Downloads.
+
+### Nález: brána měřila adresu proti řetězci, který v provozu nevznikne
+
+Při psaní vzorkového testu se ukázalo, že `nacti_web` v `check_export_flow.py`
+vrací **suffixovaný klíč** datasetu (`…/procesnimapaApk_mpsv_procesnimapaSite`)
+a dosazuje ho do mini-interpretu jako hodnotu proměnné webu. Adresa se pak
+měřila proti sobě samé: `startswith(web)` prošlo, protože se suffix propsal do
+obou stran. Táž chyba byla v `adresa_webu` v `check_solution.py` (tam bez
+následku — bere se z ní jen hostname). Obě teď čtou `datasetOverride.name`,
+stejně jako opravená `nacti_metadata` v `build_mapa_flow.py`.
+
+Balík 67 tím nebyl vadný — vadný byl důkaz o něm.
+
+**Mutační skript dostal pojistku:** mutace, která se do definice netrefí
+(změní se tvar výrazu a `str.replace` přestane nacházet), se dřív tvářila jako
+platný test. `uprav_flow` teď porovná definici před a po a na nezměněném
+balíku skončí chybou. Dvě z existujících mutací adresu hledaly řetězcem, který
+se doplněním náhrad změnil.
+
+### Brány po 1.0.0.68
+
+`check_export_flow` **124** (nová `vyznam_mapa_vzorek`) · `check_solution` 300 ·
+`check_mapa_flow` 139 · `check_flow` 26 · `check_app` · `check_env` — vše zelené.
+Mutačně: `mutace_export_mapa` **7/7** (přibyla „enkódování bez náhrad"),
+`mutace_napojeni` 5/5.
+
 ### Neověřené — čeká na import
 
-Tvar adresy mapy skládaný ve flow (`AllItems.aspx?id=` s `encodeUriComponent`)
-se liší od dnešního zapečeného tvaru v tom, že pomlčky, podtržítka a tečky
-nechává neenkódované. Brána ověří tvar, ne chování SharePointu. Když se mapa
-místo zobrazení stáhne, je to tohle — a řeší se doplněním náhrad ve
-`vyraz_adresy_mapy()` v `build_export_flow.py`.
+Že `viewid` v adrese chybět smí. Ověřená adresa ho měla, MPSV varianta v 66 ne
+a ta se nikdy nevyzkoušela. Pokud by náhled bez `viewid` nefungoval, znamená to
+dotáhnout GUID výchozího zobrazení knihovny — z proměnné, ne natvrdo.
 
 ## Nová základna: 1.0.0.66, export z běžícího MPSV (30.08.2026)
 

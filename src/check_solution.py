@@ -55,7 +55,10 @@ def adresa_webu(customizations):
     for spojeni in data.values():
         datasety = spojeni.get("dataSets") or {}
         if datasety:
-            return next(iter(datasety))
+            klic, obsah = next(iter(datasety.items()))
+            # Klíč nese s napojením přes proměnné suffix se schemaname webu;
+            # čistá adresa je v datasetOverride.name.
+            return (obsah.get("datasetOverride") or {}).get("name") or klic
     return None
 
 

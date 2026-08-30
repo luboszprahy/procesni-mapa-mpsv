@@ -608,7 +608,12 @@ def nacti_web(customizations):
     for spojeni in data.values():
         datasety = spojeni.get("dataSets") or {}
         if datasety:
-            return next(iter(datasety))
+            klic, obsah = next(iter(datasety.items()))
+            # S napojením přes proměnné nese klíč suffix se schemaname webu.
+            # Do mini-interpretu patří hodnota, kterou bude mít proměnná
+            # v provozu — jinak by se adresa měřila proti řetězci, který
+            # nikde nevznikne, a kontroly by dokazovaly samy sebe.
+            return (obsah.get("datasetOverride") or {}).get("name") or klic
     return None
 
 
@@ -650,6 +655,42 @@ def vyznam_mapa(akce, web):
            f"běžný export dostal adresu mapy: {bezny}")
 
 
+# Adresa z reálného kliknutí na mapu v knihovně (PPF DEV, 20.08.2026) — jediný
+# tvar, o kterém je ověřeno, že mapu zobrazí místo stažení. `viewid` se
+# vypouští: je to GUID zobrazení, v cizím prostředí neznámý, a náhled si
+# bez něj vezme výchozí zobrazení.
+VZOREK_WEB = "https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa"
+VZOREK_MAPA = (
+    VZOREK_WEB + "/SiteAssets/Forms/AllItems.aspx"
+    "?id=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa"
+    "%2FSiteAssets%2Fprocesni%5Fmapa%2Ehtml"
+    "&parent=%2Fsites%2FDigiData%5FD%2Ftestovaci%5Fsubsajta%2Fprocesnimapa%2FSiteAssets"
+)
+
+
+def vyznam_mapa_vzorek(akce):
+    """Skládaná adresa musí pro známý web vyjít znak po znaku jako ta ověřená.
+
+    Kontroly tvaru výše projdou i adrese, která se liší enkódováním — a právě
+    tím se pozná, jestli SharePoint mapu zobrazí, nebo pošle do Downloads.
+    Proti hádání pomáhá jediné: porovnat s odkazem, který v prostředí
+    prokazatelně fungoval.
+    """
+    global WEB_APPKY
+    puvodni = WEB_APPKY
+    WEB_APPKY = VZOREK_WEB
+    try:
+        adresa = priprav_kontext(akce, VZOREK, NADPIS, "word",
+                                 text=REZIM_MAPA)["akce"]["Adresa"]
+    finally:
+        WEB_APPKY = puvodni
+
+    overit(adresa == VZOREK_MAPA,
+           "skládaná adresa mapy se liší od ověřeného odkazu z knihovny:\n"
+           f"      čekám: {VZOREK_MAPA}\n"
+           f"      mám:   {adresa}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True)
@@ -681,6 +722,7 @@ def main():
         vyznam_excel(akce)
         vyznam_meze(akce)
         vyznam_mapa(akce, web)
+        vyznam_mapa_vzorek(akce)
     zapis_v_baliku(polozky, klic)
     return vypis()
 

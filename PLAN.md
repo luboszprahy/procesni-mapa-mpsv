@@ -1376,7 +1376,19 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
    risk: schéma WADL se nesmí změnit ani o vlastnost. Kontrola: WADL blok
      v DataSources.json musí zůstat bajtově shodný se základnou.
 
-5. [Build a import na PPF DEV] — co: deploy/procesnimapa_1_0_0_67.zip
+4b. [Enkódování adresy na ověřený tvar] — co: build_export_flow.py,
+     funkce `enkoduj_cestu()`  — HOTOVO 30.08.2026, balík 1.0.0.68
+   `encodeUriComponent` nechává `-`, `_` a `.` být; SharePoint je v odkazu
+   píše jako `%2D`, `%5F`, `%2E`. Náhrady až po enkódování.
+   verify: `vyznam_mapa_vzorek` v check_export_flow složí adresu pro web
+     PPF DEV a porovná ji znak po znaku s adresou z reálného kliknutí
+     z 20.08.2026. Mutace „enkódování bez náhrad" bránu shodí.
+   edge cases: `%` už vzniklá enkódováním se nesmí re-enkódovat — `-`, `_`
+     ani `.` se v `%2F` nevyskytují, takže na pořadí náhrad nezáleží.
+   risk: `viewid` ověřená adresa měla, skládaná ho nemá. Náhled si bez něj
+     má vzít výchozí zobrazení; ověří se až importem.
+
+5. [Build a import na PPF DEV] — co: deploy/procesnimapa_1_0_0_68.zip
    Pořadí buildu drží HANDOVER.md §5: build_flow.py PŘED build_app.py.
    `--list-aktivity` = GUID listu Aktivity na PPF DEV (vypíše
    `deploy/mpsv/03_vypis_guidy.js` spuštěný na PPF webu).
