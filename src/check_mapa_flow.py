@@ -130,7 +130,7 @@ def viditelne(akce, jmeno):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True)
-    parser.add_argument("--base", default="deploy/procesnimapa_1_0_0_63.zip",
+    parser.add_argument("--base", default="input/procesnimapa_1_0_0_66.zip",
                         help="výchozí export, proti kterému se hlídá, co se nesmělo změnit")
     argumenty = parser.parse_args()
 

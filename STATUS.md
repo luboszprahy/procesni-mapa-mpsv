@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 17:50 (F9: enkódování adresy mapy na ověřený tvar, 1.0.0.68)
+Aktualizováno: 2026-08-30 17:55 (F9: balík 1.0.0.68 hotový, brány zeleně; čeká se na GUID Aktivity z PPF DEV)
 
 ## CO JE NA TOBĚ
 
@@ -129,6 +129,12 @@ se doplněním náhrad změnil.
 `check_mapa_flow` 139 · `check_flow` 26 · `check_app` · `check_env` — vše zelené.
 Mutačně: `mutace_export_mapa` **7/7** (přibyla „enkódování bez náhrad"),
 `mutace_napojeni` 5/5.
+
+**Oprava 30.08.2026 17:55:** `check_mapa_flow.py` měl `--base` natvrdo na
+`deploy/procesnimapa_1_0_0_63.zip`, což je balík, který v `deploy/` už není —
+brána spuštěná bez explicitního `--base` (tedy tak, jak ji uvádí HANDOVER)
+padala na `FileNotFoundError`. Default nyní míří na aktuální základnu
+`input/procesnimapa_1_0_0_66.zip`; proti ní i proti 67 dá týchž 139 kontrol.
 
 ### Neověřené — čeká na import
 
@@ -2458,9 +2464,12 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**F2 čeká na výsledek importu 1.0.0.6** (viz sekce nahoře). Mezitím F3 krok 9b —
-klikací návod `deploy/flow_AktualizaceKratkehoNazvu.md`; ověřovací skript
-`src/check_zkraceni_flow.py` už hotový a mutačně ověřený.
+**F9 kroky 1–4b hotové, balík `deploy/procesnimapa_1_0_0_68.zip` stojí připravený.
+Kroky 5 a 6 (build a import na PPF DEV, pak zpět na MPSV) čekají na GUID listu
+Aktivity z PPF DEV** — domluveno na 31.08.2026, viz „CO JE NA TOBĚ" nahoře.
+Bez něj se druhý balík postavit nedá, `PatchItem` runtime výraz nesnese.
+Do té doby nic dalšího nerozpracovávám; náměty ze sekce „Náměty na rozšíření"
+jsou neschválené.
 
 Dělba práce u canvas apps je zavedená a zapsaná ve skillu `power-Apps-skill`
 i v paměti projektu: uživatel založí appku ve Studiu a pošle solution,
