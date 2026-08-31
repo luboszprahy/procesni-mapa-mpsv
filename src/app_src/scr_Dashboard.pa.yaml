@@ -834,6 +834,41 @@ Screens:
             Width: =100
             X: =1016
             Y: =116
+      # Záloha nemá nabídku, protože má zatím jedinou volbu. Až přibude obnova
+      # (F11 krok 4), stane se z toho rozbalovátko jako u mapy a exportu.
+      - btn_Zaloha:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varZalohuji, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuMapa, false);
+              Set(varMenuExport, false);
+              Set(varMenuRozbalit, false);
+              Set(varZalohuji, true);
+              IfError(
+                  ZalohaFlow.Run();
+                  Notify("Záloha spuštěna. Snímek se za chvíli objeví v knihovně Zálohy.", NotificationType.Information, varNotifyMs),
+                  Notify("Zálohu se nepodařilo spustit: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+              );
+              Set(varZalohuji, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="Záloha"
+            Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00. Hlášení potvrzuje spuštění, ne dokončení."'
+            Width: =100
+            X: =1120
+            Y: =116
       - btn_KodD:
           Control: Classic/Button@2.2.0
           Properties:

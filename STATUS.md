@@ -1,49 +1,74 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-08-31 19:10** — F11 krok 1 (snímek rejstříku) hotový.
+Aktualizováno: **2026-08-31 20:35** — balík 1.0.0.80 s tlačítkem „Záloha".
 Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
-## CO JE NA TOBĚ (tři věci, pořadí je nově závazné)
+## CO JE NA TOBĚ
 
-Podrobný postup s ověřením u každého kroku: **`deploy/INSTALACE.md`**.
+1. **Naimportuj `deploy/procesnimapa_1_0_0_80.zip`** a projdi
+   **`deploy/INSTALACE.md`**. Proti 76 přibyla devátá proměnná
+   `mpsv_listZalohy` (knihovna `Zálohy`) a tlačítko **Záloha** v horní liště
+   Přehledu. `setup_sharepoint.js` už na PPF běžel, takže pořadí kroků 1 a 2
+   tentokrát nehrozí.
+   **Ověření, na kterém záleží nejvíc:** po stisku tlačítka Záloha musí
+   v knihovně `Zálohy` přibýt `rejstrik_<RRRR-MM-DD_HHMM>.json` a v něm musí
+   mít `listy.DilciProcesy` **250 položek, ne 100**. Sto by znamenalo
+   nepropsané stránkování — běh je v tom případě zelený a snímek přesto
+   oříznutý.
 
-**Bod 1 musí být před bodem 2.** Balík 1.0.0.76 přidal osmou proměnnou
-prostředí (`mpsv_listHistorieKodu`) a průvodce importem se na ni zeptá.
-Když list na webu ještě neexistuje, není co vybrat — proměnná zůstane
-prázdná a to shodí napojení **celé** SharePoint connection, tedy i listů,
-které s ní nesouvisejí. Skript z bodu 1 ten list zakládá.
-
-1. **Spusť `src/setup_sharepoint.js` na PPF** — ~2 min. F12 → Console na webu
-   `/sites/DigiData_D/testovaci_subsajta/procesnimapa`. Nově zakládá **knihovnu
-   `Zalohy`** (kam píše snímek rejstříku), k tomu list `HistorieKodu`
-   a sloupec `puvodni_kod` v `Procesy`, `DilciProcesy` a `Aktivity`.
-   Idempotentní; na konci musí říct, že chybných sloupců je **0**.
-
-2. **Naimportuj `deploy/procesnimapa_1_0_0_76.zip`** — ~5 min, až po bodu 1.
-   Proti 75 přibyla dvě flow (`ZalohaFlow`, `ZalohaScheduled`) a osmá
-   proměnná. V průvodci **vyplň Current Value u všech osmi** proměnných.
-   Po importu mikro-změna → Save → Publish. Flow, která se nezapnou, zapni
-   ručně — import stav zapnutí nemění.
-
-3. **Test DLP pro Excel Online (Business)** — ~10 min, **nejcennější**.
+2. **Test DLP pro Excel Online (Business)** — ~10 min, pořád otevřené.
    V Power Automate ručně nové flow, jedna akce `List rows present in a table`
    nad testovacím `.xlsx` v knihovně na PPF. Tři kontrolní body: akce se
    objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí řádky.
    Soubor musí mít **formátovanou Tabulku** (Vložit → Tabulka), ne volnou
    mřížku — jinak konektor neuvidí nic a vypadá to jako chyba oprávnění.
-   **Na tom stojí tvar celého F11 kroku 3.** Když konektor neprojde, hromadný
-   import se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js`
-   z vývojářského skriptu na nástroj pro správce). MPSV se doověří, až budeš
-   mít přístup — do té doby to zůstává otevřené riziko.
-
-**Až budeš mít 76 naimportovaný:** Studio → `Add data` → **`ZalohaFlow`**
-a **`HistorieKodu`** (obojí jedním kolečkem) → mikro-změna → Save → Publish →
-export solution a pošli mi zip. Bez té registrace nejde do appky napsat
-tlačítko „Pořídit zálohu" ani zápis do historie kódů.
+   **Na tom stojí tvar F11 kroku 3b.** Když konektor neprojde, hromadný import
+   se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js` z
+   vývojářského skriptu na nástroj pro správce).
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
-přístup. Žádný z dnešních nálezů se MPSV netýká.
+přístup.
+
+## CO DĚLÁM JÁ (next step)
+
+**F11 krok 3a — šablona pro hromadný import.** `src/make_sablona.py` generuje
+`.xlsx` ze `src/schema.json` (sloupce schématu minus systémové: kód,
+`nazev_kratky`, `datum_aktualizace`, `puvodni_kod`) + brána
+`src/check_sablona.py`. Platí v obou větvích kroku 3 — ať konektor Excel
+Online projde, nebo ne, správce vyplňuje týž soubor.
+
+Zbytek kroku 3b (flow `ImportFlow`, obrazovka náhledu) čeká na výsledek
+DLP testu. F11 krok 4 (restore) se nezačíná dřív, než jsou zelené kroky 1 a 3.
+
+## Balík 1.0.0.80 — tlačítko „Záloha" (31.08.2026 20:35)
+
+Postaveno z exportu `input/procesnimapa_1_0_0_79.zip`, který doložil
+registraci všech tří nových zdrojů:
+
+| zdroj | jak je v appce |
+|---|---|
+| `ZalohaFlow` | `ServiceInfo`, `FlowNameId 92767d85-1d09-4847-8d04-26141252cd19` |
+| `Historie kódů` | `ConnectedDataSourceInfo` |
+| `Zálohy` (knihovna) | `ConnectedDataSourceInfo` |
+
+`ZalohaScheduled` registrované není a správně — plánované flow se z appky
+nevolá.
+
+**Tlačítko** `btn_Zaloha` v horní liště Přehledu (X=1120, vedle `Export ▾`).
+Bez nabídky, protože má zatím jedinou volbu; až přibude obnova, stane se
+z toho rozbalovátko jako u mapy a exportu. `DisplayMode` na `varZalohuji`,
+aby dvojklik nevyrobil dva snímky. Vzorec je `IfError` + `Notify` podle
+stejného vzoru jako `MapaPublishFlow` — hlášení potvrzuje **spuštění**,
+ne dokončení.
+
+**Brány na 80:** `check_solution` 435 · `check_zaloha_flow` 157 ·
+`mutace_zaloha` 9/9 · `check_mapa_flow` 139 · `check_export_flow` 124 ·
+`check_flow`, `check_env`, `check_app` zeleně.
+
+Sestavení: `build_app.py --solution input/procesnimapa_1_0_0_79.zip
+--verze 1.0.0.80` (přes `pac`, generátory flow se nepouštěly — flow jsou
+na prostředí nezávislá a v exportu už jsou).
 
 ## Čeká se na export s listem `HistorieKodu` (31.08.2026 20:05)
 

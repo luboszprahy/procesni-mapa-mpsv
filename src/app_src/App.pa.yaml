@@ -86,6 +86,7 @@ App:
       Set(varMenuExport, false);
       Set(varExportBezi, false);
       Set(varPublikuji, false);
+      Set(varZalohuji, false);
       Set(varSmazatD, Blank());
       // Razítko dosazuje build_app.py při balení. Bez něj se z běžící appky
       // nedá poznat, jestli po importu proběhla ve Studiu povinná mikro-změna

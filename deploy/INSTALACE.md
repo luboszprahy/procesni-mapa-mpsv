@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_76.zip`
+# Instalace balíku `procesnimapa_1_0_0_80.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -15,15 +15,15 @@ https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa
 
 ## Pořadí kroků 1 a 2 je závazné
 
-Balík 76 přidal osmou proměnnou prostředí `mpsv_listHistorieKodu`. Průvodce
-importem se na ni zeptá a nabídne rozbalovátko listů cílového webu. **Když
-list `HistorieKodu` na webu ještě neexistuje, není co vybrat** — proměnná
-zůstane prázdná a to shodí napojení **celé** SharePoint connection, tedy
-i listů, které s ní nesouvisejí (canvas váže všechny datasety jedné connection
-v jednom bloku).
+Balík 80 přidal proměnné `mpsv_listHistorieKodu` a `mpsv_listZalohy`. Průvodce
+importem se na ně zeptá a nabídne rozbalovátko listů cílového webu. **Když
+list `HistorieKodu` nebo knihovna `Zalohy` na webu ještě neexistují, není co
+vybrat** — proměnná zůstane prázdná a to shodí napojení **celé** SharePoint
+connection, tedy i listů, které s ní nesouvisejí (canvas váže všechny datasety
+jedné connection v jednom bloku).
 
 Projeví se to jako `We didn't find any datasets` při spuštění appky a vypadá to
-jako vada balíku. Krok 1 ten list zakládá, proto musí být první.
+jako vada balíku. Krok 1 obojí zakládá, proto musí být první.
 
 ## Co balík obsahuje
 
@@ -31,7 +31,7 @@ jako vada balíku. Krok 1 ten list zakládá, proto musí být první.
 |---|---|
 | `CanvasApps/` | canvas app *procesní mapa*, čtyři obrazovky |
 | `Workflows/` | šest flow (viz krok 4) |
-| `environmentvariabledefinitions/` | osm proměnných, **bez hodnot** |
+| `environmentvariabledefinitions/` | devět proměnných, **bez hodnot** |
 | `solution.xml`, `customizations.xml` | manifest a napojení |
 
 Dokumentace v zipu **není** — solution zip nese jen artefakty Power Platform.
@@ -59,16 +59,17 @@ do `Procesy`, `DilciProcesy` a `Aktivity`. Knihovna vzniká jako BaseTemplate
 V knihovně Site contents musí být vidět `Zálohy` a list `Historie kódů`.
 Struktura je popsaná v `sharepoint_schema.md`.
 
-## 2. Naimportovat solution a VYPLNIT VŠECH OSM PROMĚNNÝCH
+## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_76.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_80.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
 
 1. **připojení** — connection reference na SharePoint,
-2. **osm proměnných**. U `mpsv_procesnimapaSite` zadej adresu webu; zbylých
-   sedm se pak vybírá **z rozbalovátka listů toho webu**.
+2. **devět proměnných**. U `mpsv_procesnimapaSite` zadej adresu webu; zbylých
+   osm se pak vybírá **z rozbalovátka listů toho webu** — knihovna `Zálohy`
+   je v něm taky, knihovna je pro SharePoint taky list.
 
 | proměnná | zobrazí se jako | vybírá se |
 |---|---|---|
@@ -80,6 +81,7 @@ Průvodce se zeptá na:
 | `mpsv_listVazby` | Procesni mapa - Vazby | list `Vazba aktivita–dílčí proces` |
 | `mpsv_listUtvary` | Procesni mapa - Utvary | list `Útvary` |
 | `mpsv_listHistorieKodu` | Procesni mapa - Historie kodu | list `Historie kódů` |
+| `mpsv_listZalohy` | Procesni mapa - Zalohy | **knihovna** `Zálohy` |
 
 > **Průvodce neproklikávej.** Definice **nemají výchozí hodnotu** schválně:
 > s ní by průvodce předvyplnil adresu vývojového webu a import by tiše prošel
@@ -90,7 +92,7 @@ Průvodce se zeptá na:
 > **Zkontroluj je i tak** (Solutions → Environment variables): balík je nemá
 > čím přepsat, ale taky nemá čím doplnit.
 
-**Ověření:** import doběhne bez chyby a v Environment variables má všech osm
+**Ověření:** import doběhne bez chyby a v Environment variables má všech devět
 proměnných vyplněnou *Current Value*.
 
 ## 3. Zapnout flow
@@ -115,9 +117,10 @@ vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
 
 ## 4. Ověřit zálohu — první snímek ručně
 
-`ZalohaScheduled` poběží sám až v 5:00, ale čekat na to nemá smysl.
-
-Power Automate → `ZalohaScheduled` → **Test → Manually → Run**.
+`ZalohaScheduled` poběží sám až v 5:00, ale čekat na to nemá smysl. Od balíku
+80 na to stačí appka: **tlačítko „Záloha"** v horní liště Přehledu. Kdo chce
+appku obejít, spustí `ZalohaScheduled` v Power Automate přes
+**Test → Manually → Run**.
 
 **Ověření — a je důležitější, než vypadá:** běh musí být zelený **a** v knihovně
 `Zalohy` musí přibýt soubor `rejstrik_<RRRR-MM-DD_HHMM>.json`. Otevři ho
@@ -145,26 +148,21 @@ knihovně `Zalohy`.
 **Ověření:** `MapaPublishFlow` doběhne zeleně a `procesni_mapa.html` se
 přepíše aktuálním časem.
 
-## 6. Zaregistrovat nové zdroje ve Studiu a publikovat
+## 6. Otevřít appku ve Studiu a publikovat
 
-Tenhle krok **za tebe udělat nejde** — registrace datového zdroje vzniká jen
-ve Studiu. `FlowNameId` i GUID listu přiděluje cílové prostředí a lokálně se
-dogenerovat nedají.
+Otevři appku v **Power Apps Studiu** → **mikro-změna** (posunout prvek
+o pixel a vrátit) → **Save** → **Publish**.
 
-Otevři appku v **Power Apps Studiu**:
+**Není to formalita:** bez toho ostatní vidí pořád předchozí verzi appky,
+i když import proběhl. Navíc appka zabalená z YAML se validuje až tady.
 
-1. **Add data → `ZalohaFlow`** — bez toho nejde do appky napsat tlačítko
-   „Pořídit zálohu",
-2. **Add data → `HistorieKodu`** — bez toho nejde zapisovat zánik kódu,
-3. **mikro-změna** (posunout prvek o pixel a vrátit) → **Save** → **Publish**,
-4. **Export solution** (unmanaged) a ten zip pošli — navazuje na něj další
-   balík.
+Registrace datových zdrojů (`ZalohaFlow`, `HistorieKodu`, knihovna `Zálohy`)
+je na **PPF DEV už hotová** a balík 80 ji veze s sebou. **Na jiném prostředí
+se dělá znovu** — `FlowNameId` i GUID listů přiděluje až cílové prostředí
+a lokálně se dogenerovat nedají. Tam tedy platí: `Add data` → ty tři zdroje →
+mikro-změna → Save → Publish → **Export solution** a poslat zip.
 
-**Mikro-změna a Publish nejsou formalita:** bez nich ostatní vidí pořád
-předchozí verzi appky, i když import proběhl.
-
-**Ověření:** v Data appky jsou vidět oba nové zdroje a ve Versions je nová
-verze označená jako *Live*.
+**Ověření:** ve Versions je nová verze označená jako *Live*.
 
 ## 7. Projít appku
 
@@ -174,6 +172,7 @@ verze označená jako *Live*.
 | přidat a odebrat zařazení na obrazovce vazeb | Přehled se po návratu přepočítá |
 | Export → Word / Excel | soubor se stáhne |
 | Zobrazit v HTML | otevře se publikovaná mapa |
+| **Záloha** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
 
 ---
 
@@ -185,6 +184,7 @@ verze označená jako *Live*.
 | `Flow.Run failed: 502 BadGateway / NoResponse` | vypnuté flow (krok 3) nebo nevyplněná proměnná; pravdu řekne run history, ne hláška v appce |
 | flow nejde zapnout | prázdná proměnná, nebo sirotek po starší solution v Default Solution (Turn off → Delete → Publish all customizations) |
 | `ZalohaFlow` spadne na neexistující složce | neproběhl krok 1, knihovna `Zalohy` chybí |
+| tlačítko Záloha hlásí `502 BadGateway` | `ZalohaFlow` je vypnuté (krok 3) nebo chybí Current Value; pravdu řekne run history |
 | snímek má u `DilciProcesy` přesně 100 položek | nepropsalo se stránkování — nahlas to, je to vada balíku |
 | appka ukazuje starou verzi | chybí mikro-změna → Save → Publish (krok 6) |
 
