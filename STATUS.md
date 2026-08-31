@@ -5,6 +5,8 @@ Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ (tři věci, pořadí je nově závazné)
 
+Podrobný postup s ověřením u každého kroku: **`deploy/INSTALACE.md`**.
+
 **Bod 1 musí být před bodem 2.** Balík 1.0.0.76 přidal osmou proměnnou
 prostředí (`mpsv_listHistorieKodu`) a průvodce importem se na ni zeptá.
 Když list na webu ještě neexistuje, není co vybrat — proměnná zůstane
