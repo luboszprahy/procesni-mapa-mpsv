@@ -35,7 +35,7 @@ App:
       // Doba svícení notifikací v ms. Potvrzení má zmizet dřív, než začne
       // překážet; u chyby musí zbýt čas ji přečíst. Ladí se jen tady.
       Set(varNotifyMs, 3000);
-      Set(varNotifyChybaMs, 4000);
+      Set(varNotifyChybaMs, 3000);
       Set(stylPrimarni, RGBA(17, 11, 122, 1));
       Set(stylAkce, RGBA(16, 126, 150, 1));
       Set(stylAkceHover, RGBA(14, 111, 131, 1));

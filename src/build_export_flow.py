@@ -381,19 +381,6 @@ def uzel_workflow(customizations, guid):
     return customizations[zacatek:konec]
 
 
-def parametry(vzor):
-    """Deklarace parametrů flow — vždy včetně proměnné webu.
-
-    Zdrojové flow (MapaPublishFlow) ji nedeklaruje, protože ji používá jen
-    jako parametr konektoru. ExportFlow ji má i ve výrazu, kde ji runtime
-    bez deklarace nenajde. Bez `defaultValue` — hodnotu dodá proměnná
-    prostředí, kterou vyplní obsluha při importu.
-    """
-    p = dict(vzor["properties"]["definition"].get("parameters", {}))
-    p.setdefault(ep.klic(ep.WEB), ep.deklarace(ep.WEB))
-    return p
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True, help="solution zip, do kterého se flow přidá")
@@ -427,18 +414,10 @@ def main():
                 # "undefined" je past: import projde, ale flow pak nejde
                 # otevřít v designeru („Flow not found").
                 "contentVersion": "1.0.0.0",
-                # Parametr MUSÍ být deklarovaný: Cesta_webu i Adresa ho berou
-                # ve výrazu, a tam ho runtime bez deklarace nenajde —
-                # "InvalidTemplate … The workflow parameter '…' is not found"
-                # (PPF DEV, 31.08.2026, balík 1.0.0.69). Jako parametr
-                # konektoru (`dataset`) přitom týž odkaz bez deklarace roky
-                # funguje, proto se na to přišlo až teď: Cesta_webu je první
-                # výrazové použití a přinesl ji F9 krok 4.
-                # Deklarace je ZÁMĚRNĚ bez `defaultValue`: hodnotu dodá
-                # proměnná prostředí, kterou vyplní obsluha při importu.
-                # Zapečená adresa by byla přesně to, co F9 rušil, a prázdný
-                # řetězec shodí import na 29 % (ověřeno jinde v PPF).
-                "parameters": parametry(vzor),
+                # Deklarace použitých parametrů doplní build_app.py
+                # (dorovnej_deklarace_parametru) — jedno místo pro všechna
+                # flow, ať to příští generátor nemůže minout.
+                "parameters": vzor["properties"]["definition"].get("parameters", {}),
                 "triggers": trigger(),
                 "actions": akce(),
                 "outputs": {},

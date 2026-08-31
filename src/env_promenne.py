@@ -91,6 +91,14 @@ def list_param(zobrazovany):
     return param(LIST_PROMENNA[zobrazovany])
 
 
+def schema_z_klice(k):
+    """Z klíče 'Zobrazovaný název (schema)' vrátí schema, jinak None."""
+    for d in DEFINICE:
+        if k == f"{d[1]} ({d[0]})":
+            return d[0]
+    return None
+
+
 def deklarace(schema):
     """Deklarace parametru do `definition.parameters` flow.
 

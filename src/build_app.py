@@ -419,29 +419,54 @@ def napoj_appku_na_promenne(solution_dir):
     return napojene, odebrane
 
 
-def zbav_flow_vychozich_hodnot(solution_dir):
-    """Smaže defaultValue u parametrů proměnných prostředí v definicích flow.
+def dorovnej_deklarace_parametru(solution_dir):
+    """Každý parametr, na který se flow odkazuje, musí být v `definition.parameters`.
 
-    Designer je tam dopíše aktuální hodnotou z prostředí, jakmile se flow
-    jednou uloží — export z MPSV takhle nesl adresu tamního webu (1.0.0.66).
-    Na cizím tenantu by pak flow s nevyplněnou proměnnou tiše běželo proti
-    původnímu webu místo aby selhalo. Systémové $authentication a $connections
-    se nechávají, jejich prázdný defaultValue je součást tvaru definice.
+    Jinak flow spadne za běhu na
+    `InvalidTemplate … The workflow parameter '<název>' is not found`
+    a volající appka vidí jen `502 BadGateway / NoResponse`
+    (PPF DEV 31.08.2026: ExportFlow/Cesta_webu v 1.0.0.69,
+    MapaPublishFlow/Sablona v 1.0.0.70).
+
+    Platí to i pro odkaz, který je celou hodnotou parametru konektoru
+    (`dataset`, `table`) — tam to chvíli vypadalo, že deklarace potřeba není,
+    protože balík 1.0.0.63 běžel úplně bez deklarací. Rozdíl je nejspíš v tom,
+    že prostředí parametry samo doplní jen flow, které nedeklaruje ŽÁDNÝ;
+    jakmile jeden přibude, platí deklarace jako úplný výčet. Na tom stavět
+    nechceme, takže se deklarují všechny.
+
+    `defaultValue` se ZÁMĚRNĚ nedoplňuje — hodnota patří do prostředí jako
+    Current Value. Ověřeno 31.08.2026 v provozu: bez ní to funguje, a balík
+    tím nemusí vézt adresu žádného tenantu. Zároveň se zahazuje hodnota,
+    kterou do exportu dopsal designer (export z MPSV nesl adresu tamního webu).
     """
-    zbavene = []
+    doplnene = []
     for cesta in sorted((solution_dir / "Workflows").glob("*.json")):
         data = json.loads(cesta.read_text(encoding="utf-8-sig"))
-        parametry = data["properties"]["definition"].get("parameters", {})
-        zmeneno = False
-        for nazev, definice in parametry.items():
-            if nazev.startswith("$") or not isinstance(definice, dict):
+        definice = data["properties"]["definition"]
+        parametry = definice.setdefault("parameters", {})
+
+        pouzite = set(re.findall(r"parameters\('([^']+)'\)",
+                                 json.dumps(definice, ensure_ascii=False)))
+        flow = cesta.name.split("-")[0]
+        for klic in sorted(pouzite):
+            if klic.startswith("$"):
                 continue
-            if definice.pop("defaultValue", None) is not None:
-                zbavene.append(f"{cesta.name.split('-')[0]}/{nazev}")
-                zmeneno = True
-        if zmeneno:
-            cesta.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-    return zbavene
+            schema = env_promenne.schema_z_klice(klic)
+            if schema is None:
+                raise SystemExit(
+                    f"CHYBA: {flow} se odkazuje na parametr {klic!r}, který "
+                    f"neodpovídá žádné proměnné v env_promenne.py")
+            if klic not in parametry:
+                parametry[klic] = env_promenne.deklarace(schema)
+                doplnene.append(f"{flow}/{schema}")
+
+        for nazev, popis in parametry.items():
+            if not nazev.startswith("$") and isinstance(popis, dict):
+                popis.pop("defaultValue", None)
+
+        cesta.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return doplnene
 
 
 def dokonci(solution_dir, verze):
@@ -450,9 +475,9 @@ def dokonci(solution_dir, verze):
     print(f"napojení appky přes proměnné: {len(napojene)} zdrojů ({', '.join(napojene)})")
     if odebrane:
         print(f"  odebrané nepoužívané zdroje: {', '.join(sorted(set(odebrane)))}")
-    zbavene = zbav_flow_vychozich_hodnot(solution_dir)
-    if zbavene:
-        print(f"odstraněné výchozí hodnoty proměnných ve flow: {', '.join(zbavene)}")
+    doplnene = dorovnej_deklarace_parametru(solution_dir)
+    print(f"deklarace parametrů ve flow: doplněno {len(doplnene)}"
+          + (f" ({', '.join(doplnene)})" if doplnene else ""))
     pocet = zkontroluj_flow_kratky_nazev(solution_dir)
     print(f"flow — povinná pole zápisu ověřena ({pocet}), žádné z triggeru")
 
