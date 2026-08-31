@@ -1,6 +1,7 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-08-31 20:35** — balík 1.0.0.80 s tlačítkem „Záloha".
+Aktualizováno: **2026-08-31 20:33** — konec dne, práce se zavírá.
+Balík 1.0.0.80 čeká na import; uživatel testuje 01.09.2026.
 Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
@@ -32,14 +33,18 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 3a — šablona pro hromadný import.** `src/make_sablona.py` generuje
-`.xlsx` ze `src/schema.json` (sloupce schématu minus systémové: kód,
-`nazev_kratky`, `datum_aktualizace`, `puvodni_kod`) + brána
-`src/check_sablona.py`. Platí v obou větvích kroku 3 — ať konektor Excel
-Online projde, nebo ne, správce vyplňuje týž soubor.
+**F11 krok 3a — šablona pro hromadný import. Zadáno, NEZAČATO.**
+`src/make_sablona.py` generuje `.xlsx` ze `src/schema.json` (sloupce schématu
+minus systémové: kód, `nazev_kratky`, `datum_aktualizace`, `puvodni_kod`)
++ brána `src/check_sablona.py`. Platí v obou větvích kroku 3 — ať konektor
+Excel Online projde, nebo ne, správce vyplňuje týž soubor. Dá se tedy stavět,
+aniž by byl znám výsledek DLP testu.
 
 Zbytek kroku 3b (flow `ImportFlow`, obrazovka náhledu) čeká na výsledek
 DLP testu. F11 krok 4 (restore) se nezačíná dřív, než jsou zelené kroky 1 a 3.
+
+**Pozor při navazování:** kdyby import 1.0.0.80 nedopadl, nezačínej opravovat
+balík dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
 
 ## Balík 1.0.0.80 — tlačítko „Záloha" (31.08.2026 20:35)
 
