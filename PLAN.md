@@ -1406,9 +1406,11 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
      nevyplněná proměnná, nebo špatný tvar overridu — rozliší se pohledem
      do panelu Data, na co je zdroj napojený.
 
-6. [Zpět na MPSV] — POSTAVENO 31.08.2026: deploy/procesnimapa_1_0_0_71.zip
-     (import čeká na uživateli; jméno souboru se odvozuje z verze, takže
-     dva balíky = dvě verze)
+6. [Zpět na MPSV] — ODLOŽENO 31.08.2026: uživatel nemá několik dní
+     přístup do tenantu MPSV. Balík 1.0.0.71 smazán (postavený před opravou
+     deklarací parametrů, na MPSV by shodil MapaPublishFlow). Až bude
+     přístup, postaví se nový z tehdy aktuálního balíku — jméno souboru
+     se odvozuje z verze, takže dva tenanty = dvě verze.
    Po zeleném PPF: `--list-aktivity` na GUID MPSV, build, import na MPSV,
    vyplnit proměnné, ověřit stejným seznamem jako v kroku 5.
    verify: obě prostředí běží ze stejného zdroje a liší se jen tím GUIDem.

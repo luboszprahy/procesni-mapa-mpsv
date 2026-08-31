@@ -13,26 +13,45 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
    dílčími procesy, u dvou z nich se značkou a bez ikony koše.
    Kdyby se appka po importu neotevřela, spadni na `1.0.0.72` — ten má
    jen opravu flow a notifikace, bez zásahu do stromu.
-2. **Naimportuj `deploy/procesnimapa_1_0_0_71.zip` na MPSV** (F9 krok 6),
-   až se ti to bude hodit — MPSV je prostředí, kde appku někdo používá,
-   takže po dohodě, ne mimochodem. Je to **první import s napojením appky
-   přes proměnné**, takže tam nově musíš vyplnit **všech sedm** proměnných
-   (dosud jich bylo šest a appka měla zdroje napojené natvrdo). MPSV běží
-   na 1.0.0.65. Po importu: mikro-změna → Save → Publish → flow ručně
-   zapnout.
-   **Pozor: 71 je postavený PŘED opravou deklarací** — pro MPSV se přestaví
-   z 73, až bude PPF zelené. Do té doby ho neimportuj.
-   `1.0.0.68` ani `1.0.0.69` nenasazuj vůbec — mají vadu ExportFlow.
+2. **MPSV odloženo** — nemáš do jejich tenantu několik dní přístup
+   (31.08.2026). Podrobnosti níže v „F9 krok 6 odložen".
 3. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
 4. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
-5. **Otestuj konektor Excel Online (Business)** — až budeš u toho. Ručně
+5. **Otestuj konektor Excel Online (Business)** — zatím **jen na PPF**,
+   MPSV počká na přístup. — až budeš u toho. Ručně
    v designeru jedno flow o jedné akci `List rows present in a table` nad
    testovacím `.xlsx` (musí mít formátovanou **Tabulku**, ne volnou mřížku).
-   Zajímá mě, jestli akce projde DLP a běh doběhne — v **obou** tenantech.
+   Zajímá mě, jestli akce projde DLP a běh doběhne.
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
+
+## F9 krok 6 odložen — bez přístupu na MPSV (31.08.2026 14:50)
+
+Uživatel nemá několik dní přístup do tenantu MPSV. Krok 6 (import na MPSV)
+tedy **čeká na přístup**, ne na práci — je to jeden build a jeden import.
+
+**Balík 1.0.0.71 smazán.** Byl postavený před opravou deklarací parametrů,
+takže by na MPSV shodil `MapaPublishFlow` úplně stejně jako 70 na PPF.
+Až bude přístup, postaví se nový z tehdy aktuálního balíku — příkaz je
+`build_flow.py` s GUIDem MPSV (`b1daaa38-53df-4c7b-b9f8-03b36d46bc60`)
+a pak `build_app.py --bez-pac`. Nechávat ležet vadný zip s lákavým jménem
+je horší než ho postavit znovu za minutu.
+
+Ze stejného důvodu jsou smazané i `1.0.0.67`, `68` a `70` — všechny mají
+vadu deklarací. V `deploy/` zůstávají jen dva:
+
+| balík | pro | role |
+|---|---|---|
+| `procesnimapa_1_0_0_73.zip` | PPF DEV | aktuální, k importu |
+| `procesnimapa_1_0_0_72.zip` | PPF DEV | záloha bez zásahu do stromu, kdyby se appka z 73 neotevřela |
+
+Oba jsou zabalené z YAML, takže z obou jde stavět dál přes `--bez-pac`.
+Starší verze jsou v git historii, kdyby byly potřeba.
+
+**MPSV běží dál na 1.0.0.65** a nic z dnešních nálezů se ho netýká — vada
+deklarací přišla až s F9, tedy ve verzích, které tam nikdy nedoputovaly.
 
 ## Druhé kolo téhož nálezu — a oprava mého mylného závěru (31.08.2026 14:45)
 
