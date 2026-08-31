@@ -41,6 +41,8 @@ DEFINICE = [
     ("mpsv_listUtvary", "Procesni mapa - Utvary", "Ciselnik utvaru.", "table", WEB),
     ("mpsv_listHistorieKodu", "Procesni mapa - Historie kodu",
      "List Historie kodu - zaniknute kody.", "table", WEB),
+    ("mpsv_listZalohy", "Procesni mapa - Zalohy",
+     "Knihovna se snimky rejstriku.", "table", WEB),
 ]
 
 # Zobrazovaný název listu v appce -> proměnná. Klíč je týž, jakým listy
@@ -55,6 +57,9 @@ LIST_PROMENNA = {
     # HistorieKodu appka zatím nemá připojený — proměnná je tu kvůli
     # ZalohaFlow, které zálohuje všech sedm listů schématu.
     "Historie kódů": "mpsv_listHistorieKodu",
+    # Knihovna, ne list. Appka z ní bere NABÍDKU snímků pro obnovu; obsah
+    # snímku přečíst neumí, to je práce RestoreFlow.
+    "Zálohy": "mpsv_listZalohy",
 }
 
 # Zdroj, který appka má v napojení, ale žádný vzorec ho nepoužívá. Knihovna

@@ -384,12 +384,19 @@ def napoj_appku_na_promenne(solution_dir):
         odkaz["dataSources"] = [z for z in odkaz.get("dataSources", [])
                                 if z not in env_promenne.NEPOUZIVANE_ZDROJE]
 
-        nove_datasety = {}
+        # Bloky se SLUČUJÍ do jednoho. Studio zakládá každý ručně připojený
+        # zdroj do vlastního bloku klíčovaného čistou URL, kdežto zdroje, které
+        # už jednou prošly tímhle buildem, sedí v bloku se suffixem. Obojí
+        # ukazuje na týž web, takže po očištění klíče vyjde stejný klíč — a
+        # zápis do slovníku po jednom bloku by ten předchozí PŘEPSAL. Projevilo
+        # se to na exportu 1.0.0.78: šest listů v prvním bloku, knihovna Zálohy
+        # ve druhém, a ve výsledku by v appce zůstala jen ta knihovna.
+        cesty, zdroje = set(), {}
         for adresa, dataset in (odkaz.get("dataSets") or {}).items():
             # Klíč už suffix nese, když se staví z balíku, který přes proměnné
             # jednou prošel — jinak by se nabaloval podruhé.
             cista = adresa[: -len("_" + env_promenne.WEB)] if adresa.endswith("_" + env_promenne.WEB) else adresa
-            zdroje = {}
+            cesty.add((dataset.get("datasetOverride") or {}).get("name") or cista)
             for jmeno, popis in (dataset.get("dataSources") or {}).items():
                 if jmeno in env_promenne.NEPOUZIVANE_ZDROJE:
                     odebrane.append(jmeno)
@@ -405,11 +412,20 @@ def napoj_appku_na_promenne(solution_dir):
                     "tableNameOverride": {"name": guid, "environmentVariableName": promenna},
                 }
                 napojene.append(f"{jmeno}={promenna}")
-            nove_datasety[f"{cista}_{env_promenne.WEB}"] = {
-                "datasetOverride": {"name": cista, "environmentVariableName": env_promenne.WEB},
-                "dataSources": zdroje,
+
+        if len(cesty) > 1:
+            raise SystemExit(
+                f"CHYBA: appka má zdroje na více webech {sorted(cesty)} — sloučit je "
+                f"pod jednu proměnnou {env_promenne.WEB} by je přepojilo jinam")
+        if cesty:
+            cista = next(iter(cesty))
+            odkaz["dataSets"] = {
+                f"{cista}_{env_promenne.WEB}": {
+                    "datasetOverride": {"name": cista,
+                                        "environmentVariableName": env_promenne.WEB},
+                    "dataSources": zdroje,
+                }
             }
-        odkaz["dataSets"] = nove_datasety
 
     if not napojene:
         raise SystemExit("CHYBA: nenašel jsem SharePoint connection reference k napojení")

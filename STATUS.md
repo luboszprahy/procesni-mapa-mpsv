@@ -45,9 +45,61 @@ tlačítko „Pořídit zálohu" ani zápis do historie kódů.
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
 přístup. Žádný z dnešních nálezů se MPSV netýká.
 
+## Čeká se na export s listem `HistorieKodu` (31.08.2026 20:05)
+
+Export **1.0.0.78** dorazil a doložil to hlavní: **`ZalohaFlow` je
+zaregistrované** (`FlowNameId 92767d85-1d09-4847-8d04-26141252cd19`).
+`ZalohaScheduled` registrované není a správně — plánované flow se z appky
+nevolá. Uživatel do Studia dopojuje `HistorieKodu` a pošle další export;
+z něj se staví 1.0.0.79.
+
+**Knihovna `Zálohy` v appce zůstává.** Připojila se omylem místo
+`HistorieKodu`, ale ukázalo se, že je pro F11 krok 4 potřeba: nabídku snímků
+k obnově (podle data a času) umí canvas app přečíst z připojené knihovny sama,
+kdežto obsah snímku přečíst neumí — to je práce `RestoreFlow`. Dostala proto
+devátou proměnnou `mpsv_listZalohy`.
+
+### Vada v `napoj_appku_na_promenne`, kterou ten export odhalil
+
+Studio zakládá **ručně připojený zdroj do vlastního `dataSets` bloku**,
+klíčovaného čistou URL, kdežto zdroje, které už buildem prošly, sedí v bloku
+se suffixem `_mpsv_procesnimapaSite`. V 78 tak byly bloky dva: šest listů
+v prvním, knihovna `Zálohy` ve druhém.
+
+`napoj_appku_na_promenne` psala do slovníku klíč `f"{cista}_{WEB}"` po každém
+bloku zvlášť. Oba bloky se po očištění klíče trefí na týž klíč, takže druhý
+zápis první **přepsal** — v appce by zůstala napojená jen knihovna a šest
+listů by po importu nemělo na co navázat. Nic by přitom nespadlo při buildu
+ani na staré bráně: tvar přeživšího bloku je bezvadný, jen je v něm o šest
+zdrojů méně.
+
+Opraveno slučováním všech bloků do jednoho, s tvrdou chybou, kdyby zdroje
+ležely na různých webech.
+
+### Brána, která to od teď chytne
+
+`check_solution` porovnává zdroje v napojení proti
+`References/DataSources.json` v `.msapp` (typ `ConnectedDataSourceInfo`) —
+pravdu o tom, na co se appka opravdu váže, má `.msapp`, ne XML. **431 kontrol.**
+Mutačně ověřeno: z napojení ponechán jen poslední zdroj → brána vypíše
+`v .msapp navíc ['Agendy', 'Aktivity', 'Dílčí procesy', 'Procesy',
+'Vazba aktivita–dílčí proces', 'Útvary']`.
+
+### Oprava zastaralého tvrzení o `pac`
+
+STATUS na několika místech tvrdil, že **na HP-LUBOS `pac` není**. Je —
+rozšíření VS Code `microsoft-isvexptools.powerplatform-vscode` (2.0.150
+i 2.0.152) veze `microsoft.powerapps.cli.*.nupkg` a `build_app.py` si ho
+rozbalí do `runs/app_build/pac/`. Ověřeno buildem z 78, který přes `pac`
+proběhl. Na `--bez-pac` z téhle základny stavět stejně nejde: appka je
+doauthorovaná Studiem, `LoadFromYaml` je pryč.
+
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 3a — šablona pro hromadný import.** `src/make_sablona.py` generuje
+**Až dorazí export s `HistorieKodu`:** postavit 1.0.0.79 a dopsat do appky
+tlačítko „Pořídit zálohu" (`ZalohaFlow.Run()`) — registrace je hotová.
+
+**Mezitím F11 krok 3a — šablona pro hromadný import.** `src/make_sablona.py` generuje
 `.xlsx` ze `src/schema.json` (sloupce schématu minus systémové: kód,
 `nazev_kratky`, `datum_aktualizace`, `puvodni_kod`) + brána
 `src/check_sablona.py`. Je to část, která platí v obou větvích kroku 3 — ať

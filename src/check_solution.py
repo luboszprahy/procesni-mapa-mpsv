@@ -307,6 +307,7 @@ def main():
     zdroj_custom = cti(vstupni, "customizations.xml")
     cil_custom = cti(vystupni, "customizations.xml")
     overit(cil_custom is not None, "customizations.xml ve výstupu chybí")
+    napojene_zdroje = None
     if zdroj_custom and cil_custom:
         puvodni = guidy_listu(zdroj_custom)
         nove = guidy_listu(cil_custom)
@@ -343,6 +344,9 @@ def main():
                 overit(prepis_listu.get("name") == popis.get("tableName"),
                        f"zdroj {jmeno}: tableNameOverride.name nesedí na tableName")
 
+        napojene_zdroje = {jmeno for dataset in (datasety or {}).values()
+                           for jmeno in (dataset.get("dataSources") or {})}
+
     # --- flow ze vstupní solution nesmí přebalením zmizet ---
     # Kdyby se stavělo ze staršího balíku, flow by ve výstupu nebylo a upgrade
     # by ho z prostředí odstranil. Tichá ztráta, proto explicitní kontrola.
@@ -358,6 +362,21 @@ def main():
     msapp, pocet = nacti_msapp(VYSTUP)
     overit(msapp is not None, f"ve výstupu není právě jeden .msapp (nalezeno {pocet})")
     if msapp:
+        # --- žádný zdroj se cestou neztratil ---
+        # Tvar každého bloku v napojení může být bezvadný, a přesto tam chybí
+        # polovina zdrojů: Studio zakládá ručně připojený zdroj do vlastního
+        # `dataSets` bloku a build je slučuje do jednoho. Kdyby slučování
+        # selhalo, jeden blok druhý přepíše — a v appce zůstane napojený jen
+        # ten poslední. Pravdu o tom, na co se appka opravdu váže, má `.msapp`,
+        # ne XML, proto se porovnávají proti sobě.
+        zdroje_json = json.loads(msapp.read("References/DataSources.json").decode("utf-8-sig"))
+        v_appce = {z.get("Name") for z in zdroje_json.get("DataSources", [])
+                   if z.get("Type") == "ConnectedDataSourceInfo"} - set(ep.NEPOUZIVANE_ZDROJE)
+        overit(napojene_zdroje is not None and napojene_zdroje == v_appce,
+               f"napojení neodpovídá zdrojům appky — v .msapp navíc "
+               f"{sorted(v_appce - napojene_zdroje)}, v napojení navíc "
+               f"{sorted(napojene_zdroje - v_appce)}")
+
         polozky = [n.replace("\\", "/") for n in msapp.namelist()]
 
         packed = cti(msapp, "packed.json")
