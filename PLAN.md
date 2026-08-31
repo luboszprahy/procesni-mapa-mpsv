@@ -1581,6 +1581,10 @@ celý návrh na reálných datech dřív, než se pustíme do kaskády nad proce
 
 ## F11 — Záloha a hromadný import (zadáno 30.08.2026)
 
+**Stav:** krok 1 **hotový** (31.08.2026, balík 1.0.0.76) · krok 2 na uživateli ·
+kroky 3 a 4 nezačaté. Krok 3 se dělí na 3a (šablona — platí v obou větvích)
+a 3b (flow + náhled, čeká na výsledek kroku 2).
+
 **Rozhodnutí zadavatele (30.08.2026 18:08): import a záloha oddělené.**
 Sdílí tvar tabulky a validační/náhledový engine, ale ne formát a ne operaci.
 
@@ -1625,7 +1629,7 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
 ### Kroky
 
 ```
-1. [Snímek rejstříku] — co: nové flow `ZalohaFlow` + plánované dvojče
+1. [Snímek rejstříku] — HOTOVO 31.08.2026 — co: flow `ZalohaFlow` + plánované dvojče
    Čte všech šest (po F10 sedm) listů a zapisuje
    `Zalohy/rejstrik_<RRRR-MM-DD_HHMM>.json`: verze schématu, razítko,
    všechny řádky se všemi sloupci.
@@ -1643,6 +1647,14 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      (`ensure_ascii=False` ekvivalent — JSON z flow musí být UTF-8).
    risk: soubory se hromadí. Úklidové flow po N dnech je pár akcí, ale musí
      nechat naživu poslední snímek každého měsíce, ne mazat podle stáří slepě.
+   PROVEDENO JINAK, NEŽ PLÁN ČEKAL: obě flow staví `src/build_zaloha_flow.py`
+     z jedné funkce `akce()`, ne klonováním hotového flow ze zipu (klon zůstal
+     jen pro obálku — uzel <Workflow>, RootComponent, spojení). Brána
+     `src/check_zaloha_flow.py` má 157 kontrol, mutace `src/mutace_zaloha.py`
+     9/9. K tomu bylo potřeba dvoje, co plán neuváděl: knihovnu `Zalohy`
+     (`make_setup.py` uměl jen listy, teď i BaseTemplate 101) a osmou proměnnou
+     prostředí `mpsv_listHistorieKodu`. Zbývá úklid starých snímků a tlačítko
+     v appce — obojí čeká na registraci flow ve Studiu.
 
 2. [Test DLP pro Excel Online (Business)] — co: jedno testovací flow, ručně
      v designeru, PŘED čímkoli dalším z kroku 3
@@ -1657,7 +1669,18 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      povýšit `deploy/mpsv/02_import_dat.js` z vývojářského skriptu na
      nástroj pro správce. To rozhodnutí padne TADY, ne po týdnu stavění.
 
-3. [Šablona a hromadný import] — co: src/make_sablona.py (generuje .xlsx
+3a. [Šablona] — co: src/make_sablona.py + src/check_sablona.py
+   Vydělený z kroku 3, protože platí v OBOU jeho větvích: ať konektor Excel
+   Online projde, nebo se import postaví jako konzolový nástroj pro správce,
+   správce vyplňuje týž soubor. Dá se tedy stavět, aniž by byl znám výsledek
+   kroku 2.
+   verify: `check_sablona.py` — sloupce šablony = sloupce schématu minus
+     systémové; mutace: přidej do schématu sloupec a ověř, že kontrola spadne.
+   edge cases: sešit musí být formátovaná Tabulka, ne volná mřížka (jinak ho
+     konektor neuvidí); kód a odvozené sloupce v šabloně NEJSOU.
+   risk: rozejití se schématem — proto se generuje, ne udržuje ručně.
+
+3b. [Hromadný import] — co: src/make_sablona.py (generuje .xlsx
      ze schématu), knihovna `Import`, flow `ImportFlow`, obrazovka náhledu
    Šablona se generuje ZE SCHÉMATU, aby se nemohla rozejít s listy.
    Sloupce, které si systém drží sám (kód, `nazev_kratky`,

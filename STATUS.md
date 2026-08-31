@@ -1,13 +1,29 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-08-31 15:37** — konec dne, práce se zavírá.
-Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
+Aktualizováno: **2026-08-31 19:10** — F11 krok 1 (snímek rejstříku) hotový.
+Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
-## CO JE NA TOBĚ (tři věci, dohromady necelou půlhodinu)
+## CO JE NA TOBĚ (tři věci, pořadí je nově závazné)
 
-Pořadí je podle užitku. Kdyby vyšla jen jedna, ať je to ta první.
+**Bod 1 musí být před bodem 2.** Balík 1.0.0.76 přidal osmou proměnnou
+prostředí (`mpsv_listHistorieKodu`) a průvodce importem se na ni zeptá.
+Když list na webu ještě neexistuje, není co vybrat — proměnná zůstane
+prázdná a to shodí napojení **celé** SharePoint connection, tedy i listů,
+které s ní nesouvisejí. Skript z bodu 1 ten list zakládá.
 
-1. **Test DLP pro Excel Online (Business)** — ~10 min, **nejcennější**.
+1. **Spusť `src/setup_sharepoint.js` na PPF** — ~2 min. F12 → Console na webu
+   `/sites/DigiData_D/testovaci_subsajta/procesnimapa`. Nově zakládá **knihovnu
+   `Zalohy`** (kam píše snímek rejstříku), k tomu list `HistorieKodu`
+   a sloupec `puvodni_kod` v `Procesy`, `DilciProcesy` a `Aktivity`.
+   Idempotentní; na konci musí říct, že chybných sloupců je **0**.
+
+2. **Naimportuj `deploy/procesnimapa_1_0_0_76.zip`** — ~5 min, až po bodu 1.
+   Proti 75 přibyla dvě flow (`ZalohaFlow`, `ZalohaScheduled`) a osmá
+   proměnná. V průvodci **vyplň Current Value u všech osmi** proměnných.
+   Po importu mikro-změna → Save → Publish. Flow, která se nezapnou, zapni
+   ručně — import stav zapnutí nemění.
+
+3. **Test DLP pro Excel Online (Business)** — ~10 min, **nejcennější**.
    V Power Automate ručně nové flow, jedna akce `List rows present in a table`
    nad testovacím `.xlsx` v knihovně na PPF. Tři kontrolní body: akce se
    objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí řádky.
@@ -18,47 +34,99 @@ Pořadí je podle užitku. Kdyby vyšla jen jedna, ať je to ta první.
    z vývojářského skriptu na nástroj pro správce). MPSV se doověří, až budeš
    mít přístup — do té doby to zůstává otevřené riziko.
 
-2. **Naimportuj `deploy/procesnimapa_1_0_0_75.zip`** — ~5 min. Opravuje tichou
-   vadu z balíku 74: po přidání nebo odebrání zařazení na obrazovce vazeb
-   zůstal Přehled viset na starém stromu. Při zkoušení ti to vyšlo, ale vyjít
-   nemuselo. Po importu mikro-změna → Save → Publish.
-
-3. **Spusť `src/setup_sharepoint.js` na PPF** — ~2 min. F12 → Console na webu
-   `/sites/DigiData_D/testovaci_subsajta/procesnimapa`. Založí list
-   `HistorieKodu` a doplní `puvodni_kod` do `Procesy`, `DilciProcesy`
-   a `Aktivity`. Idempotentní; na konci musí říct, že chybných sloupců je **0**.
-
-**Ještě nedělej:** `Add data` ve Studiu ani export solution. Až bude hotové
-`ZalohaFlow`, zaregistruješ ho jedním kolečkem spolu s `HistorieKodu` —
-jinak se to dělá dvakrát.
+**Až budeš mít 76 naimportovaný:** Studio → `Add data` → **`ZalohaFlow`**
+a **`HistorieKodu`** (obojí jedním kolečkem) → mikro-změna → Save → Publish →
+export solution a pošli mi zip. Bez té registrace nejde do appky napsat
+tlačítko „Pořídit zálohu" ani zápis do historie kódů.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
-na 1.0.0.65 a žádný z dnešních nálezů se ho netýká (vada deklarací přišla
-až s F9, tedy ve verzích, které tam nikdy nedoputovaly).
+na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
+přístup. Žádný z dnešních nálezů se MPSV netýká.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 1 — snímek rejstříku.** Zadáno, nezačato. Postavit `ZalohaFlow`
-+ plánované dvojče (Logic Apps má jeden trigger na flow, takže dvě flow
-s klonovanými akcemi — vzor `add_mapa_schedule.py`) a bránu
-`check_zaloha_flow.py`. Klíčová kontrola: **pagination u každého `Get items`**
-— bez ní se snímek nad 2 000 řádky tiše ořízne a tváří se jako úspěch.
-Otevřená drobnost k rozhodnutí: knihovna `Zalohy` zatím neexistuje a
-`make_setup.py` umí zakládat jen listy (BaseTemplate 100), ne knihovny.
+**F11 krok 3a — šablona pro hromadný import.** `src/make_sablona.py` generuje
+`.xlsx` ze `src/schema.json` (sloupce schématu minus systémové: kód,
+`nazev_kratky`, `datum_aktualizace`, `puvodni_kod`) + brána
+`src/check_sablona.py`. Je to část, která platí v obou větvích kroku 3 — ať
+konektor Excel Online projde, nebo ne, správce vyplňuje týž soubor.
 
-Pořadí priorit se 31.08. v 15:30 změnilo: **F11 (záloha a import) jde před
-F10** — uživatel je označil za primární úkoly. F10 krok 1 je hotový,
-krok 2 rozpracovaný nebyl.
+Zbytek kroku 3 (flow `ImportFlow`, obrazovka náhledu) čeká na výsledek
+DLP testu z bodu 3 výše.
 
-Pořadí uvnitř F11 zůstává **záloha → import → restore**: stavět nástroj,
-který hromadně píše do dat, dřív než je čím to vrátit, je pozpátku.
+F11 krok 4 (restore) se nezačíná dřív, než jsou zelené kroky 1 a 3.
+
+## F11 krok 1 hotový — snímek rejstříku (31.08.2026 19:10)
+
+Balík **1.0.0.76**. Přibylo:
+
+| co | kde |
+|---|---|
+| knihovna `Zalohy` | `src/schema.json` → `libraries`, zakládá `setup_sharepoint.js` (BaseTemplate 101) |
+| 8. proměnná `mpsv_listHistorieKodu` | `src/env_promenne.py` |
+| `ZalohaFlow` (PowerApps V2) + `ZalohaScheduled` (denně 5:00) | `src/build_zaloha_flow.py` |
+| brána, 157 kontrol | `src/check_zaloha_flow.py` |
+| mutace, 9/9 | `src/mutace_zaloha.py` |
+| dokumentace a datový kontrakt | `deploy/flow_Zaloha.md` |
+
+Snímek: `Zalohy/rejstrik_<RRRR-MM-DD_HHMM>.json`, všech sedm listů se všemi
+sloupci schématu plus `ID`, klíče jsou interní názvy sloupců SharePointu
+(ze snímku se dá zapisovat zpátky bez překladové tabulky).
+
+### Dvojčata se staví z jedné funkce, ne klonováním
+
+`add_mapa_schedule.py` vyrábí plánované dvojče klonem hotového flow ze zipu.
+Tady jsem to udělal jinak: **obě definice staví jeden skript z téže funkce
+`akce()`**. Klonování je pořád v pořádku pro obálku (uzel `<Workflow>`,
+RootComponent, spojení), ale u logiky je zbytečné kolo, ve kterém se dá něco
+ztratit. Brána dvojčata i tak porovnává celá — rozešlá dvojčata by se poznala
+až ve chvíli, kdy je záloha potřeba.
+
+### Rozhodnutí, které měl STATUS otevřené
+
+Osmá proměnná se podle zápisu z 15:22 měla přidat až s exportem ze Studia,
+protože by ji `check_solution` hlásil jako deklarovanou a nepoužitou. Ten
+důvod padl: `ZalohaFlow` ji používá. Cena je pořadí úkolů výše — balík 76 se
+nesmí importovat do prostředí, kde neběžel `setup_sharepoint.js`.
+
+Rovnou se tím zavřela i druhá otevřená drobnost: `make_setup.py` uměl zakládat
+jen listy (BaseTemplate 100). Teď umí i knihovny; `check_setup.js` má na to
+čtyři kontroly (49 celkem) a obě mutace — knihovna založená jako list,
+knihovna nezaložená vůbec — bránu shodí.
+
+### Co je na tom mutačně ověřené
+
+Devět mutací, každou chytí ta kontrola, kvůli které vznikla (skript vypisuje
+první hlášku, ne jen návratový kód — mutace chycená nesouvisející kontrolou
+vypadá stejně zeleně a přitom nedokazuje nic):
+
+vypnuté stránkování u jednoho listu · ze snímku vypadl celý list · vypadl
+sloupec · Choice bez `?['Value']` · jméno souboru z druhého `utcNow()` · zápis
+mimo knihovnu `Zalohy` · snímek bez verze schématu · dvojčata rozešlá
+stránkováním · dvojčata rozešlá vynechaným listem.
+
+Nejdůležitější z nich je první: **bez `paginationPolicy` vrátí konektor jen
+prvních 100 položek, běh skončí zeleně a snímek je oříznutý.** U
+`DilciProcesy` (250 řádků) by se to stalo hned první noc a poznalo by se to
+až při obnově.
+
+### Brány po sestavení 76
+
+`check_zaloha_flow` 157 · `check_solution` 427 · `check_mapa_flow` 139 ·
+`check_export_flow` 124 · `check_setup.js` 49 · `check_env`, `check_app`,
+`check_schema` zeleně.
 
 ## Stav balíků
 
-V `deploy/` je jediný balík: **`procesnimapa_1_0_0_75.zip`** (PPF DEV).
-Starší jsou smazané — všechny měly vadu chybějících deklarací parametrů
-nebo byly nahrazené. Je zabalený z YAML, takže z něj jde stavět dál přes
-`--bez-pac` (na tomhle stroji `pac` není). Historie v gitu.
+V `deploy/` je jediný balík: **`procesnimapa_1_0_0_76.zip`** (PPF DEV).
+Starší jsou smazané — měly vadu chybějících deklarací parametrů nebo byly
+nahrazené. Je zabalený z YAML, takže z něj jde stavět dál přes `--bez-pac`
+(na tomhle stroji `pac` není). Historie v gitu.
+
+Sestavení 76: `runs/build_76/vstup.zip` je kopie 75, do ní
+`build_zaloha_flow.py`, pak `build_app.py --bez-pac --verze 1.0.0.76`.
+Pořadí je závazné — deklarace parametrů doplňuje `build_app.py`, takže
+generátory flow musí běžet **před** ním.
 
 ## Vše z 31.08.2026 ověřeno v provozu (15:23)
 

@@ -13,10 +13,13 @@ function falesnySharePoint(predpripraveneListy) {
   const log = [];
   let guid = 0, itemId = 0;
 
-  function novyList(nazev, popis) {
+  function novyList(nazev, popis, baseTemplate) {
+    // 101 = knihovna dokumentu. Sedi v korenu webu, ne pod /Lists/ - a prave
+    // na tom rozdilu stoji hledani knihovny v setup_sharepoint.js.
+    const bt = baseTemplate || 100;
     const l = {
-      Id: "guid-" + (++guid), Title: nazev,
-      url: "/sites/X/procesnimapa/Lists/" + nazev,
+      Id: "guid-" + (++guid), Title: nazev, BaseTemplate: bt,
+      url: "/sites/X/procesnimapa/" + (bt === 101 ? "" : "Lists/") + nazev,
       typ: "SP.Data." + nazev + "ListItem",
       popis: popis || "",
       // SharePoint zaklada tyhle dva sloupce sam pri vytvoreni listu
@@ -83,7 +86,7 @@ function falesnySharePoint(predpripraveneListy) {
     if (cesta.startsWith("web/lists?$select=Id,Title")) {
       return ok({
         value: [...listy.values()].map((l) => ({
-          Id: l.Id, Title: l.Title,
+          Id: l.Id, Title: l.Title, BaseTemplate: l.BaseTemplate,
           ListItemEntityTypeFullName: l.typ,
           RootFolder: { ServerRelativeUrl: l.url },
         })),
@@ -91,7 +94,7 @@ function falesnySharePoint(predpripraveneListy) {
     }
     if (cesta === "web/lists" && m === "POST") {
       if (listy.has(telo.Title)) throw new Error("list uz existuje: " + telo.Title);
-      novyList(telo.Title, telo.Description);
+      novyList(telo.Title, telo.Description, telo.BaseTemplate);
       return ok({});
     }
 

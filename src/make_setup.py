@@ -128,6 +128,30 @@ function fieldXml(c) {
   throw new Error("neznamy typ sloupce: " + c.type);
 }
 
+// ---------- knihovny ----------
+
+async function najdiKnihovnu(nazev) {
+  // Knihovna sedi v korenu webu (/Zalohy), ne pod /Lists/ - proto vlastni
+  // hledani. BaseTemplate 101 odlisi knihovnu od stejnojmenneho listu.
+  const j = await get("web/lists?$select=Id,Title,BaseTemplate,RootFolder/ServerRelativeUrl" +
+                      "&$expand=RootFolder&$top=500");
+  const konec = "/" + nazev.toLowerCase();
+  return (j.value || []).find(
+    (l) => l.BaseTemplate === 101 && l.RootFolder &&
+           l.RootFolder.ServerRelativeUrl.toLowerCase().endsWith(konec)) || null;
+}
+
+async function zalozKnihovnu(kn) {
+  // Title pri zalozeni = interni nazev -> cista URL /<Name>, stejne jako u listu.
+  await post("web/lists", {
+    __metadata: { type: "SP.List" },
+    BaseTemplate: 101,
+    Title: kn.name,
+    Description: kn.popis || "",
+  });
+  return najdiKnihovnu(kn.name);
+}
+
 // ---------- listy ----------
 
 async function najdiList(nazev) {
@@ -205,6 +229,26 @@ async function nastavRazeni(id, lst) {
 
 const zprava = [];
 const radky = [];
+
+for (const kn of (SCHEMA.libraries || [])) {
+  let knihovna = await najdiKnihovnu(kn.name);
+  const zalozena = !knihovna;
+  if (!knihovna) knihovna = await zalozKnihovnu(kn);
+  if (!knihovna) throw new Error("knihovnu " + kn.name + " se nepodarilo zalozit ani najit");
+  const zobraz = kn.display || kn.name;
+  if (knihovna.Title !== zobraz) {
+    await post("web/lists(guid'" + knihovna.Id + "')", {
+      __metadata: { type: "SP.List" },
+      Title: zobraz,
+    }, true);
+  }
+  zprava.push(kn.name + " (knihovna): " + (zalozena ? "zalozena" : "existovala") +
+              " (" + knihovna.Id + ")");
+  radky.push({
+    list: kn.name, sloupec: "(knihovna)", stav: zalozena ? "zalozena" : "existovala",
+    typ: "DocumentLibrary", ve_zobrazeni: "-", skryty: "ne", zobrazovany_nazev: zobraz,
+  });
+}
 
 for (const lst of SCHEMA.lists) {
   let list = await najdiList(lst.name);
@@ -333,8 +377,9 @@ def main():
     io.open(out, "w", encoding="utf-8", newline="\n").write(js)
 
     sloupcu = sum(len(l["columns"]) for l in schema["lists"])
-    print("%s (%.1f kB) - %d listu, %d sloupcu"
-          % (out, out.stat().st_size / 1000.0, len(schema["lists"]), sloupcu))
+    print("%s (%.1f kB) - %d listu, %d sloupcu, %d knihoven"
+          % (out, out.stat().st_size / 1000.0, len(schema["lists"]), sloupcu,
+             len(schema.get("libraries") or [])))
 
 
 if __name__ == "__main__":

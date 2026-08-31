@@ -265,6 +265,14 @@ def write_doc(schema, rows_by_list, path):
                 L.append("- `%s` — %s" % (k, v))
         L.append("")
 
+    if schema.get("libraries"):
+        L += ["## Knihovny", "",
+              "Zakládá je týž skript jako listy (`setup_sharepoint.js`), jen jako",
+              "BaseTemplate 101 — knihovna sedí v kořenu webu, ne pod `/Lists/`.", ""]
+        for kn in schema["libraries"]:
+            L += ["### `%s`" % kn["name"], "", kn.get("popis", ""), "",
+                  "Zobrazovaný název: %s." % (kn.get("display") or kn["name"]), ""]
+
     path.parent.mkdir(parents=True, exist_ok=True)
     io.open(path, "w", encoding="utf-8", newline="\r\n").write("\n".join(L))
 

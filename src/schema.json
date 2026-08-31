@@ -488,5 +488,12 @@
       ],
       "display": "Historie kódů"
     }
+  ],
+  "libraries": [
+    {
+      "name": "Zalohy",
+      "display": "Zálohy",
+      "popis": "Snimky rejstriku (JSON) z flow ZalohaFlow. Nazev souboru nese razitko, verzovani proto neni potreba."
+    }
   ]
 }

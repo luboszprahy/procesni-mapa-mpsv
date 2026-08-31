@@ -39,6 +39,8 @@ DEFINICE = [
     ("mpsv_listVazby", "Procesni mapa - Vazby",
      "Vazebni list aktivita - dilci proces.", "table", WEB),
     ("mpsv_listUtvary", "Procesni mapa - Utvary", "Ciselnik utvaru.", "table", WEB),
+    ("mpsv_listHistorieKodu", "Procesni mapa - Historie kodu",
+     "List Historie kodu - zaniknute kody.", "table", WEB),
 ]
 
 # Zobrazovaný název listu v appce -> proměnná. Klíč je týž, jakým listy
@@ -50,6 +52,9 @@ LIST_PROMENNA = {
     "Aktivity": "mpsv_listAktivity",
     "Vazba aktivita–dílčí proces": "mpsv_listVazby",
     "Útvary": "mpsv_listUtvary",
+    # HistorieKodu appka zatím nemá připojený — proměnná je tu kvůli
+    # ZalohaFlow, které zálohuje všech sedm listů schématu.
+    "Historie kódů": "mpsv_listHistorieKodu",
 }
 
 # Zdroj, který appka má v napojení, ale žádný vzorec ho nepoužívá. Knihovna

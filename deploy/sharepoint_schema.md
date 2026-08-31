@@ -181,3 +181,14 @@ Zdroj dat: `None` (0 řádků). Verzování: zapnuto.
 - `uroven` — Uroven, na ktere kod stal. Odvoditelna z poctu segmentu, ale uklada se kvuli filtrovani ve view.
 - `nazev` — Nazev polozky v okamziku uzavreni - doklad, ktery se uz nemeni.
 - `nastupce_kod` — Novy kod, pod kterym polozka zije dal. Prazdne = zruseno bez nahrady.
+
+## Knihovny
+
+Zakládá je týž skript jako listy (`setup_sharepoint.js`), jen jako
+BaseTemplate 101 — knihovna sedí v kořenu webu, ne pod `/Lists/`.
+
+### `Zalohy`
+
+Snimky rejstriku (JSON) z flow ZalohaFlow. Nazev souboru nese razitko, verzovani proto neni potreba.
+
+Zobrazovaný název: Zálohy.

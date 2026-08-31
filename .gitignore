@@ -10,3 +10,4 @@ __pycache__/
 .venv/
 runs/app_build/
 runs/mapa_beh/
+runs/build_*/

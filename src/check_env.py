@@ -20,7 +20,7 @@ VERZE = "1.0.0.62"
 # Web + jeden list na každou tabulku, kterou používá flow nebo appka.
 # Číslo je psané ručně schválně: kdyby proměnná někde přibyla nedopatřením,
 # průvodce importem se na ni zeptá a nikdo nebude vědět proč.
-POCET = 7
+POCET = 8
 
 chyby = []
 
