@@ -1388,10 +1388,10 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
    risk: `viewid` ověřená adresa měla, skládaná ho nemá. Náhled si bez něj
      má vzít výchozí zobrazení; ověří se až importem.
 
-5. [Build a import na PPF DEV] — 31.08.2026: appka na PPF DEV běží a čte
-     data přes proměnné; ExportFlow spadlo na chybějící deklaraci parametru
-     (viz STATUS „Nález: chybějící deklarace parametru"). Opraveno,
-     deploy/procesnimapa_1_0_0_70.zip čeká na import.
+5. [Build a import na PPF DEV] — HOTOVO 31.08.2026, balík 1.0.0.70.
+     Cestou nalezena a opravena chybějící deklarace parametru v ExportFlow
+     (viz STATUS „Nález: chybějící deklarace parametru"). Ověřeno v provozu:
+     appka čte data přes proměnné, mapa se zobrazí. `viewid` chybět smí.
    Pořadí buildu drží HANDOVER.md §5: build_flow.py PŘED build_app.py.
    `--list-aktivity` = GUID listu Aktivity na PPF DEV (vypíše
    `deploy/mpsv/03_vypis_guidy.js` spuštěný na PPF webu).
@@ -1406,8 +1406,9 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
      nevyplněná proměnná, nebo špatný tvar overridu — rozliší se pohledem
      do panelu Data, na co je zdroj napojený.
 
-6. [Zpět na MPSV] — co: druhý balík z téže základny (bude 1.0.0.70;
-     jméno souboru se odvozuje z verze, takže dva balíky = dvě verze)
+6. [Zpět na MPSV] — POSTAVENO 31.08.2026: deploy/procesnimapa_1_0_0_71.zip
+     (import čeká na uživateli; jméno souboru se odvozuje z verze, takže
+     dva balíky = dvě verze)
    Po zeleném PPF: `--list-aktivity` na GUID MPSV, build, import na MPSV,
    vyplnit proměnné, ověřit stejným seznamem jako v kroku 5.
    verify: obě prostředí běží ze stejného zdroje a liší se jen tím GUIDem.

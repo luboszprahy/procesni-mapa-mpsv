@@ -4,19 +4,24 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
 
 ## CO JE NA TOBĚ
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_70.zip` na PPF DEV** jako upgrade.
-   Opravuje pád `ExportFlow`, na který jsi narazil ve 13:46 — rozbor je
-   níže v sekci „Nález: chybějící deklarace parametru". Proměnné už na PPF
-   DEV vyplněné máš, takže stačí import → mikro-změna, Save, Publish →
-   ověřit **tlačítko mapy** a **export do Wordu/Excelu** (padalo obojí,
-   ne jen mapa).
-   **`1.0.0.68` ani `1.0.0.69` nenasazuj** — mají tutéž vadu. 69 je smazaný,
-   68 zůstává jen jako základna pro build.
-2. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
+1. **Ověř na PPF DEV ještě export do Wordu a Excelu.** Mapa se v 14:13
+   zobrazila správně, takže `Cesta_webu` i `Adresa` fungují — export jede
+   přes tytéž akce a navíc zapisuje soubor přes `Uloz`, což je jediná část,
+   kterou mapa neprověřila.
+2. **Naimportuj `deploy/procesnimapa_1_0_0_71.zip` na MPSV** (F9 krok 6),
+   až se ti to bude hodit — MPSV je prostředí, kde appku někdo používá,
+   takže po dohodě, ne mimochodem. Je to **první import s napojením appky
+   přes proměnné**, takže tam nově musíš vyplnit **všech sedm** proměnných
+   (dosud jich bylo šest a appka měla zdroje napojené natvrdo). MPSV běží
+   na 1.0.0.65. Po importu: mikro-změna → Save → Publish → flow ručně
+   zapnout.
+   **`1.0.0.68` ani `1.0.0.69` nenasazuj** — mají vadu ExportFlow.
+   69 je smazaný, 68 zůstává jen jako základna pro build.
+3. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
-3. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
+4. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
-4. **Otestuj konektor Excel Online (Business)** — až budeš u toho. Ručně
+5. **Otestuj konektor Excel Online (Business)** — až budeš u toho. Ručně
    v designeru jedno flow o jedné akci `List rows present in a table` nad
    testovacím `.xlsx` (musí mít formátovanou **Tabulku**, ne volnou mřížku).
    Zajímá mě, jestli akce projde DLP a běh doběhne — v **obou** tenantech.
@@ -122,7 +127,8 @@ překážka F9 kroku 5.
 |---|---|---|---|
 | `deploy/procesnimapa_1_0_0_68.zip` | `b1daaa38-…` | MPSV | **nenasazovat** — vada ExportFlow; drží se jen jako základna pro build |
 | ~~`1_0_0_69`~~ | `9dfbb5a1-…` | PPF DEV | smazaný — táž vada, nasazen a spadl |
-| `deploy/procesnimapa_1_0_0_70.zip` | `9dfbb5a1-…` | PPF DEV | opravený, čeká na import |
+| `deploy/procesnimapa_1_0_0_70.zip` | `9dfbb5a1-…` | PPF DEV | **nasazený a ověřený** (mapa se zobrazila) |
+| `deploy/procesnimapa_1_0_0_71.zip` | `b1daaa38-…` | MPSV | čeká na import (F9 krok 6) |
 
 Verze jsou dvě, ne jedna, protože `build_app.py` odvozuje jméno souboru
 z verze — stejná verze by druhý balík přepsala. Pro obě prostředí jde
@@ -361,12 +367,17 @@ brána spuštěná bez explicitního `--base` (tedy tak, jak ji uvádí HANDOVER
 padala na `FileNotFoundError`. Default nyní míří na aktuální základnu
 `input/procesnimapa_1_0_0_66.zip`; proti ní i proti 67 dá týchž 139 kontrol.
 
-### Neověřené — čeká na import
+### OVĚŘENO 31.08.2026 14:13 — `viewid` v adrese chybět smí
 
-Že `viewid` v adrese chybět smí. Ověřená adresa ho měla, MPSV varianta v 66 ne
-a ta se nikdy nevyzkoušela. Pokud by náhled bez `viewid` nefungoval, znamená to
-dotáhnout GUID výchozího zobrazení knihovny — z proměnné, ne natvrdo.
+Mapa se na PPF DEV z balíku 1.0.0.70 **zobrazila správně**, ne stáhla. Náhled
+si bez `viewid` vezme výchozí zobrazení knihovny, jak se předpokládalo. GUID
+výchozího zobrazení tedy dotahovat nemusíme a riziko zapsané u balíků 67/68
+padá.
 
+Zároveň tím padlo druhé neověřené tvrzení: **deklarace parametru bez
+`defaultValue` pro výrazové použití stačí** — hodnota přišla z Current Value.
+Balík tedy nemusí vézt adresu žádného tenantu ani jako záložní hodnotu.
+Zapsáno do skillu `power-Apps-skill`.
 ## Nová základna: 1.0.0.66, export z běžícího MPSV (30.08.2026)
 
 Uživatel dodal `procesnimapa_1_0_0_66.zip` — export solution z MPSV, kde
@@ -2689,10 +2700,10 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**F9 kroky 1–4b hotové, krok 5 postavený: `deploy/procesnimapa_1_0_0_69.zip`
-čeká na import na PPF DEV** (viz „CO JE NA TOBĚ" nahoře). Krok 6 — balík
-1.0.0.70 pro MPSV — se postaví, až bude PPF DEV zelené; je to tentýž build
-jen s druhým GUIDem, takže je to minuta práce, ne fáze.
+**F9 je hotová.** Krok 5 ověřen v provozu na PPF DEV (appka čte data přes
+proměnné, mapa se zobrazí). Krok 6 postavený: `deploy/procesnimapa_1_0_0_71.zip`
+čeká na import na MPSV — viz „CO JE NA TOBĚ". Zbývá jen doověřit export
+do Wordu/Excelu na PPF.
 
 **F10 krok 1 hotový** (list `HistorieKodu`, `puvodni_kod`, brány mutačně
 ověřené). Balíku se to netýká — appka nový list zatím nepoužívá.
