@@ -4,11 +4,14 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
 
 ## CO JE NA TOBĚ
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_69.zip` na PPF DEV** jako upgrade
-   (na PPF DEV běží 1.0.0.63). Je to první balík, který má napojení appky
-   přes proměnné prostředí — postup a co ověřit je níže v sekci
-   „Balík 1.0.0.69 pro PPF DEV". **Nejdřív vyplň všech sedm proměnných,
-   teprve pak zapínej flow.**
+1. **Naimportuj `deploy/procesnimapa_1_0_0_70.zip` na PPF DEV** jako upgrade.
+   Opravuje pád `ExportFlow`, na který jsi narazil ve 13:46 — rozbor je
+   níže v sekci „Nález: chybějící deklarace parametru". Proměnné už na PPF
+   DEV vyplněné máš, takže stačí import → mikro-změna, Save, Publish →
+   ověřit **tlačítko mapy** a **export do Wordu/Excelu** (padalo obojí,
+   ne jen mapa).
+   **`1.0.0.68` ani `1.0.0.69` nenasazuj** — mají tutéž vadu. 69 je smazaný,
+   68 zůstává jen jako základna pro build.
 2. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
 3. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
@@ -20,7 +23,93 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
 
-## Balík 1.0.0.69 pro PPF DEV (31.08.2026 11:20)
+## Nález: chybějící deklarace parametru shodila ExportFlow (31.08.2026 14:10)
+
+Import 1.0.0.69 na PPF DEV **appku rozběhl** — strom ukázal 6 agend,
+44 procesů, 249 dílčích a 47 aktivit, což přesně sedí na GUIDy z PPF DEV.
+Napojení přes proměnné tedy funguje a hlavní cíl F9 platí.
+
+Padalo ale volání flow. Appka hlásila jen
+`ExportFlow.Run failed: 502 BadGateway … NoResponse`, run history řekla
+pravdu:
+
+```
+InvalidTemplate. Unable to process template language expressions in action
+'Cesta_webu' inputs at line '0' and column '0': The workflow parameter
+'Procesni mapa - web (mpsv_procesnimapaSite)' is not found.
+```
+
+### Proč se to neprojevilo dřív
+
+Rozhoduje, **kde** se `parameters('…')` použije:
+
+| použití | deklarace v `definition.parameters` | doloženo |
+|---|---|---|
+| parametr konektoru (`inputs/parameters/dataset`) | není potřeba | MapaPublish běží týdny bez ní |
+| ve výrazu (Compose, podmínka, Select) | **povinná** | pád výše |
+
+`Cesta_webu` a `Adresa` jsou **první výrazové použití** v celém projektu
+a přinesl je F9 krok 4 (adresa mapy z ExportFlow). Do té doby se parametr
+objevoval jen jako `dataset` u SharePoint akcí, kde si ho runtime dosadí sám.
+Proto stejný tvar roky procházel a spadl až teď.
+
+Rozbor balíku ukázal, že deklaraci nemá `ExportFlow`, `MapaPublishFlow` ani
+`MapaPublishScheduled` — u posledních dvou to ale **nevadí**, parametry mají
+jen v konektorech. Vada je tedy přesně jedna, v jednom flow.
+
+### Oprava
+
+`build_export_flow.py` kopíroval `parameters` ze zdrojového `MapaPublishFlow`,
+které je nemá. Nově doplní deklaraci proměnné webu vždy (`parametry()`).
+
+Tvar se **neuhádl, opsal** — z deklarace, kterou do `AktualizaceKratkehoNazvu`
+dopsal designer a která v provozu funguje. Skládá ji `ep.deklarace()`:
+
+```json
+{"type": "String",
+ "metadata": {"schemaName": "mpsv_procesnimapaSite",
+              "description": "Adresa SharePoint webu s rejstrikem."}}
+```
+
+`metadata.schemaName` je ta podstatná část — je to vazba na proměnnou
+prostředí. Bez ní by parametr existoval, ale hodnota by do něj nedorazila;
+byla by to druhá cesta k témuž selhání, jen o kolo později.
+
+**`defaultValue` se ZÁMĚRNĚ nedoplňuje.** Hodnota patří do prostředí,
+kde ji obsluha vyplní při importu — zapečená adresa je přesně to, co F9
+rušil. (Prázdný řetězec je navíc zakázaný: s ním selže import na 29 %,
+ověřeno v PPF na jiném projektu.)
+
+### Brána: `deklarace_parametru` v check_solution.py
+
+Žádná z jedenácti bran tohle nechytala — `check_export_flow` kontroluje
+kontrakt akcí, ne deklarace. Nová kontrola projde **všechna** flow v balíku
+a hlídá:
+
+1. každý parametr použitý **ve výrazu** je v `definition.parameters`,
+2. jeho deklarace má `metadata.schemaName` navázané na tu proměnnou,
+3. žádná deklarace nemá `defaultValue: ""`.
+
+Rozlišení „výraz vs. parametr konektoru" dělá `_parametry_ve_vyrazech()` —
+kdyby bránu neuměla rozlišit, musely by se zbytečně deklarovat i parametry
+v MapaPublish flow.
+
+**Zpětný důkaz:** brána spuštěná na balíku 1.0.0.69 nález vypíše přesně tak,
+jak ho ukázala run history.
+
+**Mutačně ověřeno 4/4** (`src/mutace_parametry.py`): smazaná deklarace,
+deklarace bez `metadata`, `schemaName` na jinou proměnnou, prázdný
+`defaultValue`. Skript má i pojistku proti mutaci, která se do definice
+netrefí.
+
+### Co z toho platí obecně
+
+Patří to do skillu `power-Apps-skill` jako doplněk pravidla o
+`definition.parameters`: dosud tam stálo „nech je, jak přišly z exportu".
+Nově je doložené i **proč** — a že rozhoduje způsob použití, ne to, jestli
+flow zapisuje.
+
+## Balíky 1.0.0.69 a 1.0.0.70 pro PPF DEV (31.08.2026 11:20)
 
 GUID listu Aktivity na PPF DEV dodán v 11:08:
 `9dfbb5a1-65a6-4fd4-b9f9-fdd35fa246cd`, web
@@ -29,10 +118,11 @@ překážka F9 kroku 5.
 
 **Dva balíky z jednoho zdroje se liší jen tímhle GUIDem** a jinak ničím:
 
-| balík | list Aktivity | pro |
-|---|---|---|
-| `deploy/procesnimapa_1_0_0_68.zip` | `b1daaa38-…` | MPSV |
-| `deploy/procesnimapa_1_0_0_69.zip` | `9dfbb5a1-…` | PPF DEV |
+| balík | list Aktivity | pro | stav |
+|---|---|---|---|
+| `deploy/procesnimapa_1_0_0_68.zip` | `b1daaa38-…` | MPSV | **nenasazovat** — vada ExportFlow; drží se jen jako základna pro build |
+| ~~`1_0_0_69`~~ | `9dfbb5a1-…` | PPF DEV | smazaný — táž vada, nasazen a spadl |
+| `deploy/procesnimapa_1_0_0_70.zip` | `9dfbb5a1-…` | PPF DEV | opravený, čeká na import |
 
 Verze jsou dvě, ne jedna, protože `build_app.py` odvozuje jméno souboru
 z verze — stejná verze by druhý balík přepsala. Pro obě prostředí jde
@@ -116,12 +206,14 @@ opravdu začne používat — dřív by se na tenanty zakládal list, do kteréh
 nikdo nepíše. `src/setup_sharepoint.js`, `src/import_data.js`
 a `deploy/sharepoint_schema.md` už aktuální jsou.
 
-### Brány po F10/1 a balíku 69
+### Brány po F10/1 a balíku 70
 
-`check_solution` 300 · `check_mapa_flow` 139 · `check_export_flow` 124 ·
+`check_solution` **304** · `check_mapa_flow` 139 · `check_export_flow` 124 ·
 `check_flow` · `check_app` · `check_env` · `check_schema` (7 listů,
 44 sloupců) · `check_mapa_html` 31 · `check_mapa_beh` 25 ·
 `check_setup.js` (+13 nových) · `check_import.js` — vše zelené.
+Mutačně: `mutace_parametry` 4/4, `mutace_napojeni` 5/5,
+`mutace_export_mapa` 7/7, `check_setup.js` 4/4.
 
 ## F10 a F11 zadány — rozhodnutí z 30.08.2026 18:08
 

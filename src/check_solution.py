@@ -189,6 +189,72 @@ def promenne_ve_flow(vystupni, promenne_appky=frozenset()):
            f"se na ni zeptá a nikdo nebude vědět proč")
 
 
+def _parametry_ve_vyrazech(uzel, cesta=(), v_konektoru=False):
+    """Vrátí (jméno parametru, cesta) pro každé `parameters('…')` MIMO konektor.
+
+    Parametr konektoru (`inputs/parameters/dataset` uvnitř OpenApiConnection)
+    si runtime dosadí sám i bez deklarace — tak to v tomhle balíku roky jelo.
+    Ve výrazu (Compose, podmínka, Select) ho ale bez deklarace nenajde.
+    """
+    if isinstance(uzel, dict):
+        je_konektor = uzel.get("type") == "OpenApiConnection"
+        for k, v in uzel.items():
+            yield from _parametry_ve_vyrazech(
+                v, cesta + (k,), v_konektoru or (je_konektor and k == "inputs"))
+    elif isinstance(uzel, list):
+        for i, v in enumerate(uzel):
+            yield from _parametry_ve_vyrazech(v, cesta + (str(i),), v_konektoru)
+    elif isinstance(uzel, str):
+        v_parametrech = v_konektoru and len(cesta) >= 2 and cesta[-2] == "parameters"
+        if v_parametrech:
+            return
+        for p in re.findall(r"parameters\('([^']+)'\)", uzel):
+            if not p.startswith("$"):
+                yield p, "/".join(cesta)
+
+
+def deklarace_parametru(vystupni):
+    """Parametr použitý ve výrazu musí být v `definition.parameters`.
+
+    Bez deklarace flow doběhne až k té akci a spadne na
+    `InvalidTemplate … The workflow parameter '…' is not found`
+    (PPF DEV 31.08.2026, ExportFlow/Cesta_webu, balík 1.0.0.69). Volající
+    appka přitom vidí jen `502 BadGateway / NoResponse`, takže z hlášky
+    v appce se příčina poznat nedá — proto brána.
+
+    `defaultValue` se nekontroluje na obsah, ale prázdný řetězec je zakázaný:
+    s ním import selže na 29 % (ověřeno v PPF na jiném projektu). Hodnotu
+    dodává proměnná prostředí, ne balík.
+    """
+    for jmeno, soubor in _flow_soubory(vystupni):
+        definice = json.loads(vystupni.read(jmeno).decode("utf-8-sig"))["properties"]["definition"]
+        deklarovane = {k for k in (definice.get("parameters") or {}) if not k.startswith("$")}
+
+        pouzite = {}
+        for skupina in ("triggers", "actions"):
+            for p, cesta in _parametry_ve_vyrazech(definice.get(skupina) or {}, (skupina,)):
+                pouzite.setdefault(p, cesta)
+        vsechny = definice.get("parameters") or {}
+        for p, cesta in sorted(pouzite.items()):
+            overit(p in deklarovane,
+                   f"{soubor}: parametr {p!r} je použitý ve výrazu ({cesta}), ale "
+                   f"není v definition.parameters — flow spadne na InvalidTemplate")
+            # Deklarace sama nestačí: bez `metadata.schemaName` je to parametr
+            # bez vazby na proměnnou prostředí, takže by zůstal bez hodnoty.
+            schema = ((vsechny.get(p) or {}).get("metadata") or {}).get("schemaName")
+            overit(schema is not None and f"({schema})" in p,
+                   f"{soubor}: deklarace {p!r} nemá metadata.schemaName navázané "
+                   f"na proměnnou prostředí (je {schema!r}) — hodnota do parametru "
+                   f"nedorazí")
+
+        for nazev, popis in (definice.get("parameters") or {}).items():
+            if nazev.startswith("$") or not isinstance(popis, dict):
+                continue
+            overit(popis.get("defaultValue", None) != "",
+                   f"{soubor}: parametr {nazev!r} má prázdný defaultValue — "
+                   f"s ním selže import solution")
+
+
 def overit(podminka, popis):
     global kontrol
     kontrol += 1
@@ -464,6 +530,7 @@ def main():
             if prepis_listu.get("environmentVariableName"):
                 promenne_appky.add(prepis_listu["environmentVariableName"])
     promenne_ve_flow(vystupni, promenne_appky)
+    deklarace_parametru(vystupni)
 
     print(f"kontrol: {kontrol}, chyb: {len(chyby)}")
     for text_varovani in varovani:

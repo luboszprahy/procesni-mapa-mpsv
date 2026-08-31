@@ -91,6 +91,19 @@ def list_param(zobrazovany):
     return param(LIST_PROMENNA[zobrazovany])
 
 
+def deklarace(schema):
+    """Deklarace parametru do `definition.parameters` flow.
+
+    `metadata.schemaName` je vazba na proměnnou prostředí — bez ní by
+    parametr existoval, ale hodnotu by do něj prostředí nedosadilo.
+    Tvar je 1:1 podle deklarace, kterou do AktualizaceKratkehoNazvu dopsal
+    designer. Bez `defaultValue`: hodnota patří do prostředí, ne do balíku.
+    """
+    _, _, popis, _, _ = _PODLE_SCHEMA[schema]
+    return {"type": "String",
+            "metadata": {"schemaName": schema, "description": popis}}
+
+
 def xml(schema, verze):
     """Obsah environmentvariabledefinition.xml pro jednu proměnnou."""
     _, nazev, popis, klic, rodic = _PODLE_SCHEMA[schema]
