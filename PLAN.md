@@ -1388,7 +1388,8 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
    risk: `viewid` ověřená adresa měla, skládaná ho nemá. Náhled si bez něj
      má vzít výchozí zobrazení; ověří se až importem.
 
-5. [Build a import na PPF DEV] — co: deploy/procesnimapa_1_0_0_68.zip
+5. [Build a import na PPF DEV] — POSTAVENO 31.08.2026,
+     deploy/procesnimapa_1_0_0_69.zip (import čeká na uživateli)
    Pořadí buildu drží HANDOVER.md §5: build_flow.py PŘED build_app.py.
    `--list-aktivity` = GUID listu Aktivity na PPF DEV (vypíše
    `deploy/mpsv/03_vypis_guidy.js` spuštěný na PPF webu).
@@ -1403,7 +1404,8 @@ appky se tím nezdrží a nedostupné flow neshodí načtení dat.
      nevyplněná proměnná, nebo špatný tvar overridu — rozliší se pohledem
      do panelu Data, na co je zdroj napojený.
 
-6. [Zpět na MPSV] — co: druhý balík z téže základny
+6. [Zpět na MPSV] — co: druhý balík z téže základny (bude 1.0.0.70;
+     jméno souboru se odvozuje z verze, takže dva balíky = dvě verze)
    Po zeleném PPF: `--list-aktivity` na GUID MPSV, build, import na MPSV,
    vyplnit proměnné, ověřit stejným seznamem jako v kroku 5.
    verify: obě prostředí běží ze stejného zdroje a liší se jen tím GUIDem.
@@ -1478,8 +1480,10 @@ celý návrh na reálných datech dřív, než se pustíme do kaskády nad proce
 ### Kroky
 
 ```
-1. [List HistorieKodu a sloupce nástupnictví] — co: src/schema.json,
-     src/make_setup.py, src/check_schema.py
+1. [List HistorieKodu a sloupce nástupnictví] — HOTOVO 31.08.2026
+     (src/schema.json, src/check_schema.py, src/make_import.py,
+      src/check_setup.js; make_setup.py se měnit nemusel, je schéma-řízený.
+      Mutačně ověřeno 4/4. `deploy/mpsv/` se přegeneruje až s krokem 2.)
    Nový list `HistorieKodu` (jeden pro všechny úrovně):
      Title = uzavřený kód (přirozený klíč), uroven (Choice: agenda/proces/
      dilci_proces/aktivita), nazev, nastupce_kod (Text, prázdné = zrušeno bez

@@ -91,6 +91,33 @@ function tvrd(podminka, popis) {
   tvrd(aktivity.fields.get("nazev").TypeAsString === "Note",
        "uplny nazev zustal Note");
 
+  // HistorieKodu (F10): sloupce jsou vyjmenovane naschval, ne odvozene ze
+  // schematu. Odvozene ocekavani by se pri odebrani sloupce jen snizilo
+  // a test by prosel - prave to ma tahle kontrola chytit.
+  const historie = sp.listy.get("HistorieKodu");
+  tvrd(!!historie, "list HistorieKodu zalozen");
+  for (const [jm, typ] of [["Title", "Text"], ["uroven", "Choice"], ["nazev", "Text"],
+                           ["nastupce_kod", "Text"], ["duvod", "Note"],
+                           ["datum", "DateTime"], ["kdo", "Text"]]) {
+    const f = historie && historie.fields.get(jm);
+    tvrd(!!f && f.TypeAsString === typ, "HistorieKodu." + jm + " je " + typ);
+  }
+  tvrd(!!historie && historie.fields.get("Title").Indexed === true,
+       "HistorieKodu.Title je indexovany (pridelovaci vzorec nad nim filtruje prefix)");
+  // ciselnik urovni se v poli neuklada, cte se tedy z odeslaneho SchemaXml.
+  // Vyhledava se podle obsahu, ne podle jmena - sloupec `uroven` ma i list Utvary.
+  const urovne = ["agenda", "proces", "dilci_proces", "aktivita"];
+  tvrd(cfx.map((r) => r.telo.parameters.SchemaXml).some(
+         (x) => /Name="uroven"/.test(x) &&
+                urovne.every((v) => x.includes("<CHOICE>" + v + "</CHOICE>"))),
+       "HistorieKodu.uroven nese vsechny ctyri urovne");
+
+  // puvodni_kod v zivych listech - protejsek k HistorieKodu.nastupce_kod
+  for (const jm of ["Procesy", "DilciProcesy", "Aktivity"]) {
+    const f = sp.listy.get(jm).fields.get("puvodni_kod");
+    tvrd(!!f && f.TypeAsString === "Text", jm + ".puvodni_kod je Text");
+  }
+
   // razeni
   tvrd(/FieldRef Name="nazev_kratky"[^>]*Ascending="TRUE"/.test(aktivity.viewQuery) &&
        /FieldRef Name="Title"/.test(aktivity.viewQuery),

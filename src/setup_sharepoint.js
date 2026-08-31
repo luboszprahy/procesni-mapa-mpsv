@@ -120,6 +120,14 @@ const SCHEMA = {
       "rejstrik",
       "karta"
      ]
+    },
+    {
+     "name": "puvodni_kod",
+     "display": "Vzniklo z kódu",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod."
     }
    ],
    "display": "Procesy"
@@ -190,6 +198,14 @@ const SCHEMA = {
       "rejstrik",
       "karta"
      ]
+    },
+    {
+     "name": "puvodni_kod",
+     "display": "Vzniklo z kódu",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod."
     }
    ],
    "display": "Dílčí procesy"
@@ -305,6 +321,14 @@ const SCHEMA = {
      "type": "DateTime",
      "csv": null,
      "popis": "V evidencni karte neexistuje - pri importu se plni datem importu, dal ji udrzuje porizovaci appka."
+    },
+    {
+     "name": "puvodni_kod",
+     "display": "Vzniklo z kódu",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod."
     }
    ],
    "display": "Aktivity"
@@ -409,6 +433,74 @@ const SCHEMA = {
      "popis": "Kod nadrizeneho utvaru; u sekce prazdne."
     }
    ]
+  },
+  {
+   "name": "HistorieKodu",
+   "csv": null,
+   "popis": "Uzavrene identifikacni kody vsech ctyr urovni. Zaznam vznika pri presunu polozky pod jineho rodice (zanik + vznik) nebo pri zruseni bez nahrady. Nemaze se a kod se nikdy nerecykluje - pridelovaci vzorec bere maximum pres zivy list I pres tuto historii.",
+   "columns": [
+    {
+     "name": "Title",
+     "display": "Uzavřený kód",
+     "type": "Text",
+     "maxlen": 20,
+     "required": true,
+     "indexed": true,
+     "csv": null,
+     "popis": "Uzavreny identifikacni kod. Prirozeny klic - kazdy kod se uzavira prave jednou."
+    },
+    {
+     "name": "uroven",
+     "display": "Úroveň",
+     "type": "Choice",
+     "indexed": true,
+     "csv": null,
+     "choices": [
+      "agenda",
+      "proces",
+      "dilci_proces",
+      "aktivita"
+     ],
+     "popis": "Uroven, na ktere kod stal. Odvoditelna z poctu segmentu, ale uklada se kvuli filtrovani ve view."
+    },
+    {
+     "name": "nazev",
+     "display": "Název",
+     "type": "Text",
+     "maxlen": 255,
+     "required": true,
+     "csv": null,
+     "popis": "Nazev polozky v okamziku uzavreni - doklad, ktery se uz nemeni."
+    },
+    {
+     "name": "nastupce_kod",
+     "display": "Nástupce (kód)",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Novy kod, pod kterym polozka zije dal. Prazdne = zruseno bez nahrady."
+    },
+    {
+     "name": "duvod",
+     "display": "Důvod",
+     "type": "Note",
+     "csv": null
+    },
+    {
+     "name": "datum",
+     "display": "Datum uzavření",
+     "type": "DateTime",
+     "csv": null
+    },
+    {
+     "name": "kdo",
+     "display": "Uzavřel",
+     "type": "Text",
+     "maxlen": 255,
+     "csv": null
+    }
+   ],
+   "display": "Historie kódů"
   }
  ]
 };

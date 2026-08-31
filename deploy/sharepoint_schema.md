@@ -53,11 +53,13 @@ Zdroj dat: `procesy.csv` (46 řádků). Verzování: zapnuto.
 | `agenda_kod` | Agenda (kód) | Jeden řádek textu | ano | ano | agenda_kod |
 | `vlastnik` | Vlastník procesu | Jeden řádek textu | ne | ne | vlastnik |
 | `zdroj` | Zdroj | Volba | ne | ne | zdroj |
+| `puvodni_kod` | Vzniklo z kódu | Jeden řádek textu | ne | ne | — (zakládá se prázdné) |
 
 - `zdroj` — hodnoty: `rejstrik`, `karta`
 - `Title` — Identifikacni kod AA-BB.
 - `agenda_kod` — Textovy odkaz na Agendy.Title - ne lookup ID (prenositelnost mezi tenanty).
 - `vlastnik` — Odbor. Vice vlastniku pripustne - oddelovac '; '.
+- `puvodni_kod` — Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod.
 
 Sloupce CSV, které se **záměrně neukládají**:
 - `pocet_aktivit` — odvozeny udaj - pocita se az v mape
@@ -76,6 +78,7 @@ Zdroj dat: `dilci_procesy.csv` (250 řádků). Verzování: zapnuto.
 | `vlastnik` | Vlastník dílčího procesu | Jeden řádek textu | ne | ne | vlastnik |
 | `stav_rejstrik` | Stav v rejstříku | Volba | ne | ne | stav_rejstrik |
 | `zdroj` | Zdroj | Volba | ne | ne | zdroj |
+| `puvodni_kod` | Vzniklo z kódu | Jeden řádek textu | ne | ne | — (zakládá se prázdné) |
 
 - `stav_rejstrik` — hodnoty: `využitý`, `využitý-S4`, `nevyužitý`
 - `zdroj` — hodnoty: `rejstrik`, `karta`
@@ -83,6 +86,7 @@ Zdroj dat: `dilci_procesy.csv` (250 řádků). Verzování: zapnuto.
 - `nazev` — Nejdelsi namereny nazev 166 znaku - rezerva do 255 je mala, ale sloupec musi zustat Text kvuli razeni a indexaci.
 - `vlastnik` — Odbor. Vice vlastniku pripustne - oddelovac '; '.
 - `stav_rejstrik` — Barevne odliseni v puvodnim rejstriku.
+- `puvodni_kod` — Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod.
 
 Sloupce CSV, které se **záměrně neukládají**:
 - `pocet_aktivit` — odvozeny udaj - pocita se az v mape
@@ -106,6 +110,7 @@ Zdroj dat: `aktivity.csv` (46 řádků). Verzování: zapnuto. Výchozí řazen�
 | `sekce` | Sekce | Jeden řádek textu | ne | ano | sekce |
 | `stav` | Stav | Volba | ne | ano | — (zakládá se prázdné) |
 | `datum_aktualizace` | Datum aktualizace | Datum a čas | ne | ne | — (zakládá se prázdné) |
+| `puvodni_kod` | Vzniklo z kódu | Jeden řádek textu | ne | ne | — (zakládá se prázdné) |
 
 - `stav` — hodnoty: `pracovní`, `schváleno`
 - `Title` — Identifikacni kod AA-BB-CCC-DDDD.
@@ -117,6 +122,7 @@ Zdroj dat: `aktivity.csv` (46 řádků). Verzování: zapnuto. Výchozí řazen�
 - `text_pro_or` — V evidencni karte neexistuje - zaklada se prazdny, plni se rucne pro budouci generovani organizacniho radu.
 - `stav` — V evidencni karte neexistuje - pri importu se plni hodnotou 'pracovní'.
 - `datum_aktualizace` — V evidencni karte neexistuje - pri importu se plni datem importu, dal ji udrzuje porizovaci appka.
+- `puvodni_kod` — Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod.
 
 Sloupce CSV, které se **záměrně neukládají**:
 - `zdroj_radek` — cislo radku ve zdrojove evidencni karte - artefakt importu, do rejstriku nepatri
@@ -153,3 +159,25 @@ Zdroj dat: `utvary.csv` (8 řádků). Verzování: zapnuto. Výchozí řazení: 
 - `uroven` — hodnoty: `sekce`, `odbor`, `oddělení`
 - `Title` — Cislo utvaru. 1 cislice = sekce, 2 = odbor, 3 = oddeleni.
 - `nadrizeny_kod` — Kod nadrizeneho utvaru; u sekce prazdne.
+
+### `HistorieKodu`
+
+Uzavrene identifikacni kody vsech ctyr urovni. Zaznam vznika pri presunu polozky pod jineho rodice (zanik + vznik) nebo pri zruseni bez nahrady. Nemaze se a kod se nikdy nerecykluje - pridelovaci vzorec bere maximum pres zivy list I pres tuto historii.
+
+Zdroj dat: `None` (0 řádků). Verzování: zapnuto.
+
+| Interní název | Zobrazovaný název | Typ | Povinný | Indexovaný | Zdroj v CSV |
+|---|---|---|---|---|---|
+| `Title` | Uzavřený kód | Jeden řádek textu | ano | ano | — (zakládá se prázdné) |
+| `uroven` | Úroveň | Volba | ne | ano | — (zakládá se prázdné) |
+| `nazev` | Název | Jeden řádek textu | ano | ne | — (zakládá se prázdné) |
+| `nastupce_kod` | Nástupce (kód) | Jeden řádek textu | ne | ne | — (zakládá se prázdné) |
+| `duvod` | Důvod | Více řádků textu (prostý text) | ne | ne | — (zakládá se prázdné) |
+| `datum` | Datum uzavření | Datum a čas | ne | ne | — (zakládá se prázdné) |
+| `kdo` | Uzavřel | Jeden řádek textu | ne | ne | — (zakládá se prázdné) |
+
+- `uroven` — hodnoty: `agenda`, `proces`, `dilci_proces`, `aktivita`
+- `Title` — Uzavreny identifikacni kod. Prirozeny klic - kazdy kod se uzavira prave jednou.
+- `uroven` — Uroven, na ktere kod stal. Odvoditelna z poctu segmentu, ale uklada se kvuli filtrovani ve view.
+- `nazev` — Nazev polozky v okamziku uzavreni - doklad, ktery se uz nemeni.
+- `nastupce_kod` — Novy kod, pod kterym polozka zije dal. Prazdne = zruseno bez nahrady.

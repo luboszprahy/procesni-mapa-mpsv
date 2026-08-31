@@ -44,12 +44,48 @@ def read_csv(path):
         return list(csv.DictReader(f, delimiter=";"))
 
 
+def zkontroluj_razeni(lst, errors, warnings):
+    """Overi default_sort proti sloupcum listu - nezavisle na datech."""
+    name = lst["name"]
+    srt = lst.get("default_sort")
+    if not srt:
+        return
+    if not any(c["name"] == srt["column"] for c in lst["columns"]):
+        errors.append("%s: default_sort odkazuje na neexistujici sloupec %r"
+                      % (name, srt["column"]))
+    else:
+        sc = next(c for c in lst["columns"] if c["name"] == srt["column"])
+        if sc["type"] == "Note":
+            errors.append("%s: default_sort je nad sloupcem %r typu Note - "
+                          "SharePoint podle Note neradi" % (name, sc["name"]))
+        elif not sc.get("indexed"):
+            warnings.append("%s: sloupec %r se pouziva k razeni, ale neni indexovany"
+                            % (name, sc["name"]))
+    if srt.get("pak") and not any(c["name"] == srt["pak"] for c in lst["columns"]):
+        errors.append("%s: druhotne razeni odkazuje na neexistujici sloupec %r"
+                      % (name, srt["pak"]))
+
+
 def check(schema, datadir, errors, warnings):
     keys = {}          # list -> set kodu (pro kontrolu referenci)
     rows_by_list = {}
 
     for lst in schema["lists"]:
         name = lst["name"]
+        zkontroluj_razeni(lst, errors, warnings)
+
+        if not lst.get("csv"):
+            # list se zaklada prazdny a plni ho az aplikace (HistorieKodu) -
+            # data neexistuji, ma smysl overit jen tvar
+            rows_by_list[name] = []
+            if not any(c["name"] == "Title" for c in lst["columns"]):
+                errors.append("%s: schema nema sloupec Title (prirozeny klic)" % name)
+            for col in lst["columns"]:
+                if col.get("csv") or col.get("derive") or col.get("derive_truncate"):
+                    errors.append("%s.%s: list nema zdrojova data, sloupec z nich tedy "
+                                  "nemuze cerpat" % (name, col["name"]))
+            continue
+
         path = datadir / lst["csv"]
         if not path.exists():
             errors.append("%s: chybi zdrojovy soubor %s" % (name, path))
@@ -120,23 +156,6 @@ def check(schema, datadir, errors, warnings):
                                 "hodnotu a razeni nema druhotny klic - jejich vzajemne "
                                 "poradi ve view neni urcene, napr. %r"
                                 % (name, col["name"], len(kolize), kolize[0][:60]))
-
-        # razeni vychoziho zobrazeni
-        srt = lst.get("default_sort")
-        if srt and not any(c["name"] == srt["column"] for c in lst["columns"]):
-            errors.append("%s: default_sort odkazuje na neexistujici sloupec %r"
-                          % (name, srt["column"]))
-        elif srt:
-            sc = next(c for c in lst["columns"] if c["name"] == srt["column"])
-            if sc["type"] == "Note":
-                errors.append("%s: default_sort je nad sloupcem %r typu Note - "
-                              "SharePoint podle Note neradi" % (name, sc["name"]))
-            elif not sc.get("indexed"):
-                warnings.append("%s: sloupec %r se pouziva k razeni, ale neni indexovany"
-                                % (name, sc["name"]))
-            if srt.get("pak") and not any(c["name"] == srt["pak"] for c in lst["columns"]):
-                errors.append("%s: druhotne razeni odkazuje na neexistujici sloupec %r"
-                              % (name, srt["pak"]))
 
         # hodnoty sloupcu
         for col in lst["columns"]:

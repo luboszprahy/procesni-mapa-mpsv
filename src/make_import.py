@@ -278,6 +278,8 @@ def main():
 
     data, popis = [], []
     for lst in schema["lists"]:
+        if not lst.get("csv"):
+            continue          # list se zaklada prazdny, plni ho az aplikace
         rows = read_csv(datadir / lst["csv"])
         data.append({"list": lst["name"],
                      "rows": [hodnoty_radku(lst, r, ted) for r in rows]})

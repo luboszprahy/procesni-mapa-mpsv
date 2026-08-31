@@ -1,15 +1,14 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-30 18:16 (konec dne; zítra pokračování z jiného stroje)
+Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
 
 ## CO JE NA TOBĚ
 
-1. **Pošli mi GUID listu Aktivity na PPF DEV** — domluveno na **31.08.2026**,
-   až budeš v práci. Zjistí ho `deploy/mpsv/03_vypis_guidy.js` vložený do
-   konzole prohlížeče (F12) na PPF webu. Bez něj neumím postavit balík pro PPF
-   — je to jediná hodnota, kterou z proměnné vzít nejde (`PatchItem` runtime
-   výraz nesnese, ověřeno 28.08. v provozu). Kroky 5 a 6 plánu F9 na tom stojí.
-   Balík `deploy/procesnimapa_1_0_0_68.zip` je zatím postavený s GUIDem MPSV.
+1. **Naimportuj `deploy/procesnimapa_1_0_0_69.zip` na PPF DEV** jako upgrade
+   (na PPF DEV běží 1.0.0.63). Je to první balík, který má napojení appky
+   přes proměnné prostředí — postup a co ověřit je níže v sekci
+   „Balík 1.0.0.69 pro PPF DEV". **Nejdřív vyplň všech sedm proměnných,
+   teprve pak zapínej flow.**
 2. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
 3. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
@@ -21,19 +20,108 @@ Aktualizováno: 2026-08-30 18:16 (konec dne; zítra pokračování z jiného str
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
 
-### Zítra se pokračuje z jiného stroje (31.08.2026)
+## Balík 1.0.0.69 pro PPF DEV (31.08.2026 11:20)
 
-Vše podstatné je v gitu — `input/procesnimapa_1_0_0_66.zip` (základna, ze které
-se staví), `deploy/procesnimapa_1_0_0_68.zip`, `kody.json`, `src/schema.json`
-i `HANDOVER.md`. Poslední commit `c6e0945`, remote
-`luboszprahy/procesni-mapa-mpsv`.
+GUID listu Aktivity na PPF DEV dodán v 11:08:
+`9dfbb5a1-65a6-4fd4-b9f9-fdd35fa246cd`, web
+`/sites/DigiData_D/testovaci_subsajta/procesnimapa`. Tím padla jediná
+překážka F9 kroku 5.
 
-Na novém stroji: `git pull`, pak **Rozjezd v `HANDOVER.md`** — `.venv` se přes
-git nepřenáší (`python -m venv .venv`, `pip install openpyxl pyyaml`).
-Bez `pac` se staví přes `--bez-pac`; proti balíku 68 to jde, je zabalený z YAML.
+**Dva balíky z jednoho zdroje se liší jen tímhle GUIDem** a jinak ničím:
 
-Pořadí zítra: GUID Aktivity → build balíku pro PPF DEV → import → mezitím
-test DLP pro Excel Online (Business).
+| balík | list Aktivity | pro |
+|---|---|---|
+| `deploy/procesnimapa_1_0_0_68.zip` | `b1daaa38-…` | MPSV |
+| `deploy/procesnimapa_1_0_0_69.zip` | `9dfbb5a1-…` | PPF DEV |
+
+Verze jsou dvě, ne jedna, protože `build_app.py` odvozuje jméno souboru
+z verze — stejná verze by druhý balík přepsala. Pro obě prostředí jde
+o upgrade (MPSV má 1.0.0.65, PPF DEV 1.0.0.63).
+
+Postaveno z 68 přes `--bez-pac` (na tomhle stroji `pac` není a 68 je zabalený
+z YAML): `build_flow.py --list-aktivity <GUID PPF>` a pak
+`build_app.py --bez-pac --verze 1.0.0.69`. Ostatní tři flow se
+nepřegenerovávaly — web berou z proměnné, takže jsou na prostředí nezávislé.
+Ověřeno čtením obou zipů: v 69 je GUID PPF jen ve `Workflows/Aktualizace…`,
+GUID MPSV zůstává v `customizations.xml` jako `name` u overridu, což je
+záměrný tvar podle produkčních vzorů (`name` drží původní hodnotu,
+`environmentVariableName` říká, co ji přebije).
+
+### Co ověřit po importu
+
+1. **Environment variables — všech sedm** (`mpsv_procesnimapaSite` +
+   šest listů). Vyplnit PŘED zapnutím flow; 28.08. se stalo, že se hodnota
+   `mpsv_listAgendy` nepropsala.
+2. Appku otevřít ve Studiu → **mikro-změna → Save → Publish**.
+3. **Flow ručně zapnout** — import stav zapnutí nemění.
+4. Spustit appku: strom se načte, číselník i vazby ukazují data, tlačítko
+   mapy mapu otevře (ne stáhne), export do Wordu i Excelu stáhne soubor.
+
+**Neověřené, ukáže se až tady:** že náhled mapy funguje i bez `viewid`
+v adrese. Kdyby SharePoint místo zobrazení soubor stáhl, je to ono — řeší se
+dotažením GUID výchozího zobrazení knihovny, z proměnné, ne natvrdo.
+
+Když appka data nenačte, rozliší se to pohledem do panelu Data: nevyplněná
+proměnná vs. špatný tvar overridu.
+
+**Krok 6 (zpět na MPSV)** čeká na zelený výsledek tady. Balík se postaví
+stejně, jen s GUIDem MPSV a jako 1.0.0.70.
+
+## F10 krok 1 hotový — HistorieKodu a sloupce nástupnictví (31.08.2026 11:20)
+
+Datová vrstva pro variantu C stojí. Appka ji zatím nepoužívá, takže se to
+**neprojevilo v balíku 69** a import na PPF DEV to nijak nezdrží.
+
+- **Nový list `HistorieKodu`** ve `src/schema.json` — `Title` (uzavřený kód,
+  indexovaný), `uroven` (Choice agenda/proces/dilci_proces/aktivita,
+  indexovaný), `nazev`, `nastupce_kod` (prázdné = zrušeno bez náhrady),
+  `duvod` (Note), `datum` (DateTime), `kdo`.
+- **`puvodni_kod`** (Text 20) do `Procesy`, `DilciProcesy` a `Aktivity` —
+  protějšek k `nastupce_kod`. `Agendy` ho nemají: agenda nemá rodiče, takže
+  z předchůdce nevzniká.
+- Žádný druhý `stav` se nezavádí. Uzavřenost je dána tím, že kód **je**
+  v `HistorieKodu`; sloupec `stav` u aktivit zůstává schvalovací.
+
+### Co bylo potřeba dotáhnout v generátorech
+
+`HistorieKodu` je první list, který **nemá zdrojová data** — zakládá se
+prázdný a plní ho až aplikace. Obojí to rozbíjelo:
+
+- `check_schema.py` sahal na `datadir / lst["csv"]` bez ohledu na to, jestli
+  zdroj existuje. Nově list s `csv: null` přeskočí datové kontroly, ale tvar
+  se ověřuje dál (Title jako klíč, `default_sort`, a navíc chyba, kdyby
+  takový list měl sloupec čerpající z CSV). Kontrola řazení se kvůli tomu
+  vytáhla z těla smyčky do `zkontroluj_razeni()`.
+- `make_import.py` list bez `csv` přeskakuje — do importního skriptu nepatří.
+
+`make_setup.py` ani `check_import.js` se měnit nemusely, jsou schéma-řízené.
+
+### Brána: kontroly jsou vyjmenované schválně
+
+`check_setup.js` odvozuje očekávání ze `schema.json`, takže odebraný sloupec
+by očekávání jen **snížil** a test by prošel. Kontroly pro `HistorieKodu`
+a `puvodni_kod` proto sloupce **vyjmenovávají**. Číselník úrovní se čte
+z odeslaného `SchemaXml` a hledá se podle obsahu, ne podle jména — sloupec
+`uroven` má i list `Útvary`.
+
+**Mutačně ověřeno, 4/4:** odebrání `nastupce_kod`, odebrání `uroven`,
+odebrání `Aktivity.puvodni_kod` a odebrání celého listu — každá shodí bránu.
+
+### Ještě není promítnuto do nasazovací složky
+
+`deploy/mpsv/01_zaloz_listy.js` a `02_import_dat.js` jsou pořád ze schématu
+bez `HistorieKodu` (generuje je `src/make_deploy_mpsv.py` a je navázaná na
+balík 1.0.0.65). **Přegeneruje se až s F10 krokem 2**, kdy appka nový list
+opravdu začne používat — dřív by se na tenanty zakládal list, do kterého
+nikdo nepíše. `src/setup_sharepoint.js`, `src/import_data.js`
+a `deploy/sharepoint_schema.md` už aktuální jsou.
+
+### Brány po F10/1 a balíku 69
+
+`check_solution` 300 · `check_mapa_flow` 139 · `check_export_flow` 124 ·
+`check_flow` · `check_app` · `check_env` · `check_schema` (7 listů,
+44 sloupců) · `check_mapa_html` 31 · `check_mapa_beh` 25 ·
+`check_setup.js` (+13 nových) · `check_import.js` — vše zelené.
 
 ## F10 a F11 zadány — rozhodnutí z 30.08.2026 18:08
 
@@ -2509,14 +2597,17 @@ jsou volená tak, aby se dala revidovat bez ztráty dat.
 
 ## CO DĚLÁM JÁ (další krok)
 
-**F9 kroky 1–4b hotové, balík `deploy/procesnimapa_1_0_0_68.zip` stojí připravený.
-Kroky 5 a 6 (build a import na PPF DEV, pak zpět na MPSV) čekají na GUID listu
-Aktivity z PPF DEV** — domluveno na 31.08.2026, viz „CO JE NA TOBĚ" nahoře.
-Bez něj se druhý balík postavit nedá, `PatchItem` runtime výraz nesnese.
+**F9 kroky 1–4b hotové, krok 5 postavený: `deploy/procesnimapa_1_0_0_69.zip`
+čeká na import na PPF DEV** (viz „CO JE NA TOBĚ" nahoře). Krok 6 — balík
+1.0.0.70 pro MPSV — se postaví, až bude PPF DEV zelené; je to tentýž build
+jen s druhým GUIDem, takže je to minuta práce, ne fáze.
 
-**Po F9 následují F10 a F11** — zadané 30.08.2026 večer, plán v `PLAN.md`.
-Zatím jen naplánované, nerozpracované; pořadí je F9/5–6 → F11 krok 2 (test DLP,
-je to deset minut a rozhoduje o zbytku F11) → F10 → zbytek F11.
+**F10 krok 1 hotový** (list `HistorieKodu`, `puvodni_kod`, brány mutačně
+ověřené). Balíku se to netýká — appka nový list zatím nepoužívá.
+
+Další v pořadí: **F11 krok 2** (test DLP pro Excel Online (Business) — je to
+deset minut a rozhoduje o zbytku F11, čeká na uživateli) → **F10 krok 2**
+(přesun aktivity = uzavření + vznik) → F10 kroky 3–5 → zbytek F11.
 
 Dělba práce u canvas apps je zavedená a zapsaná ve skillu `power-Apps-skill`
 i v paměti projektu: uživatel založí appku ve Studiu a pošle solution,
