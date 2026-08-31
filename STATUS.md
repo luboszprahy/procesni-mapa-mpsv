@@ -4,28 +4,53 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
 
 ## CO JE NA TOBĚ
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_73.zip` na PPF DEV.** Nese
-   opravu `MapaPublishFlow` (chybějící deklarace parametrů), notifikace na
-   3 s a zobrazení aktivity pod všemi dílčími procesy se značkou `↳`.
-   Nahrazuje 72; ten importovat netřeba. Po importu ověř:
-   **publikaci mapy** (změň data, spusť publikaci, změna se má v mapě
-   objevit) a **aktivitu `01-01-006-0001`** — má být vidět pod všemi třemi
-   dílčími procesy, u dvou z nich se značkou a bez ikony koše.
-   Kdyby se appka po importu neotevřela, spadni na `1.0.0.72` — ten má
-   jen opravu flow a notifikace, bez zásahu do stromu.
-2. **MPSV odloženo** — nemáš do jejich tenantu několik dní přístup
+1. **Ověř publikaci mapy na PPF DEV** — jediné z dnešních oprav, co ještě
+   nemá potvrzení. Změň data, spusť publikaci a podívej se, jestli se změna
+   v mapě objeví. Tím se prověří oprava `MapaPublishFlow`.
+2. **Pro F10 krok 2 potřebuju od tebe tři věci** (viz „F10 krok 2 —
+   co potřebuju" níže): spustit `src/setup_sharepoint.js` na PPF, přidat
+   `HistorieKodu` jako datový zdroj ve Studiu a poslat nový export solution.
+3. **MPSV odloženo** — nemáš do jejich tenantu několik dní přístup
    (31.08.2026). Podrobnosti níže v „F9 krok 6 odložen".
-3. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
+4. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
-4. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
+5. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
    zkrácený tvar.
-5. **Otestuj konektor Excel Online (Business)** — zatím **jen na PPF**,
+6. **Otestuj konektor Excel Online (Business)** — zatím **jen na PPF**,
    MPSV počká na přístup. — až budeš u toho. Ručně
    v designeru jedno flow o jedné akci `List rows present in a table` nad
    testovacím `.xlsx` (musí mít formátovanou **Tabulku**, ne volnou mřížku).
    Zajímá mě, jestli akce projde DLP a běh doběhne.
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
+
+## F10 krok 2 — co potřebuju od tebe (31.08.2026 15:22)
+
+Appka bude zapisovat do nového listu `HistorieKodu`, a to je zásah, který
+za mě lokálně udělat nejde — registrace datového zdroje vzniká jen ve Studiu
+(`FlowNameId`/`DataSources.json` přiděluje prostředí, viz `power-Apps-skill`).
+Pořadí je proto:
+
+1. **Na PPF DEV spusť `src/setup_sharepoint.js`** (F12 → Console na webu
+   `/sites/DigiData_D/testovaci_subsajta/procesnimapa`). Založí list
+   `HistorieKodu` a doplní sloupec `puvodni_kod` do `Procesy`, `DilciProcesy`
+   a `Aktivity`. Skript je idempotentní — co existuje, nechá být.
+   Na konci musí říct, že chybných sloupců je 0.
+2. **Power Apps Studio → Add data → `HistorieKodu`.**
+3. **Mikro-změna → Save → Publish → export solution** a pošli mi zip.
+
+Do té doby stavím vzorce a brány naslepo proti schématu — to jde, jen se
+výsledek nedá zabalit do balíku, dokud zdroj v appce neexistuje.
+
+**Osmá proměnná prostředí** (`mpsv_listHistorieKodu`) se přidá až s tím
+exportem. Kdybych ji zavedl dřív, `check_solution` ji ohlásí jako
+deklarovanou a nepoužitou — a měl by pravdu.
+
+## Zobrazení M:N na Přehledu potvrzeno (31.08.2026 15:22)
+
+Balík 1.0.0.74 ověřen v provozu — aktivita se ukazuje pod všemi svými
+dílčími procesy, řazení sedí. Aktuální balík pro PPF DEV je **1.0.0.74**,
+73 smazán.
 
 ## F9 krok 6 odložen — bez přístupu na MPSV (31.08.2026 14:50)
 
