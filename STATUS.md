@@ -1,30 +1,64 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
+Aktualizováno: **2026-08-31 15:37** — konec dne, práce se zavírá.
+Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
-## CO JE NA TOBĚ
+## CO JE NA TOBĚ (tři věci, dohromady necelou půlhodinu)
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_75.zip`** — opravuje tichou vadu,
-   kterou přinesl balík 74 (viz „Zneplatnění stromu po změně vazeb" níže).
-   Bez ní zůstane Přehled po přidání nebo odebrání zařazení na obrazovce
-   vazeb viset na starém obrázku, dokud appku nedonutíš přepočítat něčím
-   jiným.
-2. **Pro F10 krok 2 potřebuju od tebe tři věci** (viz „F10 krok 2 —
-   co potřebuju" níže): spustit `src/setup_sharepoint.js` na PPF, přidat
-   `HistorieKodu` jako datový zdroj ve Studiu a poslat nový export solution.
-3. **MPSV odloženo** — nemáš do jejich tenantu několik dní přístup
-   (31.08.2026). Podrobnosti níže v „F9 krok 6 odložen".
-4. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
-   ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
-5. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
-   zkrácený tvar.
-6. **Otestuj konektor Excel Online (Business)** — zatím **jen na PPF**,
-   MPSV počká na přístup. — až budeš u toho. Ručně
-   v designeru jedno flow o jedné akci `List rows present in a table` nad
-   testovacím `.xlsx` (musí mít formátovanou **Tabulku**, ne volnou mřížku).
-   Zajímá mě, jestli akce projde DLP a běh doběhne.
-   Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
-   jinak a je lepší to vědět teď než po týdnu stavění.
+Pořadí je podle užitku. Kdyby vyšla jen jedna, ať je to ta první.
+
+1. **Test DLP pro Excel Online (Business)** — ~10 min, **nejcennější**.
+   V Power Automate ručně nové flow, jedna akce `List rows present in a table`
+   nad testovacím `.xlsx` v knihovně na PPF. Tři kontrolní body: akce se
+   objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí řádky.
+   Soubor musí mít **formátovanou Tabulku** (Vložit → Tabulka), ne volnou
+   mřížku — jinak konektor neuvidí nic a vypadá to jako chyba oprávnění.
+   **Na tom stojí tvar celého F11 kroku 3.** Když konektor neprojde, hromadný
+   import se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js`
+   z vývojářského skriptu na nástroj pro správce). MPSV se doověří, až budeš
+   mít přístup — do té doby to zůstává otevřené riziko.
+
+2. **Naimportuj `deploy/procesnimapa_1_0_0_75.zip`** — ~5 min. Opravuje tichou
+   vadu z balíku 74: po přidání nebo odebrání zařazení na obrazovce vazeb
+   zůstal Přehled viset na starém stromu. Při zkoušení ti to vyšlo, ale vyjít
+   nemuselo. Po importu mikro-změna → Save → Publish.
+
+3. **Spusť `src/setup_sharepoint.js` na PPF** — ~2 min. F12 → Console na webu
+   `/sites/DigiData_D/testovaci_subsajta/procesnimapa`. Založí list
+   `HistorieKodu` a doplní `puvodni_kod` do `Procesy`, `DilciProcesy`
+   a `Aktivity`. Idempotentní; na konci musí říct, že chybných sloupců je **0**.
+
+**Ještě nedělej:** `Add data` ve Studiu ani export solution. Až bude hotové
+`ZalohaFlow`, zaregistruješ ho jedním kolečkem spolu s `HistorieKodu` —
+jinak se to dělá dvakrát.
+
+**MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
+na 1.0.0.65 a žádný z dnešních nálezů se ho netýká (vada deklarací přišla
+až s F9, tedy ve verzích, které tam nikdy nedoputovaly).
+
+## CO DĚLÁM JÁ (next step)
+
+**F11 krok 1 — snímek rejstříku.** Zadáno, nezačato. Postavit `ZalohaFlow`
++ plánované dvojče (Logic Apps má jeden trigger na flow, takže dvě flow
+s klonovanými akcemi — vzor `add_mapa_schedule.py`) a bránu
+`check_zaloha_flow.py`. Klíčová kontrola: **pagination u každého `Get items`**
+— bez ní se snímek nad 2 000 řádky tiše ořízne a tváří se jako úspěch.
+Otevřená drobnost k rozhodnutí: knihovna `Zalohy` zatím neexistuje a
+`make_setup.py` umí zakládat jen listy (BaseTemplate 100), ne knihovny.
+
+Pořadí priorit se 31.08. v 15:30 změnilo: **F11 (záloha a import) jde před
+F10** — uživatel je označil za primární úkoly. F10 krok 1 je hotový,
+krok 2 rozpracovaný nebyl.
+
+Pořadí uvnitř F11 zůstává **záloha → import → restore**: stavět nástroj,
+který hromadně píše do dat, dřív než je čím to vrátit, je pozpátku.
+
+## Stav balíků
+
+V `deploy/` je jediný balík: **`procesnimapa_1_0_0_75.zip`** (PPF DEV).
+Starší jsou smazané — všechny měly vadu chybějících deklarací parametrů
+nebo byly nahrazené. Je zabalený z YAML, takže z něj jde stavět dál přes
+`--bez-pac` (na tomhle stroji `pac` není). Historie v gitu.
 
 ## Vše z 31.08.2026 ověřeno v provozu (15:23)
 
