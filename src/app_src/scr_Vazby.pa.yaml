@@ -144,6 +144,7 @@ Screens:
                   OnSelect: |-
                     =IfError(
                         Remove('Vazba aktivita–dílčí proces', ThisItem);
+                        Set(varAktStale, true);
                         Notify("Vazba odebrána.", NotificationType.Success, varNotifyMs),
                         Notify("Odebrání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                     )
@@ -264,6 +265,7 @@ Screens:
                                     primarni: { Value: "ne" }
                                 }
                             );
+                            Set(varAktStale, true);
                             Notify("Přidáno do " & ThisItem.Title & ".", NotificationType.Success, varNotifyMs),
                             Notify("Přidání selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                         )

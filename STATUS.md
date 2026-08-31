@@ -4,9 +4,11 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
 
 ## CO JE NA TOBĚ
 
-1. **Ověř publikaci mapy na PPF DEV** — jediné z dnešních oprav, co ještě
-   nemá potvrzení. Změň data, spusť publikaci a podívej se, jestli se změna
-   v mapě objeví. Tím se prověří oprava `MapaPublishFlow`.
+1. **Naimportuj `deploy/procesnimapa_1_0_0_75.zip`** — opravuje tichou vadu,
+   kterou přinesl balík 74 (viz „Zneplatnění stromu po změně vazeb" níže).
+   Bez ní zůstane Přehled po přidání nebo odebrání zařazení na obrazovce
+   vazeb viset na starém obrázku, dokud appku nedonutíš přepočítat něčím
+   jiným.
 2. **Pro F10 krok 2 potřebuju od tebe tři věci** (viz „F10 krok 2 —
    co potřebuju" níže): spustit `src/setup_sharepoint.js` na PPF, přidat
    `HistorieKodu` jako datový zdroj ve Studiu a poslat nový export solution.
@@ -23,6 +25,39 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
    Zajímá mě, jestli akce projde DLP a běh doběhne.
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
+
+## Vše z 31.08.2026 ověřeno v provozu (15:23)
+
+Potvrzeno na PPF DEV z balíku 1.0.0.74: **publikace mapy** (oprava
+`MapaPublishFlow`), **HTML mapa** ukazuje aktivitu pod všemi dílčími procesy,
+**Přehled** taky, **mazání zařazení** se projeví správně. Spolu s dřívějším
+potvrzením exportů, zkracování názvu a útvarů tím nezůstává nic otevřeného.
+
+## Zneplatnění stromu po změně vazeb — vada, kterou přinesl balík 74 (15:23)
+
+Uživatel při zkoušení mazal zařazení a vyšlo to. Kontrola kódu ale ukázala,
+že to vyjít nemuselo: **`scr_Vazby` přidává i odebírá vazby bez
+`Set(varAktStale, true)`**. Přehled si `colAkt`, `colVazby` a `colStrom`
+staví jednou a přepočítá je až na ten příznak — bez něj by po návratu
+z obrazovky vazeb visel starý strom.
+
+Do 1.0.0.73 to nevadilo, protože Přehled vazby vůbec nečetl. **Závislost
+přibyla s balíkem 74 a zneplatnění se k ní nedoplnilo** — klasická tichá
+vada: projeví se jen podle toho, kudy uživatel prošel.
+
+Opraveno v `scr_Vazby.pa.yaml` u přidání i odebrání.
+
+### Brána `kontrola_zneplatneni_stromu`
+
+Vzorec, který zapisuje do `Aktivity` nebo do vazebního listu a nenastaví
+`varAktStale`, je od teď chyba. **Mutačně ověřeno 2/2** (odebrání, přidání) —
+každá vrátí právě jednu chybu.
+
+**Poznámka k té bráně:** napoprvé mutace nechytala a vypadala přitom zeleně.
+Do regexu se při zápisu dostal skutečný znak backspace místo `` — v editoru
+neviditelný, `sed` ho taky nezobrazí, našel ho až `od -c`. Kdybych se spokojil
+se zelenou bránou, měl bych v repu kontrolu, která nekontroluje nic. Je to
+přesně ten důvod, proč se mutace píšou.
 
 ## F10 krok 2 — co potřebuju od tebe (31.08.2026 15:22)
 

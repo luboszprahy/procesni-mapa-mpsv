@@ -786,6 +786,29 @@ def kontrola_potvrzeni_mazani(soubory):
                             )
 
 
+def kontrola_zneplatneni_stromu(vzorce):
+    """Zápis do listů, ze kterých stojí strom, musí strom zneplatnit.
+
+    Přehled si `colAkt`, `colVazby` a `colStrom` staví jednou a přepočítá je
+    až na `varAktStale`. Vzorec, který do `Aktivity` nebo do vazebního listu
+    zapíše a příznak nenastaví, nechá na Přehledu viset starý obrázek.
+
+    Vzniklo to v 1.0.0.74: strom začal záviset i na vazbách, ale obrazovka
+    vazeb `varAktStale` nenastavovala — dokud strom četl jen primární
+    zařazení, nemusela. Závislost přibyla a zneplatnění se nedoplnilo.
+    """
+    zdroje = ("'Vazba aktivita–dílčí proces'", "Aktivity")
+    for cesta, prop, text in vzorce:
+        zapisuje = any(
+            re.search(r"\b(Patch|Remove|RemoveIf|Collect)\s*\(\s*" + re.escape(z), text)
+            for z in zdroje)
+        if zapisuje and "varAktStale" not in text:
+            chyby.append(
+                f"{Path(cesta).stem}: '{prop}' zapisuje do Aktivit nebo do vazebního "
+                "listu, ale nenastavuje varAktStale — strom na Přehledu zůstane starý"
+            )
+
+
 def kontrola_adresy_mapy(vzorce):
     """varMapaUrl nesmí být přímý odkaz na soubor v knihovně.
 
@@ -1327,6 +1350,7 @@ def main():
     kontrola_adresy_mapy(vzorce)
     kontrola_notify(vzorce, soubory)
     kontrola_potvrzeni_mazani(soubory)
+    kontrola_zneplatneni_stromu(vzorce)
     kontrola_unikatnosti(soubory)
     kontrola_identifikatoru(vzorce)
     kontrola_syntaxe(vzorce)
