@@ -45,6 +45,10 @@ Screens:
                 ShowColumns(Aktivity, Title, nazev, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
             );
             ClearCollect(
+                colVazby,
+                ShowColumns('Vazba aktivita–dílčí proces', aktivita_kod, dilci_proces_kod, primarni)
+            );
+            ClearCollect(
                 colStrom,
                 ForAll(
                     colAgendy As a,
@@ -60,7 +64,8 @@ Screens:
                         aktC: CountRows(Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title)),
                         aktS: CountRows(
                             Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title, stav.Value = "schváleno")
-                        )
+                        ),
+                        vedlejsi: false
                     }
                 )
             );
@@ -80,7 +85,8 @@ Screens:
                         aktC: CountRows(Filter(colAkt, Left(dilci_proces_kod, 5) = p.Title)),
                         aktS: CountRows(
                             Filter(colAkt, Left(dilci_proces_kod, 5) = p.Title, stav.Value = "schváleno")
-                        )
+                        ),
+                        vedlejsi: false
                     }
                 )
             );
@@ -100,7 +106,8 @@ Screens:
                         aktC: CountRows(Filter(colAkt, dilci_proces_kod = d.Title)),
                         aktS: CountRows(
                             Filter(colAkt, dilci_proces_kod = d.Title, stav.Value = "schváleno")
-                        )
+                        ),
+                        vedlejsi: false
                     }
                 )
             );
@@ -118,8 +125,41 @@ Screens:
                         osirely: IsBlank(k.dilci_proces_kod) || IsBlank(LookUp(colDilci, Title = k.dilci_proces_kod)),
                         pocet: 0,
                         aktC: 1,
-                        aktS: If(k.stav.Value = "schváleno", 1, 0)
+                        aktS: If(k.stav.Value = "schváleno", 1, 0),
+                        vedlejsi: false
                     }
+                )
+            );
+            // Aktivita zařazená i do jiných dílčích procesů se ukáže pod
+            // každým z nich — stejně jako v HTML mapě. Do POČTŮ se ale
+            // vedlejší řádky nezapočítávají (aktC/aktS = 0): sloupec POLOŽKY
+            // a čísla u agend a procesů dál znamenají počet aktivit, ne počet
+            // zařazení. Jinak by součet nesouhlasil s dlaždicí AKTIVITY.
+            // Primární řádky se staví beze změny, takže tenhle join platí
+            // jen na vedlejší vazby, kterých je z podstaty málo.
+            Collect(
+                colStrom,
+                Filter(
+                    ForAll(
+                        Filter(colVazby, primarni.Value = "ne") As v,
+                        With(
+                            { k: LookUp(colAkt, Title = v.aktivita_kod) },
+                            {
+                                kod: k.Title,
+                                nazev: k.nazev_kratky,
+                                nazevPlny: k.nazev,
+                                utvar: k.vykonava,
+                                uroven: 4,
+                                rodic: v.dilci_proces_kod,
+                                osirely: IsBlank(LookUp(colDilci, Title = v.dilci_proces_kod)),
+                                pocet: 0,
+                                aktC: 0,
+                                aktS: 0,
+                                vedlejsi: true
+                            }
+                        )
+                    ),
+                    !IsBlank(kod)
                 )
             );
             Set(
@@ -970,6 +1010,26 @@ Screens:
                   Width: =20
                   X: =27 + (ThisItem.uroven - 1) * 28
                   Y: =0
+            - lbl_StromVedlejsi:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =Parent.TemplateHeight - 1
+                  Size: =11 + varFs
+                  # Znak, ne Classic/Icon: ikonový výčet Power Apps se z YAML
+                  # neověří ničím, co běží lokálně, a chybná hodnota se pozná
+                  # až ve Studiu. Rozbalovací šipky ▸ ▾ o řádek výš jsou
+                  # kreslené stejně, takže je to i vzhledově konzistentní.
+                  Text: =If(ThisItem.vedlejsi, "↳", "")
+                  Tooltip: |-
+                    ="Vedlejší zařazení. Aktivita patří primárně do jiného dílčího
+                    procesu; tady je jen zařazená navíc."
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =20
+                  X: =27 + (ThisItem.uroven - 1) * 28
+                  Y: =0
             - lbl_StromKod:
                 Control: Label@2.5.1
                 Properties:
@@ -986,7 +1046,7 @@ Screens:
             - lbl_StromNazev:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =stylText
+                  Color: =If(ThisItem.vedlejsi, stylTextSlaby, stylText)
                   Font: =Font.'Open Sans'
                   FontWeight: |-
                     =If(ThisItem.uroven <= 2, FontWeight.Semibold, FontWeight.Normal)
@@ -1213,6 +1273,9 @@ Screens:
                   HoverFill: =stylRadekVybrany
                   Icon: =Icon.Trash
                   OnSelect: =Set(varSmazatD, ThisItem)
+                  # Na vedlejším zařazení schované schválně: smazalo by celou
+                  # aktivitu, ne jen tuhle vazbu. Vazby se ruší v detailu.
+                  Visible: =!ThisItem.vedlejsi
                   PaddingBottom: =9
                   PaddingLeft: =9
                   PaddingRight: =9

@@ -32,8 +32,9 @@ App:
       // (flow ji složí z proměnné prostředí, takže sedí na to prostředí,
       // kde appka běží). Tady jen prázdno, aby proměnná existovala.
       Set(varMapaUrl, "");
-      // Doba svícení notifikací v ms. Potvrzení má zmizet dřív, než začne
-      // překážet; u chyby musí zbýt čas ji přečíst. Ladí se jen tady.
+      // Doba svícení notifikací v ms. Tři sekundy na obojí — chyba měla
+      // dřív 4000, ale delší svícení působilo spíš jako zádrhel než jako
+      // čas navíc na čtení (rozhodnuto 31.08.2026). Ladí se jen tady.
       Set(varNotifyMs, 3000);
       Set(varNotifyChybaMs, 3000);
       Set(stylPrimarni, RGBA(17, 11, 122, 1));

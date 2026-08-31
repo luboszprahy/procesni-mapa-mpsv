@@ -4,10 +4,15 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
 
 ## CO JE NA TOBĚ
 
-1. **Ověř na PPF DEV ještě export do Wordu a Excelu.** Mapa se v 14:13
-   zobrazila správně, takže `Cesta_webu` i `Adresa` fungují — export jede
-   přes tytéž akce a navíc zapisuje soubor přes `Uloz`, což je jediná část,
-   kterou mapa neprověřila.
+1. **Naimportuj `deploy/procesnimapa_1_0_0_73.zip` na PPF DEV.** Nese
+   opravu `MapaPublishFlow` (chybějící deklarace parametrů), notifikace na
+   3 s a zobrazení aktivity pod všemi dílčími procesy se značkou `↳`.
+   Nahrazuje 72; ten importovat netřeba. Po importu ověř:
+   **publikaci mapy** (změň data, spusť publikaci, změna se má v mapě
+   objevit) a **aktivitu `01-01-006-0001`** — má být vidět pod všemi třemi
+   dílčími procesy, u dvou z nich se značkou a bez ikony koše.
+   Kdyby se appka po importu neotevřela, spadni na `1.0.0.72` — ten má
+   jen opravu flow a notifikace, bez zásahu do stromu.
 2. **Naimportuj `deploy/procesnimapa_1_0_0_71.zip` na MPSV** (F9 krok 6),
    až se ti to bude hodit — MPSV je prostředí, kde appku někdo používá,
    takže po dohodě, ne mimochodem. Je to **první import s napojením appky
@@ -15,8 +20,9 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
    (dosud jich bylo šest a appka měla zdroje napojené natvrdo). MPSV běží
    na 1.0.0.65. Po importu: mikro-změna → Save → Publish → flow ručně
    zapnout.
-   **`1.0.0.68` ani `1.0.0.69` nenasazuj** — mají vadu ExportFlow.
-   69 je smazaný, 68 zůstává jen jako základna pro build.
+   **Pozor: 71 je postavený PŘED opravou deklarací** — pro MPSV se přestaví
+   z 73, až bude PPF zelené. Do té doby ho neimportuj.
+   `1.0.0.68` ani `1.0.0.69` nenasazuj vůbec — mají vadu ExportFlow.
 3. **Ověř tlačítko mapy** (zbylo z 28.08.) — nově se adresa netahá z kódu,
    ale z `ExportFlow`, takže tenhle test platí až pro balík 68 a dál.
 4. **Ověř zkracování názvu** — uprav název aktivity, do minuty se má dopsat
@@ -27,6 +33,46 @@ Aktualizováno: 2026-08-31 11:20 (stroj 5CG5210MB2)
    Zajímá mě, jestli akce projde DLP a běh doběhne — v **obou** tenantech.
    Na tom stojí celé F11: když neprojde, hromadný import se musí postavit
    jinak a je lepší to vědět teď než po týdnu stavění.
+
+## Druhé kolo téhož nálezu — a oprava mého mylného závěru (31.08.2026 14:45)
+
+`MapaPublishFlow` spadlo na PPF DEV toutéž chybou, jen v akci `Sablona`
+(`GetFileContentByPath`). Tvrzení, které jsem zapsal o půl hodiny dřív —
+že parametr konektoru deklaraci nepotřebuje a povinná je jen u template
+výrazu — **neplatí**. `Sablona` používá parametr jako **celou hodnotu**
+`dataset`, tedy přesně ten tvar, který měl být bezpečný.
+
+Postavil jsem ten závěr na nepřítomnosti pádu: balík 1.0.0.63 běžel na PPF DEV
+měsíc úplně bez deklarací (ověřeno v git historii, `git show e252e87^:…`).
+To ale nedokazuje, že to je správně — jen že se to zatím neprojevilo.
+
+**Nové jednotné pravidlo: deklaruje se každý použitý parametr, bez rozlišení.**
+
+Nejlepší dostupné vysvětlení rozdílu: prostředí doplní parametry samo jen flow,
+které nedeklaruje **žádný**; jakmile jeden přibude, bere se deklarace jako
+úplný výčet. Nedoloženo do konce — a právě proto se deklarují všechny, ať na
+tom nestojí nic.
+
+### Kde to bylo špatně navržené
+
+Deklaraci uměl doplnit jen `build_export_flow.py`. Ostatní generátory o ní
+nevěděly — proto se to muselo objevit dvakrát. Nově to dělá **jedno místo**:
+`dorovnej_deklarace_parametru()` v `build_app.py`, která běží nad **všemi**
+flow v balíku, ať už je vyrobil kdokoli. Do balíku 72 doplnila 12 chybějících
+deklarací v obou MapaPublish flow.
+
+Funkce zároveň nahradila `zbav_flow_vychozich_hodnot()` — zahazování
+`defaultValue` dělá dál (export ze Studia nese adresu vývojového webu), ale
+je to teď vedlejší efekt jedné funkce místo dvou konkurenčních pravidel.
+
+### Brána
+
+`deklarace_parametru` už nerozlišuje výraz od parametru konektoru;
+`_parametry_ve_vyrazech()` zrušena. **343 kontrol.** Zpětný důkaz: spuštěná
+na vadném balíku 70 vypíše **24 nálezů**.
+
+Skill `power-Apps-skill` opraven včetně toho mylného mezikroku — nechal jsem
+ho tam jako varování, protože vypadal přesvědčivě.
 
 ## Nález: chybějící deklarace parametru shodila ExportFlow (31.08.2026 14:10)
 
@@ -113,6 +159,46 @@ Patří to do skillu `power-Apps-skill` jako doplněk pravidla o
 `definition.parameters`: dosud tam stálo „nech je, jak přišly z exportu".
 Nově je doložené i **proč** — a že rozhoduje způsob použití, ne to, jestli
 flow zapisuje.
+
+## Ověřeno na PPF DEV z balíku 1.0.0.70 (31.08.2026 14:33)
+
+Prošlo: **export do Wordu i Excelu**, **zkracování dlouhého názvu** (a tím
+i GUID listu Aktivity — je to jediné místo v balíku, kde je natvrdo),
+**Vykonává útvar** se plní (sedmá proměnná z F9).
+
+Neprošlo: **MapaPublishFlow** (viz nález výše) a **aktivita ve více dílčích
+procesech** (viz níže).
+
+## Aktivita ve více dílčích procesech na Přehledu (31.08.2026 14:45)
+
+Nebyla to chyba kódu — Přehled ukazoval **jen primární zařazení** a bylo to
+tak i okomentované v `scr_Dashboard.pa.yaml`. HTML mapa M:N ukazuje správně
+odjakživa, takže test #4 z `app_navrh.md` („v obou větvích **mapy**")
+formálně procházel. Očekávání uživatele ale míří na Přehled, kde se pracuje.
+
+**Rozhodnutí zadavatele (31.08.2026 14:45): ukázat všude, počty jen primární.**
+
+- Aktivita se objeví pod **každým** svým dílčím procesem.
+- Vedlejší řádek je odlišený **značkou `↳`** ve volném slotu rozbalovací
+  šipky (u aktivit je prázdný) a **ztlumenou barvou názvu**.
+- `aktC`/`aktS` u vedlejších řádků jsou **0**, takže sloupec POLOŽKY a čísla
+  u agend a procesů dál znamenají **počet aktivit, ne počet zařazení** —
+  součet sedí na dlaždici AKTIVITY.
+- **Ikona smazání je na vedlejším řádku schovaná.** Smazala by celou
+  aktivitu, ne tu jednu vazbu; vazby se ruší v detailu.
+
+Primární řádky se staví beze změny — přidaný `ForAll` jde jen přes vazby
+s `primarni = "ne"`, kterých je z podstaty málo, takže to nepřidává
+per-row scan nad celým seznamem.
+
+**Značka je Label se znakem, ne `Classic/Icon`.** Ikonový výčet Power Apps
+se z YAML lokálně neověří ničím a chybná hodnota se pozná až ve Studiu;
+appka jich používá jen čtyři a žádná se sem nehodí. Rozbalovací šipky `▸ ▾`
+o řádek výš jsou kreslené stejně.
+
+**Číselník (záložka Editace) zůstává na primárním zařazení** — je to
+editační seznam, kde se spravuje hlavní zařazení, a vedlejší se přidávají
+v detailu. Kdyby to mělo být i tam, je to stejný zásah.
 
 ## Balíky 1.0.0.69 a 1.0.0.70 pro PPF DEV (31.08.2026 11:20)
 
