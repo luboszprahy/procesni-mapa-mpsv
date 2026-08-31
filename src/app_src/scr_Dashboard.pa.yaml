@@ -65,7 +65,9 @@ Screens:
                         aktS: CountRows(
                             Filter(colAkt, Left(dilci_proces_kod, 2) = a.Title, stav.Value = "schváleno")
                         ),
-                        vedlejsi: false
+                        vedlejsi: false,
+                        radit: a.Title,
+                        deti: CountRows(Filter(colProcesy, agenda_kod = a.Title))
                     }
                 )
             );
@@ -86,7 +88,9 @@ Screens:
                         aktS: CountRows(
                             Filter(colAkt, Left(dilci_proces_kod, 5) = p.Title, stav.Value = "schváleno")
                         ),
-                        vedlejsi: false
+                        vedlejsi: false,
+                        radit: p.Title,
+                        deti: CountRows(Filter(colDilci, proces_kod = p.Title))
                     }
                 )
             );
@@ -107,7 +111,17 @@ Screens:
                         aktS: CountRows(
                             Filter(colAkt, dilci_proces_kod = d.Title, stav.Value = "schváleno")
                         ),
-                        vedlejsi: false
+                        vedlejsi: false,
+                        radit: d.Title,
+                        // `pocet` zůstává počtem aktivit s PRIMÁRNÍM zařazením
+                        // (to je sloupec POLOŽKY), ale rozbalovací šipka se řídí
+                        // tím, jestli je pod uzlem vůbec co rozbalit — jinak by
+                        // dílčí proces, kam je aktivita zařazená jen vedlejší
+                        // vazbou, šipku neměl a řádek by nešel zobrazit.
+                        deti: CountRows(Filter(colAkt, dilci_proces_kod = d.Title))
+                            + CountRows(
+                                Filter(colVazby, dilci_proces_kod = d.Title, primarni.Value = "ne")
+                            )
                     }
                 )
             );
@@ -126,7 +140,9 @@ Screens:
                         pocet: 0,
                         aktC: 1,
                         aktS: If(k.stav.Value = "schváleno", 1, 0),
-                        vedlejsi: false
+                        vedlejsi: false,
+                        radit: k.Title,
+                        deti: 0
                     }
                 )
             );
@@ -153,9 +169,22 @@ Screens:
                                 rodic: v.dilci_proces_kod,
                                 osirely: IsBlank(LookUp(colDilci, Title = v.dilci_proces_kod)),
                                 pocet: 0,
-                                aktC: 0,
-                                aktS: 0,
-                                vedlejsi: true
+                                // aktC/aktS jako u primárního řádku: neslouží
+                                // k součtům (ty si agenda, proces i dílčí proces
+                                // počítají samy z colAkt, kde je aktivita jednou),
+                                // ale k filtru stavu a k exportu. S nulami by
+                                // vedlejší řádek při zapnutém filtru zmizel
+                                // a v exportu by byl vždy "pracovní".
+                                aktC: 1,
+                                aktS: If(k.stav.Value = "schváleno", 1, 0),
+                                vedlejsi: true,
+                                // Řadí se pod SVÉHO rodiče, ne podle vlastního
+                                // kódu — ten patří jinam. "-z" za kódem rodiče:
+                                // písmeno je za číslicemi v každém řazení, takže
+                                // vedlejší řádky sedí až za primárními dětmi
+                                // téhož dílčího procesu a nepřetečou do dalšího.
+                                radit: v.dilci_proces_kod & "-z" & k.Title,
+                                deti: 0
                             }
                         )
                     ),
@@ -912,12 +941,13 @@ Screens:
             Items: |-
               =If(
                   varDashOsirele,
-                  Sort(Filter(colStrom, osirely), kod, SortOrder.Ascending),
+                  Sort(Filter(colStrom, osirely, !vedlejsi), kod, SortOrder.Ascending),
                   !IsBlank(txt_HledatD.Text),
                   Sort(
                       Search(
                           Filter(
                               colStrom,
+                              !vedlejsi,
                               varDashStav = ""
                               || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
                           ),
@@ -941,13 +971,13 @@ Screens:
                       || (
                           uroven = 4
                           && !IsBlank(LookUp(colOtevrene, Kod = rodic))
-                          && !IsBlank(LookUp(colOtevrene, Kod = Left(kod, 5)))
-                          && !IsBlank(LookUp(colOtevrene, Kod = Left(kod, 2)))
+                          && !IsBlank(LookUp(colOtevrene, Kod = Left(rodic, 5)))
+                          && !IsBlank(LookUp(colOtevrene, Kod = Left(rodic, 2)))
                       ),
                       varDashStav = ""
                       || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
                   ),
-                  kod,
+                  radit,
                   SortOrder.Ascending
                   )
               )
@@ -1002,7 +1032,7 @@ Screens:
                   Size: =11 + varFs
                   Text: |-
                     =If(
-                        ThisItem.pocet = 0,
+                        ThisItem.deti = 0,
                         "",
                         If(IsBlank(LookUp(colOtevrene, Kod = ThisItem.kod)), "▸", "▾")
                     )
@@ -1174,7 +1204,13 @@ Screens:
                         "Detail otevřeš tužkou vpravo.",
                         "Tužka vpravo otevře úpravu, + založí položku o úroveň níž. Číslo vpravo = počet položek o úroveň níž (" &
                         Switch(ThisItem.uroven, 1, "procesů v agendě", 2, "dílčích procesů v procesu", "aktivit v dílčím procesu") &
-                        "): " & ThisItem.pocet & ". Klikni pro rozbalení."
+                        "): " & ThisItem.pocet & "." &
+                        If(
+                            ThisItem.deti > ThisItem.pocet,
+                            " Navíc je sem " & (ThisItem.deti - ThisItem.pocet) &
+                            "x zařazená aktivita, která patří primárně jinam - do počtu se nezapočítává.",
+                            ""
+                        ) & " Klikni pro rozbalení."
                     )
                   Width: =Parent.TemplateWidth
                   X: =0
