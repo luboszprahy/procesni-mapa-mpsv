@@ -57,7 +57,7 @@ Právě proto je ta chyba cenná. Vyplývá z ní:
 |---|---|---|
 | smí být `file` dynamické? | **ano** | akce se k tabulce vůbec dostala; `File` se vyhodnotil na `%252fSdilene%2bdokumenty%252fsablona_import_aktivit.xlsx`, tedy `{Identifier}` ze SharePointu |
 | dá se `table` adresovat jménem? | **ano** | konektor tabulky vyhledává podle názvu — jinak by nehlásil „no table was found with the **name**" |
-| smí být `drive` (Document Library) dynamický? | zatím nevím | pole bylo z pickeru |
+| smí být `drive` (Document Library) dynamický? | **zatím nevím** | pole zůstalo z pickeru |
 
 Import tedy dokáže číst **libovolný nahraný sešit**, ne jen jedno pevné místo.
 
@@ -65,9 +65,20 @@ Vedlejší nález: knihovna `Dokumenty` má v URL segment **`Sdilene dokumenty`*
 zobrazovaný a interní název se u výchozí knihovny liší, s tím musí `ImportFlow`
 počítat, pokud by se adresovalo cestou.
 
+**Potvrzeno zeleným během v 13:38** (po opravě názvu tabulky na `Aktivity`):
+akce vrátila jeden řádek se všemi osmi sloupci prázdnými, klíče jsou hlavičky
+včetně diakritiky. `File` byl přitom dynamický z předchozí akce a `Table`
+zadaná textem — obojí tedy konektor přijímá.
+
+Běh jel pod **`sys_power_platform@pmb.cz`**, tedy pod servisním účtem
+(connection reference, ne invoker) — appka nebude po uživatelích chtít vlastní
+excelové spojení.
+
 Zbývá poslední neznámá: jestli `Document Library` vezme vlastní hodnotu. Když
 ano, je flow přenositelné bez jediné nové proměnné prostředí; když ne, budou
-`source` a `drive` textové proměnné vyplněné jednou při instalaci.
+`source` a `drive` textové proměnné vyplněné jednou při instalaci. Hodnotu
+`source` pro PPF DEV už znám z chybové hlášky brány:
+`sites/ppfbanka.sharepoint.com,88f35380-bf73-40fc-b9d2-33fa58270333,f2148e9c-0c38-4234-b945-9f5984ead91c`.
 
 ## Náhled obnovy proběhl — a odpověděl i na otevřenou otázku (01.09.2026 13:15)
 
