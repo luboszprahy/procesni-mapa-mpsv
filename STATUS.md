@@ -1,8 +1,8 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-08-31 20:33** — konec dne, práce se zavírá.
+Aktualizováno: **2026-09-01 09:05** — F11 krok 3a hotový (šablona pro import).
 Balík 1.0.0.80 čeká na import; uživatel testuje 01.09.2026.
-Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
+Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
@@ -27,24 +27,72 @@ Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
    se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js` z
    vývojářského skriptu na nástroj pro správce).
 
+3. **Otevři `deploy/sablona_import_aktivit.xlsx` v Excelu** — ~2 min.
+   Offline brána ověří obsah, ne to, že soubor Excel přijme bez „oprav".
+   Tři kontrolní body: (a) otevře se **bez dialogu o opravě obsahu**,
+   (b) ve sloupci **Stav** je na řádku 2 rozbalovátko s volbami
+   `pracovní` / `schváleno` a napsaná hodnota mimo ně vyvolá hlášku,
+   (c) po napsání textu do řádku 3 se Tabulka sama roztáhne (řádek zůstane
+   uvnitř Tabulky, ne pod ní). Kdyby (a) selhalo, pošli doslovné znění
+   dialogu — sešit se generuje, opraví se generátor.
+   **Ten samý soubor použij i na DLP test v bodě 2** — má formátovanou
+   Tabulku `Aktivity`, takže konektor je na čem zkoušet.
+
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
 přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 3a — šablona pro hromadný import. Zadáno, NEZAČATO.**
-`src/make_sablona.py` generuje `.xlsx` ze `src/schema.json` (sloupce schématu
-minus systémové: kód, `nazev_kratky`, `datum_aktualizace`, `puvodni_kod`)
-+ brána `src/check_sablona.py`. Platí v obou větvích kroku 3 — ať konektor
-Excel Online projde, nebo ne, správce vyplňuje týž soubor. Dá se tedy stavět,
-aniž by byl znám výsledek DLP testu.
+**F11 krok 3a hotový** (01.09.2026, viz sekce níže). Další krok čeká na tebe:
 
-Zbytek kroku 3b (flow `ImportFlow`, obrazovka náhledu) čeká na výsledek
-DLP testu. F11 krok 4 (restore) se nezačíná dřív, než jsou zelené kroky 1 a 3.
+- **3b (flow `ImportFlow` + obrazovka náhledu)** se nezačíná, dokud není znám
+  **výsledek DLP testu Excel Online** (bod 2 výše). Na něm stojí, jestli import
+  čte sešit konektorem, nebo se `deploy/mpsv/02_import_dat.js` povyšuje na
+  nástroj pro správce.
+- **F11 krok 4 (restore)** se nezačíná dřív, než jsou zelené kroky 1 a 3.
 
 **Pozor při navazování:** kdyby import 1.0.0.80 nedopadl, nezačínej opravovat
 balík dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+
+## F11 krok 3a — šablona pro hromadný import (01.09.2026 09:05)
+
+`src/make_sablona.py` → **`deploy/sablona_import_aktivit.xlsx`**, brána
+`src/check_sablona.py` (**66 kontrol**), mutace `src/mutace_sablona.py`
+(**15/15** — 6 mutací schématu, 9 sešitu).
+
+**Rozhodnutí zadavatele:** šablona nese **jen list Aktivity**, osm sloupců.
+Agendy/procesy/dílčí procesy (7/46/250) už z rejstříku existují a spravují se
+v appce; hromadně přibývají aktivity. **Vedlejší zařazení aktivity (M:N)
+šablona nenese** — import zakládá aktivitu s primárním dílčím procesem, další
+zařazení se přidávají v appce.
+
+Sloupce (display názvy ze schématu, v jeho pořadí): Název aktivity (úplný) ·
+Primární dílčí proces (kód) · Vykonává útvar · Spolupracuje · Vnitřní předpis ·
+Text pro OŘ · Sekce · Stav. Systémové v šabloně NEJSOU: `Title` (kód),
+`nazev_kratky`, `datum_aktualizace`, `puvodni_kod`.
+
+**Co z toho platí pro 3b:**
+- Tabulka se jmenuje **`Aktivity`** — na to jméno se `ImportFlow` odkazuje.
+- Konektor nečte buňky hlavičky, ale **jména sloupců v definici Tabulky**;
+  brána hlídá, že se ty dvě sady neliší. Klíče v `item()?['…']` jsou tedy
+  display názvy včetně diakritiky a závorek.
+- Sešit se vydává s **jedním prázdným datovým řádkem** (Tabulku bez datového
+  řádku Excel „opravuje"). `List rows present in a table` ho vrátí jako řádek
+  se samými prázdnými hodnotami — **import ho musí přeskočit**, jinak založí
+  prázdnou aktivitu hned při prvním použití šablony.
+- **Prázdný Stav = `pracovní`** (tak to slibují Pokyny v sešitě).
+
+**Postaveno navíc oproti plánu:** druhý list `Pokyny` (povinnost, omezení
+a max. délka odvozené ze schématu + krátká nápověda ke každému sloupci; brána
+hlídá, že slovník `NAPOVEDA` pokrývá přesně sloupce šablony, takže přidání
+sloupce do schématu shodí build, dokud se nápověda nedopíše) a rozbalovátko
+s chybovou hláškou nad sloupcem Stav.
+
+**Detail, na kterém stojí smysl brány:** zákaz systémových sloupců brána
+vyslovuje **vlastním seznamem `ZAKAZANE`**, ne konstantou `SYSTEMOVE`
+z generátoru. Kdyby ze `SYSTEMOVE` sloupec vypadl, generátor i brána by se
+shodly na tom, že do šablony patří, a mutace by nic nechytila.
 
 ## Balík 1.0.0.80 — tlačítko „Záloha" (31.08.2026 20:35)
 
@@ -124,21 +172,6 @@ rozbalí do `runs/app_build/pac/`. Ověřeno buildem z 78, který přes `pac`
 proběhl. Na `--bez-pac` z téhle základny stavět stejně nejde: appka je
 doauthorovaná Studiem, `LoadFromYaml` je pryč.
 
-## CO DĚLÁM JÁ (next step)
-
-**Až dorazí export s `HistorieKodu`:** postavit 1.0.0.79 a dopsat do appky
-tlačítko „Pořídit zálohu" (`ZalohaFlow.Run()`) — registrace je hotová.
-
-**Mezitím F11 krok 3a — šablona pro hromadný import.** `src/make_sablona.py` generuje
-`.xlsx` ze `src/schema.json` (sloupce schématu minus systémové: kód,
-`nazev_kratky`, `datum_aktualizace`, `puvodni_kod`) + brána
-`src/check_sablona.py`. Je to část, která platí v obou větvích kroku 3 — ať
-konektor Excel Online projde, nebo ne, správce vyplňuje týž soubor.
-
-Zbytek kroku 3 (flow `ImportFlow`, obrazovka náhledu) čeká na výsledek
-DLP testu z bodu 3 výše.
-
-F11 krok 4 (restore) se nezačíná dřív, než jsou zelené kroky 1 a 3.
 
 ## F11 krok 1 hotový — snímek rejstříku (31.08.2026 19:10)
 

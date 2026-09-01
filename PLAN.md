@@ -1582,7 +1582,8 @@ celý návrh na reálných datech dřív, než se pustíme do kaskády nad proce
 ## F11 — Záloha a hromadný import (zadáno 30.08.2026)
 
 **Stav:** krok 1 **hotový** (31.08.2026, balík 1.0.0.76) · krok 2 na uživateli ·
-kroky 3 a 4 nezačaté. Krok 3 se dělí na 3a (šablona — platí v obou větvích)
+krok 3a **hotový** (01.09.2026) · krok 3b čeká na výsledek kroku 2 ·
+krok 4 nezačatý. Krok 3 se dělí na 3a (šablona — platí v obou větvích)
 a 3b (flow + náhled, čeká na výsledek kroku 2).
 
 **Rozhodnutí zadavatele (30.08.2026 18:08): import a záloha oddělené.**
@@ -1669,7 +1670,7 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      povýšit `deploy/mpsv/02_import_dat.js` z vývojářského skriptu na
      nástroj pro správce. To rozhodnutí padne TADY, ne po týdnu stavění.
 
-3a. [Šablona] — co: src/make_sablona.py + src/check_sablona.py
+3a. [Šablona] — HOTOVO 01.09.2026 — co: src/make_sablona.py + src/check_sablona.py
    Vydělený z kroku 3, protože platí v OBOU jeho větvích: ať konektor Excel
    Online projde, nebo se import postaví jako konzolový nástroj pro správce,
    správce vyplňuje týž soubor. Dá se tedy stavět, aniž by byl znám výsledek
@@ -1679,6 +1680,20 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
    edge cases: sešit musí být formátovaná Tabulka, ne volná mřížka (jinak ho
      konektor neuvidí); kód a odvozené sloupce v šabloně NEJSOU.
    risk: rozejití se schématem — proto se generuje, ne udržuje ručně.
+   ROZHODNUTO 01.09.2026 (zadavatel): šablona nese **jen list Aktivity**,
+     osm sloupců. Agendy/procesy/dílčí procesy (7/46/250) už z rejstříku
+     existují a spravují se v appce; hromadně přibývají aktivity. **Vedlejší
+     zařazení (M:N) šablona nenese** — import zakládá aktivitu s primárním
+     dílčím procesem, další zařazení se přidávají v appce.
+   PROVEDENO NAVÍC oproti plánu: druhý list `Pokyny` (povinnost, omezení
+     a max. délka odvozené ze schématu + krátká nápověda ke každému sloupci,
+     hlídaná bránou) a rozbalovátko s chybovou hláškou nad sloupcem Stav —
+     bez `showErrorMessage` je rozbalovátko ozdoba a překlep projde až
+     k importu. Brána `check_sablona.py` má **66 kontrol**, mutace
+     `src/mutace_sablona.py` **15/15** (6 mutací schématu, 9 sešitu).
+     Zákaz systémových sloupců brána vyslovuje **vlastním seznamem**, ne
+     konstantou z generátoru: kdyby z ní sloupec vypadl, obě strany by se
+     shodly a nikdo by nezakřičel.
 
 3b. [Hromadný import] — co: src/make_sablona.py (generuje .xlsx
      ze schématu), knihovna `Import`, flow `ImportFlow`, obrazovka náhledu
