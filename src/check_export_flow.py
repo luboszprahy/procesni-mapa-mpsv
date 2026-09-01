@@ -41,6 +41,11 @@ AKCE = ["Vstup", "Html_radky", "Xls_radky", "Jmeno", "Dokument", "Ulozeni",
 VNORENA_ZAPISOVA = "Uloz"
 REZIM_MAPA = "__mapa__"
 REZIM_SABLONA = "__sablona__"
+# Vyexportované dokumenty mají od 1.0.0.82 vlastní knihovnu; statické soubory
+# webu (mapa, vzorová tabulka) zůstávají v Site Assets. Kdyby se to smíchalo
+# zpátky, knihovna s mapou se zas začne plnit odpadem z každého exportu.
+SLOZKA_EXPORTU = "/Exporty"
+SLOZKA_ASSETS = "/SiteAssets"
 SABLONA_SOUBOR = "sablona_import_aktivit.xlsx"
 KLICE_RADKU = {"uroven", "kod", "nazev", "vlastnik", "stav"}
 TEXTOVA_POLE = ("kod", "nazev", "vlastnik", "stav")
@@ -372,6 +377,11 @@ def struktura(flow, web):
            "s natvrdo zadanou adresou se flow na cizím tenantu nedá zapnout")
     overit(not str(parametry.get("folderPath", "")).startswith("@"),
            "folderPath zápisové akce je runtime výraz")
+    # Zápis do Site Assets by se mísil s publikovanou mapou a její šablonou —
+    # přesně to se dělo do 1.0.0.81 a knihovna kvůli tomu přestala být čitelná.
+    overit(parametry.get("folderPath") == SLOZKA_EXPORTU,
+           f"export se ukládá do {parametry.get('folderPath')!r}, "
+           f"čekám vlastní knihovnu {SLOZKA_EXPORTU}")
     overit(vnorene[VNORENA_ZAPISOVA]["inputs"]["host"]["operationId"] == "CreateFile",
            "zápis souboru nepoužívá CreateFile")
 
@@ -457,8 +467,9 @@ def vyznam_word(akce, web):
 
     overit(kontext["akce"]["Jmeno"].endswith(".doc"),
            f"formát word dal soubor {kontext['akce']['Jmeno']}")
-    overit(kontext["akce"]["Adresa"] == f"{web}/SiteAssets/{kontext['akce']['Jmeno']}",
-           f"vrácená adresa {kontext['akce']['Adresa']} nemíří na uložený soubor")
+    overit(kontext["akce"]["Adresa"] == f"{web}{SLOZKA_EXPORTU}/{kontext['akce']['Jmeno']}",
+           f"vrácená adresa {kontext['akce']['Adresa']} nemíří na uložený soubor "
+           f"v knihovně {SLOZKA_EXPORTU}")
 
 
 class Tabulka(html.parser.HTMLParser):
@@ -712,7 +723,7 @@ def vyznam_sablona(akce, web):
     kontext = priprav_kontext(akce, VZOREK, NADPIS, "word", text=REZIM_SABLONA)
     adresa = kontext["akce"]["Adresa"]
 
-    overit(adresa == f"{web}/SiteAssets/{SABLONA_SOUBOR}",
+    overit(adresa == f"{web}{SLOZKA_ASSETS}/{SABLONA_SOUBOR}",
            f"adresa vzorové tabulky není přímá cesta k souboru: {adresa}")
     overit("AllItems.aspx" not in adresa,
            f"adresa vzorové tabulky je odkaz na náhled — sešit by se otevřel "

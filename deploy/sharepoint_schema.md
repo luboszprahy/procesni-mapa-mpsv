@@ -192,3 +192,9 @@ BaseTemplate 101 — knihovna sedí v kořenu webu, ne pod `/Lists/`.
 Snimky rejstriku (JSON) z flow ZalohaFlow. Nazev souboru nese razitko, verzovani proto neni potreba.
 
 Zobrazovaný název: Zálohy.
+
+### `Exporty`
+
+Vyexportovane dokumenty z prehledu (.doc/.xls) z flow ExportFlow. Do 1.0.0.81 padaly do Site Assets a misily se s publikovanou mapou.
+
+Zobrazovaný název: Exporty.

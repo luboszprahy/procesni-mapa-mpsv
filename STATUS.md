@@ -1,46 +1,39 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 11:05** — balík **1.0.0.81**: nabídka Data ▾,
-oprava nereagujícího tlačítka Záloha, vzorová tabulka ke stažení z appky.
+Aktualizováno: **2026-09-01 11:45** — balík **1.0.0.82**: exporty do vlastní
+knihovny `Exporty`. Balík 81 je na PPF DEV nasazený a ověřený uživatelem
+(nabídka Data ▾ i vzorová tabulka fungují).
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_81.zip`** a projdi
-   **`deploy/INSTALACE.md`**. Proti 80 nepřibyla žádná proměnná ani flow —
-   mění se jen appka a `ExportFlow`, takže kroky 1 a 2 jsou tentokrát
-   formalita. **Nový je krok 5:** do knihovny **Site Assets** nahraj
-   `deploy/sablona_import_aktivit.xlsx` (přesně pod tím jménem).
-   **Ověření (krok 7):** v horní liště Přehledu je jedno tlačítko **Data ▾**
-   a pod ním čtyři položky — Export do Wordu, Export do Excelu, Vzorová
-   tabulka pro import, Záloha rejstříku. Záloha musí po kliknutí ohlásit
-   „Záloha spuštěna" a do knihovny `Zálohy` přidat snímek; vzorová tabulka
-   se musí stáhnout jako `.xlsx`.
+1. **Spusť znovu `src/setup_sharepoint.js`** (F12 → Console na cílovém webu).
+   Zakládá novou knihovnu **`Exporty`**; bez ní `ExportFlow` spadne na
+   neexistující složce. Skript je idempotentní, nic jiného se nezaloží
+   podruhé.
 
-2. **Zbývá ověřit obsah snímku ze zálohy.** Plánovaný běh uspěl
-   (`rejstrik_2026-09-01_0300.json` v knihovně), ruční ne — z důvodu, který
-   je teď opravený. Otevři **poslední** snímek a zkontroluj, že
-   `listy.DilciProcesy` má **249 položek** (tolik jich dnes v listu je),
-   ne 100. Sto by znamenalo nepropsané stránkování — běh je v tom případě
-   zelený a snímek přesto oříznutý. Je to jediná vada zálohy, která se jinak
-   pozná až při obnově.
+2. **Naimportuj `deploy/procesnimapa_1_0_0_82.zip`.** Žádná nová proměnná
+   ani flow — mění se jen cílová složka zápisu v `ExportFlow`.
+   **Ověření:** Data ▾ → Export do Excelu se stáhne a soubor přibude
+   v knihovně **`Exporty`**, ne v Site Assets.
+   Staré `procesni_mapa_<razitko>.doc/.xls/.csv` v Site Assets můžeš smazat —
+   appka na ně neodkazuje, adresu dostává vždy z čerstvého běhu flow.
 
-3. **Test DLP pro Excel Online (Business)** — ~10 min, pořád otevřené.
+3. **Test DLP pro Excel Online (Business)** — ~10 min. **Tohle je jediná věc,
+   která blokuje hromadný import**, a udělat ji můžeš jen ty (přístup na PPF).
    V Power Automate ručně nové flow, jedna akce `List rows present in a table`
    nad `sablona_import_aktivit.xlsx` v knihovně na PPF. Tři kontrolní body:
    akce se objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí
-   řádky. **Na tom stojí tvar F11 kroku 3b.** Když konektor neprojde, hromadný
-   import se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js`
-   z vývojářského skriptu na nástroj pro správce).
+   řádky (u prázdné šablony jeden prázdný řádek).
+   **Výsledek rozhoduje o tvaru F11 kroku 3b:** projde-li konektor, čte import
+   sešit přímo ve flow; neprojde-li, povyšuje se `deploy/mpsv/02_import_dat.js`
+   z vývojářského skriptu na nástroj pro správce. Stavět to napůl nemá smysl.
 
-4. **Otevři `deploy/sablona_import_aktivit.xlsx` v Excelu** — ~2 min.
-   Offline brána ověří obsah, ne to, že soubor Excel přijme bez „oprav".
-   Tři kontrolní body: (a) otevře se **bez dialogu o opravě obsahu**,
-   (b) ve sloupci **Stav** je na řádku 2 rozbalovátko s volbami
-   `pracovní` / `schváleno` a napsaná hodnota mimo ně vyvolá hlášku,
-   (c) po napsání textu do řádku 3 se Tabulka sama roztáhne (řádek zůstane
-   uvnitř Tabulky, ne pod ní). Kdyby (a) selhalo, pošli doslovné znění
-   dialogu — sešit se generuje, opraví se generátor.
+4. **Ověř obsah snímku ze zálohy** — pořád otevřené. Otevři poslední soubor
+   v knihovně `Zálohy` a zkontroluj, že `listy.DilciProcesy` má **249 položek**
+   (tolik jich dnes v listu je), ne 100. Sto by znamenalo nepropsané
+   stránkování — běh je v tom případě zelený a snímek přesto oříznutý. Je to
+   jediná vada zálohy, která se jinak pozná až při obnově.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -48,16 +41,47 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 3a i F12 hotové.** Další krok čeká na tebe:
+**F11 krok 4 — obnova ze snímku (`RestoreFlow`).** Nezávisí na výsledku DLP
+testu, takže se staví hned. Sdílí s importem obrazovku náhledu, a ta se proto
+navrhuje rovnou pro obě použití.
 
-- **3b (flow `ImportFlow` + obrazovka náhledu)** se nezačíná, dokud není znám
-  **výsledek DLP testu Excel Online** (bod 3 výše). Na něm stojí, jestli import
-  čte sešit konektorem, nebo se `deploy/mpsv/02_import_dat.js` povyšuje na
-  nástroj pro správce.
-- **F11 krok 4 (restore)** se nezačíná dřív, než jsou zelené kroky 1 a 3.
+**F11 krok 3b (hromadný import)** čeká na bod 3 výše. Připravit se dá i tak
+to, co je oběma větvím společné — validace řádků a náhled „co vznikne / co je
+duplicita / co je chyba" —, ale způsob čtení sešitu je bez toho výsledku
+hádání.
 
-**Pozor při navazování:** kdyby import 1.0.0.81 nedopadl, nezačínej opravovat
+**Pozor při navazování:** kdyby import 1.0.0.82 nedopadl, nezačínej opravovat
 balík dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+
+## Balík 1.0.0.82 — exporty mají vlastní knihovnu (01.09.2026 11:45)
+
+Zadáno z provozu: v Site Assets se za měsíc nashromáždilo přes deset
+vyexportovaných dokumentů vedle publikované mapy a její šablony a knihovna
+přestala být čitelná.
+
+**Úplně bez ukládání to nejde** — `Download()` v Power Apps potřebuje adresu
+souboru někde na webu, takže flow musí dokument nejdřív vytvořit. Změnilo se
+tedy místo, ne princip:
+
+| co | kam | proč |
+|---|---|---|
+| vyexportované `.doc` / `.xls` | knihovna **`Exporty`** | generuje se při každém kliknutí, roste |
+| `procesni_mapa.html`, `mapa_template.html`, `sablona_import_aktivit.xlsx` | **Site Assets** | statické soubory webu, negenerují se |
+
+Knihovnu zakládá `setup_sharepoint.js` ze `schema.json` (`libraries`), takže
+**krok 1 instalace se musí spustit znovu** i tam, kde už proběhl. Novou
+proměnnou prostředí to nepotřebuje: složka je literál relativní k webu,
+adresu si flow bere z `mpsv_procesnimapaSite` jako dosud.
+
+**Brána:** `check_export_flow` nově tvrdí, že `folderPath` zápisové akce je
+právě `/Exporty` — samotná kontrola vrácené adresy nestačí, ta by prošla
+i zápisu jinam. 129 kontrol. Adresa mapy i vzorové tabulky se dál skládá
+proti Site Assets a je ověřená proti reálnému odkazu z knihovny, takže se
+rozdělení konstant nemohlo tiše promítnout do nich.
+
+**Úklid starých exportů zatím není.** Knihovna poroste dál, jen jinde. Až
+bude vadit, je to pár akcí navíc v `ExportFlow` za `Response` (volající na ně
+nečeká) — smazat soubory starší než N dní. Nabízeno, nezadáno.
 
 ## Kontrola nasazení na PPF DEV podle snímků (01.09.2026 10:42)
 

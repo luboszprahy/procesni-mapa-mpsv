@@ -1789,6 +1789,23 @@ Tři věci naráz, protože všechny sedí ve stejném pruhu tlačítek nad stro
      `sablona_import_aktivit.xlsx` — flow adresu skládá z názvu, nevyhledává.
    risk: zapomenutý upload → stáhne se chybová stránka místo sešitu. Proto je
      to bod v INSTALACE.md kroku 5 i řádek v tabulce příznaků.
+
+4. [Exporty do vlastní knihovny] — HOTOVO (balík 1.0.0.82) — co: schema.json
+     libraries, build_export_flow.py, check_export_flow.py, INSTALACE.md
+   Zadáno z provozu: v Site Assets se za měsíc nashromáždilo přes deset
+   vyexportovaných dokumentů vedle publikované mapy a její šablony.
+   Úplně bez ukládání to nejde — `Download()` potřebuje adresu souboru na
+   webu, takže flow ho musí nejdřív vytvořit; změnilo se místo, ne princip.
+   Konstanta `CILOVA_SLOZKA` rozdělena na `/Exporty` (generované dokumenty)
+   a `SLOZKA_ASSETS` (mapa, šablona mapy, vzorová tabulka — statické).
+   verify: `check_export_flow.py` tvrdí, že `folderPath` zápisové akce je
+     právě `/Exporty` — kontrola vrácené adresy sama nestačí, prošla by
+     i zápisu jinam. 129 kontrol. Adresa mapy se dál ověřuje proti reálnému
+     odkazu z knihovny, takže rozdělení konstant se do ní nemohlo promítnout.
+   edge cases: knihovna musí existovat dřív, než flow poprvé zapíše — proto
+     se krok 1 instalace spouští znovu i na webu, kde už proběhl.
+   risk: exporty porostou dál, jen jinde. Úklid nezadán; až bude vadit, je to
+     pár akcí v `ExportFlow` za `Response`, na které volající nečeká.
 ```
 
 ---

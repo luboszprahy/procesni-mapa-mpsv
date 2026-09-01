@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_81.zip`
+# Instalace balíku `procesnimapa_1_0_0_82.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -42,7 +42,7 @@ Referenční popisy jsou vedle: `sharepoint_schema.md` (listy a knihovna),
 
 ---
 
-## 1. Založit listy, sloupce a knihovnu
+## 1. Založit listy, sloupce a knihovny
 
 Otevři cílový web, dej **F12 → Console**, vlož celý obsah
 `src/setup_sharepoint.js` a spusť.
@@ -51,17 +51,22 @@ Skript si web odvodí z adresy stránky, na které běží — žádnou URL v so
 Je **idempotentní**: co existuje, nezakládá znovu; co chybí, doplní; sloupce
 mimo výchozí zobrazení do něj přidá.
 
-Založí sedm listů, **knihovnu `Zalohy`** a doplní sloupec `puvodni_kod`
-do `Procesy`, `DilciProcesy` a `Aktivity`. Knihovna vzniká jako BaseTemplate
-101, tedy v kořenu webu (`/Zalohy`), ne pod `/Lists/`.
+Založí sedm listů, knihovny **`Zalohy`** a **`Exporty`** a doplní sloupec
+`puvodni_kod` do `Procesy`, `DilciProcesy` a `Aktivity`. Knihovny vznikají
+jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`), ne pod
+`/Lists/`.
+
+> **Balík 82 tenhle krok vyžaduje znovu i tam, kde už skript běžel** —
+> knihovna `Exporty` je nová. Bez ní `ExportFlow` spadne na neexistující
+> složce. Skript je idempotentní, takže se nic dalšího nezaloží dvakrát.
 
 **Ověření:** poslední řádek výpisu musí říct, že chybných sloupců je **0**.
-V knihovně Site contents musí být vidět `Zálohy` a list `Historie kódů`.
+V Site contents musí být vidět `Zálohy`, `Exporty` a list `Historie kódů`.
 Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_81.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_82.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
@@ -139,6 +144,11 @@ Jen při **prvním** nasazení na daný web, nebo když se některý ze souborů
 změnil. Podrobně `navod_publikace_mapy.md`; ve zkratce do knihovny
 **Site Assets** přetáhni z `deploy/`:
 
+Do Site Assets patří jen **statické** soubory webu; vyexportované dokumenty
+od balíku 82 padají do vlastní knihovny `Exporty` (do 81 se hromadily tady).
+Staré `procesni_mapa_<razitko>.doc/.xls/.csv` v Site Assets jde smazat —
+appka na ně neodkazuje, adresu dostává vždy z čerstvého běhu flow.
+
 | soubor | k čemu |
 |---|---|
 | `mapa_template.html` | šablona s kotvami, ze které flow skládá stránku |
@@ -178,7 +188,7 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 |---|---|
 | otevřít Přehled | strom se sedmi agendami, počty u větví |
 | přidat a odebrat zařazení na obrazovce vazeb | Přehled se po návratu přepočítá |
-| Data ▾ → Export do Wordu / do Excelu | soubor se stáhne |
+| Data ▾ → Export do Wordu / do Excelu | soubor se stáhne a přibude v knihovně `Exporty`, ne v Site Assets |
 | HTML mapa ▾ → Zobrazit v HTML | otevře se publikovaná mapa |
 | **Data ▾ → Vzorová tabulka pro import** | stáhne se `sablona_import_aktivit.xlsx`; v Excelu má list Aktivity jako Tabulku a druhý list Pokyny |
 | **Data ▾ → Záloha rejstříku** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
@@ -193,6 +203,7 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 | `Flow.Run failed: 502 BadGateway / NoResponse` | vypnuté flow (krok 3) nebo nevyplněná proměnná; pravdu řekne run history, ne hláška v appce |
 | flow nejde zapnout | prázdná proměnná, nebo sirotek po starší solution v Default Solution (Turn off → Delete → Publish all customizations) |
 | `ZalohaFlow` spadne na neexistující složce | neproběhl krok 1, knihovna `Zalohy` chybí |
+| `ExportFlow` spadne na neexistující složce | neproběhl krok 1 po balíku 82, knihovna `Exporty` chybí |
 | Záloha rejstříku hlásí `502 BadGateway` | `ZalohaFlow` je vypnuté (krok 3) nebo chybí Current Value; pravdu řekne run history |
 | Vzorová tabulka: stáhne se stránka s chybou místo sešitu | soubor není v Site Assets, nebo se jmenuje jinak (krok 5) |
 | snímek má u `DilciProcesy` přesně 100 položek | nepropsalo se stránkování — nahlas to, je to vada balíku |

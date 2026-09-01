@@ -53,7 +53,13 @@ CIL = "ExportFlow"
 # zakládal v prostředí nové a hromadili by se sirotci.
 CIL_GUID = "3f2b6d41-8c55-4a37-9d21-5b8e0c47a9f2"
 
-CILOVA_SLOZKA = "/SiteAssets"
+# Vyexportované dokumenty mají vlastní knihovnu. Do 1.0.0.81 padaly do
+# Site Assets vedle publikované mapy a její šablony a mísily se s nimi —
+# po měsíci provozu jich tam bylo přes deset a knihovna přestala být čitelná.
+CILOVA_SLOZKA = "/Exporty"
+# Statické soubory webu: publikovaná mapa a vzorová tabulka pro import.
+# Tady se nic negeneruje, takže knihovna zůstává přehledná.
+SLOZKA_ASSETS = "/SiteAssets"
 # Smluvená hodnota vstupu, kterou si appka říká o adresu publikované mapy
 # místo exportu. Schéma volání (pošli text -> dostaň adresu) se tím nemění,
 # takže flow nepotřebuje novou registraci ve Studiu. Kdyby se měnilo, musel
@@ -274,10 +280,10 @@ def vyraz_adresy_mapy():
     hlavičku Content-Disposition: attachment a mapa se místo zobrazení stáhne
     do Downloads (ověřeno 20.08.2026). Klik v knihovně používá právě tenhle tvar.
     """
-    soubor = f"concat(outputs('Cesta_webu'), {lit(CILOVA_SLOZKA + '/' + MAPA_SOUBOR)})"
-    slozka = f"concat(outputs('Cesta_webu'), {lit(CILOVA_SLOZKA)})"
+    soubor = f"concat(outputs('Cesta_webu'), {lit(SLOZKA_ASSETS + '/' + MAPA_SOUBOR)})"
+    slozka = f"concat(outputs('Cesta_webu'), {lit(SLOZKA_ASSETS)})"
     return (f"concat({ep.vyraz(ep.WEB)}, "
-            f"{lit(CILOVA_SLOZKA + '/Forms/AllItems.aspx?id=')}, "
+            f"{lit(SLOZKA_ASSETS + '/Forms/AllItems.aspx?id=')}, "
             f"{enkoduj_cestu(soubor)}, {lit('&parent=')}, "
             f"{enkoduj_cestu(slozka)})")
 
@@ -289,7 +295,7 @@ def vyraz_adresy_sablony():
     stáhnout, a přesně to Strict browser file handling na přímé cestě udělá.
     """
     return (f"concat({ep.vyraz(ep.WEB)}, "
-            f"{lit(CILOVA_SLOZKA + '/' + SABLONA_SOUBOR)})")
+            f"{lit(SLOZKA_ASSETS + '/' + SABLONA_SOUBOR)})")
 
 
 def akce():

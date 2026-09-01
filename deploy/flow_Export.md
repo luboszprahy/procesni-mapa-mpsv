@@ -7,8 +7,14 @@ Poprvé v balíku **1.0.0.56**.
 
 Appka pošle **momentální zobrazení** stromu z Přehledu — tedy to, co je zrovna
 vidět po filtru stavu, hledání, chipu osiřelých a rozbalení úrovní. Flow z toho
-složí dokument, uloží ho do knihovny **Site Assets** cílového webu a vrátí
+složí dokument, uloží ho do knihovny **`Exporty`** cílového webu a vrátí
 adresu; appka na ni zavolá `Download()`.
+
+Do 1.0.0.81 dokumenty padaly do **Site Assets** vedle publikované mapy a její
+šablony. Po měsíci provozu jich tam bylo přes deset a knihovna přestala být
+čitelná, proto mají od 1.0.0.82 vlastní knihovnu. Statické soubory webu —
+`procesni_mapa.html`, `mapa_template.html`, `sablona_import_aktivit.xlsx` —
+zůstávají v Site Assets, protože se negenerují.
 
 ## Datový kontrakt
 
@@ -35,7 +41,7 @@ Trigger `PowerAppV2` má **jeden textový vstup** (`zobrazeni`) s tímto JSON:
 - `format` je `word` nebo `excel`. Cokoli jiného spadne do `word`.
 - Chybějící `vlastnik` nebo `stav` (null) je v pořádku — vznikne prázdná buňka.
 
-Odpověď: `{"adresa": "https://…/SiteAssets/procesni_mapa_20260825_143012.doc"}`.
+Odpověď: `{"adresa": "https://…/Exporty/procesni_mapa_20260825_143012.doc"}`.
 
 ## Formáty
 
@@ -93,9 +99,9 @@ Html_radky  Select    řádek tabulky pro .doc (escapuje & < >)
 Xls_radky   Select    řádek excelové tabulky (buňky s vynuceným textem)
 Jmeno       Compose   procesni_mapa_<yyyyMMdd_HHmmss>.doc | .xls
 Dokument    Compose   if(format = excel, tabulka pro Excel, dokument pro Word)
-Ulozeni     If        mimo režim mapy i šablony → Uloz (CreateFile do /SiteAssets)
+Ulozeni     If        mimo režim mapy i šablony → Uloz (CreateFile do /Exporty)
 Cesta_webu  Compose   server-relative cesta webu (/sites/…) pro odkaz na náhled
-Adresa      Compose   mapa → náhled knihovny · šablona → SiteAssets/<sešit> · jinak <web>/SiteAssets/<jmeno>
+Adresa      Compose   mapa → náhled knihovny · šablona → SiteAssets/<sešit> · jinak <web>/Exporty/<jmeno>
 Odpoved     Response  { "adresa": … }
 ```
 
