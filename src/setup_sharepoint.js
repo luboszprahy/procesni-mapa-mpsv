@@ -513,6 +513,11 @@ const SCHEMA = {
    "name": "Exporty",
    "display": "Exporty",
    "popis": "Vyexportovane dokumenty z prehledu (.doc/.xls) z flow ExportFlow. Do 1.0.0.81 padaly do Site Assets a misily se s publikovanou mapou."
+  },
+  {
+   "name": "Import",
+   "display": "Import",
+   "popis": "Vyplnene sesity pro hromadny import aktivit. Spravce sem nahrava .xlsx podle sablony; cte je ImportFlow."
   }
  ]
 };
