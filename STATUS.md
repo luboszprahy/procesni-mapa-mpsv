@@ -1,17 +1,20 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 15:05** — balík **1.0.0.87**: obrazovka náhledu
-pro import i obnovu. **F11 je tím hotová celá** (záloha → import → obnova),
-zbývá ji vyzkoušet na datech.
+Aktualizováno: **2026-09-01 14:55** — balík **1.0.0.88**: oprava PA1011
+(galerie bez `Variant`), kvůli které appka z 87 nešla otevřít v editaci.
+**F11 je hotová celá** (záloha → import → obnova), zbývá zkouška na datech.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
+
+0. **Naimportuj `deploy/procesnimapa_1_0_0_88.zip`** — balík 87 appku rozbil,
+   88 to opravuje. Nic jiného se proti 87 nemění.
 
 1. **Spusť znovu `src/setup_sharepoint.js`** — zakládá knihovnu **`Import`**;
    bez ní `ImportFlow` spadne na neexistující složce. Pokud jsi to udělal už
    po balíku 85, přeskoč.
 
-2. **Naimportuj `deploy/procesnimapa_1_0_0_87.zip`.** Obě flow už zapnutá máš,
+2. **Po importu appku jednou otevři ve Studiu.** Obě flow už zapnutá máš,
    nová nepřibyla. Po importu appku jednou otevři ve Studiu — z YAML zabalená
    appka se validuje až tam.
 
@@ -49,6 +52,31 @@ jsem ověřil bránou a offline, ale běh v prostředí nahradit nejde.
 Až bude F11 uzavřená, na řadě jsou nezačaté náměty z `PLAN.md`: R-2 (pohled
 „kdo má co dodělat") a R-3 (generování textu organizačního řádu), který je
 dnes lacinější, než býval — `ExportFlow` už umí skládat dokument.
+
+## Balík 1.0.0.88 — oprava PA1011 (01.09.2026 14:55)
+
+Appka z balíku 87 **nešla otevřít v editaci**: `Error opening file`, tři chyby
+`PA1011: The keyword 'Variant' is required but is missing or empty` nad
+`scr_Nahled.pa.yaml`. Import balíku přitom proběhl zeleně.
+
+**Příčina:** galerie v `pa.yaml` musí mít hned pod `Control:` klíč `Variant`
+(v téhle appce `BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0`). Moje tři
+nové galerie ho neměly. Existující galerie v `scr_Vazby` a `scr_Ciselnik` ho
+mají, takže to bylo vidět — jen jsem se na ně nepodíval.
+
+**Co to nechytilo:** `pac canvas pack` zabalil bez námitek, import solution
+prošel, `check_solution` i `check_app` byly zelené. Přesně ten případ, před
+kterým varuje `power-Apps-skill`: *„pac canvas pack nechytí ani jednu z nich —
+zabalí to a chyba přijde až ve Studiu."*
+
+**Brána, která to od teď chytne:** `kontrola_varianty` v `check_app.py`.
+Ověřeno mutací — po odebrání jednoho `Variant` vypíše
+`'gal_SouhrnImportN' typu Gallery@2.15.0 nemá hned pod Control klíč Variant`
+a spadne. Kontroluje i to, jestli varianta není v appce osamocená; osamocená
+znamená šablonu navíc v `Templates.json`, a tu balík negeneruje.
+
+Použitá varianta je táž, jakou už mají galerie v `scr_Vazby`, takže
+`Templates.json` v `.msapp` zůstal beze změny (sedm šablon).
 
 ## Balík 1.0.0.87 — obrazovka náhledu (01.09.2026 15:05)
 

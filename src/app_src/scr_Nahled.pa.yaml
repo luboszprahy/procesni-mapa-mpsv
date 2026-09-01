@@ -303,6 +303,7 @@ Screens:
             Y: =168
       - gal_SouhrnImportN:
           Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
           Properties:
             Height: =260
             Items: =colNahledSouhrn
@@ -340,6 +341,7 @@ Screens:
                   Y: =0
       - gal_SouhrnObnovaN:
           Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
           Properties:
             Height: =260
             Items: =colNahledObnova
@@ -435,6 +437,7 @@ Screens:
             Y: =168
       - gal_ChybyN:
           Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
           Properties:
             Height: =468
             Items: =colNahledChyby

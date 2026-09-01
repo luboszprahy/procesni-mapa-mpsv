@@ -1352,6 +1352,56 @@ def kontrola_navigace(vzorce, obrazovky):
                 chyby.append(f"{cesta}.{prop}: Navigate na neexistující obrazovku '{cil}'")
 
 
+# Typy, které v pa.yaml vyžadují klíč `Variant`. Bez něj Studio appku vůbec
+# neotevře (PA1011) — a `pac canvas pack` ani import balíku to nechytí, projeví
+# se to až dialogem „Error opening file". Ověřeno 01.09.2026 na scr_Nahled.
+VYZADUJI_VARIANTU = ("Gallery@",)
+
+
+def kontrola_varianty(soubory):
+    """Galerie musí mít `Variant`, a to takovou, jakou appka opravdu veze.
+
+    Vzniklo z 1.0.0.87: tři nové galerie ho neměly, import balíku proběhl
+    zeleně a appka pak nešla otevřít v editaci. Kontroluje se i hodnota —
+    varianta, kterou nepoužívá žádná jiná galerie v appce, znamená šablonu
+    navíc v Templates.json, a ta se do balíku negeneruje.
+    """
+    znama = set()
+    zaznamy = []
+    for cesta in soubory:
+        radky = io.open(cesta, encoding="utf-8").read().splitlines()
+        for cislo, radek in enumerate(radky):
+            shoda = re.match(r"\s*Control:\s*(\S+)", radek)
+            if shoda and any(shoda.group(1).startswith(t) for t in VYZADUJI_VARIANTU):
+                dalsi = radky[cislo + 1] if cislo + 1 < len(radky) else ""
+                varianta = re.match(r"\s*Variant:\s*(\S+)", dalsi)
+                jmeno = "?"
+                for zpet in range(cislo - 1, max(-1, cislo - 4), -1):
+                    nalezeny = re.match(r"\s*-\s+([A-Za-z_][A-Za-z0-9_]*):", radky[zpet])
+                    if nalezeny:
+                        jmeno = nalezeny.group(1)
+                        break
+                zaznamy.append((Path(cesta).name, jmeno, shoda.group(1),
+                                varianta.group(1) if varianta else None))
+                if varianta:
+                    znama.add(varianta.group(1))
+
+    for soubor, jmeno, typ, varianta in zaznamy:
+        if varianta is None:
+            chyby.append(
+                f"{soubor}: '{jmeno}' typu {typ} nemá hned pod Control klíč "
+                f"Variant — Studio appku vůbec neotevře (PA1011) a import "
+                f"balíku ani pac to nechytí")
+        elif len(znama) > 1 and varianta not in znama - {varianta}:
+            # jediný výskyt varianty napříč appkou = šablona, kterou balík
+            # nemusí vézt; hlásí se jako varování, ne jako chyba
+            if sum(1 for z in zaznamy if z[3] == varianta) == 1:
+                varovani.append(
+                    f"{soubor}: '{jmeno}' používá variantu {varianta}, kterou "
+                    f"žádná jiná galerie v appce nemá — ověř, že je "
+                    f"v Templates.json")
+
+
 def main():
     soubory = sorted(APP_SRC.glob("*.pa.yaml"))
     if not soubory:
@@ -1376,6 +1426,7 @@ def main():
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
     kontrola_stareho_result(vzorce)
+    kontrola_varianty(soubory)
     kontrola_prekryvu(soubory)
     kontrola_adresy_mapy(vzorce)
     kontrola_notify(vzorce, soubory)
