@@ -1648,6 +1648,13 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      (`ensure_ascii=False` ekvivalent — JSON z flow musí být UTF-8).
    risk: soubory se hromadí. Úklidové flow po N dnech je pár akcí, ale musí
      nechat naživu poslední snímek každého měsíce, ne mazat podle stáří slepě.
+   ÚKLID DOPLNĚN 01.09.2026 (balík 1.0.0.85), a jinak, než plán čekal: místo
+     „poslední snímek každého měsíce" se nechává **posledních 20** (zadáno
+     uživatelem 13:52). Obava plánu se řeší jinak a lépe — maže se jen to, co
+     flow samo vyrobilo, tedy `rejstrik_RRRR-MM-DD_HHMM.json` VČETNĚ délky
+     jména. Snímek, který má přežít natrvalo, stačí přejmenovat. Úklid běží
+     až po uložení nového snímku, bere `skip` (ne `take`) a maže přes
+     `recycle()`, takže omyl není nevratný. Sedm nových mutací.
    PROVEDENO JINAK, NEŽ PLÁN ČEKAL: obě flow staví `src/build_zaloha_flow.py`
      z jedné funkce `akce()`, ne klonováním hotového flow ze zipu (klon zůstal
      jen pro obálku — uzel <Workflow>, RootComponent, spojení). Brána
@@ -1695,7 +1702,7 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      konstantou z generátoru: kdyby z ní sloupec vypadl, obě strany by se
      shodly a nikdo by nezakřičel.
 
-3b. [Hromadný import] — co: src/make_sablona.py (generuje .xlsx
+3b. [Hromadný import] — HOTOVO 01.09.2026 (balík 1.0.0.85) — co: src/make_sablona.py (generuje .xlsx
      ze schématu), knihovna `Import`, flow `ImportFlow`, obrazovka náhledu
    Šablona se generuje ZE SCHÉMATU, aby se nemohla rozejít s listy.
    Sloupce, které si systém drží sám (kód, `nazev_kratky`,
@@ -1713,6 +1720,15 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      prázdné řádky na konci tabulky; soubor nahraný dvakrát.
    risk: největší je slepý zápis. Náhled není komfort, je to pojistka —
      bez potvrzovacího kroku se krok 3 nenasazuje.
+   ZMĚŘENO, NE ODHADNUTO: konektor snese `file` jako výraz a `table` jménem,
+     ale `drive` musí být Graph ID `b!…`. Balík proto nenese ani jedno
+     tenantové ID — `source` se skládá z proměnné webu a dvou REST dotazů,
+     `drive` se hledá v `/_api/v2.0/drives` podle URL segmentu knihovny.
+     Bez toho by se flow na MPSV nepřeneslo.
+   PROVEDENO: `src/build_import_flow.py` (31 akcí), brána
+     `src/check_import_flow.py` 145 kontrol, mutace `src/mutace_import.py`
+     21/21, kontrakt `deploy/flow_Import.md`, knihovna `Import` ve schématu.
+     Zbývá obrazovka náhledu — čeká na registraci flow ve Studiu.
 
 4. [Restore ze snímku] — co: flow `RestoreFlow` + tatáž obrazovka náhledu
    Nikdy plánovaně, vždy ručně, vždy s dry-runem a protokolem do knihovny.

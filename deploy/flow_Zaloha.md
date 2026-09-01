@@ -82,3 +82,27 @@ jiné řešení, ne vyšší číslo.
 - **Úklid starých snímků** — soubory se hromadí. Úklidové flow musí nechat
   naživu poslední snímek každého měsíce, ne mazat podle stáří slepě.
 - **Restore** — F11 krok 4, staví se až po hromadném importu.
+
+## Úklid starých snímků (od 1.0.0.85)
+
+Obě flow po uložení nového snímku nechají v knihovně **posledních 20** a starší
+pošlou do koše. Počet je akce `Kolik_nechat` na začátku úklidu; mění se
+v `src/build_zaloha_flow.py` (`POCET_ZALOH`) a rebuildem — ruční změna
+v designeru by příští balík přepsal.
+
+Čtyři věci, na kterých úklid stojí, a každou z nich shazuje vlastní mutace:
+
+1. **Běží až po uložení nového snímku.** Před ním by mazal o jeden víc, než je
+   potřeba, a při chybě zápisu by po sobě zůstal úklid bez zálohy.
+2. **Maže jen to, co flow samo vyrobilo** — jméno musí sedět na
+   `rejstrik_RRRR-MM-DD_HHMM.json` **včetně délky**. Snímek, který chceš
+   udržet natrvalo (třeba stav při schvalování OŘ), stačí **přejmenovat**
+   a úklid si ho přestane všímat. To je schválně: jinak by „posledních 20"
+   znamenalo, že po třech týdnech není z čeho obnovit starší stav.
+3. **`skip`, ne `take`** — zahazuje se ocas seznamu seřazeného od nejnovějšího.
+   Záměna by smazala právě ty nejnovější.
+4. **`recycle()`, ne `DELETE`** — soubor jde do koše (93 dní), takže chyba
+   v úklidu není nevratná.
+
+Řadí SharePoint přes `$orderby: Created desc`, ne flow: `sort()` nad polem
+objektů Logic Apps nemá.

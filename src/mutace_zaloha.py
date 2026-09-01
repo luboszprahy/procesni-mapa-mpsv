@@ -94,6 +94,51 @@ def bez_verze_schematu(definice):
     del definice["actions"]["Snimek"]["inputs"]["schema_verze"]
 
 
+def uklid_pred_zapisem(definice):
+    """Úklid před uložením nového snímku smaže o jeden víc, než má, a při
+    chybě zápisu zůstane po sobě úklid bez zálohy."""
+    definice["actions"]["Kolik_nechat"]["runAfter"] = {"Snimek": ["Succeeded"]}
+
+
+def uklid_bere_hlavu(definice):
+    """take() místo skip() smaže právě ty nejnovější snímky."""
+    definice["actions"]["Ke_smazani"]["inputs"] = (
+        "@take(body('Nase_snimky'), outputs('Kolik_nechat'))")
+
+
+def uklid_bez_kontroly_jmena(definice):
+    """Bez filtru na jméno smaže úklid i cizí soubory a přejmenované snímky,
+    které si někdo schválně nechal."""
+    definice["actions"]["Ke_smazani"]["inputs"] = (
+        "@skip(outputs('Snimky')?['body/value'], outputs('Kolik_nechat'))")
+
+
+def uklid_bez_delky(definice):
+    """Kontrola prefixu bez kontroly délky: `rejstrik_schvaleni_OR.json`
+    projde jako běžný snímek a smaže se."""
+    uzel = definice["actions"]["Nase_snimky"]
+    kde = uzel["inputs"]["where"]
+    uzel["inputs"]["where"] = "@" + kde[kde.index("startsWith("):kde.rindex(",")]
+
+
+def uklid_maze_natrvalo(definice):
+    """DELETE místo recycle(): omyl v úklidu je nevratný."""
+    parametry = (definice["actions"]["Smaz_stare"]["actions"]["Recykluj"]
+                 ["inputs"]["parameters"])
+    parametry["parameters/method"] = "DELETE"
+    parametry["parameters/uri"] = parametry["parameters/uri"].replace("/recycle()", "")
+
+
+def uklid_od_nejstarsiho(definice):
+    """Bez `desc` čte flow snímky od nejstaršího a skip zahodí ty nejnovější."""
+    definice["actions"]["Snimky"]["inputs"]["parameters"]["$orderby"] = "Created"
+
+
+def uklid_nechava_nula(definice):
+    """Nula ponechaných záloh smaže i právě pořízený snímek."""
+    definice["actions"]["Kolik_nechat"]["inputs"] = 0
+
+
 MUTACE = (
     [("vypnuté stránkování u jednoho listu", *obe(bez_strankovani))]
     + [("ze snímku vypadl celý list", *obe(vynechany_list))]
@@ -102,6 +147,14 @@ MUTACE = (
     + [("jméno souboru z druhého utcNow()", *obe(dve_razitka))]
     + [("zápis mimo knihovnu Zalohy", *obe(jina_slozka))]
     + [("snímek bez verze schématu", *obe(bez_verze_schematu))]
+    # úklid starých snímků — maže data, takže se hlídá přísněji než zbytek
+    + [("úklid běží před uložením snímku", *obe(uklid_pred_zapisem))]
+    + [("úklid bere hlavu místo ocasu", *obe(uklid_bere_hlavu))]
+    + [("úklid nekontroluje jméno souboru", *obe(uklid_bez_kontroly_jmena))]
+    + [("úklid nekontroluje délku jména", *obe(uklid_bez_delky))]
+    + [("úklid maže natrvalo, ne do koše", *obe(uklid_maze_natrvalo))]
+    + [("snímky se čtou od nejstaršího", *obe(uklid_od_nejstarsiho))]
+    + [("úklid nenechá ani jednu zálohu", *obe(uklid_nechava_nula))]
     # poslední dvě: zásah jen do plánovaného flow, tedy rozešlá dvojčata
     + [("dvojčata se rozešla (stránkování)", (PLANOVANE, bez_strankovani))]
     + [("dvojčata se rozešla (vynechaný list)", (PLANOVANE, vynechany_list))]

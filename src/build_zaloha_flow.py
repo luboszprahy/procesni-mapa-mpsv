@@ -47,6 +47,22 @@ CASOVE_PASMO = "Central Europe Standard Time"
 # se pozná až ve chvíli, kdy se z ní obnovuje.
 STRANKOVANI = 5000
 
+# Kolik snimku nechat v knihovne. Uklid maze od nejstarsiho a bezi AZ PO
+# ulozeni noveho, takze se nikdy nesmaze vic, nez kolik jich opravdu zbyva.
+# Zmena se dela tady a rebuildem, ne v designeru - pristi balik by rucni
+# upravu prepsal.
+POCET_ZALOH = 20
+
+# Maze se jen to, co vyrobilo tohle flow: jmeno musi sedet na
+# `rejstrik_RRRR-MM-DD_HHMM.json` VCETNE delky. Snimek, ktery chce nekdo
+# udrzet natrvalo (treba stav pri schvalovani OR), staci prejmenovat a uklid
+# si ho prestane vsimat. To je schvalne, ne nahodou.
+JMENO_SNIMKU = "rejstrik_"
+DELKA_JMENA = len("rejstrik_2026-09-01_0300.json")
+
+# Pole, pod kterym konektor vraci nazev souboru vcetne pripony.
+POLE_JMENA = "{FilenameWithExtension}"
+
 HOST_SP = "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
 
 
@@ -133,9 +149,83 @@ def akce(schema):
         "CreateFile",
         {"dataset": ep.web(),
          "folderPath": KNIHOVNA,
-         "name": "@concat('rejstrik_', outputs('Razitko'), '.json')",
+         "name": "@concat(" + lit(JMENO_SNIMKU) + ", outputs('Razitko'), '.json')",
          "body": "@string(outputs('Snimek'))"},
         "Snimek")
+    kroky.update(uklid())
+    return kroky
+
+
+def lit(hodnota):
+    return "'" + str(hodnota).replace("'", "''") + "'"
+
+
+def uklid():
+    """Nechá v knihovně posledních POCET_ZALOH snímků, starší pošle do koše.
+
+    Běží až po uložení nového snímku — kdyby běžel před ním, mazalo by se
+    o jeden víc, než je potřeba, a při chybě zápisu by po sobě zůstal úklid
+    bez zálohy.
+
+    Maže se přes REST `recycle()`, ne konektorovou mazací akcí: soubor jde do
+    koše (93 dní), takže omyl v tomhle mechanismu není nevratný, a REST
+    adresuje knihovnu interním názvem, takže se nic neváže na tenant.
+    """
+    kroky = {}
+    kroky["Kolik_nechat"] = {
+        "type": "Compose",
+        "inputs": POCET_ZALOH,
+        "runAfter": {"Uloz_zalohu": ["Succeeded"]},
+    }
+    kroky["Cesta_webu"] = {
+        "type": "Compose",
+        "inputs": "@concat('/', join(skip(split(" + ep.vyraz(ep.WEB) + ", '/'), 3), '/'))",
+        "runAfter": {"Kolik_nechat": ["Succeeded"]},
+    }
+    # Řadí SharePoint, ne flow: `sort()` nad polem objektů Logic Apps nemá
+    # a řadit stovky snímků výrazem by bylo horší než jeden $orderby.
+    kroky["Snimky"] = sp_akce(
+        "GetItems",
+        {"dataset": ep.web(),
+         "table": ep.list_param("Zálohy"),
+         "$orderby": "Created desc",
+         "$top": STRANKOVANI},
+        "Cesta_webu")
+    kroky["Snimky"]["runtimeConfiguration"] = {
+        "paginationPolicy": {"minimumItemCount": STRANKOVANI}}
+
+    jmeno = "string(item()?[" + lit(POLE_JMENA) + "])"
+    kroky["Nase_snimky"] = {
+        "type": "Query",
+        "inputs": {
+            "from": "@outputs('Snimky')?['body/value']",
+            "where": ("@and(startsWith(" + jmeno + ", " + lit(JMENO_SNIMKU) + "),"
+                      " equals(length(" + jmeno + "), " + str(DELKA_JMENA) + "))"),
+        },
+        "runAfter": {"Snimky": ["Succeeded"]},
+    }
+    kroky["Ke_smazani"] = {
+        "type": "Compose",
+        "inputs": "@skip(body('Nase_snimky'), outputs('Kolik_nechat'))",
+        "runAfter": {"Nase_snimky": ["Succeeded"]},
+    }
+    kroky["Smaz_stare"] = {
+        "type": "Foreach",
+        "foreach": "@outputs('Ke_smazani')",
+        "actions": {
+            "Recykluj": sp_akce(
+                "HttpRequest",
+                {"dataset": ep.web(),
+                 "parameters/method": "POST",
+                 "parameters/uri": (
+                     "@concat('_api/web/GetList(" + chr(39) * 3 + ", outputs('Cesta_webu'), "
+                     + lit(KNIHOVNA) + ", " + chr(39) * 3 + ")/items(',"
+                     " string(items('Smaz_stare')?['ID']), ')/recycle()')"),
+                 "parameters/headers": {"Accept": "application/json;odata=nometadata"}},
+                None),
+        },
+        "runAfter": {"Ke_smazani": ["Succeeded"]},
+    }
     return kroky
 
 

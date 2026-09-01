@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_84.zip`
+# Instalace balíku `procesnimapa_1_0_0_85.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -36,7 +36,8 @@ jako vada balíku. Krok 1 obojí zakládá, proto musí být první.
 
 Dokumentace v zipu **není** — solution zip nese jen artefakty Power Platform.
 Referenční popisy jsou vedle: `sharepoint_schema.md` (listy a knihovny),
-`flow_Zaloha.md`, `flow_Restore.md`, `flow_MapaPublish.md`, `flow_Export.md`,
+`flow_Zaloha.md`, `flow_Restore.md`, `flow_Import.md`, `flow_MapaPublish.md`,
+`flow_Export.md`,
 `flow_AktualizaceKratkehoNazvu.md` (kontrakty flow), `navod_sprava.md`
 (jak appku používat), `navod_publikace_mapy.md` (HTML mapa).
 
@@ -51,22 +52,23 @@ Skript si web odvodí z adresy stránky, na které běží — žádnou URL v so
 Je **idempotentní**: co existuje, nezakládá znovu; co chybí, doplní; sloupce
 mimo výchozí zobrazení do něj přidá.
 
-Založí sedm listů, knihovny **`Zalohy`** a **`Exporty`** a doplní sloupec
+Založí sedm listů, knihovny **`Zalohy`**, **`Exporty`** a **`Import`**
+a doplní sloupec
 `puvodni_kod` do `Procesy`, `DilciProcesy` a `Aktivity`. Knihovny vznikají
-jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`), ne pod
-`/Lists/`.
+jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`,
+`/Import`), ne pod `/Lists/`.
 
-> **Balík 82 tenhle krok vyžaduje znovu i tam, kde už skript běžel** —
-> knihovna `Exporty` je nová. Bez ní `ExportFlow` spadne na neexistující
+> **Balík 85 tenhle krok vyžaduje znovu i tam, kde už skript běžel** —
+> knihovna `Import` je nová a `ImportFlow` by bez ní spadl na neexistující
 > složce. Skript je idempotentní, takže se nic dalšího nezaloží dvakrát.
 
 **Ověření:** poslední řádek výpisu musí říct, že chybných sloupců je **0**.
-V Site contents musí být vidět `Zálohy`, `Exporty` a list `Historie kódů`.
+V Site contents musí být vidět `Zálohy`, `Exporty`, `Import` a list `Historie kódů`.
 Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_84.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_85.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
@@ -114,12 +116,13 @@ zůstane vypnuté i po importu opravené verze. Po importu, který skončil hlá
 | `AktualizaceKratkehoNazvu` | zkrácený název aktivity | změna v listu |
 | `ZalohaFlow` | snímek rejstříku do `Zalohy` | z appky |
 | `ZalohaScheduled` | týž snímek | denně 5:00 |
-| `RestoreFlow` | **nové** — obnova rejstříku ze snímku | z appky |
+| `RestoreFlow` | obnova rejstříku ze snímku | z appky |
+| `ImportFlow` | **nové** — hromadné pořízení aktivit z Excelu | z appky |
 
 Vypnuté flow se projeví jako chyba **appky**, ne flow: volající canvas app
 vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
 
-**Ověření:** všech **sedm** má stav *On*.
+**Ověření:** všech **osm** má stav *On*.
 
 > **Testovací flow `import new data`** (to, kterým se ověřoval DLP pro
 > Excel Online) v balíku 84 **není** — vezlo v sobě natvrdo adresu webu
@@ -201,10 +204,11 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 | **Data ▾ → Vzorová tabulka pro import** | stáhne se `sablona_import_aktivit.xlsx`; v Excelu má list Aktivity jako Tabulku a druhý list Pokyny |
 | **Data ▾ → Záloha rejstříku** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
 
-Obnova ze snímku zatím **nemá tlačítko** — `RestoreFlow` se v balíku 84 jen
-zavádí, aby ho šlo v příštím kole zaregistrovat ve Studiu (`Flow.Run()` se váže
-na `FlowNameId`, které přiděluje až prostředí při importu). Vyzkoušet se dá
-ručně, postup je v `flow_Restore.md`; **v režimu náhledu nezapisuje nic.**
+Obnova ani import zatím **nemají tlačítko** — `RestoreFlow` a `ImportFlow`
+se v balíku 85 jen zavádějí, aby šlo obě v příštím kole zaregistrovat ve Studiu
+(`Flow.Run()` se váže na `FlowNameId`, které přiděluje až prostředí při
+importu). Vyzkoušet se dají ručně, postup je v `flow_Restore.md`
+a `flow_Import.md`; **v režimu náhledu nezapisuje ani jedno nic.**
 
 ---
 
@@ -217,6 +221,8 @@ ručně, postup je v `flow_Restore.md`; **v režimu náhledu nezapisuje nic.**
 | flow nejde zapnout | prázdná proměnná, nebo sirotek po starší solution v Default Solution (Turn off → Delete → Publish all customizations) |
 | `ZalohaFlow` spadne na neexistující složce | neproběhl krok 1, knihovna `Zalohy` chybí |
 | `ExportFlow` spadne na neexistující složce | neproběhl krok 1 po balíku 82, knihovna `Exporty` chybí |
+| `ImportFlow` spadne na neexistující složce | neproběhl krok 1 po balíku 85, knihovna `Import` chybí |
+| v knihovně `Zálohy` ubývají staré snímky | tak to má být: od balíku 85 se nechává posledních 20; snímek, který chceš udržet, přejmenuj |
 | Záloha rejstříku hlásí `502 BadGateway` | `ZalohaFlow` je vypnuté (krok 3) nebo chybí Current Value; pravdu řekne run history |
 | Vzorová tabulka: stáhne se stránka s chybou místo sešitu | soubor není v Site Assets, nebo se jmenuje jinak (krok 5) |
 | snímek má u `DilciProcesy` přesně 100 položek | nepropsalo se stránkování — nahlas to, je to vada balíku |

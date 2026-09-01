@@ -1,29 +1,35 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 13:20** — balík **1.0.0.84** nasazený, náhled
-obnovy zelený. Zbývá skutečná zkouška obnovy a jedna zkouška kvůli importu.
+Aktualizováno: **2026-09-01 14:15** — balík **1.0.0.85**: `ImportFlow`
+(hromadný import z Excelu) a úklid starých záloh. Chybí už jen obrazovky
+v appce, a ty čekají na registraci flow ve Studiu.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_84.zip`** a **zapni `RestoreFlow`**
-   (Import stav zapnutí nemění). Žádná nová proměnná ani knihovna nepřibyla.
+1. **Spusť znovu `src/setup_sharepoint.js`** (F12 → Console na cílovém webu).
+   Zakládá novou knihovnu **`Import`**; bez ní `ImportFlow` spadne na
+   neexistující složce. Idempotentní, nic jiného se nezaloží podruhé.
 
-2. **Smaž v Power Automate testovací flow `import new data`.** Z balíku 84
-   jsem ho vyndal — veze v sobě natvrdo adresu webu PPF, takže by balík
-   neprošel na MPSV. Odebrání z balíku ho ale z prostředí nesmaže (unmanaged
-   solution komponenty nemaže), zůstal by jako sirotek. **Spojení na Excel
-   Online zůstává** a `ImportFlow` ho bude potřebovat — ruš flow, ne spojení.
+2. **Naimportuj `deploy/procesnimapa_1_0_0_85.zip`** a **zapni `ImportFlow`**
+   (`RestoreFlow` už zapnuté máš). Import stav zapnutí nemění.
 
-3. **NEMAZAT zatím `import new data`** — potřebuju z něj ještě jednu
-   tříminutovou zkoušku, viz „Co ještě chybí k importu" níže. Bod 2 platí
-   až po ní.
+3. **Registrace obou flow ve Studiu — tohle je to kolo, na které se čekalo.**
+   Otevři appku ve Studiu → **Add data → `RestoreFlow`** a **`ImportFlow`**
+   (obě v jednom sezení) → mikro-změna → Save → Publish → **export solution**
+   → pošli zip. Z něj postavím obrazovku náhledu a položky v nabídce `Data ▾`
+   pro obojí.
 
-4. **Registrace obou flow ve Studiu — druhé kolo.** Až bude bod 3 zelený:
-   otevři appku ve Studiu → **Add data → RestoreFlow** → mikro-změna → Save →
-   Publish → **export solution** → pošli zip. Z něj postavím obrazovku náhledu
-   a položku v nabídce `Data ▾`. Obejít to nejde: `Flow.Run()` se váže na
-   `FlowNameId`, které přiděluje až prostředí při importu.
+4. **Až budeš mít chuť, skutečná zkouška obnovy** (náhled nad nezměněnými daty
+   dokázal jen to, že nevyrábí falešné rozdíly): smaž 3–5 řádků z `Aktivity`,
+   spusť náhled — musí je vypsat ve sloupci **založit** —, pak `"rezim":
+   "zapis"` a nakonec znovu náhled, který má být zase samé nuly.
+
+5. **Zkouška importu, taky ručně** — postup je v `deploy/flow_Import.md`.
+   Vyplň pár řádků do šablony, nahraj do knihovny `Import`, spusť
+   `{"soubor": "…xlsx", "rezim": "nahled"}`. **V náhledu nesmí přibýt jediná
+   položka.** Zajímá mě hlavně, jestli sedí čísla v `prehled` a jestli
+   `chyby` ukazují správná čísla řádků.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -31,18 +37,92 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 3b — hromadný import.** DLP test prošel, takže se staví přes
-konektor Excel Online. Zbývá vyřešit jednu věc, na kterou přišel až rozbor
-běhu: parametry akce jsou čtyři neprůhledná ID vázaná na tenant a na
-konkrétní soubor. `file` musí být dynamické tak jako tak (správce nahrává
-pokaždé jiný sešit), `source` a `drive` jsou per-tenant konstanty.
+**Čekám na export z bodu 3.** Bez něj obrazovku náhledu postavit nejde —
+`Flow.Run()` se váže na `FlowNameId`, které přiděluje až prostředí.
 
-Rozpracované: knihovna `Import` do schématu, `src/build_import_flow.py`.
-Obrazovka náhledu se navrhuje **jednou pro import i obnovu** — proto se
-obojí dodělá v témže kole.
+Až přijde: balík 86 = **jedna obrazovka náhledu pro import i obnovu**
+(„co vznikne / co se změní / co je duplicita / co je chyba na řádku N“)
+a dvě položky v nabídce `Data ▾`. Proto v ní bylo od 81 nechané místo.
 
-**Pozor při navazování:** kdyby import 84 nedopadl, nezačínej opravovat balík
-dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+## Balík 1.0.0.85 — ImportFlow a úklid záloh (01.09.2026 14:15)
+
+### ImportFlow
+
+`src/build_import_flow.py` → 31 akcí. Brána `src/check_import_flow.py`
+**145 kontrol**, mutace `src/mutace_import.py` **21/21**, kontrakt
+`deploy/flow_Import.md`.
+
+Vstup `{"soubor": "karta_s3.xlsx", "rezim": "nahled" | "zapis"}`, odpověď
+`{stav, soubor, prehled, chyby}` — `prehled` i `chyby` jako řetězec, aby se
+schéma odpovědi neměnilo s obsahem a flow se nemuselo znovu registrovat.
+
+**Balík nenese ani jedno tenantové ID.** Parametry excelového konektoru se
+skládají za běhu: `source` z proměnné webu a dvou REST dotazů, `drive`
+z `/_api/v2.0/drives` podle **URL segmentu** knihovny (ne podle zobrazovaného
+názvu — ten nese diakritiku a mění se přejmenováním). Bez toho by se flow na
+MPSV nepřeneslo.
+
+**Rozklad řádků je úplný a nepřekrývá se:**
+
+```
+Ocistene ─┬─ Prazdne        všechny buňky prázdné → ignoruje se
+          └─ S_obsahem ─┬─ Chybne          chybí název nebo kód dílčího procesu
+                        └─ Uplne ─┬─ Neznamy_dilci   dílčí proces v rejstříku není
+                                  └─ Zarazene ─┬─ Duplicitni  dvojice dílčí+název už je
+                                               └─ K_zalozeni  zakládá se
+```
+
+Kdyby se skupiny překrývaly, sedělo by v náhledu jiné číslo než ve skutečnosti
+a správce by opravoval podle něj. Čísla řádků v hlášení jsou skutečná čísla
+v sešitě (index+2 kvůli hlavičce) — proto se řádky procházejí přes index.
+
+**Kódy** se přidělují sekvenčně ze sdílené proměnné (souběžnost smyčky 1),
+z nejvyššího dosud použitého pod týmž rodičem — smazaný kód se nerecykluje.
+Ke každé aktivitě vzniká primární vazba s klíčem `<kod>__<dilci>`, tedy v témž
+tvaru, jaký zakládá appka. `nazev_kratky` import nezapisuje, dopočítá ho
+`AktualizaceKratkehoNazvu`.
+
+### Úklid starých záloh
+
+Zadáno v 13:52. Obě záložní flow po uložení nového snímku nechají v knihovně
+**posledních 20** a starší pošlou **do koše**. Počet je akce `Kolik_nechat`;
+mění se v `build_zaloha_flow.py` (`POCET_ZALOH`) a rebuildem.
+
+Bylo to levné, protože flow už existovalo: šest akcí na konci, žádné nové
+flow, žádná nová proměnná, žádné další oprávnění.
+
+Čtyři věci, na kterých to stojí, každou shazuje vlastní mutace:
+
+1. **běží až po uložení** nového snímku — jinak by mazal o jeden víc a při
+   chybě zápisu by zůstal úklid bez zálohy;
+2. **maže jen `rejstrik_RRRR-MM-DD_HHMM.json` včetně délky jména** — snímek,
+   který chceš udržet natrvalo, stačí **přejmenovat**. To je schválně: bez
+   toho by „posledních 20" znamenalo, že po třech týdnech není z čeho obnovit
+   starší stav, což je přesně ten případ, kvůli kterému zálohy vznikly (R-5,
+   stav při schvalování OŘ);
+3. **`skip`, ne `take`** — zahazuje se ocas seznamu řazeného od nejnovějšího;
+4. **`recycle()`, ne `DELETE`** — soubor jde do koše (93 dní).
+
+Řadí SharePoint přes `$orderby: Created desc`; `sort()` nad polem objektů
+Logic Apps nemá.
+
+### Brány na 85
+
+`check_solution` **536** · `check_restore_flow` 531 · `check_zaloha_flow`
+**184** · `check_import_flow` **145** · `check_export_flow` 129 ·
+`check_mapa_flow` 139 · `check_flow` 26 · `check_app`, `check_env` zeleně.
+Mutačně: `mutace_import` **21/21**, `mutace_restore` 15/15, `mutace_zaloha`
+**16/16**, `mutace_export_mapa` 7/7, `mutace_parametry` 4/4,
+`mutace_napojeni` 5/5.
+
+Sestavení (pořadí je součást postupu — generátory flow PŘED `build_app.py`):
+
+```
+copy deploy/procesnimapa_1_0_0_84.zip runs/vstup_85.zip
+python src/build_zaloha_flow.py --solution runs/vstup_85.zip
+python src/build_import_flow.py --solution runs/vstup_85.zip
+python src/build_app.py --solution runs/vstup_85.zip --verze 1.0.0.85
+```
 
 ## Zkouška dynamických parametrů Excelu — dvě ze tří odpovědí (01.09.2026 13:31)
 

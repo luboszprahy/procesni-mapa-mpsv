@@ -25,8 +25,9 @@ from pathlib import Path
 
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
-from build_zaloha_flow import (CASOVE_PASMO, KNIHOVNA, PLANOVANE, RUCNI,  # noqa: E402
-                               STRANKOVANI, nacti_schema)
+from build_zaloha_flow import (CASOVE_PASMO, DELKA_JMENA, JMENO_SNIMKU,  # noqa: E402
+                               KNIHOVNA, PLANOVANE, POCET_ZALOH, POLE_JMENA,
+                               RUCNI, STRANKOVANI, nacti_schema)
 
 chyby = []
 kontrol = 0
@@ -236,6 +237,81 @@ def zkontroluj_knihovnu(schema):
            f"setup_sharepoint.js ji nezaloží a flow spadne na neexistující složce")
 
 
+def zkontroluj_uklid(akce):
+    """Úklid starých snímků. Maže data, takže se hlídá přísněji než zbytek.
+
+    Čtyři věci, jejichž záměna se pozná až tím, že záloha, kterou někdo
+    potřeboval, v knihovně není:
+
+    1. úklid běží AŽ PO uložení nového snímku — jinak by se mazalo o jeden
+       víc a při chybě zápisu by zůstal úklid bez zálohy;
+    2. maže se jen to, co flow samo vyrobilo (jméno i jeho DÉLKA) — snímek,
+       který někdo přejmenoval, aby ho udržel, musí přežít;
+    3. `skip`, ne `take` — zahazuje se ocas, ne hlava;
+    4. `recycle()`, ne DELETE — soubor jde do koše, takže chyba v úklidu
+       není nevratná.
+    """
+    for jmeno in ("Kolik_nechat", "Cesta_webu", "Snimky", "Nase_snimky",
+                  "Ke_smazani", "Smaz_stare"):
+        overit(jmeno in akce, f"chybí akce úklidu {jmeno}")
+    if "Smaz_stare" not in akce:
+        return
+
+    kolik = (akce.get("Kolik_nechat") or {}).get("inputs")
+    overit(isinstance(kolik, int) and kolik > 0,
+           f"počet ponechaných záloh není kladné číslo, ale {kolik!r}")
+    overit(kolik == POCET_ZALOH,
+           f"počet ponechaných záloh je {kolik}, generátor má {POCET_ZALOH}")
+
+    overit("Uloz_zalohu" in json.dumps((akce.get("Kolik_nechat") or {}).get("runAfter"), ensure_ascii=False),
+           "úklid nezačíná až po uložení nového snímku — mazalo by se o jeden víc, "
+           "než je potřeba, a při chybě zápisu by zůstal úklid bez zálohy")
+
+    snimky = ((akce.get("Snimky") or {}).get("inputs") or {}).get("parameters") or {}
+    overit(str(snimky.get("$orderby", "")).endswith("desc"),
+           f"snímky se nečtou od nejnovějšího ({snimky.get('$orderby')!r}) — "
+           f"skip by pak zahodil ty nejnovější")
+    strankovani = (((akce.get("Snimky") or {}).get("runtimeConfiguration") or {})
+                   .get("paginationPolicy") or {}).get("minimumItemCount")
+    overit(strankovani == STRANKOVANI,
+           f"čtení snímků nemá stránkování {STRANKOVANI}")
+
+    kde = str(((akce.get("Nase_snimky") or {}).get("inputs") or {}).get("where", ""))
+    overit(POLE_JMENA in kde,
+           f"úklid nefiltruje podle názvu souboru ({POLE_JMENA})")
+    overit(f"'{JMENO_SNIMKU}'" in kde,
+           f"úklid se neomezuje na soubory {JMENO_SNIMKU}… — smazal by i cizí "
+           f"soubory, které do knihovny někdo nahrál")
+    overit(f"length" in kde and str(DELKA_JMENA) in kde,
+           "úklid nekontroluje délku názvu — přejmenovaný snímek, který si někdo "
+           "schválně nechal, by se smazal taky")
+
+    ke_smazani = str((akce.get("Ke_smazani") or {}).get("inputs", ""))
+    overit(ke_smazani.startswith("@skip("),
+           f"ke smazání se nebere skip(), ale {ke_smazani[:40]!r} — s take() by "
+           f"se mazaly právě ty nejnovější snímky")
+    overit("body('Nase_snimky')" in ke_smazani,
+           "skip nejede přes filtrované snímky, ale přes všechny soubory")
+    overit("outputs('Kolik_nechat')" in ke_smazani,
+           "počet ponechaných záloh se nebere z akce Kolik_nechat, takže by ho "
+           "nešlo změnit na jednom místě")
+
+    smycka = akce.get("Smaz_stare") or {}
+    overit(smycka.get("foreach") == "@outputs('Ke_smazani')",
+           f"smyčka úklidu nejede přes Ke_smazani, ale {smycka.get('foreach')!r}")
+    recykluj = (smycka.get("actions") or {}).get("Recykluj") or {}
+    parametry = ((recykluj.get("inputs") or {}).get("parameters") or {})
+    uri = str(parametry.get("parameters/uri", ""))
+    overit("recycle()" in uri,
+           f"úklid nemaže přes recycle() — soubor by nešel vrátit z koše: {uri[:60]}")
+    overit(str(parametry.get("parameters/method", "")).upper() != "DELETE",
+           "úklid maže metodou DELETE, tedy natrvalo")
+    overit(KNIHOVNA in uri,
+           f"úklid neadresuje knihovnu {KNIHOVNA}: {uri[:60]}")
+    overit(not re.search(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-", uri),
+           "úklid má v adrese GUID vázaný na jeden tenant")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True)
@@ -268,6 +344,7 @@ def main():
     zkontroluj_cteni(akce, schema)
     zkontroluj_mapovani(akce, schema)
     zkontroluj_snimek(akce, schema)
+    zkontroluj_uklid(akce)
     zkontroluj_retez(akce)
     zkontroluj_dvojce(polozky, klic, flow, argumenty.hodina)
 
