@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_80.zip`
+# Instalace balíku `procesnimapa_1_0_0_81.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -61,7 +61,7 @@ Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_80.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_81.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
@@ -118,8 +118,10 @@ vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
 ## 4. Ověřit zálohu — první snímek ručně
 
 `ZalohaScheduled` poběží sám až v 5:00, ale čekat na to nemá smysl. Od balíku
-80 na to stačí appka: **tlačítko „Záloha"** v horní liště Přehledu. Kdo chce
-appku obejít, spustí `ZalohaScheduled` v Power Automate přes
+81 na to stačí appka: **Data ▾ → Záloha rejstříku** v horní liště Přehledu
+(do balíku 80 to bylo samostatné tlačítko „Záloha"; leželo pod popiskem
+s počtem řádků, takže se do něj nedalo pořádně kliknout). Kdo chce appku
+obejít, spustí `ZalohaScheduled` v Power Automate přes
 **Test → Manually → Run**.
 
 **Ověření — a je důležitější, než vypadá:** běh musí být zelený **a** v knihovně
@@ -131,22 +133,28 @@ zelený a snímek je přesto oříznutý. Je to jediná vada zálohy, která se 
 pozná až ve chvíli, kdy se z ní obnovuje. Kontrakt snímku popisuje
 `flow_Zaloha.md`.
 
-## 5. Nahrát soubory mapy do Site Assets
+## 5. Nahrát soubory do Site Assets
 
-Jen při **prvním** nasazení na daný web, nebo když se změnila šablona.
-Podrobně `navod_publikace_mapy.md`; ve zkratce do knihovny **Site Assets**
-přetáhni z `deploy/`:
+Jen při **prvním** nasazení na daný web, nebo když se některý ze souborů
+změnil. Podrobně `navod_publikace_mapy.md`; ve zkratce do knihovny
+**Site Assets** přetáhni z `deploy/`:
 
 | soubor | k čemu |
 |---|---|
 | `mapa_template.html` | šablona s kotvami, ze které flow skládá stránku |
 | `procesni_mapa.html` | hotová mapa, aby bylo co otevřít, než flow poprvé proběhne |
+| `sablona_import_aktivit.xlsx` | prázdný sešit, který appka nabízí ke stažení pod **Data ▾ → Vzorová tabulka pro import** |
+
+Sešit se **musí jmenovat přesně takhle** — `ExportFlow` skládá jeho adresu
+z názvu, ne z vyhledání souboru. Sestavit ho ve flow nejde: `.xlsx` je zip
+a Logic Apps zip nevyrobí. Generuje ho `python src/make_sablona.py`.
 
 Účet, pod kterým flow běží, potřebuje **Contribute na Site Assets** a na
 knihovně `Zalohy`.
 
 **Ověření:** `MapaPublishFlow` doběhne zeleně a `procesni_mapa.html` se
-přepíše aktuálním časem.
+přepíše aktuálním časem. Ke vzorové tabulce stačí, že v knihovně je —
+ověří se v kroku 7.
 
 ## 6. Otevřít appku ve Studiu a publikovat
 
@@ -170,9 +178,10 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 |---|---|
 | otevřít Přehled | strom se sedmi agendami, počty u větví |
 | přidat a odebrat zařazení na obrazovce vazeb | Přehled se po návratu přepočítá |
-| Export → Word / Excel | soubor se stáhne |
-| Zobrazit v HTML | otevře se publikovaná mapa |
-| **Záloha** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
+| Data ▾ → Export do Wordu / do Excelu | soubor se stáhne |
+| HTML mapa ▾ → Zobrazit v HTML | otevře se publikovaná mapa |
+| **Data ▾ → Vzorová tabulka pro import** | stáhne se `sablona_import_aktivit.xlsx`; v Excelu má list Aktivity jako Tabulku a druhý list Pokyny |
+| **Data ▾ → Záloha rejstříku** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
 
 ---
 
@@ -184,7 +193,8 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 | `Flow.Run failed: 502 BadGateway / NoResponse` | vypnuté flow (krok 3) nebo nevyplněná proměnná; pravdu řekne run history, ne hláška v appce |
 | flow nejde zapnout | prázdná proměnná, nebo sirotek po starší solution v Default Solution (Turn off → Delete → Publish all customizations) |
 | `ZalohaFlow` spadne na neexistující složce | neproběhl krok 1, knihovna `Zalohy` chybí |
-| tlačítko Záloha hlásí `502 BadGateway` | `ZalohaFlow` je vypnuté (krok 3) nebo chybí Current Value; pravdu řekne run history |
+| Záloha rejstříku hlásí `502 BadGateway` | `ZalohaFlow` je vypnuté (krok 3) nebo chybí Current Value; pravdu řekne run history |
+| Vzorová tabulka: stáhne se stránka s chybou místo sešitu | soubor není v Site Assets, nebo se jmenuje jinak (krok 5) |
 | snímek má u `DilciProcesy` přesně 100 položek | nepropsalo se stránkování — nahlas to, je to vada balíku |
 | appka ukazuje starou verzi | chybí mikro-změna → Save → Publish (krok 6) |
 

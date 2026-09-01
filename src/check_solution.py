@@ -17,6 +17,7 @@ import argparse
 
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
+import check_app  # noqa: E402  — návrhová plocha, proti které se počítají překryvy
 
 _p = argparse.ArgumentParser()
 _p.add_argument("--vstup", default="input/procesnimapa_1_0_0_2 (2).zip")
@@ -398,6 +399,18 @@ def main():
             overit(priznaky.get("supportcolumnnamesasidentifiers") is True,
                    "appka nemá supportcolumnnamesasidentifiers=True, ale vzorce "
                    "předávají sloupce jako identifikátory")
+            # Podle návrhové plochy počítá check_app.py souřadnice z výrazů
+            # `Parent.Width - N`, a tím hlídá překryvy prvků. Kdyby se plocha
+            # v appce změnila a konstanta ne, kontrola překryvu by tiše
+            # počítala s jinými čísly, než jaká appka doopravdy má.
+            plocha = json.loads(vlastnosti)
+            for klic, ocekavano, kde in (
+                    ("DocumentLayoutWidth", check_app.SIRKA_PLOCHY, "šířka"),
+                    ("DocumentLayoutHeight", check_app.VYSKA_PLOCHY, "výška")):
+                overit(plocha.get(klic) == ocekavano,
+                       f"{kde} návrhové plochy je {plocha.get(klic)}, ale "
+                       f"check_app.py počítá s {ocekavano} — sjednoť to, jinak "
+                       f"kontrola překryvu prvků počítá s cizími čísly")
 
         nalezene = {Path(p).name.replace(".pa.yaml", "") for p in polozky if p.endswith(".pa.yaml")}
         overit(OCEKAVANE_OBRAZOVKY <= nalezene,

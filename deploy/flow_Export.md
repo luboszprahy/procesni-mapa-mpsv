@@ -65,16 +65,37 @@ potvrdit Ano. Je to jediný způsob, jak z cloud flow bez placeného konektoru
 dostat sešit se správným kódováním a typy; `.xlsx` je zip a ten Logic Apps
 sestavit neumí.
 
-## Akce (8)
+## Zvláštní režimy vstupu
+
+Kromě JSON s pohledem umí vstup dvě **smluvené hodnoty**, kterými si appka
+říká o adresu souboru místo exportu. Schéma volání se tím nemění (pošli text →
+dostaň adresu), takže flow kvůli nim nepotřebuje novou registraci ve Studiu.
+
+| vstup | co vrátí | proč zrovna takhle |
+|---|---|---|
+| `__mapa__` | odkaz na **náhled knihovny** s publikovanou mapou | přímá cesta k `.html` skončí kvůli Strict browser file handling stažením do Downloads místo zobrazení (ověřeno 20.08.2026) |
+| `__sablona__` | **přímou cestu** k `SiteAssets/sablona_import_aktivit.xlsx` | sešit se má naopak stáhnout, a přímá cesta přesně to udělá |
+
+V obou režimech se **nic neukládá** — zápis souboru je proto jediná akce
+uvnitř podmínky `Ulozeni`. Jinak by název vyšel na `.doc`/`.xls` a v Site
+Assets by při každém dotazu na adresu přibýval odpad; u mapy by dokonce
+přepsal ji samotnou.
+
+Vzorovou tabulku flow **nesestavuje**, jen vrací její adresu: `.xlsx` je zip
+a ten Logic Apps vyrobit neumí. Soubor tam nahraje správce (krok 5 v
+`INSTALACE.md`) a generuje ho `python src/make_sablona.py` ze `src/schema.json`.
+
+## Akce (9)
 
 ```
-Vstup       Compose   json(triggerBody()['text'])
+Vstup       Compose   json(if(mapa nebo šablona, prázdné řádky, triggerBody()['text']))
 Html_radky  Select    řádek tabulky pro .doc (escapuje & < >)
 Xls_radky   Select    řádek excelové tabulky (buňky s vynuceným textem)
 Jmeno       Compose   procesni_mapa_<yyyyMMdd_HHmmss>.doc | .xls
 Dokument    Compose   if(format = excel, tabulka pro Excel, dokument pro Word)
-Uloz        SharePoint CreateFile do /SiteAssets
-Adresa      Compose   <web>/SiteAssets/<jmeno>
+Ulozeni     If        mimo režim mapy i šablony → Uloz (CreateFile do /SiteAssets)
+Cesta_webu  Compose   server-relative cesta webu (/sites/…) pro odkaz na náhled
+Adresa      Compose   mapa → náhled knihovny · šablona → SiteAssets/<sešit> · jinak <web>/SiteAssets/<jmeno>
 Odpoved     Response  { "adresa": … }
 ```
 

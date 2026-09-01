@@ -611,6 +611,35 @@ def kontrola_unikatnosti(soubory):
 # a překryvná vrstva galerie leží nad celým řádkem záměrně.
 PREKRYV_POVOLEN = {"lbl_RadekPrekryv", "lbl_StromPrekryv", "lbl_RadekPrekryvC"}
 
+# Návrhová plocha appky. Odpovídá DocumentLayoutWidth/Height v .msapp a appka
+# má ScaleToFit, takže Parent.Width je za běhu vždycky 1366 bez ohledu na okno
+# prohlížeče — souřadnice z výrazů `Parent.Width - N` jdou tedy dopočítat
+# přesně, ne odhadem. Shodu s .msapp hlídá check_solution.py.
+SIRKA_PLOCHY = 1366
+VYSKA_PLOCHY = 768
+
+
+def souradnice_v_px(vyraz, rozmer):
+    """Pixelová hodnota souřadnice, nebo None, když ji spočítat nejde.
+
+    Vzniklo z btn_Zaloha (01.09.2026): popisek `lbl_RozpadPocet` má
+    `X = Parent.Width - 240`, tedy 1126, a ležel tak přes pravých 94 px
+    tlačítka Záloha. Protože byl v souboru později, kreslil se NAD ním a
+    klikání do většiny tlačítka spolkl — tlačítko „nic nedělalo" a ukazovalo
+    cizí tooltip. Brána to přeskakovala právě proto, že souřadnice byla výraz.
+    """
+    text = str(vyraz).lstrip("=").strip()
+    if text.isdigit():
+        return int(text)
+    plocha = {"Width": SIRKA_PLOCHY, "Height": VYSKA_PLOCHY}
+    shoda = re.fullmatch(r"Parent\.(Width|Height)(?:\s*([-+])\s*(\d+))?", text)
+    if not shoda:
+        return None
+    zaklad = plocha[shoda.group(1)]
+    if shoda.group(2) is None:
+        return zaklad
+    return zaklad - int(shoda.group(3)) if shoda.group(2) == "-" else zaklad + int(shoda.group(3))
+
 
 def kontrola_prekryvu(soubory):
     """Dva prvky s obsahem nesmějí ležet přes sebe.
@@ -619,9 +648,9 @@ def kontrola_prekryvu(soubory):
     nabídky Stav a seděl na stejné pozici jako jiný popisek. Studio ani packer
     to nehlásí, appka se otevře — vidí to až člověk na snímku obrazovky.
 
-    Počítá se jen tam, kde jsou všechny čtyři souřadnice obou prvků čísla;
-    výrazy typu `Parent.Width - 80` se přeskakují, protože bez znalosti šířky
-    plochy by kontrola jen hádala.
+    Počítá se tam, kde jdou všechny čtyři souřadnice obou prvků dopočítat —
+    číslem, nebo výrazem `Parent.Width/Height ± N` proti návrhové ploše
+    (viz `souradnice_v_px`). Zbytek se přeskakuje.
     """
     obsahove = ("lbl_", "txt_", "drp_", "btn_", "cmb_", "ico_")
 
@@ -651,9 +680,10 @@ def kontrola_prekryvu(soubory):
                             continue
                         vlastnosti = definice.get("Properties") or {}
                         souradnice = []
-                        for klic in ("X", "Y", "Width", "Height"):
-                            hodnota = str(vlastnosti.get(klic, "")).lstrip("=").strip()
-                            souradnice.append(int(hodnota) if hodnota.isdigit() else None)
+                        for klic, rozmer in (("X", "Width"), ("Y", "Height"),
+                                             ("Width", "Width"), ("Height", "Height")):
+                            souradnice.append(
+                                souradnice_v_px(vlastnosti.get(klic, ""), rozmer))
                         if any(s is None for s in souradnice):
                             continue
                         # Prvky skryté za stejné podmínky se nepřekrývají za běhu.

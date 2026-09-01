@@ -1734,6 +1734,63 @@ Tenhle plán nahrazuje námět **R-1** (hromadné pořízení aktivit) a naplňu
 **R-5** (snímek rejstříku k datu). Oba zůstávají v seznamu níže jen jako
 historický kontext.
 
+## F12 — sjednocená nabídka Data a vydání šablony (zadáno 01.09.2026)
+
+**Stav:** hotovo, balík **1.0.0.81**. Zadáno z provozu po testu balíku 80.
+
+Tři věci naráz, protože všechny sedí ve stejném pruhu tlačítek nad stromem:
+
+```
+1. [Tlačítko Záloha nereaguje] — HOTOVO — co: src/check_app.py, kontrola_prekryvu
+   Příčina NENÍ ve flow ani v registraci: popisek `lbl_RozpadPocet`
+   („47 řádků") má X = Parent.Width - 240, tedy 1126 na návrhové ploše 1366,
+   a ležel tak přes pravých 94 px tlačítka Záloha (X 1120, šířka 100). Protože
+   je v souboru později, kreslí se NAD ním — spolkl klik i tooltip. Odtud oba
+   hlášené příznaky naráz: „nic nedělá" a „divný tooltip" (byl to tooltip toho
+   popisku).
+   verify: brána `kontrola_prekryvu` dopočítává souřadnice z výrazů
+     `Parent.Width/Height ± N` proti návrhové ploše, místo aby je přeskakovala.
+     Spuštěná na vadném zdroji vypsala přesně jeden nález:
+     `'btn_Zaloha' a 'lbl_RozpadPocet' se překrývají o 94×28 px` — a nic
+     jiného, takže nejde o plošné zpřísnění.
+   edge cases: appka má ScaleToFit, takže Parent.Width je vždycky 1366 bez
+     ohledu na okno prohlížeče — dopočet je přesný, ne odhad.
+   risk: kdyby se návrhová plocha v appce změnila a konstanta v bráně ne,
+     počítala by kontrola s cizími čísly. Hlídá to `check_solution.py` proti
+     DocumentLayoutWidth/Height v .msapp.
+
+2. [Jedna nabídka místo tří tlačítek] — HOTOVO — co: src/app_src/scr_Dashboard.pa.yaml
+   Export ▾, Záloha a (budoucí) Import sjednoceny do rozbalovátka **Data ▾**
+   na X = 1016. Položky: Export do Wordu · Export do Excelu · Vzorová tabulka
+   pro import · Záloha rejstříku. `varMenuExport` přejmenována na `varMenuData`.
+   HTML mapa ▾ zůstává samostatně — zadání mluvilo o exportu, importu a záloze.
+   verify: `check_app.py` zeleně (žádný překryv, pořadí nabídek proti stínu,
+     odkazy a proměnné) + `check_solution.py` 443 kontrol nad balíkem.
+   edge cases: položky nabídky musí být v souboru ZA stínem `rec_MenuStin`,
+     jinak stín spolkne klik (1.0.0.41) — hlídá `kontrola_poradi_nabidek`.
+   risk: pruh se zkrátil, takže popisek s počtem řádků už na nic neleze;
+     kdyby v budoucnu přibylo další tlačítko, brána z kroku 1 to ohlásí.
+
+3. [Vydání vzorové tabulky uživateli] — HOTOVO — co: build_export_flow.py,
+     položka btn_SablonaImport, INSTALACE.md krok 5
+   Šablona z F11/3a se ke správci dostane stažením z appky. `.xlsx` sestavit
+   ve flow nejde (je to zip), takže hotový soubor leží v **Site Assets** a
+   `ExportFlow` v novém režimu `__sablona__` vrací jen jeho adresu — appka na
+   ni zavolá `Download()`. Nová smluvená hodnota vstupu je totéž, co už dělá
+   `__mapa__`, takže flow NEPOTŘEBUJE novou registraci ve Studiu.
+   Rozdíl proti mapě: šablona dostane **přímou cestu** k souboru (má se
+   stáhnout), mapa odkaz na náhled knihovny (má se zobrazit).
+   verify: `check_export_flow.py` 128 kontrol — nová `vyznam_sablona()`
+     vyhodnotí flow pro vstup `__sablona__` a ověří, že adresa je přímá cesta
+     k `SiteAssets/sablona_import_aktivit.xlsx`, že to není odkaz na náhled
+     a že běžný export tím nedostal adresu šablony. Podmínka zápisu se
+     kontroluje pro OBA režimy.
+   edge cases: soubor v Site Assets se musí jmenovat přesně
+     `sablona_import_aktivit.xlsx` — flow adresu skládá z názvu, nevyhledává.
+   risk: zapomenutý upload → stáhne se chybová stránka místo sešitu. Proto je
+     to bod v INSTALACE.md kroku 5 i řádek v tabulce příznaků.
+```
+
 ---
 ## Náměty na rozšíření (neschválené, k připomenutí)
 

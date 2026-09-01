@@ -40,6 +40,8 @@ AKCE = ["Vstup", "Html_radky", "Xls_radky", "Jmeno", "Dokument", "Ulozeni",
 # nesmí provést, jinak by export přepsal samotnou mapu.
 VNORENA_ZAPISOVA = "Uloz"
 REZIM_MAPA = "__mapa__"
+REZIM_SABLONA = "__sablona__"
+SABLONA_SOUBOR = "sablona_import_aktivit.xlsx"
 KLICE_RADKU = {"uroven", "kod", "nazev", "vlastnik", "stav"}
 TEXTOVA_POLE = ("kod", "nazev", "vlastnik", "stav")
 ODSAZENI_PT = 18
@@ -217,6 +219,12 @@ def vyhodnot(uzel, kontext):
         return hodnoty[1] if hodnoty[0] else hodnoty[2]
     if jmeno == "equals":
         return hodnoty[0] == hodnoty[1]
+    if jmeno == "or":
+        return any(hodnoty)
+    if jmeno == "and":
+        return all(hodnoty)
+    if jmeno == "not":
+        return not hodnoty[0]
     if jmeno == "string":
         return _text(hodnoty[0])
     if jmeno == "int":
@@ -354,8 +362,9 @@ def struktura(flow, web):
     if list(vnorene) != [VNORENA_ZAPISOVA]:
         return None
     podminka = json.dumps(ulozeni.get("expression"), ensure_ascii=False)
-    overit(REZIM_MAPA in podminka and '"not"' in podminka,
-           f"podmínka zápisu nevylučuje režim {REZIM_MAPA}: {podminka}")
+    for rezim in (REZIM_MAPA, REZIM_SABLONA):
+        overit(rezim in podminka and '"not"' in podminka,
+               f"podmínka zápisu nevylučuje režim {rezim}: {podminka}")
 
     parametry = vnorene[VNORENA_ZAPISOVA]["inputs"]["parameters"]
     overit(parametry.get("dataset") == ep.web(),
@@ -691,6 +700,30 @@ def vyznam_mapa_vzorek(akce):
            f"      mám:   {adresa}")
 
 
+def vyznam_sablona(akce, web):
+    """Vstup `__sablona__` musí vrátit přímou cestu k sešitu v Site Assets.
+
+    Na rozdíl od mapy se má soubor stáhnout, ne zobrazit — přímá cesta je
+    tedy správně, protože Strict browser file handling na ní pošle
+    Content-Disposition: attachment. Zároveň se v tomhle režimu nesmí nic
+    uložit: název by vyšel na .doc/.xls a v Site Assets by přibýval odpad
+    při každém stažení šablony.
+    """
+    kontext = priprav_kontext(akce, VZOREK, NADPIS, "word", text=REZIM_SABLONA)
+    adresa = kontext["akce"]["Adresa"]
+
+    overit(adresa == f"{web}/SiteAssets/{SABLONA_SOUBOR}",
+           f"adresa vzorové tabulky není přímá cesta k souboru: {adresa}")
+    overit("AllItems.aspx" not in adresa,
+           f"adresa vzorové tabulky je odkaz na náhled — sešit by se otevřel "
+           f"místo stažení: {adresa}")
+
+    # Týž řetěz musí pro běžný vstup dál vracet vyexportovaný soubor.
+    bezny = priprav_kontext(akce, VZOREK, NADPIS, "word")["akce"]["Adresa"]
+    overit(not bezny.endswith(SABLONA_SOUBOR),
+           f"běžný export dostal adresu vzorové tabulky: {bezny}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True)
@@ -723,6 +756,7 @@ def main():
         vyznam_meze(akce)
         vyznam_mapa(akce, web)
         vyznam_mapa_vzorek(akce)
+        vyznam_sablona(akce, web)
     zapis_v_baliku(polozky, klic)
     return vypis()
 

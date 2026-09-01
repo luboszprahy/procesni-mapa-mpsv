@@ -60,6 +60,11 @@ CILOVA_SLOZKA = "/SiteAssets"
 # by uživatel appku znovu projít přes Add data.
 REZIM_MAPA = "__mapa__"
 MAPA_SOUBOR = "procesni_mapa.html"
+# Totéž pro vzorovou tabulku hromadného importu. Sestavit .xlsx ve flow nejde
+# (je to zip), takže hotový soubor leží v Site Assets a flow jen vrátí jeho
+# adresu — appka ji stáhne přes Download().
+REZIM_SABLONA = "__sablona__"
+SABLONA_SOUBOR = "sablona_import_aktivit.xlsx"
 HOST_SP = "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
 
 # Klíče datového kontraktu. Drží je deploy/flow_Export.md a kontroluje
@@ -230,9 +235,22 @@ def trigger():
     }
 
 
+def je_rezim(hodnota):
+    """Výraz, kterým se pozná dotaz na adresu souboru místo exportu."""
+    return f"equals(triggerBody()['text'], {lit(hodnota)})"
+
+
 def je_mapa():
-    """Výraz, kterým se pozná dotaz na adresu mapy místo exportu."""
-    return f"equals(triggerBody()['text'], {lit(REZIM_MAPA)})"
+    return je_rezim(REZIM_MAPA)
+
+
+def je_sablona():
+    return je_rezim(REZIM_SABLONA)
+
+
+def bez_dokumentu():
+    """Režimy, ve kterých se nic nesestavuje ani neukládá — jen se vrací adresa."""
+    return f"or({je_mapa()}, {je_sablona()})"
 
 
 def enkoduj_cestu(vyraz):
@@ -264,11 +282,21 @@ def vyraz_adresy_mapy():
             f"{enkoduj_cestu(slozka)})")
 
 
+def vyraz_adresy_sablony():
+    """Přímá cesta k souboru, ne náhled knihovny jako u mapy.
+
+    U mapy je náhled potřeba proto, že se má zobrazit; sešit se má naopak
+    stáhnout, a přesně to Strict browser file handling na přímé cestě udělá.
+    """
+    return (f"concat({ep.vyraz(ep.WEB)}, "
+            f"{lit(CILOVA_SLOZKA + '/' + SABLONA_SOUBOR)})")
+
+
 def akce():
     kroky = {}
     kroky["Vstup"] = {
         "type": "Compose",
-        "inputs": ("@json(if(" + je_mapa() + ", " + lit('{"radky":[]}')
+        "inputs": ("@json(if(" + bez_dokumentu() + ", " + lit('{"radky":[]}')
                    + ", triggerBody()['text']))"),
         "runAfter": {},
     }
@@ -299,7 +327,10 @@ def akce():
     # a export by přepsal samotnou mapu. Proto zápis, a jen ten, jde do podmínky.
     kroky["Ulozeni"] = {
         "type": "If",
-        "expression": {"not": {"equals": ["@triggerBody()['text']", REZIM_MAPA]}},
+        "expression": {"and": [
+            {"not": {"equals": ["@triggerBody()['text']", REZIM_MAPA]}},
+            {"not": {"equals": ["@triggerBody()['text']", REZIM_SABLONA]}},
+        ]},
         "actions": {
             "Uloz": {
                 "type": "OpenApiConnection",
@@ -333,8 +364,9 @@ def akce():
     kroky["Adresa"] = {
         "type": "Compose",
         "inputs": (f"@if({je_mapa()}, {vyraz_adresy_mapy()}, "
+                   f"if({je_sablona()}, {vyraz_adresy_sablony()}, "
                    f"concat({ep.vyraz(ep.WEB)}, {lit(CILOVA_SLOZKA + '/')}, "
-                   f"outputs('Jmeno')))"),
+                   f"outputs('Jmeno'))))"),
         "runAfter": {"Cesta_webu": ["Succeeded"]},
     }
     kroky["Odpoved"] = {

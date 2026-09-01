@@ -1,33 +1,39 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 09:05** — F11 krok 3a hotový (šablona pro import).
-Balík 1.0.0.80 čeká na import; uživatel testuje 01.09.2026.
+Aktualizováno: **2026-09-01 11:05** — balík **1.0.0.81**: nabídka Data ▾,
+oprava nereagujícího tlačítka Záloha, vzorová tabulka ke stažení z appky.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
-1. **Naimportuj `deploy/procesnimapa_1_0_0_80.zip`** a projdi
-   **`deploy/INSTALACE.md`**. Proti 76 přibyla devátá proměnná
-   `mpsv_listZalohy` (knihovna `Zálohy`) a tlačítko **Záloha** v horní liště
-   Přehledu. `setup_sharepoint.js` už na PPF běžel, takže pořadí kroků 1 a 2
-   tentokrát nehrozí.
-   **Ověření, na kterém záleží nejvíc:** po stisku tlačítka Záloha musí
-   v knihovně `Zálohy` přibýt `rejstrik_<RRRR-MM-DD_HHMM>.json` a v něm musí
-   mít `listy.DilciProcesy` **250 položek, ne 100**. Sto by znamenalo
-   nepropsané stránkování — běh je v tom případě zelený a snímek přesto
-   oříznutý.
+1. **Naimportuj `deploy/procesnimapa_1_0_0_81.zip`** a projdi
+   **`deploy/INSTALACE.md`**. Proti 80 nepřibyla žádná proměnná ani flow —
+   mění se jen appka a `ExportFlow`, takže kroky 1 a 2 jsou tentokrát
+   formalita. **Nový je krok 5:** do knihovny **Site Assets** nahraj
+   `deploy/sablona_import_aktivit.xlsx` (přesně pod tím jménem).
+   **Ověření (krok 7):** v horní liště Přehledu je jedno tlačítko **Data ▾**
+   a pod ním čtyři položky — Export do Wordu, Export do Excelu, Vzorová
+   tabulka pro import, Záloha rejstříku. Záloha musí po kliknutí ohlásit
+   „Záloha spuštěna" a do knihovny `Zálohy` přidat snímek; vzorová tabulka
+   se musí stáhnout jako `.xlsx`.
 
-2. **Test DLP pro Excel Online (Business)** — ~10 min, pořád otevřené.
+2. **Zbývá ověřit obsah snímku ze zálohy.** Plánovaný běh uspěl
+   (`rejstrik_2026-09-01_0300.json` v knihovně), ruční ne — z důvodu, který
+   je teď opravený. Otevři **poslední** snímek a zkontroluj, že
+   `listy.DilciProcesy` má **249 položek** (tolik jich dnes v listu je),
+   ne 100. Sto by znamenalo nepropsané stránkování — běh je v tom případě
+   zelený a snímek přesto oříznutý. Je to jediná vada zálohy, která se jinak
+   pozná až při obnově.
+
+3. **Test DLP pro Excel Online (Business)** — ~10 min, pořád otevřené.
    V Power Automate ručně nové flow, jedna akce `List rows present in a table`
-   nad testovacím `.xlsx` v knihovně na PPF. Tři kontrolní body: akce se
-   objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí řádky.
-   Soubor musí mít **formátovanou Tabulku** (Vložit → Tabulka), ne volnou
-   mřížku — jinak konektor neuvidí nic a vypadá to jako chyba oprávnění.
-   **Na tom stojí tvar F11 kroku 3b.** Když konektor neprojde, hromadný import
-   se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js` z
-   vývojářského skriptu na nástroj pro správce).
+   nad `sablona_import_aktivit.xlsx` v knihovně na PPF. Tři kontrolní body:
+   akce se objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí
+   řádky. **Na tom stojí tvar F11 kroku 3b.** Když konektor neprojde, hromadný
+   import se musí postavit jinak (povýšit `deploy/mpsv/02_import_dat.js`
+   z vývojářského skriptu na nástroj pro správce).
 
-3. **Otevři `deploy/sablona_import_aktivit.xlsx` v Excelu** — ~2 min.
+4. **Otevři `deploy/sablona_import_aktivit.xlsx` v Excelu** — ~2 min.
    Offline brána ověří obsah, ne to, že soubor Excel přijme bez „oprav".
    Tři kontrolní body: (a) otevře se **bez dialogu o opravě obsahu**,
    (b) ve sloupci **Stav** je na řádku 2 rozbalovátko s volbami
@@ -35,8 +41,6 @@ Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
    (c) po napsání textu do řádku 3 se Tabulka sama roztáhne (řádek zůstane
    uvnitř Tabulky, ne pod ní). Kdyby (a) selhalo, pošli doslovné znění
    dialogu — sešit se generuje, opraví se generátor.
-   **Ten samý soubor použij i na DLP test v bodě 2** — má formátovanou
-   Tabulku `Aktivity`, takže konektor je na čem zkoušet.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -44,16 +48,111 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 3a hotový** (01.09.2026, viz sekce níže). Další krok čeká na tebe:
+**F11 krok 3a i F12 hotové.** Další krok čeká na tebe:
 
 - **3b (flow `ImportFlow` + obrazovka náhledu)** se nezačíná, dokud není znám
-  **výsledek DLP testu Excel Online** (bod 2 výše). Na něm stojí, jestli import
+  **výsledek DLP testu Excel Online** (bod 3 výše). Na něm stojí, jestli import
   čte sešit konektorem, nebo se `deploy/mpsv/02_import_dat.js` povyšuje na
   nástroj pro správce.
 - **F11 krok 4 (restore)** se nezačíná dřív, než jsou zelené kroky 1 a 3.
 
-**Pozor při navazování:** kdyby import 1.0.0.80 nedopadl, nezačínej opravovat
+**Pozor při navazování:** kdyby import 1.0.0.81 nedopadl, nezačínej opravovat
 balík dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+
+## Kontrola nasazení na PPF DEV podle snímků (01.09.2026 10:42)
+
+**Nic nechybí.** Site contents má všech sedm listů schématu plus knihovnu
+`Zalohy`, kterou přidal balík 80:
+
+| co | v prostředí | pozn. |
+|---|---|---|
+| Agendy · Procesy · Dílčí procesy · Aktivity | 6 · 44 · 249 · 48 | data, ne schéma — viz níže |
+| Vazba aktivita–dílčí proces | 54 | M:N, víc řádků než aktivit je správně |
+| Útvary | 7 | |
+| Historie kódů | 0 | správně — plní se až při přesunu položky (F10/2) |
+| Zálohy (knihovna) | 2 | oba snímky z plánovaného běhu |
+| Site Assets | 14 | mapa, šablona mapy, exporty |
+| Documents | 0 | výchozí knihovna webu, projekt ji nepoužívá |
+
+**Počty se liší od čísel v dokumentaci a je to v pořádku.** Rejstřík se
+importoval jako 7/46/250/46, dnes je 6/44/249/48. Rozdíl je testovacím
+mazáním a zakládáním v appce, ne ztrátou dat — čísla v `CLAUDE.md` popisují
+původní import, ne živý stav PPF DEV.
+
+**Zálohy mají jen soubory z plánovaného běhu** (`_1748` z 31.08., `_0300`
+z 01.09.), žádný ruční — což sedí na hlášenou vadu tlačítka, viz níže.
+
+## Balík 1.0.0.81 — nabídka Data ▾ a vzorová tabulka (01.09.2026 11:05)
+
+### Proč tlačítko Záloha nereagovalo
+
+**Nebylo to flow ani registrace.** Popisek `lbl_RozpadPocet` („47 řádků") má
+`X = Parent.Width - 240`, což je na návrhové ploše 1366 přesně **1126** —
+a tlačítko Záloha sedělo na 1120 se šířkou 100. Popisek tedy ležel přes jeho
+pravých **94 ze 100 px**, a protože je v souboru později, kreslí se NAD ním.
+Spolkl klik i tooltip. Odtud oba hlášené příznaky naráz: „nic nedělá"
+i „divný tooltip" — ten text o plochém seznamu a 2 000 záznamech patří tomu
+popisku, ne tlačítku.
+
+Klik na levých 6 px by fungoval, což vysvětluje, proč to nešlo poznat jako
+chyba rozvržení.
+
+### Brána, která to od teď chytne
+
+`kontrola_prekryvu` v `check_app.py` souřadnice zadané výrazem dosud
+**přeskakovala** — s odůvodněním, že bez znalosti šířky plochy by hádala.
+Hádat ale nemusí: appka má `ScaleToFit`, takže `Parent.Width` je vždycky
+1366 bez ohledu na okno prohlížeče. Nová `souradnice_v_px()` dopočítá tvary
+`Parent.Width/Height ± N`.
+
+Spuštěná na vadném zdroji vypsala **přesně jeden nález** —
+`btn_Zaloha` a `lbl_RozpadPocet` se překrývají o 94×28 px — a nic jiného,
+takže to není plošné zpřísnění, které by se muselo obcházet výjimkami.
+Shodu konstanty s `DocumentLayoutWidth/Height` v `.msapp` hlídá
+`check_solution.py`, aby brána nezačala počítat s cizími čísly.
+
+### Nabídka Data ▾
+
+Export ▾, Záloha a budoucí Import sjednoceny do jednoho rozbalovátka na
+X = 1016. Položky: **Export do Wordu (.doc)** · **Export do Excelu (.xls)** ·
+**Vzorová tabulka pro import** · **Záloha rejstříku**. `varMenuExport`
+přejmenována na `varMenuData`. HTML mapa ▾ zůstává samostatně — zadání
+mluvilo o exportu, importu a záloze.
+
+Vedlejší účinek, který stojí za zmínku: pruh se tím zkrátil o dvě tlačítka,
+takže popisek s počtem řádků už nemá na co lézt.
+
+### Vzorová tabulka ke stažení
+
+`ExportFlow` umí nový režim **`__sablona__`**: vrátí adresu souboru
+`SiteAssets/sablona_import_aktivit.xlsx` a appka na ni zavolá `Download()`.
+Je to táž smluvená hodnota vstupu jako `__mapa__`, takže **flow nepotřebuje
+novou registraci ve Studiu** — schéma volání se nemění.
+
+Rozdíl proti mapě je záměrný: šablona dostane **přímou cestu** k souboru
+(Strict browser file handling ji pošle do Downloads, což je přesně to chtěné),
+mapa odkaz na náhled knihovny (má se zobrazit, ne stáhnout).
+
+Sešit flow **nesestavuje** — `.xlsx` je zip a Logic Apps zip nevyrobí.
+Nahrává ho správce do Site Assets, nově krok 5 v `INSTALACE.md`, a soubor se
+musí jmenovat přesně tak, protože flow adresu skládá z názvu.
+
+### Brány na 81
+
+`check_solution` **443** · `check_export_flow` **128** (nová `vyznam_sablona`)
+· `check_zaloha_flow` 157 · `check_mapa_flow` 139 · `check_flow` 26 ·
+`check_app`, `check_env` zeleně. Mutačně: `mutace_parametry` 4/4,
+`mutace_napojeni` 5/5, `mutace_export_mapa` 7/7, `mutace_zaloha` 9/9.
+
+### `pac` na 5CG5210MB2 nebyl
+
+Build appky ho potřebuje (`.msapp` se z YAML balí přes `pac canvas pack`)
+a rozšíření VS Code tu není — VS Code na stroji vůbec není. Stažen tedy
+balíček `microsoft.powerapps.cli` **2.11.2** z nuget.org a rozbalen do
+`runs/app_build/pac/`; `build_app.py` to místo sám prohledává, takže příště
+se nic zadávat nemusí. Je novější než 2.0.15x na HP-LUBOS, proto ověřeno,
+že se formát nezměnil: `DocVersion 1.349` a `MSAppStructureVersion 2.4.0`
+vyšly stejné jako u vydaného balíku 80.
 
 ## F11 krok 3a — šablona pro hromadný import (01.09.2026 09:05)
 

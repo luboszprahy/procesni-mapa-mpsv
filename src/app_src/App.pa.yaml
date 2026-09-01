@@ -32,6 +32,9 @@ App:
       // (flow ji složí z proměnné prostředí, takže sedí na to prostředí,
       // kde appka běží). Tady jen prázdno, aby proměnná existovala.
       Set(varMapaUrl, "");
+      // Totéž pro adresu vzorové tabulky pro import — ta leží v Site
+      // Assets a její adresu skládá rovněž ExportFlow.
+      Set(varSablonaUrl, "");
       // Doba svícení notifikací v ms. Tři sekundy na obojí — chyba měla
       // dřív 4000, ale delší svícení působilo spíš jako zádrhel než jako
       // čas navíc na čtení (rozhodnuto 31.08.2026). Ladí se jen tady.
@@ -83,7 +86,7 @@ App:
       Set(varDashOsirele, false);
       Set(varMenuRozbalit, false);
       Set(varMenuMapa, false);
-      Set(varMenuExport, false);
+      Set(varMenuData, false);
       Set(varExportBezi, false);
       Set(varPublikuji, false);
       Set(varZalohuji, false);

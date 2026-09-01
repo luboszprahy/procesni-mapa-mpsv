@@ -742,7 +742,7 @@ Screens:
             OnSelect: |-
               =Set(varMenuRozbalit, !varMenuRozbalit);
               Set(varMenuMapa, false);
-              Set(varMenuExport, false)
+              Set(varMenuData, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
@@ -776,7 +776,7 @@ Screens:
             OnSelect: |-
               =Set(varMenuMapa, !varMenuMapa);
               Set(varMenuRozbalit, false);
-              Set(varMenuExport, false)
+              Set(varMenuData, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
@@ -785,26 +785,29 @@ Screens:
             Width: =110
             X: =902
             Y: =116
-      # Nabídka exportu. Sbírá se tu, ne až v položkách: obě volby pak
+      # Nabídka práce se souborem: export, vzorová tabulka pro import, záloha.
+      # Sjednoceno 01.09.2026 — tři samostatná tlačítka v pruhu už se nevešla
+      # a popisek s počtem řádků na poslední z nich lezl (viz btn_Zaloha).
+      # colExport se sbírá tady, ne až v položkách: obě exportní volby pak
       # exportují prokazatelně tentýž pohled a liší se jen formátem.
       # nazevPlny místo nazev — do dokumentu patří celé znění aktivity,
       # ne zkrácený popisek do řádku stromu.
-      - btn_ExportMenu:
+      - btn_DataMenu:
           Control: Classic/Button@2.2.0
           Properties:
             BorderColor: =stylOkraj
             BorderThickness: =1
-            Color: =If(varMenuExport, RGBA(255, 255, 255, 1), stylAkce)
+            Color: =If(varMenuData, RGBA(255, 255, 255, 1), stylAkce)
             DisplayMode: =If(varExportBezi, DisplayMode.Disabled, DisplayMode.Edit)
-            Fill: =If(varMenuExport, stylAkce, stylKarta)
+            Fill: =If(varMenuData, stylAkce, stylKarta)
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =28
-            HoverColor: =If(varMenuExport, RGBA(255, 255, 255, 1), stylAkce)
-            HoverFill: =If(varMenuExport, stylAkceHover, stylRadekHover)
+            HoverColor: =If(varMenuData, RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varMenuData, stylAkceHover, stylRadekHover)
             OnSelect: |-
-              =Set(varMenuExport, !varMenuExport);
+              =Set(varMenuData, !varMenuData);
               Set(varMenuMapa, false);
               Set(varMenuRozbalit, false);
               Set(
@@ -829,45 +832,10 @@ Screens:
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
-            Text: ="Export  ▾"
-            Tooltip: '="Uloží to, co je právě vidět ve stromu - po filtru stavu, hledání i chipu osiřelých - jako dokument pro Word nebo tabulku pro Excel. Neexportuje celý rejstřík, ale momentální pohled. Soubor vzniká v knihovně Site Assets a rovnou se stáhne."'
+            Text: ="Data  ▾"
+            Tooltip: '="Práce se souborem: export toho, co je právě vidět ve stromu, prázdná tabulka pro hromadný import a záloha celého rejstříku. Export bere momentální pohled - po filtru stavu, hledání i chipu osiřelých - ne celý rejstřík."'
             Width: =100
             X: =1016
-            Y: =116
-      # Záloha nemá nabídku, protože má zatím jedinou volbu. Až přibude obnova
-      # (F11 krok 4), stane se z toho rozbalovátko jako u mapy a exportu.
-      - btn_Zaloha:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =stylOkraj
-            BorderThickness: =1
-            Color: =stylAkce
-            DisplayMode: =If(varZalohuji, DisplayMode.Disabled, DisplayMode.Edit)
-            Fill: =stylKarta
-            FocusedBorderColor: =stylAkce
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =28
-            HoverColor: =stylAkce
-            HoverFill: =stylRadekHover
-            OnSelect: |-
-              =Set(varMenuMapa, false);
-              Set(varMenuExport, false);
-              Set(varMenuRozbalit, false);
-              Set(varZalohuji, true);
-              IfError(
-                  ZalohaFlow.Run();
-                  Notify("Záloha spuštěna. Snímek se za chvíli objeví v knihovně Zálohy.", NotificationType.Information, varNotifyMs),
-                  Notify("Zálohu se nepodařilo spustit: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
-              );
-              Set(varZalohuji, false)
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylAkceStisk
-            Size: =10
-            Text: ="Záloha"
-            Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00. Hlášení potvrzuje spuštění, ne dokončení."'
-            Width: =100
-            X: =1120
             Y: =116
       - btn_KodD:
           Control: Classic/Button@2.2.0
@@ -1371,8 +1339,8 @@ Screens:
             OnSelect: |-
               =Set(varMenuRozbalit, false);
               Set(varMenuMapa, false);
-              Set(varMenuExport, false)
-            Visible: =varMenuRozbalit || varMenuMapa || varMenuExport
+              Set(varMenuData, false)
+            Visible: =varMenuRozbalit || varMenuMapa || varMenuData
             Width: =Parent.Width
             X: =0
             Y: =0
@@ -1589,18 +1557,18 @@ Screens:
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
       # obrazovkou. Souřadnice jsou vzorce, takže kontrola překryvu je
       # přeskočí — u překryvné vrstvy je to správně.
-      # ---------- nabídka exportu ----------
+      # ---------- nabídka Data ----------
       # Leží až za stínem nabídek: co je v souboru dřív, kreslí se níž,
       # a stín pod položkami by jinak spolkl klik (viz 1.0.0.41).
-      - rec_MenuExportPanel:
+      - rec_MenuDataPanel:
           Control: Rectangle@2.3.0
           Properties:
             BorderColor: =stylOkraj
             BorderThickness: =1
             Fill: =stylKarta
-            Height: =84
-            Visible: =varMenuExport
-            Width: =180
+            Height: =148
+            Visible: =varMenuData
+            Width: =220
             X: =1016
             Y: =144
       - btn_ExportWord:
@@ -1619,7 +1587,7 @@ Screens:
             HoverColor: =stylAkce
             HoverFill: =stylRadekHover
             OnSelect: |-
-              =Set(varMenuExport, false);
+              =Set(varMenuData, false);
               If(
                   IsEmpty(colExport),
                   Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning, varNotifyMs),
@@ -1647,10 +1615,10 @@ Screens:
             PressedColor: =stylAkceStisk
             PressedFill: =stylRadekVybrany
             Size: =11
-            Text: ="Do Wordu (.doc)"
+            Text: ="Export do Wordu (.doc)"
             Tooltip: '="Uloží momentální pohled jako dokument, který Word otevře a umí uložit jako .docx. Úrovně jsou odsazené jako ve stromu. Aktivity jdou do dokumentu celým zněním, ne zkráceným popiskem z řádku."'
-            Visible: =varMenuExport
-            Width: =172
+            Visible: =varMenuData
+            Width: =212
             X: =1020
             Y: =148
       - btn_ExportExcel:
@@ -1669,7 +1637,7 @@ Screens:
             HoverColor: =stylAkce
             HoverFill: =stylRadekHover
             OnSelect: |-
-              =Set(varMenuExport, false);
+              =Set(varMenuData, false);
               If(
                   IsEmpty(colExport),
                   Notify("Ve stromu není co exportovat - zruš filtr nebo hledání.", NotificationType.Warning, varNotifyMs),
@@ -1697,12 +1665,92 @@ Screens:
             PressedColor: =stylAkceStisk
             PressedFill: =stylRadekVybrany
             Size: =11
-            Text: ="Do Excelu (.xls)"
+            Text: ="Export do Excelu (.xls)"
             Tooltip: '="Uloží momentální pohled jako tabulku se sloupci úroveň, kód, název, vlastník a stav. Kódy zůstávají textem - v .csv je Excel převáděl na data (01-01 na 01.I). Formát .xls místo .xlsx schválně: .xlsx by vyžadoval placený konektor, který v tomhle prostředí není povolený, takže je to HTML tabulka s excelovým formátováním. Excel při otevření jednou upozorní, že přípona neodpovídá obsahu - potvrď Ano."'
-            Visible: =varMenuExport
-            Width: =172
+            Visible: =varMenuData
+            Width: =212
             X: =1020
             Y: =184
+      # Vzorová tabulka pro hromadný import. Stahuje se hotový .xlsx z knihovny
+      # Site Assets — sestavit ho ve flow nejde, .xlsx je zip a Logic Apps
+      # neumí zip vyrobit. Adresu appka nezná (textové proměnné prostředí
+      # canvas app nečte), takže si o ni řekne ExportFlow smluvenou hodnotou
+      # vstupu, stejně jako o adresu mapy.
+      - btn_SablonaImport:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varExportBezi, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuData, false);
+              Set(varExportBezi, true);
+              IfError(
+                  Set(varSablonaUrl, ExportFlow.Run("__sablona__").adresa),
+                  Set(varSablonaUrl, "")
+              );
+              If(
+                  IsBlank(varSablonaUrl),
+                  Notify("Vzorovou tabulku se nepodařilo najít - ověř, že tok ExportFlow je zapnutý a že soubor je v knihovně Site Assets.", NotificationType.Error, varNotifyChybaMs),
+                  Download(varSablonaUrl)
+              );
+              Set(varExportBezi, false)
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Vzorová tabulka pro import"
+            Tooltip: '="Stáhne prázdný sešit se sloupci, které import očekává. Vyplň v něm jeden řádek na aktivitu a nahraj ho zpět - kód nevyplňuj, přiděluje ho aplikace. Sloupce ani list nepřejmenovávej, import je čte podle názvů. Pokyny k jednotlivým sloupcům jsou na druhém listu sešitu."'
+            Visible: =varMenuData
+            Width: =212
+            X: =1020
+            Y: =220
+      # Záloha byla do 1.0.0.80 samostatné tlačítko v pruhu. Přesunuto sem
+      # 01.09.2026: v pruhu už nebylo místo a popisek s počtem řádků ležel
+      # přes jeho pravou půlku, takže se do něj nedalo pořádně kliknout.
+      - btn_Zaloha:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            DisplayMode: =If(varZalohuji, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuData, false);
+              Set(varZalohuji, true);
+              IfError(
+                  ZalohaFlow.Run();
+                  Notify("Záloha spuštěna. Snímek se za chvíli objeví v knihovně Zálohy.", NotificationType.Information, varNotifyMs),
+                  Notify("Zálohu se nepodařilo spustit: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+              );
+              Set(varZalohuji, false)
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Záloha rejstříku"
+            Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00. Hlášení potvrzuje spuštění, ne dokončení."'
+            Visible: =varMenuData
+            Width: =212
+            X: =1020
+            Y: =256
       - rec_ModalStinD:
           Control: Rectangle@2.3.0
           Properties:
