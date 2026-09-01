@@ -35,7 +35,9 @@ sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
 from build_import_flow import (FLOW, FLOW_GUID, HOST_XLS, KNIHOVNA,  # noqa: E402
                                LIST_AKTIVITY, LIST_DILCI, LIST_VAZBY,
-                               REZIM_ZAPIS, SPOJKA_VAZBY, STRANKOVANI, TABULKA,
+                               ODD_POLE, ODD_RADKU, POCTY,
+                               REZIM_SEZNAM, REZIM_ZAPIS, SPOJKA_VAZBY,
+                               STRANKOVANI, TABULKA,
                                VYCHOZI_STAV, nacti_schema, sloupce_sablony)
 
 chyby = []
@@ -81,7 +83,8 @@ def zkontroluj_kostru(definice, spojeni):
     akce = definice.get("actions") or {}
     for jmeno in ("Vstup", "Cesta_webu", "Site_id", "Web_id", "Disky", "Zdroj",
                   "Disk_kandidati", "Disk", "Soubor", "Radky", "Ocistene",
-                  "Prazdne", "S_obsahem", "Chybne", "Uplne", "Neznamy_dilci",
+                  "Rezim_seznam", "Prazdne", "S_obsahem", "Chybne", "Uplne",
+                  "Neznamy_dilci",
                   "Zarazene", "Duplicitni", "K_zalozeni", "Pouzite_kody",
                   "Zapis", "Chybne_radky", "Prehled", "Odpoved"):
         overit(jmeno in akce, f"chybí akce {jmeno}")
@@ -343,10 +346,61 @@ def zkontroluj_odpoved(akce):
     for jmeno, typ in vlastnosti.items():
         overit(typ.get("type") == "string", f"pole odpovědi {jmeno} není string")
 
-    prehled = text((akce.get("Prehled") or {}).get("inputs"))
-    for skupina in ("Prazdne", "K_zalozeni", "Duplicitni", "Chybne", "Neznamy_dilci"):
-        overit(f"body('{skupina}')" in prehled,
-               f"přehled nezmiňuje skupinu {skupina}")
+    # Obrazovka náhledu bere čísla podle POŘADÍ — oddělovaný text jméno pole
+    # nenese. Kdyby se pořadí změnilo, appka by tiše ukázala čísla v jiných
+    # sloupcích a nikdo by si toho nevšiml, protože jsou to malá celá čísla.
+    prehled = str((akce.get("Prehled") or {}).get("inputs", ""))
+    poradi = re.findall(r"body\('([^']+)'\)", prehled)
+    overit(tuple(poradi) == tuple(POCTY),
+           f"přehled má skupiny v pořadí {poradi}, kontrakt je {list(POCTY)}")
+    overit(prehled.count(f"'{ODD_POLE}'") == len(POCTY) - 1,
+           f"přehled neodděluje čísla oddělovačem {ODD_POLE!r}")
+
+    chybne = str((akce.get("Chybne_radky") or {}).get("inputs", ""))
+    overit(chybne.startswith("@join(") and f"'{ODD_RADKU}'" in chybne,
+           f"chybné řádky nejsou spojené oddělovačem {ODD_RADKU!r}: {chybne[:60]}")
+    for jmeno in ("Popis_chybne", "Popis_neznamy"):
+        radek = str(((akce.get(jmeno) or {}).get("inputs") or {}).get("select", ""))
+        overit(radek.count(f"'{ODD_POLE}'") == 2,
+               f"{jmeno} nemá tři pole (řádek, název, důvod) oddělená {ODD_POLE!r}")
+        overit("item()?['radek']" in radek,
+               f"{jmeno} nenese číslo řádku v sešitě")
+
+
+def zkontroluj_seznam(akce):
+    """Režim, kterým si appka řekne o seznam sešitů v knihovně.
+
+    Existuje proto, že appka knihovnu `Import` připojenou nemá a připojit ji
+    jde jedině ve Studiu, tedy dalším kolem. Dvě věci na tom musí sedět:
+    běh se po odpovědi MUSÍ ukončit (jinak by se pokračovalo dohledáváním
+    souboru, který nikdo nezadal), a schéma odpovědi musí zůstat totožné se
+    schématem hlavní odpovědi — jinak by flow přestalo appce sedět a muselo
+    by se znovu registrovat.
+    """
+    uzel = akce.get("Rezim_seznam") or {}
+    overit(uzel.get("type") == "If", "režim seznamu není podmínka")
+    overit(REZIM_SEZNAM in text(uzel.get("expression")),
+           f"podmínka se neptá na režim {REZIM_SEZNAM!r}")
+    vnitrek = uzel.get("actions") or {}
+    for jmeno in ("Soubory", "Jmena", "Odpoved_seznam", "Konec"):
+        overit(jmeno in vnitrek, f"v režimu seznamu chybí akce {jmeno}")
+
+    overit((vnitrek.get("Konec") or {}).get("type") == "Terminate",
+           "režim seznamu neukončuje běh — pokračovalo by se dohledáváním "
+           "souboru, jehož název v tomhle režimu nikdo nezadal")
+
+    uri = str((((vnitrek.get("Soubory") or {}).get("inputs") or {})
+               .get("parameters") or {}).get("parameters/uri", ""))
+    overit(f"/{KNIHOVNA}" in uri, f"seznam se nečte z knihovny {KNIHOVNA}: {uri[:70]}")
+    overit("FileLeafRef" in uri, "seznam nevybírá název souboru (FileLeafRef)")
+
+    hlavni = (((akce.get("Odpoved") or {}).get("inputs") or {})
+              .get("schema") or {}).get("properties") or {}
+    seznamova = (((vnitrek.get("Odpoved_seznam") or {}).get("inputs") or {})
+                 .get("schema") or {}).get("properties") or {}
+    overit(set(hlavni) == set(seznamova) and set(hlavni),
+           f"schéma odpovědi seznamu ({sorted(seznamova)}) se liší od hlavní "
+           f"odpovědi ({sorted(hlavni)}) — appka by jedno z nich nepřečetla")
 
 
 def main():
@@ -376,6 +430,7 @@ def main():
     zkontroluj_ctení_sesitu(akce, sloupce)
     zkontroluj_rozklad(akce, sloupce)
     zkontroluj_zapis(akce, sloupce)
+    zkontroluj_seznam(akce)
     zkontroluj_odpoved(akce)
     zkontroluj_prenositelnost(flow)
 

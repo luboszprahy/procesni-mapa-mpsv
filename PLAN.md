@@ -1581,10 +1581,10 @@ celý návrh na reálných datech dřív, než se pustíme do kaskády nad proce
 
 ## F11 — Záloha a hromadný import (zadáno 30.08.2026)
 
-**Stav:** krok 1 **hotový** (31.08.2026, balík 1.0.0.76) · krok 2 na uživateli ·
-krok 3a **hotový** (01.09.2026) · krok 3b čeká na výsledek kroku 2 ·
-krok 4 nezačatý. Krok 3 se dělí na 3a (šablona — platí v obou větvích)
-a 3b (flow + náhled, čeká na výsledek kroku 2).
+**Stav: HOTOVO celé** (01.09.2026, balík 1.0.0.87). Krok 1 záloha vč. úklidu,
+krok 2 DLP test prošel, krok 3a šablona, 3b import, krok 4 obnova — a nad
+3b i 4 jedna společná obrazovka náhledu. Zbývá zkouška na datech v prostředí;
+offline brány a mutace jsou zelené.
 
 **Rozhodnutí zadavatele (30.08.2026 18:08): import a záloha oddělené.**
 Sdílí tvar tabulky a validační/náhledový engine, ale ne formát a ne operaci.

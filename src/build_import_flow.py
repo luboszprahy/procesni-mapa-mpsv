@@ -62,12 +62,29 @@ HOST_XLS = "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness"
 
 STRANKOVANI = 5000
 REZIM_ZAPIS = "zapis"
+# Třetí režim: vrátí jen seznam sešitů v knihovně. Appka nemá knihovnu
+# `Import` připojenou jako datový zdroj a připojit ji jde jedině ve Studiu,
+# tedy dalším kolem. Schéma odpovědi se tím nemění (pořád čtyři řetězce),
+# takže flow nepotřebuje novou registraci.
+REZIM_SEZNAM = "seznam"
+
+# Pořadí čísel v přehledu je součástí kontraktu s obrazovkou náhledu.
+POCTY = ("Ocistene", "Prazdne", "K_zalozeni", "Duplicitni",
+         "Chybne", "Neznamy_dilci")
 VYCHOZI_STAV = "pracovní"
 
 # Oddělovač odvozeného klíče vazby. Týž tvar zakládá appka na obrazovce vazeb
 # (`varAktivita.Title & "__" & ThisItem.Title`) — kdyby se lišil, vyrobil by
 # import duplicitní vazby, které by appka neuměla najít.
 SPOJKA_VAZBY = "__"
+
+# Odpovědi jdou appce jako ODDĚLOVANÝ TEXT, ne JSON. Canvas app má
+# `dynamicschema = False`, takže by na `ParseJSON` neměla co navázat;
+# `Split()` funguje vždycky. Oddělovače jsou zvolené tak, aby se nemohly
+# potkat v názvu aktivity ani souboru.
+ODD_POLE = "|~|"
+ODD_RADKU = "|#|"
+
 
 HLAVICKY_ZAPIS = {
     "Accept": "application/json;odata=nometadata",
@@ -145,8 +162,58 @@ def akce(schema):
         "runAfter": {"Vstup": ["Succeeded"]},
     }
 
+    # Režim seznamu končí vlastní odpovědí a ukončením běhu — dál se nepokračuje,
+    # protože bez názvu souboru by `Soubor` neměl co dohledat.
+    kroky["Rezim_seznam"] = {
+        "type": "If",
+        "expression": {"equals": ["@outputs('Vstup')?['rezim']", REZIM_SEZNAM]},
+        "actions": {
+            "Soubory": rest(
+                "GET",
+                ("@concat('_api/web/GetList(" + chr(39) * 3 + ", outputs('Cesta_webu'), "
+                 + lit("/" + KNIHOVNA) + ", " + chr(39) * 3
+                 + ")/items?$select=FileLeafRef&$top=500&$orderby=Modified desc')"),
+                None),
+            "Jmena": {
+                "type": "Select",
+                "inputs": {
+                    "from": "@coalesce(body('Soubory')?['value'], createArray())",
+                    "select": "@item()?['FileLeafRef']",
+                },
+                "runAfter": {"Soubory": ["Succeeded"]},
+            },
+            "Odpoved_seznam": {
+                "type": "Response",
+                "kind": "PowerApp",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": {
+                        "stav": REZIM_SEZNAM,
+                        "soubor": "",
+                        "prehled": ("@join(body('Jmena'), "
+                                    + lit(ODD_RADKU) + ")"),
+                        "chyby": "[]",
+                    },
+                    "schema": {"type": "object", "properties": {
+                        "stav": {"type": "string"},
+                        "soubor": {"type": "string"},
+                        "prehled": {"type": "string"},
+                        "chyby": {"type": "string"},
+                    }},
+                },
+                "runAfter": {"Jmena": ["Succeeded"]},
+            },
+            "Konec": {
+                "type": "Terminate",
+                "inputs": {"runStatus": "Succeeded"},
+                "runAfter": {"Odpoved_seznam": ["Succeeded"]},
+            },
+        },
+        "runAfter": {"Cesta_webu": ["Succeeded"]},
+    }
+
     # ---------- parametry excelového konektoru se skládají za běhu ----------
-    kroky["Site_id"] = rest("GET", "@'_api/site/id'", "Cesta_webu")
+    kroky["Site_id"] = rest("GET", "@'_api/site/id'", "Rezim_seznam")
     kroky["Web_id"] = rest("GET", "@'_api/web/id'", "Site_id")
     kroky["Disky"] = rest("GET", "@'_api/v2.0/drives'", "Web_id")
 
@@ -337,11 +404,10 @@ def akce(schema):
         "type": "Select",
         "inputs": {
             "from": "@body('Chybne')",
-            "select": {
-                "radek": "@item()?['radek']",
-                "nazev": "@item()?['nazev']",
-                "duvod": "chybí povinný údaj (název nebo kód dílčího procesu)",
-            },
+            "select": ("@concat(string(item()?['radek']), " + lit(ODD_POLE)
+                       + ", item()?['nazev'], " + lit(ODD_POLE) + ", "
+                       + lit("chybí povinný údaj (název nebo kód dílčího procesu)")
+                       + ")"),
         },
         "runAfter": {"Zapis": ["Succeeded"]},
     }
@@ -349,31 +415,27 @@ def akce(schema):
         "type": "Select",
         "inputs": {
             "from": "@body('Neznamy_dilci')",
-            "select": {
-                "radek": "@item()?['radek']",
-                "nazev": "@item()?['nazev']",
-                "duvod": ("@concat('dílčí proces ', item()?['dilci_proces_kod'],"
-                          " ' v rejstříku není')"),
-            },
+            "select": ("@concat(string(item()?['radek']), " + lit(ODD_POLE)
+                       + ", item()?['nazev'], " + lit(ODD_POLE)
+                       + ", 'dílčí proces ', item()?['dilci_proces_kod'],"
+                       " ' v rejstříku není')"),
         },
         "runAfter": {"Popis_chybne": ["Succeeded"]},
     }
     kroky["Chybne_radky"] = {
         "type": "Compose",
-        "inputs": "@union(body('Popis_chybne'), body('Popis_neznamy'))",
+        "inputs": ("@join(union(body('Popis_chybne'), body('Popis_neznamy')), "
+                   + lit(ODD_RADKU) + ")"),
         "runAfter": {"Popis_neznamy": ["Succeeded"]},
     }
 
+    # Pořadí čísel je součástí kontraktu — appka je bere podle indexu.
+    # Mění-li se, musí se změnit i obrazovka náhledu; hlídá to brána.
     kroky["Prehled"] = {
         "type": "Compose",
-        "inputs": {
-            "celkem_radku": "@length(body('Ocistene'))",
-            "prazdne": "@length(body('Prazdne'))",
-            "zalozit": "@length(body('K_zalozeni'))",
-            "duplicitni": "@length(body('Duplicitni'))",
-            "chybne": "@length(body('Chybne'))",
-            "neznamy_dilci": "@length(body('Neznamy_dilci'))",
-        },
+        "inputs": "@concat(" + (", " + lit(ODD_POLE) + ", ").join(
+            f"string(length(body('{skupina}')))"
+            for skupina in POCTY) + ")",
         "runAfter": {"Chybne_radky": ["Succeeded"]},
     }
 
@@ -386,8 +448,8 @@ def akce(schema):
                 "stav": f"@if(equals(outputs('Vstup')?['rezim'], {lit(REZIM_ZAPIS)}),"
                         f" 'zapsano', 'nahled')",
                 "soubor": "@outputs('Vstup')?['soubor']",
-                "prehled": "@string(outputs('Prehled'))",
-                "chyby": "@string(outputs('Chybne_radky'))",
+                "prehled": "@outputs('Prehled')",
+                "chyby": "@outputs('Chybne_radky')",
             },
             "schema": {"type": "object", "properties": {
                 "stav": {"type": "string"},

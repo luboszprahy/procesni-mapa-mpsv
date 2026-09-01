@@ -1566,7 +1566,7 @@ Screens:
             BorderColor: =stylOkraj
             BorderThickness: =1
             Fill: =stylKarta
-            Height: =148
+            Height: =220
             Visible: =varMenuData
             Width: =220
             X: =1016
@@ -1746,11 +1746,70 @@ Screens:
             PressedFill: =stylRadekVybrany
             Size: =11
             Text: ="Záloha rejstříku"
-            Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00. Hlášení potvrzuje spuštění, ne dokončení."'
+            Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00 a nechává se posledních 20. Hlášení potvrzuje spuštění, ne dokončení."'
+            Visible: =varMenuData
+            Width: =212
+            X: =1020
+            Y: =292
+      # Import a obnova vedou na TÝŽ obrazovku — obě mají stejný tvar
+      # (vyber soubor, zkontroluj nanečisto, teprve pak zapiš) a lišit se
+      # dvěma obrazovkami by znamenalo udržovat dvakrát totéž.
+      - btn_ImportMenu:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuData, false);
+              Set(varNahledRezim, "import");
+              Navigate(scr_Nahled, ScreenTransition.Cover)
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Import z tabulky"
+            Tooltip: '="Hromadné založení aktivit z vyplněného sešitu, který jsi nahrál do knihovny Import. Nejdřív ukáže, co by vzniklo, co je duplicita a kde je chyba; zapisuje se až po potvrzení."'
             Visible: =varMenuData
             Width: =212
             X: =1020
             Y: =256
+      - btn_ObnovaMenu:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Align: =Align.Left
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: |-
+              =Set(varMenuData, false);
+              Set(varNahledRezim, "obnova");
+              Navigate(scr_Nahled, ScreenTransition.Cover)
+            PaddingLeft: =12
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Obnova ze zálohy"
+            Tooltip: '="Vrátí rejstřík do stavu, ve kterém byl v okamžiku pořízení vybraného snímku. Nejdřív ukáže, kolik položek se vrátí; zapisuje se až po potvrzení. Obnova nikdy nemaže — řádek, který dnes je a ve snímku není, jen ohlásí."'
+            Visible: =varMenuData
+            Width: =212
+            X: =1020
+            Y: =328
       - rec_ModalStinD:
           Control: Rectangle@2.3.0
           Properties:

@@ -91,6 +91,17 @@ App:
       Set(varPublikuji, false);
       Set(varZalohuji, false);
       Set(varSmazatD, Blank());
+      // Obrazovka náhledu (import i obnova). Odpovědi z flow chodí jako
+      // oddělovaný text, ne JSON — appka má dynamicschema = false.
+      Set(varNahledRezim, "");
+      Set(varNahledSoubor, "");
+      Set(varNahledHotovo, "");
+      Set(varNahledHlaseni, "");
+      Set(varNahledSeznam, "");
+      Set(varNahledOdpoved, "");
+      Set(varNahledChybyText, "");
+      Set(varNahledBezi, false);
+      Set(varNahledPotvrdit, false);
       // Razítko dosazuje build_app.py při balení. Bez něj se z běžící appky
       // nedá poznat, jestli po importu proběhla ve Studiu povinná mikro-změna
       // + Save + Publish — publikovaný dokument totiž vzniká až tam a starý

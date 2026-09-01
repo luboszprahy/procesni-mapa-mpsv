@@ -1,8 +1,8 @@
 # Flow `ImportFlow` — hromadné pořízení aktivit z Excelu
 
 Vyrábí ho `src/build_import_flow.py`, hlídá `src/check_import_flow.py`
-(145 kontrol) a mutačně `src/mutace_import.py` (21/21).
-Poprvé v balíku **1.0.0.85**.
+(159 kontrol) a mutačně `src/mutace_import.py` (21/21).
+Poprvé v balíku **1.0.0.85**, obrazovka náhledu od **1.0.0.87**.
 
 ## K čemu je
 
@@ -25,18 +25,19 @@ pro správce.
 
 Odpověď:
 
-```json
-{
-  "stav": "nahled",
-  "soubor": "karta_s3.xlsx",
-  "prehled": "{\"celkem_radku\":46,\"prazdne\":1,\"zalozit\":43,\"duplicitni\":1,\"chybne\":0,\"neznamy_dilci\":1}",
-  "chyby": "[{\"radek\":17,\"nazev\":\"Vede evidenci…\",\"duvod\":\"dílčí proces 01-02-999 v rejstříku není\"}]"
-}
+```
+stav    = "nahled"
+soubor  = "karta_s3.xlsx"
+prehled = "46|~|1|~|43|~|1|~|0|~|1"
+chyby   = "17|~|Vede evidenci…|~|dílčí proces 01-02-999 v rejstříku není"
 ```
 
-`prehled` i `chyby` jdou **jako řetězec**, ne jako objekt: schéma odpovědi se
-pak nemění s obsahem a flow se nemusí znovu registrovat ve Studiu. Appka si je
-rozebere `ParseJSON`.
+`prehled` je **šest čísel v pevném pořadí**: řádků celkem, prázdné, založí se,
+duplicitní, chybné, neexistující dílčí proces. `chyby` je nula až N řádků
+`číslo řádku |~| název |~| důvod`, oddělených `|#|`.
+
+Proč ne JSON: viz poslední kapitola. Pořadí je součástí kontraktu, protože
+oddělovaný text jméno pole nenese — hlídá ho brána.
 
 ## Co se o konektoru ověřilo měřením
 
@@ -151,3 +152,29 @@ chvíli to trvá) a v `Vazba aktivita–dílčí proces` primární vazbu.
   jako duplicitu. Opravy se dělají v appce.
 - Kód v sešitě se nedá vyplnit — v šabloně ten sloupec není a import ho
   přiděluje sám.
+
+## Třetí režim: `seznam`
+
+```json
+{"rezim": "seznam"}
+```
+
+Vrátí názvy sešitů v knihovně `Import` v poli `prehled`, oddělené `|#|`. Obrazovka náhledu jimi plní
+rozbalovátko.
+
+Existuje proto, že appka by jinak musela mít knihovnu připojenou jako datový
+zdroj, a to jde jedině ve Studiu — tedy dalším kolem. Flow navíc vrací přesně
+ta jména, která samo přijímá na vstupu, takže se nemají jak rozejít s tím, co
+appka pošle zpátky.
+
+**Schéma odpovědi zůstává totožné** (čtyři řetězce), takže flow kvůli tomuhle
+režimu nepotřebuje novou registraci. Běh se po odpovědi ukončí — dál by se
+pokračovalo nad souborem, jehož název v tomhle režimu nikdo nezadal.
+
+## Odpovědi jdou jako oddělovaný text, ne JSON
+
+Canvas app má `dynamicschema = False`, takže na `ParseJSON` nemá co navázat.
+Pole se proto spojují oddělovači `|~|` (pole) a `|#|` (řádky) a appka je
+rozebírá `Split()`. **Bere je podle POŘADÍ**, ne podle klíče — oddělovaný text
+jméno pole nenese —, takže pořadí je součástí kontraktu a hlídá ho brána.
+

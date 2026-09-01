@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_85.zip`
+# Instalace balíku `procesnimapa_1_0_0_87.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -58,7 +58,7 @@ a doplní sloupec
 jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`,
 `/Import`), ne pod `/Lists/`.
 
-> **Balík 85 tenhle krok vyžaduje znovu i tam, kde už skript běžel** —
+> **Balíky 85 a 87 tenhle krok vyžadují znovu i tam, kde už skript běžel** —
 > knihovna `Import` je nová a `ImportFlow` by bez ní spadl na neexistující
 > složce. Skript je idempotentní, takže se nic dalšího nezaloží dvakrát.
 
@@ -68,7 +68,7 @@ Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_85.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_87.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
@@ -117,7 +117,7 @@ zůstane vypnuté i po importu opravené verze. Po importu, který skončil hlá
 | `ZalohaFlow` | snímek rejstříku do `Zalohy` | z appky |
 | `ZalohaScheduled` | týž snímek | denně 5:00 |
 | `RestoreFlow` | obnova rejstříku ze snímku | z appky |
-| `ImportFlow` | **nové** — hromadné pořízení aktivit z Excelu | z appky |
+| `ImportFlow` | hromadné pořízení aktivit z Excelu | z appky |
 
 Vypnuté flow se projeví jako chyba **appky**, ne flow: volající canvas app
 vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
@@ -204,11 +204,16 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 | **Data ▾ → Vzorová tabulka pro import** | stáhne se `sablona_import_aktivit.xlsx`; v Excelu má list Aktivity jako Tabulku a druhý list Pokyny |
 | **Data ▾ → Záloha rejstříku** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
 
-Obnova ani import zatím **nemají tlačítko** — `RestoreFlow` a `ImportFlow`
-se v balíku 85 jen zavádějí, aby šlo obě v příštím kole zaregistrovat ve Studiu
-(`Flow.Run()` se váže na `FlowNameId`, které přiděluje až prostředí při
-importu). Vyzkoušet se dají ručně, postup je v `flow_Restore.md`
-a `flow_Import.md`; **v režimu náhledu nezapisuje ani jedno nic.**
+| **Data ▾ → Import z tabulky** | otevře obrazovku náhledu; v rozbalovátku jsou sešity z knihovny `Import` |
+| **Data ▾ → Obnova ze zálohy** | totéž pro snímky z knihovny `Zálohy` |
+
+Obojí vede na **jednu obrazovku** (od balíku 87): vyber soubor → Zkontrolovat
+→ podívej se, co z toho vyjde → teprve pak Provést. Tlačítko *Provést* je
+zhasnuté, dokud pro vybraný soubor neproběhla kontrola, a ještě se ptá.
+
+**Ověření, na kterém záleží:** po *Zkontrolovat* **nesmí v listech přibýt ani
+se změnit jediná položka**. Kontrakty obou flow jsou v `flow_Import.md`
+a `flow_Restore.md`; spustit se dají i ručně bez appky.
 
 ---
 

@@ -1,0 +1,594 @@
+# Obrazovka 5 — náhled a provedení hromadné operace nad rejstříkem.
+#
+# Jedna obrazovka pro DVĚ operace, protože obě mají týž tvar: vyber soubor →
+# zkontroluj nanečisto → podívej se, co z toho vyjde → teprve pak zapiš.
+# Rozlišuje je `varNahledRezim` ("import" / "obnova").
+#
+# Odpovědi z flow chodí jako ODDĚLOVANÝ TEXT, ne JSON: appka má
+# `dynamicschema = False`, takže na `ParseJSON` není co navázat. Pole se berou
+# podle POŘADÍ — kontrakt drží `check_import_flow.py` a `check_restore_flow.py`.
+#
+# Zapisovací tlačítko je záměrně vypnuté, dokud neproběhl náhled PRÁVĚ NAD
+# TÍMTO souborem: bez toho by šlo vybrat jiný soubor a odklepnout zápis podle
+# čísel, která platila pro jiný.
+Screens:
+  scr_Nahled:
+    Properties:
+      Fill: =stylPlocha
+      LoadingSpinnerColor: =stylAkce
+      OnVisible: |-
+        =Set(varNahledSoubor, "");
+        Set(varNahledHotovo, "");
+        Set(varNahledHlaseni, "");
+        Clear(colNahledSouhrn);
+        Clear(colNahledObnova);
+        Clear(colNahledChyby);
+        Set(varNahledBezi, true);
+        IfError(
+            Set(
+                varNahledSeznam,
+                If(
+                    varNahledRezim = "import",
+                    ImportFlow.Run("{""rezim"":""seznam""}").prehled,
+                    RestoreFlow.Run("{""rezim"":""seznam""}").prehled
+                )
+            ),
+            Set(varNahledSeznam, "")
+        );
+        Set(varNahledBezi, false);
+        If(
+            IsBlank(varNahledSeznam),
+            Notify("Seznam souborů se nepodařilo načíst. Ověř, že je tok zapnutý a knihovna existuje.", NotificationType.Error, varNotifyChybaMs)
+        )
+    Children:
+      - rec_HlavickaN:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPrimarni
+            Height: =48
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - ico_ZpetN:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =40
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.18)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Navigate(scr_Dashboard, ScreenTransition.UnCover)
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedFill: =RGBA(255, 255, 255, 0.28)
+            Tooltip: '="Zpět na přehled. Nedokončený náhled se nikam neukládá a nic nezapisuje."'
+            Width: =40
+            X: =16
+            Y: =4
+      - lbl_NadpisN:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =14 + varFs
+            Text: |-
+              =If(
+                  varNahledRezim = "import",
+                  "Hromadný import aktivit z tabulky",
+                  "Obnova rejstříku ze zálohy"
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =900
+            X: =68
+            Y: =8
+      - lbl_l_VysvetleniN:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =40
+            Size: =10 + varFs
+            Text: |-
+              =If(
+                  varNahledRezim = "import",
+                  "Vyber sešit nahraný v knihovně Import a dej Zkontrolovat. Nic se nezapíše — jen uvidíš, co by vzniklo, co je duplicita a kde je chyba. Teprve pak jde import provést.",
+                  "Vyber snímek z knihovny Zálohy a dej Zkontrolovat. Nic se nezapíše — jen uvidíš, kolik položek se vrátí. Obnova nikdy nemaže: řádek, který dnes je a ve snímku není, se jen ohlásí."
+              )
+            Width: =1220
+            X: =40
+            Y: =56
+      - lbl_l_SouborN:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =11 + varFs
+            Text: ="Soubor"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =80
+            X: =40
+            Y: =108
+      - drp_SouborN:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            BorderColor: =stylOkraj
+            ChevronBackground: =stylKarta
+            ChevronFill: =stylAkce
+            Color: =stylText
+            AllowEmptySelection: =true
+            Font: =Font.'Open Sans'
+            Height: =32
+            Items: =Split(varNahledSeznam, "|#|")
+            # Změna souboru zneplatní náhled: čísla níž patřila jinému souboru
+            # a zápis podle nich by byl zápis naslepo.
+            OnChange: |-
+              =Set(varNahledSoubor, drp_SouborN.Selected.Value);
+              Set(varNahledHotovo, "");
+              Set(varNahledHlaseni, "");
+              Clear(colNahledSouhrn);
+              Clear(colNahledObnova);
+              Clear(colNahledChyby)
+            Size: =11 + varFs
+            Width: =520
+            X: =128
+            Y: =108
+      - btn_ZkontrolovatN:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            DisplayMode: |-
+              =If(
+                  varNahledBezi || IsBlank(drp_SouborN.Selected.Value),
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
+            Fill: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylAkceHover
+            OnSelect: |-
+              =Set(varNahledSoubor, drp_SouborN.Selected.Value);
+              Set(varNahledBezi, true);
+              Set(varNahledHotovo, "");
+              Set(varNahledOdpoved, "");
+              Set(varNahledChybyText, "");
+              IfError(
+                  If(
+                      varNahledRezim = "import",
+                      Set(
+                          varNahledVysledek,
+                          ImportFlow.Run(
+                              "{""soubor"":""" & varNahledSoubor & """,""rezim"":""nahled""}"
+                          )
+                      );
+                      Set(varNahledOdpoved, varNahledVysledek.prehled);
+                      Set(varNahledChybyText, varNahledVysledek.chyby),
+                      Set(
+                          varNahledVysledekO,
+                          RestoreFlow.Run(
+                              "{""soubor"":""" & varNahledSoubor & """,""rezim"":""nahled""}"
+                          )
+                      );
+                      Set(varNahledOdpoved, varNahledVysledekO.prehled);
+                      Set(varNahledHlaseni, varNahledVysledekO.hlaseni)
+                  ),
+                  Notify("Kontrola selhala: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+              );
+              Set(varNahledBezi, false);
+              Select(btn_RozebratN)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =11 + varFs
+            Text: ="Zkontrolovat"
+            Tooltip: '="Spustí kontrolu nanečisto. Nic se nezapisuje — vrátí se jen počty a seznam chyb. Teprve podle nich se rozhoduje, jestli operaci provést."'
+            Width: =160
+            X: =668
+            Y: =108
+      # Rozebrání odpovědi je vlastní tlačítko, ne součást kontroly: dělá se
+      # ze dvou míst (po kontrole i po zápisu) a duplikovat ten vzorec by
+      # znamenalo dvě místa, která se můžou rozejít.
+      - btn_RozebratN:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Height: =1
+            OnSelect: |-
+              =Clear(colNahledSouhrn);
+              Clear(colNahledObnova);
+              Clear(colNahledChyby);
+              If(
+                  varNahledRezim = "import",
+                  ClearCollect(
+                      colNahledSouhrn,
+                      ForAll(
+                          Sequence(6) As i,
+                          {
+                              Poradi: i.Value,
+                              Popisek: Switch(
+                                  i.Value,
+                                  1, "Řádků v sešitě",
+                                  2, "Prázdné (přeskočí se)",
+                                  3, "Založí se",
+                                  4, "Duplicitní (přeskočí se)",
+                                  5, "Chybné (chybí povinný údaj)",
+                                  "Neexistující dílčí proces"
+                              ),
+                              Pocet: Value(Index(Split(varNahledOdpoved, "|~|"), i.Value).Value)
+                          }
+                      )
+                  ),
+                  ClearCollect(
+                      colNahledObnova,
+                      ForAll(
+                          Split(varNahledOdpoved, "|#|") As r,
+                          {
+                              Seznam: Index(Split(r.Value, "|~|"), 1).Value,
+                              Zalozit: Value(Index(Split(r.Value, "|~|"), 2).Value),
+                              Zmenit: Value(Index(Split(r.Value, "|~|"), 3).Value),
+                              Navic: Value(Index(Split(r.Value, "|~|"), 4).Value),
+                              Celkem: Value(Index(Split(r.Value, "|~|"), 5).Value)
+                          }
+                      )
+                  )
+              );
+              If(
+                  varNahledRezim = "import" && !IsBlank(varNahledChybyText),
+                  ClearCollect(
+                      colNahledChyby,
+                      ForAll(
+                          Split(varNahledChybyText, "|#|") As r,
+                          {
+                              Radek: Index(Split(r.Value, "|~|"), 1).Value,
+                              Nazev: Index(Split(r.Value, "|~|"), 2).Value,
+                              Duvod: Index(Split(r.Value, "|~|"), 3).Value
+                          }
+                      )
+                  )
+              );
+              Set(varNahledHotovo, If(IsBlank(varNahledOdpoved), "", varNahledSoubor))
+            Text: =""
+            Visible: =false
+            Width: =1
+            X: =1300
+            Y: =740
+      - lbl_StavN:
+          Control: Label@2.5.1
+          Properties:
+            Color: =If(IsBlank(varNahledHlaseni), stylTextSlaby, stylPozor)
+            Font: =Font.'Open Sans'
+            Height: =28
+            Size: =10 + varFs
+            Text: |-
+              =If(
+                  !IsBlank(varNahledHlaseni),
+                  varNahledHlaseni,
+                  If(
+                      IsBlank(varNahledHotovo),
+                      "Zatím nic zkontrolováno.",
+                      "Zkontrolováno: " & varNahledHotovo
+                  )
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =520
+            X: =848
+            Y: =108
+      - rec_KartaN:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =520
+            Width: =620
+            X: =40
+            Y: =152
+      - lbl_l_SouhrnN:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =12 + varFs
+            Text: ="Co z toho vyjde"
+            Width: =560
+            X: =60
+            Y: =168
+      - gal_SouhrnImportN:
+          Control: Gallery@2.15.0
+          Properties:
+            Height: =260
+            Items: =colNahledSouhrn
+            TemplatePadding: =0
+            TemplateSize: =34
+            Visible: =varNahledRezim = "import"
+            Width: =580
+            X: =60
+            Y: =204
+          Children:
+            - lbl_SouhrnPopisekN:
+                Control: Label@2.5.1
+                Properties:
+                  Font: =Font.'Open Sans'
+                  Height: =32
+                  Size: =11 + varFs
+                  Text: =ThisItem.Popisek
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =440
+                  X: =0
+                  Y: =0
+            - lbl_SouhrnPocetN:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =If(ThisItem.Poradi = 3, stylAkce, stylText)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =If(ThisItem.Poradi = 3, FontWeight.Semibold, FontWeight.Normal)
+                  Height: =32
+                  Size: =11 + varFs
+                  Text: =Text(ThisItem.Pocet)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =120
+                  X: =450
+                  Y: =0
+      - gal_SouhrnObnovaN:
+          Control: Gallery@2.15.0
+          Properties:
+            Height: =260
+            Items: =colNahledObnova
+            TemplatePadding: =0
+            TemplateSize: =34
+            Visible: =varNahledRezim <> "import"
+            Width: =580
+            X: =60
+            Y: =204
+          Children:
+            - lbl_ObnovaListN:
+                Control: Label@2.5.1
+                Properties:
+                  Font: =Font.'Open Sans'
+                  Height: =32
+                  Size: =11 + varFs
+                  Text: =ThisItem.Seznam
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =260
+                  X: =0
+                  Y: =0
+            - lbl_ObnovaCislaN:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Font: =Font.'Open Sans'
+                  Height: =32
+                  Size: =11 + varFs
+                  Text: |-
+                    =Text(ThisItem.Zalozit) & "  ·  " & Text(ThisItem.Zmenit) &
+                    "  ·  " & Text(ThisItem.Navic) & "  ·  " & Text(ThisItem.Celkem)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =300
+                  X: =270
+                  Y: =0
+      - lbl_l_LegendaN:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =24
+            Size: =9 + varFs
+            Text: ="založit · změnit · navíc · celkem ve snímku"
+            Visible: =varNahledRezim <> "import"
+            Width: =300
+            X: =330
+            Y: =472
+      - btn_ProvestN:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            # Zápis jde odklepnout jedině tehdy, když náhled proběhl PRÁVĚ NAD
+            # TÍMTO souborem. Jinak by čísla nad tlačítkem patřila jinému.
+            DisplayMode: |-
+              =If(
+                  varNahledBezi || IsBlank(varNahledHotovo) ||
+                  varNahledHotovo <> drp_SouborN.Selected.Value,
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
+            Fill: =stylPozor
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: =Set(varNahledPotvrdit, true)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =11 + varFs
+            Text: |-
+              =If(varNahledRezim = "import", "Provést import", "Provést obnovu")
+            Tooltip: '="Zapíše to, co ukazuje náhled nad tímto souborem. Zeptá se ještě jednou. Tlačítko je zhasnuté, dokud pro vybraný soubor náhled neproběhl."'
+            Width: =240
+            X: =60
+            Y: =504
+      - lbl_l_ChybyN:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =12 + varFs
+            Text: |-
+              ="Řádky, které se nezaloží (" & CountRows(colNahledChyby) & ")"
+            Visible: =varNahledRezim = "import"
+            Width: =560
+            X: =700
+            Y: =168
+      - gal_ChybyN:
+          Control: Gallery@2.15.0
+          Properties:
+            Height: =468
+            Items: =colNahledChyby
+            TemplatePadding: =0
+            TemplateSize: =56
+            Visible: =varNahledRezim = "import"
+            Width: =600
+            X: =700
+            Y: =204
+          Children:
+            - lbl_ChybaRadekN:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =10 + varFs
+                  Text: ="řádek " & ThisItem.Radek
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =80
+                  X: =0
+                  Y: =0
+            - lbl_ChybaDuvodN:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylPozor
+                  Font: =Font.'Open Sans'
+                  Height: =24
+                  Size: =10 + varFs
+                  Text: =ThisItem.Duvod
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =480
+                  X: =88
+                  Y: =0
+            - lbl_ChybaNazevN:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =26
+                  Size: =10 + varFs
+                  Text: =ThisItem.Nazev
+                  Width: =560
+                  X: =0
+                  Y: =26
+      # ---------- potvrzení zápisu ----------
+      # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
+      # obrazovkou. Souřadnice jsou vzorce, u překryvné vrstvy je to správně.
+      - rec_ModalStinN:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.35)
+            Height: =Parent.Height
+            OnSelect: =Set(varNahledPotvrdit, false)
+            Visible: =varNahledPotvrdit
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - rec_ModalKartaN:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =240
+            Visible: =varNahledPotvrdit
+            Width: =520
+            X: =Parent.Width / 2 - 260
+            Y: =240
+      - lbl_ModalTextN:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            Height: =120
+            Size: =11 + varFs
+            Text: |-
+              =If(
+                  varNahledRezim = "import",
+                  "Založí se " & LookUp(colNahledSouhrn, Poradi = 3, Pocet) &
+                  " aktivit ze souboru " & varNahledHotovo &
+                  ". Duplicitní a chybné řádky se přeskočí. Zpět to jde jen obnovou ze zálohy.",
+                  "Obnoví se rejstřík ze snímku " & varNahledHotovo &
+                  ". Existující položky se přepíšou hodnotami ze snímku; nic se nemaže. Před tím si radši pořiď zálohu."
+              )
+            Visible: =varNahledPotvrdit
+            Width: =472
+            X: =Parent.Width / 2 - 236
+            Y: =264
+      - btn_ModalZpetN:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: =Set(varNahledPotvrdit, false)
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11 + varFs
+            Text: ="Zpět"
+            Visible: =varNahledPotvrdit
+            Width: =140
+            X: =Parent.Width / 2 - 236
+            Y: =404
+      - btn_ModalProvestN:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylPozor
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =stylPozor
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: |-
+              =Set(varNahledPotvrdit, false);
+              Set(varNahledBezi, true);
+              IfError(
+                  If(
+                      varNahledRezim = "import",
+                      Set(
+                          varNahledVysledek,
+                          ImportFlow.Run(
+                              "{""soubor"":""" & varNahledSoubor & """,""rezim"":""zapis""}"
+                          )
+                      );
+                      Set(varNahledOdpoved, varNahledVysledek.prehled);
+                      Set(varNahledChybyText, varNahledVysledek.chyby);
+                      Notify("Import proběhl. Přehled níž ukazuje, co se založilo.", NotificationType.Success, varNotifyMs),
+                      Set(
+                          varNahledVysledekO,
+                          RestoreFlow.Run(
+                              "{""soubor"":""" & varNahledSoubor & """,""rezim"":""zapis""}"
+                          )
+                      );
+                      Set(varNahledOdpoved, varNahledVysledekO.prehled);
+                      Set(varNahledHlaseni, varNahledVysledekO.hlaseni);
+                      Notify("Obnova proběhla. Přehled níž ukazuje, co se vrátilo.", NotificationType.Success, varNotifyMs)
+                  ),
+                  Notify("Operace selhala: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+              );
+              Set(varNahledBezi, false);
+              Set(varAktStale, true);
+              Select(btn_RozebratN)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =11 + varFs
+            Text: |-
+              =If(varNahledRezim = "import", "Ano, importovat", "Ano, obnovit")
+            Visible: =varNahledPotvrdit
+            Width: =240
+            X: =Parent.Width / 2 - 4
+            Y: =404

@@ -1,35 +1,41 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 14:15** — balík **1.0.0.85**: `ImportFlow`
-(hromadný import z Excelu) a úklid starých záloh. Chybí už jen obrazovky
-v appce, a ty čekají na registraci flow ve Studiu.
+Aktualizováno: **2026-09-01 15:05** — balík **1.0.0.87**: obrazovka náhledu
+pro import i obnovu. **F11 je tím hotová celá** (záloha → import → obnova),
+zbývá ji vyzkoušet na datech.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
-1. **Spusť znovu `src/setup_sharepoint.js`** (F12 → Console na cílovém webu).
-   Zakládá novou knihovnu **`Import`**; bez ní `ImportFlow` spadne na
-   neexistující složce. Idempotentní, nic jiného se nezaloží podruhé.
+1. **Spusť znovu `src/setup_sharepoint.js`** — zakládá knihovnu **`Import`**;
+   bez ní `ImportFlow` spadne na neexistující složce. Pokud jsi to udělal už
+   po balíku 85, přeskoč.
 
-2. **Naimportuj `deploy/procesnimapa_1_0_0_85.zip`** a **zapni `ImportFlow`**
-   (`RestoreFlow` už zapnuté máš). Import stav zapnutí nemění.
+2. **Naimportuj `deploy/procesnimapa_1_0_0_87.zip`.** Obě flow už zapnutá máš,
+   nová nepřibyla. Po importu appku jednou otevři ve Studiu — z YAML zabalená
+   appka se validuje až tam.
 
-3. **Registrace obou flow ve Studiu — tohle je to kolo, na které se čekalo.**
-   Otevři appku ve Studiu → **Add data → `RestoreFlow`** a **`ImportFlow`**
-   (obě v jednom sezení) → mikro-změna → Save → Publish → **export solution**
-   → pošli zip. Z něj postavím obrazovku náhledu a položky v nabídce `Data ▾`
-   pro obojí.
+   **Testovací flow `test test` jsem z balíku vyndal** (veze natvrdo adresu
+   webu PPF), ale z prostředí ho to nesmaže. Smaž ho v Power Automate ručně;
+   spojení na Excel nech být, `ImportFlow` ho používá.
 
-4. **Až budeš mít chuť, skutečná zkouška obnovy** (náhled nad nezměněnými daty
-   dokázal jen to, že nevyrábí falešné rozdíly): smaž 3–5 řádků z `Aktivity`,
-   spusť náhled — musí je vypsat ve sloupci **založit** —, pak `"rezim":
-   "zapis"` a nakonec znovu náhled, který má být zase samé nuly.
+3. **Vyzkoušej obojí z appky** — `Data ▾ → Import z tabulky` a
+   `Data ▾ → Obnova ze zálohy`. Obojí vede na tutéž obrazovku:
+   vyber soubor → **Zkontrolovat** → podívej se na čísla → teprve pak
+   **Provést** (a to se ještě ptá).
 
-5. **Zkouška importu, taky ručně** — postup je v `deploy/flow_Import.md`.
-   Vyplň pár řádků do šablony, nahraj do knihovny `Import`, spusť
-   `{"soubor": "…xlsx", "rezim": "nahled"}`. **V náhledu nesmí přibýt jediná
-   položka.** Zajímá mě hlavně, jestli sedí čísla v `prehled` a jestli
-   `chyby` ukazují správná čísla řádků.
+   **Ověření, na kterém záleží nejvíc:** po *Zkontrolovat* **nesmí v listech
+   přibýt ani se změnit jediná položka**.
+
+4. **Zkouška importu na datech.** Stáhni šablonu (`Data ▾ → Vzorová tabulka
+   pro import`), vyplň pár řádků — a schválně mezi ně dej **jeden s
+   neexistujícím dílčím procesem** a **jeden duplicitní** —, nahraj do
+   knihovny `Import` a spusť náhled. Čísla musí sedět a u chybných řádků musí
+   sedět **číslo řádku v sešitě**.
+
+5. **Zkouška obnovy na datech.** Smaž 3–5 řádků z `Aktivity`, spusť náhled —
+   musí je vypsat ve sloupci **založit** —, pak Provést, a nakonec znovu
+   náhled, který má být zase samé nuly.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -37,12 +43,73 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**Čekám na export z bodu 3.** Bez něj obrazovku náhledu postavit nejde —
-`Flow.Run()` se váže na `FlowNameId`, které přiděluje až prostředí.
+**Čekám na výsledek zkoušek z bodů 3–5.** Do té doby nic nestavím — obrazovku
+jsem ověřil bránou a offline, ale běh v prostředí nahradit nejde.
 
-Až přijde: balík 86 = **jedna obrazovka náhledu pro import i obnovu**
-(„co vznikne / co se změní / co je duplicita / co je chyba na řádku N“)
-a dvě položky v nabídce `Data ▾`. Proto v ní bylo od 81 nechané místo.
+Až bude F11 uzavřená, na řadě jsou nezačaté náměty z `PLAN.md`: R-2 (pohled
+„kdo má co dodělat") a R-3 (generování textu organizačního řádu), který je
+dnes lacinější, než býval — `ExportFlow` už umí skládat dokument.
+
+## Balík 1.0.0.87 — obrazovka náhledu (01.09.2026 15:05)
+
+`src/app_src/scr_Nahled.pa.yaml` — **jedna obrazovka pro import i obnovu**.
+Obě operace mají týž tvar (vyber soubor → zkontroluj nanečisto → podívej se,
+co z toho vyjde → teprve pak zapiš), takže dvě obrazovky by znamenaly udržovat
+dvakrát totéž. Rozlišuje je `varNahledRezim`.
+
+Nabídka `Data ▾` má teď šest položek: dva exporty, vzorová tabulka, import,
+záloha, obnova.
+
+### Dvě rozhodnutí, která šetřila kolo se Studiem
+
+**Odpovědi z flow chodí jako oddělovaný text, ne JSON.** Appka má
+`dynamicschema = False`, takže na `ParseJSON` nemá co navázat; `Split()`
+funguje vždycky. Pole se spojují `|~|`, řádky `|#|`. Appka je bere **podle
+pořadí** — oddělovaný text jméno pole nenese —, takže pořadí je součástí
+kontraktu a hlídají ho obě brány. Bez toho by se to poznalo až tím, že by
+appka ve Studiu nešla otevřít.
+
+**Obě flow dostala třetí režim `seznam`.** Vrátí názvy souborů v knihovně,
+takže appka nemusí mít `Import` ani `Zálohy` připojené jako datový zdroj —
+a připojit je jde jedině ve Studiu, tedy dalším kolem. Flow navíc vrací přesně
+ta jména, která samo přijímá na vstupu, takže se nemají jak rozejít. Schéma
+odpovědi zůstalo totožné (čtyři řetězce), takže registrace platí dál.
+
+### Co brána chytila na obrazovce
+
+Nic z toho by se jinak nepoznalo dřív než ve Studiu:
+
+- tři tlačítka měla výšku 36 px, zbytek appky má 32 — „táž akce by na dvou
+  obrazovkách vypadala jinak";
+- `Classic/DropDown` **nemá vlastnost `Value`** (PA2108). Správný tvar je
+  jednosloupcová tabulka v `Items` a čtení přes `Selected.Value` — a `Split()`
+  takovou tabulku rovnou vrací, takže mezikolekce zmizela úplně.
+
+### Pojistka proti zápisu podle cizích čísel
+
+Tlačítko *Provést* je zhasnuté, dokud náhled neproběhl **právě nad vybraným
+souborem** (`varNahledHotovo <> drp_SouborN.Selected.Value`). Změna souboru
+v rozbalovátku náhled zneplatní. Bez toho by šlo zkontrolovat jeden soubor,
+přepnout na druhý a odklepnout zápis podle čísel, která pro něj neplatí.
+
+### Brány na 87
+
+`check_solution` **571** · `check_restore_flow` **568** · `check_zaloha_flow`
+184 · `check_import_flow` **159** · `check_export_flow` 129 ·
+`check_mapa_flow` 139 · `check_flow` 26 · `check_app` (5 obrazovek, 234 prvků),
+`check_env`, `check_sablona` zeleně. Mutačně: `mutace_import` 21/21,
+`mutace_restore` 15/15, `mutace_zaloha` 16/16, `mutace_sablona` 15/15,
+`mutace_export_mapa` 7/7, `mutace_parametry` 4/4, `mutace_napojeni` 5/5.
+
+Sestavení:
+
+```
+copy input/procesnimapa_1_0_0_86.zip runs/vstup_87.zip
+python src/odeber_flow.py --solution runs/vstup_87.zip --flow testtest
+python src/build_import_flow.py --solution runs/vstup_87.zip
+python src/build_restore_flow.py --solution runs/vstup_87.zip
+python src/build_app.py --solution runs/vstup_87.zip --verze 1.0.0.87
+```
 
 ## Balík 1.0.0.85 — ImportFlow a úklid záloh (01.09.2026 14:15)
 

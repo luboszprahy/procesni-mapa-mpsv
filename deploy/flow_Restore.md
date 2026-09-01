@@ -1,8 +1,8 @@
 # Flow `RestoreFlow` — obnova rejstříku ze snímku zálohy
 
 Vyrábí ho `src/build_restore_flow.py`, hlídá `src/check_restore_flow.py`
-(531 kontrol) a mutačně `src/mutace_restore.py` (15/15).
-Poprvé v balíku **1.0.0.84**.
+(568 kontrol) a mutačně `src/mutace_restore.py` (15/15).
+Poprvé v balíku **1.0.0.84**, obrazovka náhledu od **1.0.0.87**.
 
 ## K čemu je
 
@@ -27,18 +27,19 @@ Trigger `PowerAppV2` má **jeden textový vstup** s tímto JSON:
 
 Odpověď:
 
-```json
-{
-  "stav": "nahled",
-  "hlaseni": "",
-  "porizeno": "2026-09-01_0300",
-  "prehled": "[{\"list\":\"Agendy\",\"zalozit\":0,\"zmenit\":1,\"navic\":0,\"celkem_ve_snimku\":6}, …]"
-}
+```
+stav     = "nahled"
+hlaseni  = ""
+porizeno = "2026-09-01_0300"
+prehled  = "Agendy|~|0|~|1|~|0|~|6|#|Procesy|~|0|~|0|~|0|~|44|#|…"
 ```
 
-`prehled` jde schválně **jako řetězec**, ne jako pole: schéma odpovědi se pak
-nemění s počtem listů. Kdyby se změnilo, přestane appce sedět a flow se musí
-znovu registrovat ve Studiu. Appka si ho rozebere `ParseJSON`.
+`prehled` je jeden řádek na list, pole v pevném pořadí: **název, založit,
+změnit, navíc, celkem ve snímku**. Řádky odděluje `|#|`, pole `|~|`.
+
+Jde schválně jako **jeden řetězec**, ne jako pole objektů: schéma odpovědi se
+tak nemění s počtem listů. Kdyby se změnilo, přestane appce sedět a flow se
+musí znovu registrovat ve Studiu.
 
 Když snímek vznikl nad jinou verzí schématu, vrátí flow
 `stav: "neshoda_schematu"` s vysvětlením a **běh se ukončí** — obnova se
@@ -139,3 +140,29 @@ z `Aktivity`, spusť obnovu a ověř, že se vrátily s týmiž kódy a vazbami.
   nečeká — hlášení potvrzuje spuštění.
 - Obnova nesahá na knihovny (`Zalohy`, `Exporty`, `Site Assets`), jen na
   sedm listů schématu.
+
+## Třetí režim: `seznam`
+
+```json
+{"rezim": "seznam"}
+```
+
+Vrátí názvy snímků v knihovně `Zalohy` v poli `prehled`, oddělené `|#|`. Obrazovka náhledu jimi plní
+rozbalovátko.
+
+Existuje proto, že appka by jinak musela mít knihovnu připojenou jako datový
+zdroj, a to jde jedině ve Studiu — tedy dalším kolem. Flow navíc vrací přesně
+ta jména, která samo přijímá na vstupu, takže se nemají jak rozejít s tím, co
+appka pošle zpátky.
+
+**Schéma odpovědi zůstává totožné** (čtyři řetězce), takže flow kvůli tomuhle
+režimu nepotřebuje novou registraci. Běh se po odpovědi ukončí — dál by se
+pokračovalo nad souborem, jehož název v tomhle režimu nikdo nezadal.
+
+## Odpovědi jdou jako oddělovaný text, ne JSON
+
+Canvas app má `dynamicschema = False`, takže na `ParseJSON` nemá co navázat.
+Pole se proto spojují oddělovači `|~|` (pole) a `|#|` (řádky) a appka je
+rozebírá `Split()`. **Bere je podle POŘADÍ**, ne podle klíče — oddělovaný text
+jméno pole nenese —, takže pořadí je součástí kontraktu a hlídá ho brána.
+

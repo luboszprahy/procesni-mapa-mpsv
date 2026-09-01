@@ -71,7 +71,19 @@ STRANKOVANI = 5000
 # a nikdo neručí za to, že v názvu nebude '|'.
 ODDELOVAC = "|~|"
 
+# Odpovědi jdou appce jako ODDĚLOVANÝ TEXT, ne JSON. Canvas app má
+# `dynamicschema = False`, takže by na `ParseJSON` neměla co navázat;
+# `Split()` funguje vždycky. Oddělovače jsou zvolené tak, aby se nemohly
+# potkat v názvu aktivity ani souboru.
+ODD_POLE = "|~|"
+ODD_RADKU = "|#|"
+
+
 REZIM_NAHLED = "nahled"
+# Třetí režim: vrátí jen seznam snímků v knihovně, ve stejném tvaru jména,
+# jaký sám přijímá na vstupu. Schéma odpovědi se nemění, takže flow
+# nepotřebuje novou registraci ve Studiu.
+REZIM_SEZNAM = "seznam"
 REZIM_ZAPIS = "zapis"
 
 # Hlavičky REST zápisu. `nometadata` znamená, že se do těla nemusí skládat
@@ -160,6 +172,65 @@ def akce(schema):
         "runAfter": {},
     }
 
+    kroky["Cesta_seznamu"] = {
+        "type": "Compose",
+        "inputs": "@concat('/', join(skip(split(" + ep.vyraz(ep.WEB) + ", '/'), 3), '/'))",
+        "runAfter": {"Vstup": ["Succeeded"]},
+    }
+
+    # Režim seznamu končí vlastní odpovědí a ukončením běhu — dál se nepokračuje,
+    # protože bez názvu snímku by `Soubor` neměl co číst.
+    kroky["Rezim_seznam"] = {
+        "type": "If",
+        "expression": {"equals": ["@outputs('Vstup')?['rezim']", REZIM_SEZNAM]},
+        "actions": {
+            "Soubory": sp_akce(
+                "HttpRequest",
+                {"dataset": ep.web(),
+                 "parameters/method": "GET",
+                 "parameters/uri": (
+                     "@concat('_api/web/GetList(" + chr(39) * 3 + ", outputs('Cesta_seznamu'), "
+                     + lit(KNIHOVNA) + ", " + chr(39) * 3
+                     + ")/items?$select=FileLeafRef&$top=500&$orderby=Created desc')"),
+                 "parameters/headers": {"Accept": "application/json;odata=nometadata"}},
+                None),
+            "Jmena": {
+                "type": "Select",
+                "inputs": {
+                    "from": "@coalesce(body('Soubory')?['value'], createArray())",
+                    "select": "@item()?['FileLeafRef']",
+                },
+                "runAfter": {"Soubory": ["Succeeded"]},
+            },
+            "Odpoved_seznam": {
+                "type": "Response",
+                "kind": "PowerApp",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": {
+                        "stav": REZIM_SEZNAM,
+                        "hlaseni": "",
+                        "porizeno": "",
+                        "prehled": "@join(body('Jmena'), " + lit(ODD_RADKU) + ")",
+                    },
+                    "schema": {"type": "object", "properties": {
+                        "stav": {"type": "string"},
+                        "hlaseni": {"type": "string"},
+                        "porizeno": {"type": "string"},
+                        "prehled": {"type": "string"},
+                    }},
+                },
+                "runAfter": {"Jmena": ["Succeeded"]},
+            },
+            "Konec_seznamu": {
+                "type": "Terminate",
+                "inputs": {"runStatus": "Succeeded"},
+                "runAfter": {"Odpoved_seznam": ["Succeeded"]},
+            },
+        },
+        "runAfter": {"Cesta_seznamu": ["Succeeded"]},
+    }
+
     # inferContentType false + $content: konektor obsah sám nedekóduje, takže
     # `base64ToString` platí. S výchozím true vrací body() rovnou řetězec
     # a $content neexistuje — míchat obojí se nedá (ověřeno u mapy).
@@ -168,7 +239,7 @@ def akce(schema):
         {"dataset": ep.web(),
          "path": f"@concat({lit(KNIHOVNA + '/')}, outputs('Vstup')?['soubor'])",
          "inferContentType": False},
-        "Vstup")
+        "Rezim_seznam")
 
     kroky["Snimek"] = {
         "type": "Compose",
@@ -204,7 +275,7 @@ def akce(schema):
                                     " '), rejstřík má " + schema["verze"] + "."
                                     " Obnovit ho nejde.')"),
                         "porizeno": "@outputs('Snimek')?['porizeno']",
-                        "prehled": "[]",
+                        "prehled": "",
                     },
                     "schema": {"type": "object", "properties": {
                         "stav": {"type": "string"},
@@ -302,18 +373,26 @@ def akce(schema):
         "runAfter": {predchozi: ["Succeeded"]},
     }
 
+    # Jeden řádek na list, pole v pevném pořadí: název, založit, změnit,
+    # navíc, celkem ve snímku. Pořadí je součástí kontraktu s obrazovkou
+    # náhledu — appka je bere podle indexu, ne podle klíče.
+    radky = []
+    for lst in listy:
+        jmeno = lst["name"]
+        radky.append("concat(" + ", ".join([
+            lit(jmeno),
+            lit(ODD_POLE),
+            f"string(length(body('K_zalozeni_{jmeno}')))",
+            lit(ODD_POLE),
+            f"string(length(body('Ke_zmene_{jmeno}')))",
+            lit(ODD_POLE),
+            f"string(length(body('Navic_{jmeno}')))",
+            lit(ODD_POLE),
+            f"string(length(outputs('Snimek')?['listy']?['{jmeno}']))",
+        ]) + ")")
     kroky["Prehled"] = {
         "type": "Compose",
-        "inputs": [
-            {
-                "list": lst["name"],
-                "zalozit": f"@length(body('K_zalozeni_{lst['name']}'))",
-                "zmenit": f"@length(body('Ke_zmene_{lst['name']}'))",
-                "navic": f"@length(body('Navic_{lst['name']}'))",
-                "celkem_ve_snimku": f"@length(outputs('Snimek')?['listy']?['{lst['name']}'])",
-            }
-            for lst in listy
-        ],
+        "inputs": "@concat(" + (", " + lit(ODD_RADKU) + ", ").join(radky) + ")",
         "runAfter": {"Zapis": ["Succeeded"]},
     }
 
@@ -329,7 +408,7 @@ def akce(schema):
                 "porizeno": "@outputs('Snimek')?['porizeno']",
                 # Přehled jde jako řetězec: schéma odpovědi se pak nemění
                 # s počtem listů a appka si ho rozebere ParseJSON.
-                "prehled": "@string(outputs('Prehled'))",
+                "prehled": "@outputs('Prehled')",
             },
             "schema": {"type": "object", "properties": {
                 "stav": {"type": "string"},
