@@ -57,7 +57,7 @@ Právě proto je ta chyba cenná. Vyplývá z ní:
 |---|---|---|
 | smí být `file` dynamické? | **ano** | akce se k tabulce vůbec dostala; `File` se vyhodnotil na `%252fSdilene%2bdokumenty%252fsablona_import_aktivit.xlsx`, tedy `{Identifier}` ze SharePointu |
 | dá se `table` adresovat jménem? | **ano** | konektor tabulky vyhledává podle názvu — jinak by nehlásil „no table was found with the **name**" |
-| smí být `drive` (Document Library) dynamický? | **zatím nevím** | pole zůstalo z pickeru |
+| dá se `drive` zadat jménem knihovny? | **ne** | `Sdilene dokumenty` skončilo na `The provided drive id appears to be malformed, or does not represent a valid drive` |
 
 Import tedy dokáže číst **libovolný nahraný sešit**, ne jen jedno pevné místo.
 
@@ -74,11 +74,18 @@ Běh jel pod **`sys_power_platform@pmb.cz`**, tedy pod servisním účtem
 (connection reference, ne invoker) — appka nebude po uživatelích chtít vlastní
 excelové spojení.
 
-Zbývá poslední neznámá: jestli `Document Library` vezme vlastní hodnotu. Když
-ano, je flow přenositelné bez jediné nové proměnné prostředí; když ne, budou
-`source` a `drive` textové proměnné vyplněné jednou při instalaci. Hodnotu
-`source` pro PPF DEV už znám z chybové hlášky brány:
-`sites/ppfbanka.sharepoint.com,88f35380-bf73-40fc-b9d2-33fa58270333,f2148e9c-0c38-4234-b945-9f5984ead91c`.
+**`drive` musí být Graph ID `b!…`, jménem knihovny to nevezme** (ověřeno
+13:43). Zbývá tedy jediná otázka: umí si ho flow dotáhnout za běhu?
+
+- `source` **ano** — má tvar `sites/<host>,<siteId>,<webId>` a oba GUIDy
+  vydává REST (`/_api/site/id`, `/_api/web/id`). Pro PPF DEV je to
+  `sites/ppfbanka.sharepoint.com,88f35380-bf73-40fc-b9d2-33fa58270333,f2148e9c-0c38-4234-b945-9f5984ead91c`.
+- `drive` — závisí na tom, jestli SharePoint vydá `/_api/v2.0/drives`.
+  Odpoví to `src/zjisti_excel_ids.js` (konzole prohlížeče na cílovém webu).
+  Když ano, `ImportFlow` si drive id najde podle jména knihovny za běhu
+  a balík nepotřebuje ani novou proměnnou, ani ruční krok při instalaci.
+  Když ne, přibude textová proměnná `mpsv_importDrive`, kterou správce
+  jednou vyplní hodnotou z výpisu.
 
 ## Náhled obnovy proběhl — a odpověděl i na otevřenou otázku (01.09.2026 13:15)
 
