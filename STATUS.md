@@ -1,39 +1,40 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 11:45** — balík **1.0.0.82**: exporty do vlastní
-knihovny `Exporty`. Balík 81 je na PPF DEV nasazený a ověřený uživatelem
-(nabídka Data ▾ i vzorová tabulka fungují).
+Aktualizováno: **2026-09-01 12:40** — DLP test Excel Online **zelený**, import
+i obnova odblokované. Balík 82 nasazený a ověřený (exporty padají do `Exporty`,
+ruční záloha po opravě funguje). Čeká se na export solution kvůli connection
+reference na Excel.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
-1. **Spusť znovu `src/setup_sharepoint.js`** (F12 → Console na cílovém webu).
-   Zakládá novou knihovnu **`Exporty`**; bez ní `ExportFlow` spadne na
-   neexistující složce. Skript je idempotentní, nic jiného se nezaloží
-   podruhé.
+1. **Exportuj solution `procesni mapa` (unmanaged) a pošli mi zip** — a nech
+   v ní to testovací flow `import new data`. **Tohle je teď jediná věc, která
+   mě blokuje.**
 
-2. **Naimportuj `deploy/procesnimapa_1_0_0_82.zip`.** Žádná nová proměnná
-   ani flow — mění se jen cílová složka zápisu v `ExportFlow`.
-   **Ověření:** Data ▾ → Export do Excelu se stáhne a soubor přibude
-   v knihovně **`Exporty`**, ne v Site Assets.
-   Staré `procesni_mapa_<razitko>.doc/.xls/.csv` v Site Assets můžeš smazat —
-   appka na ně neodkazuje, adresu dostává vždy z čerstvého běhu flow.
+   Proč: `ImportFlow` musí volat konektor **Excel Online (Business)**, a náš
+   balík zatím zná jen SharePoint — má dvě connection reference
+   (`ppf_sharedsharepointonline_12718`, `_bec33`) a žádnou excelovou.
+   Connection reference vzniká v prostředí, lokálně se dogenerovat nedá.
+   Tvoje testovací flow ji ale už má, takže ji z exportu vytáhnu a naklonuju,
+   stejně jako se klonuje SharePointová.
 
-3. **Test DLP pro Excel Online (Business)** — ~10 min. **Tohle je jediná věc,
-   která blokuje hromadný import**, a udělat ji můžeš jen ty (přístup na PPF).
-   V Power Automate ručně nové flow, jedna akce `List rows present in a table`
-   nad `sablona_import_aktivit.xlsx` v knihovně na PPF. Tři kontrolní body:
-   akce se objeví ve vyhledávání, flow jde uložit, běh doběhne zeleně a vrátí
-   řádky (u prázdné šablony jeden prázdný řádek).
-   **Výsledek rozhoduje o tvaru F11 kroku 3b:** projde-li konektor, čte import
-   sešit přímo ve flow; neprojde-li, povyšuje se `deploy/mpsv/02_import_dat.js`
-   z vývojářského skriptu na nástroj pro správce. Stavět to napůl nemá smysl.
+   Kdyby to flow náhodou nebylo uvnitř solution `procesni mapa`, ale
+   v jiné (nebo mimo solution), založ v naší solution nové:
+   **New → Automation → Cloud flow → Instant → trigger „When Power Apps calls
+   a flow (V2)"**, jedna akce `List rows present in a table` nad šablonou,
+   Save, a teprve pak exportuj. Na obsahu toho flow nezáleží, jde jen o to
+   spojení; po zabudování ho smažu.
 
-4. **Ověř obsah snímku ze zálohy** — pořád otevřené. Otevři poslední soubor
-   v knihovně `Zálohy` a zkontroluj, že `listy.DilciProcesy` má **249 položek**
-   (tolik jich dnes v listu je), ne 100. Sto by znamenalo nepropsané
-   stránkování — běh je v tom případě zelený a snímek přesto oříznutý. Je to
-   jediná vada zálohy, která se jinak pozná až při obnově.
+2. **Ověř obsah snímku ze zálohy** — pořád otevřené a je to poslední díl
+   F11 kroku 1. Otevři poslední soubor v knihovně `Zálohy` a zkontroluj, že
+   `listy.DilciProcesy` má **249 položek** (tolik jich dnes v listu je),
+   ne 100. Sto by znamenalo nepropsané stránkování — běh je v tom případě
+   zelený a snímek přesto oříznutý. Je to jediná vada zálohy, která se jinak
+   pozná až při obnově.
+
+**Potom přijde druhé kolo** (registrace flow ve Studiu, viz níže) — počítej
+s ním, není to chyba postupu, ale vlastnost platformy.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -41,17 +42,54 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 krok 4 — obnova ze snímku (`RestoreFlow`).** Nezávisí na výsledku DLP
-testu, takže se staví hned. Sdílí s importem obrazovku náhledu, a ta se proto
-navrhuje rovnou pro obě použití.
+**F11 kroky 3b (hromadný import) a 4 (obnova ze snímku) — staví se spolu**,
+protože sdílejí obrazovku náhledu; navrhnout ji dvakrát by bylo horší než
+jednou pro obojí.
 
-**F11 krok 3b (hromadný import)** čeká na bod 3 výše. Připravit se dá i tak
-to, co je oběma větvím společné — validace řádků a náhled „co vznikne / co je
-duplicita / co je chyba" —, ale způsob čtení sešitu je bez toho výsledku
-hádání.
+Rozpracované bez čekání na export: `src/build_restore_flow.py` (obnova nemá
+s Excelem nic společného, čte JSON snímek). `ImportFlow` čeká na bod 1.
 
-**Pozor při navazování:** kdyby import 1.0.0.82 nedopadl, nezačínej opravovat
-balík dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+**Pořadí nasazení je nutně trojkolové:**
+
+```
+A. ty: export solution s excelovým spojením          <- TEĎ
+B. já: balík 83 — ImportFlow + RestoreFlow + knihovna Import (appka beze změny)
+C. ty: import 83, obě flow ZAPNOUT, Studio -> Add data -> obě flow
+       -> mikro-změna -> Save -> Publish -> export -> poslat
+D. já: balík 84 — obrazovka náhledu a položky v nabídce Data
+```
+
+Krok C nejde přeskočit ani obejít: `Flow.Run()` se váže na `FlowNameId`, které
+přiděluje až prostředí při importu. Proto je v nabídce `Data ▾` schválně místo
+na páté a šesté položce.
+
+**Pozor při navazování:** kdyby import nedopadl, nezačínej opravovat balík
+dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+
+## DLP test Excel Online — ZELENÝ (01.09.2026 12:34)
+
+Běh doběhl `statusCode 200` a vrátil přesně čekaný tvar: **jeden řádek se
+všemi osmi sloupci prázdnými** — ten prázdný datový řádek, se kterým se
+šablona vydává.
+
+Co se tím doložilo:
+
+| co | doklad |
+|---|---|
+| Excel Online (Business) prochází DLP v PPF | akce je ve vyhledávání, flow jde uložit i spustit; hlavička `x-ms-dlp-re: GetItems\|False` |
+| konektor vidí **formátovanou Tabulku** | rozbalovátko `Table` samo nabídlo `Aktivity` |
+| klíče řádků = hlavičky včetně diakritiky | `"Název aktivity (úplný)"`, `"Primární dílčí proces (kód)"`, … |
+| prázdný řádek se opravdu vrací | `value` má 1 položku se samými `""` — import ho MUSÍ přeskočit |
+
+**Nález pro stavbu `ImportFlow`:** parametry akce jsou čtyři neprůhledná ID
+vázaná na tenant a na konkrétní soubor —
+`source: sites/ppfbanka.sharepoint.com,88f35380-…`,
+`drive: b!gFPziHO__EC50jP6WCcDM5yOFPI4DDRCuU…`,
+`file: 014MQA5N2GV4UBFLHC5NGITQROADGRAWQF`,
+`table: {00000000-000C-0000-FFFF-FFFF00000000}`.
+Natvrdo v balíku by to znamenalo flow, které se na MPSV nepřenese a navíc umí
+číst jen jeden konkrétní soubor. Řeší se to při stavbě 3b; `file` musí být
+dynamické tak jako tak, protože správce nahrává pokaždé jiný sešit.
 
 ## Balík 1.0.0.82 — exporty mají vlastní knihovnu (01.09.2026 11:45)
 
