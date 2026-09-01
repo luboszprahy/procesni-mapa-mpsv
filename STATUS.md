@@ -1,40 +1,43 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 12:40** — DLP test Excel Online **zelený**, import
-i obnova odblokované. Balík 82 nasazený a ověřený (exporty padají do `Exporty`,
-ruční záloha po opravě funguje). Čeká se na export solution kvůli connection
-reference na Excel.
+Aktualizováno: **2026-09-01 13:10** — balík **1.0.0.84** s `RestoreFlow`
+(obnova ze snímku). DLP test Excel Online zelený, import odblokovaný.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
 
-1. **Exportuj solution `procesni mapa` (unmanaged) a pošli mi zip** — a nech
-   v ní to testovací flow `import new data`. **Tohle je teď jediná věc, která
-   mě blokuje.**
+1. **Naimportuj `deploy/procesnimapa_1_0_0_84.zip`** a **zapni `RestoreFlow`**
+   (Import stav zapnutí nemění). Žádná nová proměnná ani knihovna nepřibyla.
 
-   Proč: `ImportFlow` musí volat konektor **Excel Online (Business)**, a náš
-   balík zatím zná jen SharePoint — má dvě connection reference
-   (`ppf_sharedsharepointonline_12718`, `_bec33`) a žádnou excelovou.
-   Connection reference vzniká v prostředí, lokálně se dogenerovat nedá.
-   Tvoje testovací flow ji ale už má, takže ji z exportu vytáhnu a naklonuju,
-   stejně jako se klonuje SharePointová.
+2. **Smaž v Power Automate testovací flow `import new data`.** Z balíku 84
+   jsem ho vyndal — veze v sobě natvrdo adresu webu PPF, takže by balík
+   neprošel na MPSV. Odebrání z balíku ho ale z prostředí nesmaže (unmanaged
+   solution komponenty nemaže), zůstal by jako sirotek. **Spojení na Excel
+   Online zůstává** a `ImportFlow` ho bude potřebovat — ruš flow, ne spojení.
 
-   Kdyby to flow náhodou nebylo uvnitř solution `procesni mapa`, ale
-   v jiné (nebo mimo solution), založ v naší solution nové:
-   **New → Automation → Cloud flow → Instant → trigger „When Power Apps calls
-   a flow (V2)"**, jedna akce `List rows present in a table` nad šablonou,
-   Save, a teprve pak exportuj. Na obsahu toho flow nezáleží, jde jen o to
-   spojení; po zabudování ho smažu.
+3. **Vyzkoušej obnovu nanečisto.** Power Automate → `RestoreFlow` →
+   Test → Manually, do vstupu vlož:
 
-2. **Ověř obsah snímku ze zálohy** — pořád otevřené a je to poslední díl
-   F11 kroku 1. Otevři poslední soubor v knihovně `Zálohy` a zkontroluj, že
-   `listy.DilciProcesy` má **249 položek** (tolik jich dnes v listu je),
-   ne 100. Sto by znamenalo nepropsané stránkování — běh je v tom případě
-   zelený a snímek přesto oříznutý. Je to jediná vada zálohy, která se jinak
-   pozná až při obnově.
+   ```json
+   {"soubor": "rejstrik_2026-09-01_0300.json", "rezim": "nahled"}
+   ```
 
-**Potom přijde druhé kolo** (registrace flow ve Studiu, viz níže) — počítej
-s ním, není to chyba postupu, ale vlastnost platformy.
+   Běh musí být zelený a vrátit přehled se sedmi listy. **V režimu náhledu
+   nesmí přibýt ani se změnit jediná položka** — ověř to tím, že se počty
+   v Site contents nezměnily. Pošli mi, co vrátilo pole `prehled`; z něj se
+   pozná, jestli porovnání sedí (u nedotčených listů mají být samé nuly).
+
+4. **Registrace obou flow ve Studiu — druhé kolo.** Až bude bod 3 zelený:
+   otevři appku ve Studiu → **Add data → RestoreFlow** → mikro-změna → Save →
+   Publish → **export solution** → pošli zip. Z něj postavím obrazovku náhledu
+   a položku v nabídce `Data ▾`. Obejít to nejde: `Flow.Run()` se váže na
+   `FlowNameId`, které přiděluje až prostředí při importu.
+
+5. **Ověř obsah snímku ze zálohy** — pořád otevřené, poslední díl F11 kroku 1.
+   Otevři poslední soubor v knihovně `Zálohy` a zkontroluj, že
+   `listy.DilciProcesy` má **249 položek**, ne 100. Sto by znamenalo
+   nepropsané stránkování — běh je v tom případě zelený a snímek přesto
+   oříznutý.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -42,29 +45,89 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**F11 kroky 3b (hromadný import) a 4 (obnova ze snímku) — staví se spolu**,
-protože sdílejí obrazovku náhledu; navrhnout ji dvakrát by bylo horší než
-jednou pro obojí.
+**F11 krok 3b — hromadný import.** DLP test prošel, takže se staví přes
+konektor Excel Online. Zbývá vyřešit jednu věc, na kterou přišel až rozbor
+běhu: parametry akce jsou čtyři neprůhledná ID vázaná na tenant a na
+konkrétní soubor. `file` musí být dynamické tak jako tak (správce nahrává
+pokaždé jiný sešit), `source` a `drive` jsou per-tenant konstanty.
 
-Rozpracované bez čekání na export: `src/build_restore_flow.py` (obnova nemá
-s Excelem nic společného, čte JSON snímek). `ImportFlow` čeká na bod 1.
+Rozpracované: knihovna `Import` do schématu, `src/build_import_flow.py`.
+Obrazovka náhledu se navrhuje **jednou pro import i obnovu** — proto se
+obojí dodělá v témže kole.
 
-**Pořadí nasazení je nutně trojkolové:**
-
-```
-A. ty: export solution s excelovým spojením          <- TEĎ
-B. já: balík 83 — ImportFlow + RestoreFlow + knihovna Import (appka beze změny)
-C. ty: import 83, obě flow ZAPNOUT, Studio -> Add data -> obě flow
-       -> mikro-změna -> Save -> Publish -> export -> poslat
-D. já: balík 84 — obrazovka náhledu a položky v nabídce Data
-```
-
-Krok C nejde přeskočit ani obejít: `Flow.Run()` se váže na `FlowNameId`, které
-přiděluje až prostředí při importu. Proto je v nabídce `Data ▾` schválně místo
-na páté a šesté položce.
-
-**Pozor při navazování:** kdyby import nedopadl, nezačínej opravovat balík
+**Pozor při navazování:** kdyby import 84 nedopadl, nezačínej opravovat balík
 dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+
+## Balík 1.0.0.84 — RestoreFlow (01.09.2026 13:10)
+
+`src/build_restore_flow.py` → flow `RestoreFlow`, 57 akcí nejvyšší úrovně.
+Brána `src/check_restore_flow.py` **531 kontrol**, mutace
+`src/mutace_restore.py` **15/15**, kontrakt `deploy/flow_Restore.md`.
+
+Vstup: `{"soubor": "rejstrik_….json", "rezim": "nahled" | "zapis"}`.
+Odpověď: `{stav, hlaseni, porizeno, prehled}`, kde `prehled` je **řetězec** —
+schéma odpovědi se tak nemění s počtem listů a appka ho rozebere `ParseJSON`.
+
+### Čtyři pravidla, na kterých to stojí
+
+1. **Cíl zápisu se dohledává podle kódu, nikdy podle `ID` ze snímku.** To ID
+   je stav k okamžiku zálohy; po smazání a znovuzaložení patří jinému záznamu
+   a MERGE podle něj by tiše přepsal cizí řádek — se zeleným během. Každá
+   úprava proto nejdřív dohledá řádek podle `Title` akcí `Najdi_<list>`.
+2. **Obnova nikdy nemaže.** Řádek, který dnes je a ve snímku není, se jen
+   spočítá do `navic`. Brána odmítá jakoukoli mazací operaci i metodu DELETE.
+3. **Zápis přes `SendHTTPRequest`, ne `PatchItem`.** Konektorová zápisová akce
+   s rozloženým tělem chce `table` jako GUID natvrdo — u sedmi listů by to byl
+   balík nepřenositelný na MPSV. REST adresuje list interním názvem ze
+   schématu, který je všude stejný.
+4. **Porovnává se otiskem řádku** ze všech sloupců schématu. Otisky musí být
+   symetrické: z listu Choice s `?['Value']`, ze snímku bez něj. Kdyby se
+   rozešly, hlásila by obnova změnu u každého řádku a přepsala by celý
+   rejstřík sama sebou. Brána to hlídá z obou stran.
+
+### Co mutační test opravdu dokázal
+
+15 mutací, 15 chycených, a každou chytila ta kontrola, kvůli které vznikla —
+ne nesouvisející. Mimo jiné: zápis podle ID ze snímku, dohledání podle názvu
+místo kódu, vypnuté stránkování, otisk bez `?['Value']` z jedné i druhé
+strany, zápis vytažený z podmínky režimu, MERGE bez `X-HTTP-Method`
+(z úpravy by byl druhý POST a vznikl by duplicitní řádek), prázdné datum
+jako `""` místo `null`.
+
+### Dvě věci, které stály cyklus navíc
+
+**Pořadí buildu je závazné: generátor flow PŘED `build_app.py`.** Deklarace
+použitých parametrů doplňuje jedno místo v buildu, takže flow přidané až do
+hotového balíku je nemá a spadlo by za běhu na `InvalidTemplate` — appka by
+přitom viděla jen `502 BadGateway`. Chytila to `check_solution` hned.
+Docstring u `build_zaloha_flow.py` přitom radí opak; neřídit se jím.
+
+**Testovací flow uživatele se z balíku muselo vyndat.** `importnewdata` veze
+natvrdo adresu webu PPF, protože parametry Excel konektoru jsou neprůhledná
+ID vázaná na tenant. Odebírá ho nový `src/odeber_flow.py`; connection
+reference `mpsv_sharedexcelonlinebusiness_035ba` zůstává, kvůli ní to flow
+vzniklo.
+
+### Brány na 84
+
+`check_restore_flow` **531** · `check_solution` 499 · `check_export_flow` 129
+· `check_zaloha_flow` 157 · `check_mapa_flow` 139 · `check_flow` 26 ·
+`check_app`, `check_env` zeleně. Mutačně: `mutace_restore` 15/15,
+`mutace_zaloha` 9/9, `mutace_export_mapa` 7/7, `mutace_parametry` 4/4,
+`mutace_napojeni` 5/5.
+
+Sestavení (pořadí je součást postupu):
+
+```
+copy input/procesnimapa_1_0_0_83.zip runs/vstup_84.zip
+python src/odeber_flow.py --solution runs/vstup_84.zip --flow importnewdata
+python src/build_restore_flow.py --solution runs/vstup_84.zip
+python src/build_app.py --solution runs/vstup_84.zip --verze 1.0.0.84
+```
+
+`runs/vstup_84.zip` zůstává jako srovnávací základ pro `check_solution`
+(`--vstup`) — proti původnímu exportu by brána správně hlásila, že v balíku
+chybí flow, které jsme schválně vyndali.
 
 ## DLP test Excel Online — ZELENÝ (01.09.2026 12:34)
 

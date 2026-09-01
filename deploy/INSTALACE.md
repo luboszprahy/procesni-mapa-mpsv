@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_82.zip`
+# Instalace balíku `procesnimapa_1_0_0_84.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -35,8 +35,8 @@ jako vada balíku. Krok 1 obojí zakládá, proto musí být první.
 | `solution.xml`, `customizations.xml` | manifest a napojení |
 
 Dokumentace v zipu **není** — solution zip nese jen artefakty Power Platform.
-Referenční popisy jsou vedle: `sharepoint_schema.md` (listy a knihovna),
-`flow_Zaloha.md`, `flow_MapaPublish.md`, `flow_Export.md`,
+Referenční popisy jsou vedle: `sharepoint_schema.md` (listy a knihovny),
+`flow_Zaloha.md`, `flow_Restore.md`, `flow_MapaPublish.md`, `flow_Export.md`,
 `flow_AktualizaceKratkehoNazvu.md` (kontrakty flow), `navod_sprava.md`
 (jak appku používat), `navod_publikace_mapy.md` (HTML mapa).
 
@@ -66,7 +66,7 @@ Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_82.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_84.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
@@ -112,13 +112,21 @@ zůstane vypnuté i po importu opravené verze. Po importu, který skončil hlá
 | `MapaPublishScheduled` | táž publikace | denně 7:00 |
 | `ExportFlow` | export přehledu do Wordu a Excelu | z appky |
 | `AktualizaceKratkehoNazvu` | zkrácený název aktivity | změna v listu |
-| `ZalohaFlow` | **nové** — snímek rejstříku do `Zalohy` | z appky |
-| `ZalohaScheduled` | **nové** — týž snímek | denně 5:00 |
+| `ZalohaFlow` | snímek rejstříku do `Zalohy` | z appky |
+| `ZalohaScheduled` | týž snímek | denně 5:00 |
+| `RestoreFlow` | **nové** — obnova rejstříku ze snímku | z appky |
 
 Vypnuté flow se projeví jako chyba **appky**, ne flow: volající canvas app
 vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
 
-**Ověření:** všech šest má stav *On*.
+**Ověření:** všech **sedm** má stav *On*.
+
+> **Testovací flow `import new data`** (to, kterým se ověřoval DLP pro
+> Excel Online) v balíku 84 **není** — vezlo v sobě natvrdo adresu webu
+> PPF. Odebrání z balíku ho ale z prostředí nesmaže: unmanaged solution
+> komponenty nemaže. **Smaž ho v Power Automate ručně** (Turn off →
+> Delete), ať nezůstane jako sirotek. Spojení na Excel Online zůstává
+> a `ImportFlow` ho bude potřebovat.
 
 ## 4. Ověřit zálohu — první snímek ručně
 
@@ -192,6 +200,11 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 | HTML mapa ▾ → Zobrazit v HTML | otevře se publikovaná mapa |
 | **Data ▾ → Vzorová tabulka pro import** | stáhne se `sablona_import_aktivit.xlsx`; v Excelu má list Aktivity jako Tabulku a druhý list Pokyny |
 | **Data ▾ → Záloha rejstříku** | hlášení „Záloha spuštěna" a za chvíli přibude soubor v knihovně `Zálohy` |
+
+Obnova ze snímku zatím **nemá tlačítko** — `RestoreFlow` se v balíku 84 jen
+zavádí, aby ho šlo v příštím kole zaregistrovat ve Studiu (`Flow.Run()` se váže
+na `FlowNameId`, které přiděluje až prostředí při importu). Vyzkoušet se dá
+ručně, postup je v `flow_Restore.md`; **v režimu náhledu nezapisuje nic.**
 
 ---
 

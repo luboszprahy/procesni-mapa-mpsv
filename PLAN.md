@@ -1768,6 +1768,25 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
       balík s `RestoreFlow` → import → zapnout → Studio Add data → export →
       teprve pak balík s tlačítkem a obrazovkou náhledu. V rozvržení nabídky
       Data ▾ je proto potřeba nechat místo na pátou položku dopředu.
+
+   HOTOVO 01.09.2026 (balík 1.0.0.84): `src/build_restore_flow.py`,
+   brána `src/check_restore_flow.py` **531 kontrol**, mutace
+   `src/mutace_restore.py` **15/15**, kontrakt `deploy/flow_Restore.md`.
+   Zbývá druhé kolo — registrace ve Studiu a obrazovka náhledu.
+
+   Dvě věci, které plán nepředvídal a stály cyklus navíc:
+
+   - **Pořadí buildu je závazné: generátor flow PŘED `build_app.py`.**
+     Deklarace použitých parametrů doplňuje jedno místo v buildu
+     (`dorovnej_deklarace_parametru`), takže flow přidané až do hotového
+     balíku je nemá a spadne za běhu na `InvalidTemplate`. Brána
+     `check_solution` to chytila hned; docstring u `build_zaloha_flow.py`
+     přitom radí opak — neřídit se jím.
+   - **Testovací flow uživatele se z balíku musí vyndat.** `importnewdata`
+     veze natvrdo adresu webu PPF (parametry Excel konektoru jsou neprůhledná
+     ID vázaná na tenant), takže balík neprošel bránou přenositelnosti.
+     Odebírá ho `src/odeber_flow.py`; connection reference na Excel zůstává,
+     kvůli ní to flow vzniklo.
 ```
 
 ### Vztah k dřívějším námětům
