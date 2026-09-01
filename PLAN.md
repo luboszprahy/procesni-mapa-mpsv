@@ -1726,6 +1726,48 @@ pozpátku. Záloha je pojistka k importu, ne samostatné přání.
      vznikl a ve snímku není (restore ho NESMÍ smazat, jen ohlásit).
    risk: jediná destruktivní operace v projektu. Nasazovat až po zeleném
      kroku 1 a 3, a otestovat na PPF DEV, nikdy poprvé na MPSV.
+
+   NÁVRH ROZHODNUT 01.09.2026, proti tvaru snímku, který záloha opravdu
+   vyrábí (`{schema_verze, porizeno, listy.<Nazev>[]}`, klíče řádků = interní
+   názvy sloupců, Choice už rozbalený na hodnotu, u každého řádku i `ID`):
+
+   a) **Co znamená „témuž záznamu".** Nikdy nezapisovat podle `ID` ze snímku.
+      To ID je stav k okamžiku zálohy; když se mezitím záznam smazal a jiný
+      vznikl, patří dnes někomu jinému a zápis podle něj by přepsal cizí řádek
+      — tiše a nevratně. Cílové ID se proto VŽDY dohledává v aktuálním listu
+      podle `Title` (kódu). `ID` ze snímku slouží jen k tomu, aby náhled uměl
+      říct „tenhle záznam mezitím zanikl a vznikl znovu". Tohle je ta kontrola,
+      kterou musí mutační test shodit.
+
+   b) **Restore nikdy nemaže.** Řádek, který dnes je a ve snímku není, se jen
+      ohlásí. Kombinace „obnov a smaž, co přibylo" by z opravy udělala druhou
+      destruktivní operaci a chybný výběr snímku by stál data.
+
+   c) **Zápis přes `SendHTTPRequest`, ne přes `PatchItem`.** Konektorová
+      zápisová akce s rozloženým tělem `item/<sloupec>` vyžaduje `table` jako
+      GUID natvrdo (jinak flow nejde zapnout) — u sedmi listů by to znamenalo
+      sedm GUID vázaných na jeden tenant, tedy nepřenositelný balík. REST
+      adresuje list interním názvem ze `schema.json` (`Lists/DilciProcesy`),
+      který je na všech tenantech stejný, a web bere z `mpsv_procesnimapaSite`
+      jako dosud. `SendHTTPRequest` je součást SharePoint konektoru, v PPF
+      povolená (ověřeno u servisníUtility 07.08.2026).
+
+   d) **Po řádku, ne `$batch`.** Multipart changeset by se v Logic Apps skládal
+      ručně z hranic a hlaviček a chyba v něm se pozná až za běhu. Šest set
+      řádků po jednom je s `Apply to each` a souběžností otázka desítek sekund
+      a jde to číst. Kdyby to přestalo stačit, `$batch` je optimalizace, ne
+      podmínka funkčnosti.
+
+   e) **Dva režimy, jeden vstup.** `{"soubor": "rejstrik_…json", "rezim":
+      "nahled" | "zapis"}`. V režimu náhledu se nesmí provést jediný zápis —
+      stejný vzor jako podmínka `Ulozeni` v `ExportFlow`, a stejně se hlídá.
+      Odpověď nese počty za každý list: vrátí se / vznikne / beze změny /
+      mezitím přibylo / konflikt.
+
+   f) **Pořadí nasazení je dvoukolové** (registrace flow ve Studiu):
+      balík s `RestoreFlow` → import → zapnout → Studio Add data → export →
+      teprve pak balík s tlačítkem a obrazovkou náhledu. V rozvržení nabídky
+      Data ▾ je proto potřeba nechat místo na pátou položku dopředu.
 ```
 
 ### Vztah k dřívějším námětům
