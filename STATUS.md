@@ -1,11 +1,46 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 14:55** — balík **1.0.0.88**: oprava PA1011
-(galerie bez `Variant`), kvůli které appka z 87 nešla otevřít v editaci.
-**F11 je hotová celá** (záloha → import → obnova), zbývá zkouška na datech.
+Aktualizováno: **2026-09-01 15:12** — konec dne. Balík **1.0.0.88** nasazený,
+appka se otevírá. **Import dat se nepovedl — příčina zatím neznámá**, řeší se
+2.9.2026. Obnova ani ostatní části netestované na datech.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
+## KDE SE ZÍTRA ZAČÍNÁ
+
+**Import z appky selhal. Nevím proč — a to je celý první krok.**
+
+Nezačínej opravovat flow ani appku, dokud nebude jasné, co přesně spadlo.
+Tenhle projekt už dvakrát ukázal, že hláška, kterou vidí appka, o příčině
+neříká nic: canvas app u chyby flow ukáže jen
+`Flow.Run failed: 502 BadGateway / NoResponse`, ať je vevnitř cokoli.
+
+**Co potřebuju, v tomhle pořadí:**
+
+1. **Doslovné znění toho, co appka ukázala** (hláška z Notify, nebo že se
+   nestalo nic).
+2. **Run history `ImportFlow`** (Power Automate → ImportFlow → Runs → poslední
+   běh). Zajímá mě: **která akce je červená** a její chybová hláška. Kdyby
+   běh vůbec nevznikl, je problém na straně appky, ne flow, a je to jiná
+   diagnóza.
+3. U červené akce **Show raw inputs** — zvlášť u `Radky` (excelová akce),
+   protože tam se skládají čtyři parametry za běhu a je vidět, co z nich
+   vyšlo.
+
+**Na co se dívat jako první** — podle toho, kde to spadne:
+
+| akce | co to nejspíš znamená |
+|---|---|
+| `Disky` nebo `Disk` je prázdný | knihovna `Import` na webu není (neproběhl `setup_sharepoint.js`), nebo se jmenuje jinak než URL segment `/Import` |
+| `Soubor` (GetFileMetadataByPath) | soubor v knihovně `Import` není, nebo se název z appky neshoduje |
+| `Radky` (Excel) | sešit není podle šablony — tabulka se musí jmenovat `Aktivity`; nebo `drive`/`source` vyšly špatně |
+| flow vůbec neběželo | `ImportFlow` není zapnuté, nebo appka nebyla po importu otevřena a publikována ve Studiu |
+
+**Nezkoušet to opravovat naslepo.** Flow má bránu se 159 kontrolami a mutační
+test 21/21, takže vada je spíš v datech, v prostředí nebo v předpokladu, který
+se ukázal jako mylný — a ten se musí najít, ne obejít.
+
 ## CO JE NA TOBĚ
+
 
 0. **Naimportuj `deploy/procesnimapa_1_0_0_88.zip`** — balík 87 appku rozbil,
    88 to opravuje. Nic jiného se proti 87 nemění.
@@ -22,7 +57,8 @@ Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
    webu PPF), ale z prostředí ho to nesmaže. Smaž ho v Power Automate ručně;
    spojení na Excel nech být, `ImportFlow` ho používá.
 
-3. **Vyzkoušej obojí z appky** — `Data ▾ → Import z tabulky` a
+3. **Vyzkoušej obojí z appky** — import 01.09. NESELHAL na obrazovce,
+   ale na datech; obnova zatím nezkoušena — `Data ▾ → Import z tabulky` a
    `Data ▾ → Obnova ze zálohy`. Obojí vede na tutéž obrazovku:
    vyber soubor → **Zkontrolovat** → podívej se na čísla → teprve pak
    **Provést** (a to se ještě ptá).
