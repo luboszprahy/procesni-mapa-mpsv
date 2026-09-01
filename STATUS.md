@@ -1,7 +1,7 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 13:10** — balík **1.0.0.84** s `RestoreFlow`
-(obnova ze snímku). DLP test Excel Online zelený, import odblokovaný.
+Aktualizováno: **2026-09-01 13:20** — balík **1.0.0.84** nasazený, náhled
+obnovy zelený. Zbývá skutečná zkouška obnovy a jedna zkouška kvůli importu.
 Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## CO JE NA TOBĚ
@@ -15,29 +15,15 @@ Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
    solution komponenty nemaže), zůstal by jako sirotek. **Spojení na Excel
    Online zůstává** a `ImportFlow` ho bude potřebovat — ruš flow, ne spojení.
 
-3. **Vyzkoušej obnovu nanečisto.** Power Automate → `RestoreFlow` →
-   Test → Manually, do vstupu vlož:
-
-   ```json
-   {"soubor": "rejstrik_2026-09-01_0300.json", "rezim": "nahled"}
-   ```
-
-   Běh musí být zelený a vrátit přehled se sedmi listy. **V režimu náhledu
-   nesmí přibýt ani se změnit jediná položka** — ověř to tím, že se počty
-   v Site contents nezměnily. Pošli mi, co vrátilo pole `prehled`; z něj se
-   pozná, jestli porovnání sedí (u nedotčených listů mají být samé nuly).
+3. **NEMAZAT zatím `import new data`** — potřebuju z něj ještě jednu
+   tříminutovou zkoušku, viz „Co ještě chybí k importu" níže. Bod 2 platí
+   až po ní.
 
 4. **Registrace obou flow ve Studiu — druhé kolo.** Až bude bod 3 zelený:
    otevři appku ve Studiu → **Add data → RestoreFlow** → mikro-změna → Save →
    Publish → **export solution** → pošli zip. Z něj postavím obrazovku náhledu
    a položku v nabídce `Data ▾`. Obejít to nejde: `Flow.Run()` se váže na
    `FlowNameId`, které přiděluje až prostředí při importu.
-
-5. **Ověř obsah snímku ze zálohy** — pořád otevřené, poslední díl F11 kroku 1.
-   Otevři poslední soubor v knihovně `Zálohy` a zkontroluj, že
-   `listy.DilciProcesy` má **249 položek**, ne 100. Sto by znamenalo
-   nepropsané stránkování — běh je v tom případě zelený a snímek přesto
-   oříznutý.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -57,6 +43,63 @@ obojí dodělá v témže kole.
 
 **Pozor při navazování:** kdyby import 84 nedopadl, nezačínej opravovat balík
 dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
+
+## Co ještě chybí k importu — jedna tříminutová zkouška (01.09.2026 13:20)
+
+DLP prošel, ale parametry akce `List rows present in a table` jsou čtyři
+neprůhledná ID. Aby z toho šlo postavit flow, které se přenese na MPSV a umí
+číst pokaždé jiný sešit, potřebuju vědět, které z nich smějí být dynamické.
+
+**Zkouška — v tom testovacím flow `import new data`, které proto zatím nemaž:**
+
+1. `Table` přepiš z `{00000000-000C-0000-FFFF-FFFF00000000}` na text
+   **`Aktivity`** (přepni pole na „Enter custom value").
+2. `File` přepiš na výraz — přidej před excelovou akci
+   `SharePoint – Get file metadata using path` (cesta
+   `/Dokumenty/sablona_import_aktivit.xlsx`) a do `File` dej jeho **`Id`**
+   z dynamického obsahu.
+3. Save a Run.
+
+Výsledek rozhoduje o tvaru `ImportFlow`:
+
+| co vyjde | co to znamená |
+|---|---|
+| běh zelený | `file` může být dynamické a `table` se dá adresovat jménem — flow bude číst libovolný nahraný sešit |
+| spadne na `Table` | tabulka se musí adresovat tím GUIDem; je to nejspíš konstanta „první tabulka v sešitě", ověří se dalším souborem |
+| spadne na `File` | soubor nejde zadat výrazem a import bude muset číst jedno pevné místo, kam správce sešit přepisuje |
+
+`source` a `drive` zůstanou tak jako tak **textové proměnné prostředí**
+(per-tenant konstanty, vyplní se jednou při instalaci) — canvas app je číst
+neumí, ale flow ano, a to stačí.
+
+## Náhled obnovy proběhl — a odpověděl i na otevřenou otázku (01.09.2026 13:15)
+
+První běh `RestoreFlow` v režimu `nahled` nad snímkem `rejstrik_2026-09-01_0300.json`
+skončil zeleně a vrátil **samé nuly**:
+
+| list | založit | změnit | navíc | celkem ve snímku |
+|---|---|---|---|---|
+| Agendy | 0 | 0 | 0 | 6 |
+| Procesy | 0 | 0 | 0 | 44 |
+| DilciProcesy | 0 | 0 | 0 | **249** |
+| Aktivity | 0 | 0 | 0 | 48 |
+| AktivitaDilciProces | 0 | 0 | 0 | 54 |
+| Utvary | 0 | 0 | 0 | 7 |
+
+**Tím padla i poslední otevřená otázka F11 kroku 1.** `celkem_ve_snimku` je
+délka pole ve snímku, a u `DilciProcesy` je **249**, ne 100 — stránkování
+v `ZalohaFlow` se tedy propsalo a snímek není oříznutý. Čísla navíc sedí na
+Site contents řádek po řádku.
+
+**Co to dokazuje o porovnání:** kdyby se otisky rozešly (Choice bez
+`?['Value']`, jiné pořadí sloupců, jiný oddělovač), ukázalo by se 249
+dílčích procesů ve sloupci „změnit". Nula u všech sedmi listů znamená, že
+otisk ze snímku a otisk z listu vycházejí znak po znaku stejně.
+
+**Co to NEdokazuje:** že obnova umí rozdíl najít a opravit. Zelený náhled nad
+nezměněnými daty ukazuje jen to, že nevyrábí falešné rozdíly. Skutečná
+zkouška je smazat pár řádků, spustit náhled (musí je vypsat ve sloupci
+„založit") a pak režim `zapis`.
 
 ## Balík 1.0.0.84 — RestoreFlow (01.09.2026 13:10)
 
