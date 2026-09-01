@@ -44,33 +44,30 @@ obojí dodělá v témže kole.
 **Pozor při navazování:** kdyby import 84 nedopadl, nezačínej opravovat balík
 dřív, než budeš mít doslovné znění chyby a obsah vydaného zipu.
 
-## Co ještě chybí k importu — jedna tříminutová zkouška (01.09.2026 13:20)
+## Zkouška dynamických parametrů Excelu — dvě ze tří odpovědí (01.09.2026 13:31)
 
-DLP prošel, ale parametry akce `List rows present in a table` jsou čtyři
-neprůhledná ID. Aby z toho šlo postavit flow, které se přenese na MPSV a umí
-číst pokaždé jiný sešit, potřebuju vědět, které z nich smějí být dynamické.
+Testovací flow (`Get file metadata using path` → `List rows present in a table`)
+spadlo, ale na **překlepu v názvu tabulky**, ne na omezení konektoru:
+`No table was found with the name 'Activity'` — v poli `Table` bylo anglicky
+`Activity`, kdežto tabulka v šabloně se jmenuje **`Aktivity`**.
 
-**Zkouška — v tom testovacím flow `import new data`, které proto zatím nemaž:**
+Právě proto je ta chyba cenná. Vyplývá z ní:
 
-1. `Table` přepiš z `{00000000-000C-0000-FFFF-FFFF00000000}` na text
-   **`Aktivity`** (přepni pole na „Enter custom value").
-2. `File` přepiš na výraz — přidej před excelovou akci
-   `SharePoint – Get file metadata using path` (cesta
-   `/Dokumenty/sablona_import_aktivit.xlsx`) a do `File` dej jeho **`Id`**
-   z dynamického obsahu.
-3. Save a Run.
+| otázka | odpověď | z čeho |
+|---|---|---|
+| smí být `file` dynamické? | **ano** | akce se k tabulce vůbec dostala; `File` se vyhodnotil na `%252fSdilene%2bdokumenty%252fsablona_import_aktivit.xlsx`, tedy `{Identifier}` ze SharePointu |
+| dá se `table` adresovat jménem? | **ano** | konektor tabulky vyhledává podle názvu — jinak by nehlásil „no table was found with the **name**" |
+| smí být `drive` (Document Library) dynamický? | zatím nevím | pole bylo z pickeru |
 
-Výsledek rozhoduje o tvaru `ImportFlow`:
+Import tedy dokáže číst **libovolný nahraný sešit**, ne jen jedno pevné místo.
 
-| co vyjde | co to znamená |
-|---|---|
-| běh zelený | `file` může být dynamické a `table` se dá adresovat jménem — flow bude číst libovolný nahraný sešit |
-| spadne na `Table` | tabulka se musí adresovat tím GUIDem; je to nejspíš konstanta „první tabulka v sešitě", ověří se dalším souborem |
-| spadne na `File` | soubor nejde zadat výrazem a import bude muset číst jedno pevné místo, kam správce sešit přepisuje |
+Vedlejší nález: knihovna `Dokumenty` má v URL segment **`Sdilene dokumenty`** —
+zobrazovaný a interní název se u výchozí knihovny liší, s tím musí `ImportFlow`
+počítat, pokud by se adresovalo cestou.
 
-`source` a `drive` zůstanou tak jako tak **textové proměnné prostředí**
-(per-tenant konstanty, vyplní se jednou při instalaci) — canvas app je číst
-neumí, ale flow ano, a to stačí.
+Zbývá poslední neznámá: jestli `Document Library` vezme vlastní hodnotu. Když
+ano, je flow přenositelné bez jediné nové proměnné prostředí; když ne, budou
+`source` a `drive` textové proměnné vyplněné jednou při instalaci.
 
 ## Náhled obnovy proběhl — a odpověděl i na otevřenou otázku (01.09.2026 13:15)
 
