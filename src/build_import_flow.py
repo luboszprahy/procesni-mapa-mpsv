@@ -69,9 +69,22 @@ REZIM_ZAPIS = "zapis"
 REZIM_SEZNAM = "seznam"
 
 # Pořadí čísel v přehledu je součástí kontraktu s obrazovkou náhledu.
+# `Nezarazene` je podmnožina `K_zalozeni`, ne další skupina rozkladu — proto
+# je na konci a v součtu se nezapočítává.
 POCTY = ("Ocistene", "Prazdne", "K_zalozeni", "Duplicitni",
-         "Chybne", "Neznamy_dilci")
+         "Chybne", "Neznamy_dilci", "Nezarazene")
 VYCHOZI_STAV = "pracovní"
+
+# Sloupec, do kterého se dosazuje technický rodič, když správce nahraje
+# aktivitu bez zařazení.
+KOD_RODICE_SLOUPEC = "dilci_proces_kod"
+
+# Kód technického dílčího procesu „Nezařazeno". Čte se ze schématu, protože
+# tutéž hodnotu zakládá provisioning (make_setup.py) — dvě místa s natvrdo
+# psaným kódem by se rozešla a import by zakládal sirotky pod dílčí proces,
+# který v rejstříku není.
+KOD_NEZARAZENO = json.loads(
+    SCHEMA.read_text(encoding="utf-8"))["seed"]["prefix_nezarazeno"]
 
 # Oddělovač odvozeného klíče vazby. Týž tvar zakládá appka na obrazovce vazeb
 # (`varAktivita.Title & "__" & ThisItem.Title`) — kdyby se lišil, vyrobil by
@@ -336,17 +349,40 @@ def akce(schema):
                    "where": f"@not(and({vsechny_prazdne}))"},
         "runAfter": {"Prazdne": ["Succeeded"]},
     }
+    # Aktivita nahraná BEZ zařazení je legitimní vstup: správce nahraje holé
+    # činnosti a zařadí je až v aplikaci. Kód se ale odvozuje od kódu rodiče
+    # a Title je povinný, takže rodiče mít musí — dosadí se technický
+    # `00-00-000 Nezařazeno`, který zakládá provisioning.
+    #
+    # POŘADÍ JE PODSTATNÉ: náhrada smí přijít až ZA `S_obsahem`. Kdyby se
+    # dosadilo dřív, přestaly by být prázdné řádky prázdné (`vsechny_prazdne`
+    # by neplatilo) a šablona by při každém importu založila dvě stě sirotků
+    # z prázdných řádků pod tabulkou.
+    doplneny = {"radek": "@item()?['radek']"}
+    for sloupec in sloupce:
+        jmeno = sloupec["name"]
+        if jmeno == KOD_RODICE_SLOUPEC:
+            doplneny[jmeno] = (f"@if(empty(item()?['{jmeno}']), "
+                               f"{lit(KOD_NEZARAZENO)}, item()?['{jmeno}'])")
+        else:
+            doplneny[jmeno] = f"@item()?['{jmeno}']"
+    kroky["Doplneny_rodic"] = {
+        "type": "Select",
+        "inputs": {"from": "@body('S_obsahem')", "select": doplneny},
+        "runAfter": {"S_obsahem": ["Succeeded"]},
+    }
+
     povinne = [c["name"] for c in sloupce if c.get("required")]
     ma_povinne = " ".join(f"not(empty(item()?['{n}']))," for n in povinne).rstrip(",")
     kroky["Chybne"] = {
         "type": "Query",
-        "inputs": {"from": "@body('S_obsahem')",
+        "inputs": {"from": "@body('Doplneny_rodic')",
                    "where": f"@not(and({ma_povinne}))"},
-        "runAfter": {"S_obsahem": ["Succeeded"]},
+        "runAfter": {"Doplneny_rodic": ["Succeeded"]},
     }
     kroky["Uplne"] = {
         "type": "Query",
-        "inputs": {"from": "@body('S_obsahem')", "where": f"@and({ma_povinne})"},
+        "inputs": {"from": "@body('Doplneny_rodic')", "where": f"@and({ma_povinne})"},
         "runAfter": {"Chybne": ["Succeeded"]},
     }
     kroky["Neznamy_dilci"] = {
@@ -381,13 +417,24 @@ def akce(schema):
         "runAfter": {"Duplicitni": ["Succeeded"]},
     }
 
+    # Kolik z nich je bez zařazení. Není to další skupina rozkladu, ale
+    # podmnožina `K_zalozeni` — správce musí vidět, kolik aktivit bude po
+    # importu čekat na zařazení, jinak se na ně zapomene.
+    kroky["Nezarazene"] = {
+        "type": "Query",
+        "inputs": {"from": "@body('K_zalozeni')",
+                   "where": ("@equals(item()?['" + KOD_RODICE_SLOUPEC + "'], "
+                             + lit(KOD_NEZARAZENO) + ")")},
+        "runAfter": {"K_zalozeni": ["Succeeded"]},
+    }
+
     # Kódy už přidělené v tomhle běhu musí být vidět při přidělování dalšího,
     # jinak by dvě aktivity pod týmž dílčím procesem dostaly stejný kód.
     kroky["Pouzite_kody"] = {
         "type": "InitializeVariable",
         "inputs": {"variables": [{"name": "pouziteKody", "type": "array",
                                   "value": "@body('Kody_aktivit')"}]},
-        "runAfter": {"K_zalozeni": ["Succeeded"]},
+        "runAfter": {"Nezarazene": ["Succeeded"]},
     }
 
     kroky["Zapis"] = {

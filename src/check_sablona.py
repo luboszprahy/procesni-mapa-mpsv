@@ -20,6 +20,7 @@ Spouštět z kořene projektu:
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -27,9 +28,11 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 sys.path.insert(0, "src")
-from make_sablona import (DATOVYCH_RADKU, LIST, LIST_POKYNY, NAPOVEDA, SCHEMA,  # noqa: E402
-                          TABULKA, VYSTUP, nacti_schema, omezeni,
-                          sloupce_sablony)
+from make_sablona import (DATOVYCH_RADKU, LIST, LIST_CISELNIKY,  # noqa: E402
+                          LIST_POKYNY, NAPOVEDA, SCHEMA,
+                          TABULKA, VYSTUP, jmeno_rozsahu,
+                          nacti_ciselniky, nacti_schema, omezeni,
+                          sloupce_sablony, sloupce_sesitu)
 
 # Záměrně vlastní seznam, ne SYSTEMOVE z generátoru: kdyby z něj sloupec
 # vypadl, generátor i brána by se shodly na tom, že do šablony patří, a nikdo
@@ -39,6 +42,15 @@ ZAKAZANE = {
     "nazev_kratky": "odvozuje se z názvu",
     "datum_aktualizace": "razítko importu",
     "puvodni_kod": "stopa po přesunu pod jiného rodiče",
+}
+
+# Sloupce, jejichž rozbalovátko nečerpá z Choice ve schématu, ale z číselníku
+# na listu Ciselniky. Vzorce jsou tu doslova: rozejít se s generátorem
+# nesmějí, protože chybný vzorec Excel tiše ignoruje a nabídka prostě zmizí.
+CISELNIKOVE = {
+    "_proces": "=Cis_Procesy",
+    "dilci_proces_kod": '=INDIRECT("P_"&SUBSTITUTE(LEFT($B2,5),"-","_"))',
+    "vykonava": "=Cis_Utvary",
 }
 
 chyby = []
@@ -53,8 +65,13 @@ def overit(podminka, popis):
 
 
 def zkontroluj_tvar_sesitu(sesit):
-    overit(sesit.sheetnames == [LIST, LIST_POKYNY],
-           f"listy sešitu jsou {sesit.sheetnames}, čekám {[LIST, LIST_POKYNY]}")
+    ocekavane = [LIST, LIST_POKYNY, LIST_CISELNIKY]
+    overit(sesit.sheetnames == ocekavane,
+           f"listy sešitu jsou {sesit.sheetnames}, čekám {ocekavane}")
+    overit(not sesit[LIST_CISELNIKY].tables
+           if LIST_CISELNIKY in sesit.sheetnames else True,
+           f"list {LIST_CISELNIKY} obsahuje Tabulku — konektor Excelu čte "
+           f"Tabulku podle jména a mohl by sáhnout na číselník místo na data")
     overit(not sesit[LIST_POKYNY].tables if LIST_POKYNY in sesit.sheetnames else True,
            f"list {LIST_POKYNY} obsahuje Tabulku — konektor by mohl sáhnout na ni")
 
@@ -108,6 +125,17 @@ def zkontroluj_tabulku(list_dat, pocet_sloupcu):
 
 
 def zkontroluj_hlavicku(hlavicka, sloupce, schema):
+    # `sloupce` jsou sloupce SEŠITU, tedy včetně pomocných, které ve schématu
+    # nejsou. Kontroluje se pořadí i to, že pomocný sloupec nenese jméno
+    # žádného sloupce schématu — kdyby ho nesl, import by četl jeho hodnotu.
+    ze_schematu = {c["display"] for c in sloupce_sablony(schema)}
+    for sloupec in sloupce:
+        if not sloupec.get("pomocny"):
+            continue
+        overit(sloupec["display"] not in ze_schematu,
+               f"pomocný sloupec {sloupec['display']!r} se jmenuje stejně jako "
+               f"sloupec schématu — import by ho začal číst jako data")
+
     for index, sloupec in enumerate(sloupce):
         skutecny = hlavicka[index] if index < len(hlavicka) else None
         overit(skutecny == sloupec["display"],
@@ -142,7 +170,8 @@ def zkontroluj_rozbalovatka(list_dat, sloupce):
         pismeno = get_column_letter(index)
         moje = [k for oblast, k in rozsahy.items() if oblast.startswith(f"{pismeno}2:")]
 
-        if sloupec["type"] != "Choice":
+        ocekavany = CISELNIKOVE.get(sloupec["name"])
+        if sloupec["type"] != "Choice" and ocekavany is None:
             overit(not moje,
                    f"sloupec {sloupec['display']!r} není Choice, přesto má rozbalovátko")
             continue
@@ -157,10 +186,64 @@ def zkontroluj_rozbalovatka(list_dat, sloupce):
         overit(bool(kontrola.showErrorMessage),
                f"rozbalovátko u {sloupec['display']!r} nehlásí chybu — "
                f"překlep by prošel až k importu")
-        volby = (kontrola.formula1 or "").strip('"').split(",")
-        overit(volby == sloupec["choices"],
-               f"rozbalovátko u {sloupec['display']!r} nabízí {volby}, "
-               f"schéma má {sloupec['choices']}")
+        # Prázdno musí projít u všech: aktivita bez zařazení je legitimní vstup
+        # a nepovinné sloupce se nevyplňují vůbec.
+        overit(bool(kontrola.allowBlank),
+               f"rozbalovátko u {sloupec['display']!r} nedovolí prázdno")
+
+        vzorec = (kontrola.formula1 or "")
+        if ocekavany is None:
+            volby = vzorec.strip('"').split(",")
+            overit(volby == sloupec["choices"],
+                   f"rozbalovátko u {sloupec['display']!r} nabízí {volby}, "
+                   f"schéma má {sloupec['choices']}")
+        else:
+            overit(vzorec == ocekavany,
+                   f"rozbalovátko u {sloupec['display']!r} má vzorec {vzorec!r}, "
+                   f"čekám {ocekavany!r}")
+
+
+def zkontroluj_ciselniky(sesit, ciselniky):
+    """Pojmenované rozsahy a kaskáda.
+
+    Kaskáda stojí na tom, že dílčí procesy jednoho procesu leží v souvislém
+    bloku řádků. Kdyby se pořadí rozházelo, ukazoval by pojmenovaný rozsah
+    na kus cizího procesu — a to je horší než chybějící nabídka, protože
+    vypadá funkčně.
+    """
+    jmena = set(sesit.defined_names)
+    for klic, pocet in (("Cis_Procesy", len(ciselniky["procesy"])),
+                        ("Cis_Utvary", len(ciselniky["utvary"]))):
+        overit(klic in jmena, f"chybí pojmenovaný rozsah {klic}")
+        if klic not in jmena:
+            continue
+        odkaz = sesit.defined_names[klic].attr_text
+        konec = int(re.search(r"(\d+)$", odkaz).group(1))
+        overit(konec == 1 + pocet,
+               f"rozsah {klic} končí na řádku {konec}, číselník má {pocet} "
+               f"položek — rozdíl znamená prázdné položky v nabídce nebo "
+               f"chybějící konec číselníku")
+
+    list_c = sesit[LIST_CISELNIKY]
+    for kod_procesu in {p[0] for p in ciselniky["procesy"]}:
+        jmeno = jmeno_rozsahu(kod_procesu)
+        if jmeno not in jmena:
+            continue  # proces bez dílčích procesů rozsah mít nemusí
+        odkaz = sesit.defined_names[jmeno].attr_text
+        shoda = re.search(r"\$D\$(\d+):\$D\$(\d+)", odkaz)
+        if not shoda:
+            chyby.append(f"rozsah {jmeno} nemá tvar $D$od:$D$do: {odkaz!r}")
+            continue
+        od, do = int(shoda.group(1)), int(shoda.group(2))
+        kody = [list_c.cell(row=r, column=4).value for r in range(od, do + 1)]
+        rodice = [list_c.cell(row=r, column=5).value for r in range(od, do + 1)]
+        overit(all(r == kod_procesu for r in rodice),
+               f"rozsah {jmeno} zahrnuje dílčí procesy cizích procesů: "
+               f"{sorted(set(rodice))}")
+        ocekavane = [d[0] for d in ciselniky["dilci_procesy"]
+                     if d[1] == kod_procesu]
+        overit(kody == ocekavane,
+               f"rozsah {jmeno} nabízí {kody[:3]}…, čekám {ocekavane[:3]}…")
 
 
 def zkontroluj_pokyny(list_pokyny, sloupce):
@@ -202,7 +285,8 @@ def main():
         raise SystemExit(f"CHYBA: šablona {cesta} neexistuje — spusť make_sablona.py")
 
     schema = nacti_schema(argumenty.schema)
-    sloupce = sloupce_sablony(schema)
+    sloupce = sloupce_sesitu(schema)
+    ciselniky = nacti_ciselniky()
     sesit = load_workbook(cesta)
 
     zkontroluj_tvar_sesitu(sesit)
@@ -218,6 +302,8 @@ def main():
     zkontroluj_rozbalovatka(list_dat, sloupce)
     if LIST_POKYNY in sesit.sheetnames:
         zkontroluj_pokyny(sesit[LIST_POKYNY], sloupce)
+    if LIST_CISELNIKY in sesit.sheetnames:
+        zkontroluj_ciselniky(sesit, ciselniky)
 
     vypis()
     return 1 if chyby else 0

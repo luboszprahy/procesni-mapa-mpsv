@@ -30,6 +30,7 @@ from pathlib import Path
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
+from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
@@ -39,6 +40,25 @@ VYSTUP = Path("deploy/sablona_import_aktivit.xlsx")
 LIST = "Aktivity"          # list schématu, ze kterého se šablona staví
 TABULKA = "Aktivity"       # jméno Tabulky — na něj se odkazuje ImportFlow
 LIST_POKYNY = "Pokyny"
+LIST_CISELNIKY = "Ciselniky"
+
+MODEL = Path("runs/normalize/model.json")
+UTVARY = Path("runs/normalize/utvary.csv")
+
+# Pomocný sloupec: slouží JEN k zúžení nabídky dílčích procesů, do rejstříku
+# se neimportuje. Flow čte sloupce podle schématu listu Aktivity, takže o něm
+# neví a přeskočí ho — proto tu smí být, aniž by se sahalo do schématu.
+POMOCNY_PROCES = {
+    "name": "_proces",
+    "display": "Proces",
+    "type": "Text",
+    "pomocny": True,
+}
+
+# Kolik řádků číselníkových tabulek se založí. Rozsah validace musí být stálý,
+# proto se nepočítá z dat, ale drží se na stropu — dokud se do něj číselník
+# vejde, může ho refresh přepisovat bez zásahu do šablony.
+STROP_CISELNIKU = {"procesy": 200, "dilci_procesy": 600, "utvary": 200}
 
 # Sloupce, které plní systém. Klíčem je interní název ve schématu.
 SYSTEMOVE = {
@@ -54,8 +74,12 @@ SYSTEMOVE = {
 # se nápověda nedopíše.
 NAPOVEDA = {
     "nazev": "Úplné znění činnosti tak, jak má stát v organizačním řádu.",
-    "dilci_proces_kod": "Kód existujícího dílčího procesu ve tvaru AA-BB-CCC, "
-                        "např. 01-02-003. Neexistující kód import odmítne.",
+    "_proces": "Pomocný sloupec — vyberte proces a nabídka dílčích procesů "
+               "vedle se zúží jen na ty jeho. Do rejstříku se neimportuje.",
+    "dilci_proces_kod": "Vyberte z nabídky (zúží ji sloupec Proces vlevo). "
+                        "Můžete nechat PRÁZDNÉ — aktivita se pak založí jako "
+                        "nezařazená a přiřadíte ji až v aplikaci. "
+                        "Neexistující kód import odmítne.",
     "vykonava": "Oddělení, které činnost vykonává. Více útvarů oddělte '; '.",
     "spolupracuje": "Útvary, které se na činnosti podílejí. Více útvarů oddělte '; '.",
     "vnitrni_predpis": "Předpis, ze kterého činnost plyne. Více předpisů oddělte '; '.",
@@ -94,6 +118,53 @@ def sloupce_sablony(schema):
     return [c for c in listy[0]["columns"] if c["name"] not in SYSTEMOVE]
 
 
+def sloupce_sesitu(schema):
+    """Sloupce tak, jak stojí v sešitě — se vloženým pomocným sloupcem.
+
+    Pomocný `Proces` stojí těsně před dílčím procesem: vybere se nejdřív
+    proces a nabídka dílčích procesů se tím zúží z dvou set padesáti na
+    jednotky. Bez toho je rozbalovátko k nepoužití — Excel v něm neumí hledat,
+    jen rolovat.
+    """
+    vysledek = []
+    for sloupec in sloupce_sablony(schema):
+        if sloupec["name"] == "dilci_proces_kod":
+            vysledek.append(POMOCNY_PROCES)
+        vysledek.append(sloupec)
+    return vysledek
+
+
+def jmeno_rozsahu(kod_procesu):
+    """Kód procesu na jméno pojmenovaného rozsahu (Excel nesnese pomlčky)."""
+    return "P_" + kod_procesu.replace("-", "_")
+
+
+def nacti_ciselniky(cesta_modelu=MODEL, cesta_utvaru=UTVARY):
+    """Číselníky pro rozbalovátka: procesy, dílčí procesy, útvary.
+
+    Snímek, ne živá data — sešit je statický soubor. Aktuální ho drží
+    plánované flow, které do těchto tabulek zapisuje (F13/B3).
+    """
+    model = json.loads(Path(cesta_modelu).read_text(encoding="utf-8"))
+    procesy = [(p["kod"], p["nazev"]) for p in model["procesy"]]
+    dilci = [(d["kod"], d["proces_kod"], d["nazev"])
+             for d in model["dilci_procesy"]]
+
+    utvary = []
+    radky = Path(cesta_utvaru).read_text(encoding="utf-8-sig").splitlines()
+    for radek in radky[1:]:
+        if not radek.strip():
+            continue
+        casti = radek.split(";")
+        utvary.append((casti[0], casti[1]))
+
+    # Dílčí procesy musí být seskupené podle procesu: pojmenovaný rozsah je
+    # souvislý blok řádků, takže rozházené pořadí by kaskádu rozbilo.
+    dilci.sort(key=lambda r: (r[1], r[0]))
+    procesy.sort()
+    return {"procesy": procesy, "dilci_procesy": dilci, "utvary": utvary}
+
+
 def sirka(sloupec):
     if sloupec["type"] in SIRKA_PODLE_TYPU:
         return SIRKA_PODLE_TYPU[sloupec["type"]]
@@ -102,6 +173,8 @@ def sirka(sloupec):
 
 def omezeni(sloupec):
     """Strojově odvoditelná omezení sloupce — text do listu Pokyny."""
+    if sloupec.get("pomocny"):
+        return "výběr z nabídky, neimportuje se"
     if sloupec["type"] == "Choice":
         return " / ".join(sloupec["choices"])
     if sloupec.get("maxlen"):
@@ -130,16 +203,39 @@ def zaloz_tabulku(sesit, sloupce):
         name="TableStyleMedium2", showRowStripes=True)
     list_dat.add_table(tabulka)
 
+    # Sloupec pomocného procesu potřebuje znát ten, kdo staví kaskádu níž.
+    pozice = {c["name"]: get_column_letter(i)
+              for i, c in enumerate(sloupce, start=1)}
+
     for index, sloupec in enumerate(sloupce, start=1):
-        if sloupec["type"] != "Choice":
+        vzorec = None
+        if sloupec["type"] == "Choice":
+            # Krátký výčet jde přímo do validace jako seznam v uvozovkách.
+            vzorec = '"' + ",".join(sloupec["choices"]) + '"'
+        elif sloupec["name"] == POMOCNY_PROCES["name"]:
+            vzorec = "=Cis_Procesy"
+        elif sloupec["name"] == "dilci_proces_kod":
+            # Kaskáda: nabídka se zúží na dílčí procesy vybraného procesu.
+            # Kód procesu je prvních pět znaků hodnoty ve vedlejším sloupci
+            # (`01-01`), zbytek je název — ten je tam kvůli čitelnosti výběru.
+            sloupec_procesu = pozice[POMOCNY_PROCES["name"]]
+            vzorec = (f'=INDIRECT("P_"&SUBSTITUTE(LEFT(${sloupec_procesu}2,5),'
+                      f'"-","_"))')
+        elif sloupec["name"] == "vykonava":
+            vzorec = "=Cis_Utvary"
+        if vzorec is None:
             continue
+
         # Rozsah sahá pod tabulku, aby platil i na řádky, které správce dopíše.
         pismeno = get_column_letter(index)
         # showErrorMessage: bez něj je rozbalovátko jen ozdoba a překlep projde
         # až k importu, kde ho správce uvidí jako odmítnutý řádek.
+        #
+        # allow_blank platí i pro dílčí proces: aktivita nahraná BEZ zařazení
+        # je legitimní vstup, import jí dosadí technický kód 00-00-000
+        # a správce ji zařadí až v aplikaci.
         kontrola = DataValidation(
-            type="list", allow_blank=True,
-            formula1='"' + ",".join(sloupec["choices"]) + '"',
+            type="list", allow_blank=True, formula1=vzorec,
             showErrorMessage=True, errorTitle="Neplatná hodnota",
             error="Vyberte jednu z nabízených hodnot, nebo nechte prázdné.")
         list_dat.add_data_validation(kontrola)
@@ -147,6 +243,77 @@ def zaloz_tabulku(sesit, sloupce):
 
     list_dat.freeze_panes = "A2"
     return list_dat
+
+
+def zaloz_ciselniky(sesit, ciselniky):
+    """List s číselníky a pojmenované rozsahy pro kaskádu.
+
+    List zůstává VIDITELNÝ schválně: správce v něm dohledá název podle kódu.
+    Skrytý by byl čistší na pohled, ale kód `01-02-003` sám o sobě nic neříká
+    a jinde v sešitě názvy nejsou (vzorce se do šablony dávat nesmí — chyba
+    ve vzorci by ze všech dvou set prázdných řádků udělala neprázdné).
+    """
+    list_c = sesit.create_sheet(LIST_CISELNIKY)
+    sedy = PatternFill("solid", fgColor="DDDDDD")
+
+    bloky = [
+        # Třetí sloupec je to, co se ukáže v nabídce. Proces se neimportuje,
+        # takže jeho hodnota smí být čitelná („01-01 — Název"); dílčí proces
+        # a útvar se importují, a tam musí být přesný kód.
+        ("A", ["Proces (kód)", "Název procesu", "Nabídka"],
+         [(k, n, f"{k} — {n}") for k, n in ciselniky["procesy"]],
+         STROP_CISELNIKU["procesy"]),
+        ("D", ["Dílčí proces (kód)", "Patří k procesu", "Název dílčího procesu"],
+         ciselniky["dilci_procesy"], STROP_CISELNIKU["dilci_procesy"]),
+        ("H", ["Útvar (kód)", "Název útvaru"],
+         ciselniky["utvary"], STROP_CISELNIKU["utvary"]),
+    ]
+    for prvni_sloupec, hlavicka, data, strop in bloky:
+        if len(data) > strop:
+            raise SystemExit(
+                f"CHYBA: číselník od sloupce {prvni_sloupec} má {len(data)} "
+                f"položek, ale rozsah validace pokrývá jen {strop} — nabídka "
+                f"by tiše vynechala konec")
+        posun = ord(prvni_sloupec) - ord("A")
+        for index, nadpis in enumerate(hlavicka):
+            bunka = list_c.cell(row=1, column=posun + index + 1, value=nadpis)
+            bunka.font = Font(bold=True)
+            bunka.fill = sedy
+            list_c.column_dimensions[
+                get_column_letter(posun + index + 1)].width = 34 if index else 20
+        for radek_index, radek in enumerate(data, start=2):
+            for index, hodnota in enumerate(radek):
+                list_c.cell(row=radek_index, column=posun + index + 1,
+                            value=hodnota)
+
+    # Pojmenované rozsahy pro kaskádu: jeden na každý proces, souvislý blok
+    # jeho dílčích procesů. INDIRECT nad nimi je klasický kaskádový vzor —
+    # OFFSET/MATCH by šlo taky, ale je volatile a v Excelu Online vrtkavý.
+    dilci = ciselniky["dilci_procesy"]
+    zacatky = {}
+    for index, (_, proces_kod, _) in enumerate(dilci, start=2):
+        zacatky.setdefault(proces_kod, [index, index])[1] = index
+    for proces_kod, (od, do) in zacatky.items():
+        sesit.defined_names.add(DefinedName(
+            jmeno_rozsahu(proces_kod),
+            attr_text=f"{LIST_CISELNIKY}!$D${od}:$D${do}"))
+
+    # Rozsahy pro první stupeň kaskády a pro útvary — PŘESNĚ podle počtu
+    # položek, ne na strop.
+    #
+    # Rozsah natažený do zásoby by do nabídky přidal tolik prázdných řádků,
+    # kolik zbývá do stropu (u osmi útvarů dvě stě mínus osm), a rozbalovátko
+    # by bylo k nepoužití. Cena je, že rozsah neroste sám: až přibude proces,
+    # musí se šablona přegenerovat. Refresh přes Excel konektor to nedokáže —
+    # umí přepsat buňky, ne definici pojmenovaného rozsahu (viz F13/B3).
+    sesit.defined_names.add(DefinedName(
+        "Cis_Procesy",
+        attr_text=f"{LIST_CISELNIKY}!$C$2:$C${1 + len(ciselniky['procesy'])}"))
+    sesit.defined_names.add(DefinedName(
+        "Cis_Utvary",
+        attr_text=f"{LIST_CISELNIKY}!$H$2:$H${1 + len(ciselniky['utvary'])}"))
+    list_c.freeze_panes = "A2"
+    return list_c
 
 
 def zaloz_pokyny(sesit, sloupce):
@@ -206,14 +373,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--schema", default=str(SCHEMA))
     parser.add_argument("--vystup", default=str(VYSTUP))
+    parser.add_argument("--model", default=str(MODEL))
+    parser.add_argument("--utvary", default=str(UTVARY))
     argumenty = parser.parse_args()
 
     schema = nacti_schema(argumenty.schema)
-    sloupce = sloupce_sablony(schema)
+    sloupce = sloupce_sesitu(schema)
+    ciselniky = nacti_ciselniky(argumenty.model, argumenty.utvary)
 
     sesit = Workbook()
     zaloz_tabulku(sesit, sloupce)
     zaloz_pokyny(sesit, sloupce)
+    zaloz_ciselniky(sesit, ciselniky)
 
     cesta = Path(argumenty.vystup)
     cesta.parent.mkdir(parents=True, exist_ok=True)
@@ -223,6 +394,9 @@ def main():
     print(f"tabulka {TABULKA}: {len(sloupce)} sloupců, "
           f"{DATOVYCH_RADKU} prázdných řádků "
           f"({', '.join(c['display'] for c in sloupce)})")
+    print(f"číselníky: {len(ciselniky['procesy'])} procesů, "
+          f"{len(ciselniky['dilci_procesy'])} dílčích procesů, "
+          f"{len(ciselniky['utvary'])} útvarů")
     return 0
 
 

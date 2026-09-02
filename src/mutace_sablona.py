@@ -136,6 +136,41 @@ def kratsi_pokyny(sesit):
     list_pokyny.delete_rows(list_pokyny.max_row)
 
 
+def kaskada_na_cizi_rozsah(sesit):
+    """Pojmenovaný rozsah jednoho procesu ukazuje na dílčí procesy jiného.
+
+    Nejzákeřnější z mutací: nabídka se otevře, něco v ní je, a správce
+    z ní vybere kód, který pod jeho proces nepatří. Import ho přijme —
+    ten dílčí proces existuje — a aktivita skončí jinde, než měla.
+    """
+    from openpyxl.workbook.defined_name import DefinedName
+    jmeno = "P_01_01"
+    del sesit.defined_names[jmeno]
+    sesit.defined_names.add(DefinedName(jmeno, attr_text="Ciselniky!$D$40:$D$45"))
+
+
+def rozsah_do_zasoby(sesit):
+    """Rozsah útvarů natažený na strop: nabídka se naplní prázdnými řádky."""
+    from openpyxl.workbook.defined_name import DefinedName
+    del sesit.defined_names["Cis_Utvary"]
+    sesit.defined_names.add(
+        DefinedName("Cis_Utvary", attr_text="Ciselniky!$H$2:$H$201"))
+
+
+def dilci_proces_bez_kaskady(sesit):
+    """Dílčí proces dostane plochý seznam všech 250 kódů místo kaskády —
+    rozbalovátko sice je, ale roluje se v něm k neupotřebení."""
+    for kontrola in sesit[LIST].data_validations.dataValidation:
+        if str(next(iter(kontrola.sqref.ranges))).startswith("C2:"):
+            kontrola.formula1 = "=Cis_Procesy"
+
+
+def ciselnik_bez_prazdna(sesit):
+    """Rozbalovátko nepustí prázdno — aktivitu bez zařazení pak nejde nahrát."""
+    for kontrola in sesit[LIST].data_validations.dataValidation:
+        kontrola.allowBlank = False
+
+
 MUTACE = [
     ("do schématu přibyl sloupec", "schema", pribyl_sloupec),
     ("sloupec se ve schématu přejmenoval", "schema", jiny_display),
@@ -152,6 +187,10 @@ MUTACE = [
     ("Stav bez rozbalovátka", "sesit", bez_rozbalovatka),
     ("rozbalovátko bez chybové hlášky", "sesit", rozbalovatko_bez_hlasky),
     ("pokyny zapomněly na sloupec", "sesit", kratsi_pokyny),
+    ("kaskáda ukazuje na cizí proces", "sesit", kaskada_na_cizi_rozsah),
+    ("rozsah číselníku natažený do zásoby", "sesit", rozsah_do_zasoby),
+    ("dílčí proces bez kaskády", "sesit", dilci_proces_bez_kaskady),
+    ("rozbalovátko nepustí prázdno", "sesit", ciselnik_bez_prazdna),
 ]
 
 

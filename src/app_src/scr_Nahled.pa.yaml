@@ -214,7 +214,7 @@ Screens:
                   ClearCollect(
                       colNahledSouhrn,
                       ForAll(
-                          Sequence(6) As i,
+                          Sequence(7) As i,
                           {
                               Poradi: i.Value,
                               Popisek: Switch(
@@ -224,7 +224,8 @@ Screens:
                                   3, "Založí se",
                                   4, "Duplicitní (přeskočí se)",
                                   5, "Chybné (chybí povinný údaj)",
-                                  "Neexistující dílčí proces"
+                                  6, "Neexistující dílčí proces",
+                                  "   z toho bez zařazení (doplníš v aplikaci)"
                               ),
                               Pocet: Value(Index(Split(varNahledOdpoved, "|~|"), i.Value).Value)
                           }
@@ -336,10 +337,14 @@ Screens:
                   # Barva rozlisuje, co cislo znamena: zelena = zalozi se,
                   # oranzova = radek, ktery se NEzalozi a je treba se na nej
                   # podivat. Bez toho byla vsechna cisla stejne tmava.
+                  # Sedmý řádek (bez zařazení) NENÍ chyba — je to podmnožina
+                  # založených, která čeká na zařazení v aplikaci. Musí se
+                  # testovat dřív než `>= 4`, jinak by zoranžověl jako chyba.
                   Color: |-
                     =If(
                         ThisItem.Pocet = 0, stylTextSlaby,
                         ThisItem.Poradi = 3, stylUspech,
+                        ThisItem.Poradi = 7, stylAkce,
                         ThisItem.Poradi >= 4, stylPozor,
                         stylText
                     )

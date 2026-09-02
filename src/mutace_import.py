@@ -171,6 +171,38 @@ def disk_podle_nazvu(definice):
     uzel["inputs"]["where"] = "@equals(string(item()?['name']), 'Import')"
 
 
+def rodic_pred_prazdnymi(definice):
+    """Dosazení rodiče nad `Ocistene` místo nad `S_obsahem`.
+
+    Nejdražší chyba celého kroku: prázdné řádky by přestaly být prázdné
+    (`00-00-000` je hodnota) a šablona s dvěma sty prázdnými řádky by při
+    každém importu založila dvě stě sirotků.
+    """
+    uzel = definice["actions"]["Doplneny_rodic"]
+    uzel["inputs"]["from"] = "@body('Ocistene')"
+    uzel["runAfter"] = {"Ocistene": ["Succeeded"]}
+
+
+def rodic_se_nedosazuje(definice):
+    """Prázdný dílčí proces projde beze změny — aktivita bez zařazení pak
+    spadne mezi chybné řádky a nahrát holé činnosti nejde."""
+    uzel = definice["actions"]["Doplneny_rodic"]
+    uzel["inputs"]["select"]["dilci_proces_kod"] = "@item()?['dilci_proces_kod']"
+
+
+def rodic_zahodi_sloupec(definice):
+    """Select vynechá jeden sloupec — do zápisu se pak nedostane."""
+    uzel = definice["actions"]["Doplneny_rodic"]
+    uzel["inputs"]["select"].pop("vykonava", None)
+
+
+def nezarazene_podle_jineho_kodu(definice):
+    """Počet nezařazených se počítá podle cizího kódu, takže by ukazoval nulu
+    i tehdy, když sirotci vznikli."""
+    uzel = definice["actions"]["Nezarazene"]
+    uzel["inputs"]["where"] = ("@equals(item()?['dilci_proces_kod'], '01-01-001')")
+
+
 MUTACE = [
     ("souběžná smyčka přidělování kódů", soubezna_smycka),
     ("zakládají se všechny řádky, ne jen ověřené", zaklada_vsechno),
@@ -193,6 +225,10 @@ MUTACE = [
     ("source natvrdo v definici", source_natvrdo),
     ("jméno tabulky se rozešlo se šablonou", tabulka_jinak),
     ("disk se hledá podle zobrazovaného názvu", disk_podle_nazvu),
+    ("rodič se dosazuje před oddělením prázdných", rodic_pred_prazdnymi),
+    ("prázdný dílčí proces se nedoplňuje", rodic_se_nedosazuje),
+    ("dosazení rodiče zahodí sloupec", rodic_zahodi_sloupec),
+    ("nezařazené se počítají podle cizího kódu", nezarazene_podle_jineho_kodu),
 ]
 
 

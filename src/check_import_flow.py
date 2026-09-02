@@ -35,6 +35,7 @@ sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
 from build_import_flow import (FLOW, FLOW_GUID, HOST_XLS, KNIHOVNA,  # noqa: E402
                                LIST_AKTIVITY, LIST_DILCI, LIST_VAZBY,
+                               KOD_NEZARAZENO, KOD_RODICE_SLOUPEC,
                                ODD_POLE, ODD_RADKU, POCTY,
                                REZIM_SEZNAM, REZIM_ZAPIS, SPOJKA_VAZBY,
                                STRANKOVANI, TABULKA,
@@ -83,7 +84,8 @@ def zkontroluj_kostru(definice, spojeni):
     akce = definice.get("actions") or {}
     for jmeno in ("Vstup", "Cesta_webu", "Site_id", "Web_id", "Disky", "Zdroj",
                   "Disk_kandidati", "Disk", "Soubor", "Radky", "Ocistene",
-                  "Rezim_seznam", "Prazdne", "S_obsahem", "Chybne", "Uplne",
+                  "Rezim_seznam", "Prazdne", "S_obsahem", "Doplneny_rodic",
+                  "Chybne", "Uplne", "Nezarazene",
                   "Neznamy_dilci",
                   "Zarazene", "Duplicitni", "K_zalozeni", "Pouzite_kody",
                   "Zapis", "Chybne_radky", "Prehled", "Odpoved"):
@@ -187,10 +189,11 @@ def zkontroluj_rozklad(akce, sloupce):
                f"prázdnost řádku se neptá na sloupec {sloupec['name']} — řádek "
                f"vyplněný jen v něm by se považoval za prázdný")
 
-    dvojice = (("S_obsahem", "Ocistene"), ("Chybne", "S_obsahem"),
-               ("Uplne", "S_obsahem"), ("Neznamy_dilci", "Uplne"),
-               ("Zarazene", "Uplne"), ("Duplicitni", "Zarazene"),
-               ("K_zalozeni", "Zarazene"))
+    dvojice = (("S_obsahem", "Ocistene"), ("Doplneny_rodic", "S_obsahem"),
+               ("Chybne", "Doplneny_rodic"), ("Uplne", "Doplneny_rodic"),
+               ("Neznamy_dilci", "Uplne"), ("Zarazene", "Uplne"),
+               ("Duplicitni", "Zarazene"), ("K_zalozeni", "Zarazene"),
+               ("Nezarazene", "K_zalozeni"))
     for skupina, zdroj in dvojice:
         odkud = str(((akce.get(skupina) or {}).get("inputs") or {}).get("from", ""))
         overit(odkud == f"@body('{zdroj}')",
@@ -206,6 +209,42 @@ def zkontroluj_rozklad(akce, sloupce):
                f"úplné řádky se neptají na povinný sloupec {nazev}")
     overit(chybne.startswith("@not(") and not uplne.startswith("@not("),
            "Chybne a Uplne nejsou vzájemným doplňkem, takže rozklad není úplný")
+
+    # Dosazení technického rodiče u aktivit nahraných bez zařazení.
+    #
+    # Nejdůležitější kontrola celého kroku je POŘADÍ: náhrada smí přijít až za
+    # `S_obsahem`. Kdyby běžela nad `Ocistene`, přestaly by být prázdné řádky
+    # prázdné a šablona by při každém importu založila dvě stě sirotků
+    # z prázdných řádků pod Tabulkou.
+    doplneny = (akce.get("Doplneny_rodic") or {}).get("inputs") or {}
+    overit(str(doplneny.get("from")) == "@body('S_obsahem')",
+           "technický rodič se dosazuje z jiného kroku než S_obsahem — nad "
+           "Ocistene by se prázdné řádky změnily na sirotky")
+    po_cem = list(((akce.get("Doplneny_rodic") or {}).get("runAfter") or {}))
+    overit(po_cem == ["S_obsahem"],
+           f"Doplneny_rodic běží po {po_cem}, musí po S_obsahem")
+
+    vyber = (doplneny.get("select") or {})
+    overit(isinstance(vyber, dict) and set(vyber) ==
+           {"radek"} | {c["name"] for c in sloupce},
+           "dosazení rodiče nezachovává všechny sloupce řádku — co v Select "
+           "chybí, to se ztratí i pro zápis")
+    kod = str(vyber.get(KOD_RODICE_SLOUPEC, ""))
+    overit(f"empty(item()?['{KOD_RODICE_SLOUPEC}'])" in kod
+           and f"'{KOD_NEZARAZENO}'" in kod,
+           f"prázdný {KOD_RODICE_SLOUPEC} se nenahrazuje kódem "
+           f"{KOD_NEZARAZENO}: {kod[:80]}")
+    for sloupec in sloupce:
+        if sloupec["name"] == KOD_RODICE_SLOUPEC:
+            continue
+        overit(str(vyber.get(sloupec["name"], "")) ==
+               f"@item()?['{sloupec['name']}']",
+               f"sloupec {sloupec['name']} se při dosazení rodiče mění, "
+               f"ačkoli má projít beze změny")
+
+    nezarazene = str(((akce.get("Nezarazene") or {}).get("inputs") or {}).get("where", ""))
+    overit(f"'{KOD_NEZARAZENO}'" in nezarazene,
+           "počet nezařazených se nepočítá podle kódu technického rodiče")
 
     klic = f"'{SPOJKA_VAZBY}'"
     for skupina in ("Duplicitni", "K_zalozeni"):
