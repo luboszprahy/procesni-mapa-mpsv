@@ -3,6 +3,29 @@
   "poznamka": "Jediny zdroj pravdy o strukture SharePoint listu. Cte ho check_schema.py (validace dat + generovani deploy/sharepoint_schema.md), make_setup.py (provisioning) a make_import.py (import dat). Nikde jinde strukturu nedeklaruj.",
   "prefix": "mpsv_",
   "publisher": "mpsv",
+  "seed": {
+    "poznamka": "Technicke polozky, ktere zaklada provisioning, ne import dat. Aktivita nahrana bez zarazeni dostane kod pod 00-00-000 a ceka, az ji spravce v appce priradi ke skutecnemu dilcimu procesu. Kod aktivity se odvozuje od kodu rodice, takze bez rodice by sirotek nemel pod cim vzniknout - Title je povinny.",
+    "prefix_nezarazeno": "00-00-000",
+    "polozky": [
+      {
+        "list": "Agendy",
+        "Title": "00",
+        "nazev": "Nezařazeno"
+      },
+      {
+        "list": "Procesy",
+        "Title": "00-00",
+        "nazev": "Nezařazeno",
+        "agenda_kod": "00"
+      },
+      {
+        "list": "DilciProcesy",
+        "Title": "00-00-000",
+        "nazev": "Nezařazeno",
+        "proces_kod": "00-00"
+      }
+    ]
+  },
   "lists": [
     {
       "name": "Agendy",

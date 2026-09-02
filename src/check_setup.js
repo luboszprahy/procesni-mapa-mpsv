@@ -152,6 +152,22 @@ function tvrd(podminka, popis) {
   tvrd(aktivity.viewFields.filter((x) => x === "Title").length === 0,
        "Title se do ViewFields nepridal podruhe (je tam jako LinkTitle)");
 
+  // technicke polozky (F13/C1): aktivita nahrana bez zarazeni dostane kod pod
+  // 00-00-000. Kod se odvozuje od rodice a Title je povinny, takze bez teto
+  // trojice by sirotek nemel pod cim vzniknout - a musi existovat i na webu,
+  // kam se zadna data neimportovala.
+  for (const [list, kod, rodic, sloupecRodice] of
+       [["Agendy", "00", null, null],
+        ["Procesy", "00-00", "00", "agenda_kod"],
+        ["DilciProcesy", "00-00-000", "00-00", "proces_kod"]]) {
+    const it = (sp.listy.get(list).items || []).filter((i) => i.Title === kod);
+    tvrd(it.length === 1, "technicka polozka " + kod + " zalozena v " + list);
+    if (it.length === 1 && sloupecRodice) {
+      tvrd(it[0][sloupecRodice] === rodic,
+           kod + " ukazuje na rodice " + rodic + " (" + sloupecRodice + ")");
+    }
+  }
+
   console.log("--- 2. beh (idempotence) ---");
   const pocetPredtim = sp.log.length;
   const b2 = await beh(sp, true);
@@ -172,6 +188,16 @@ function tvrd(podminka, popis) {
        "zadny sloupec navic mimo schema");
   tvrd(knihovni(radky2).every((r) => r.stav === "existovala"),
        "druhy beh hlasi u knihoven 'existovala'");
+
+  // Idempotence seedu je to podstatne: bez dohledani by druhy beh zakladal
+  // znovu a spadl na duplicitnim klici az u zakaznika.
+  for (const [list, kod] of [["Agendy", "00"], ["Procesy", "00-00"],
+                             ["DilciProcesy", "00-00-000"]]) {
+    tvrd((sp.listy.get(list).items || []).filter((i) => i.Title === kod).length === 1,
+         "druhy beh nezalozil " + kod + " podruhe");
+  }
+  tvrd(novaVolani.filter((r) => /\/items$/.test(r.cesta) && r.metoda === "POST").length === 0,
+       "druhy beh nezapsal zadnou polozku");
 
   // 3. beh: list zalozeny driv BEZ bitu 4 -> sloupce existuji, ale nejsou ve
   // vychozim zobrazeni. Presne stav, ktery bit 4 uz zpetne neopravi.

@@ -17,6 +17,29 @@ const SCHEMA = {
  "poznamka": "Jediny zdroj pravdy o strukture SharePoint listu. Cte ho check_schema.py (validace dat + generovani deploy/sharepoint_schema.md), make_setup.py (provisioning) a make_import.py (import dat). Nikde jinde strukturu nedeklaruj.",
  "prefix": "mpsv_",
  "publisher": "mpsv",
+ "seed": {
+  "poznamka": "Technicke polozky, ktere zaklada provisioning, ne import dat. Aktivita nahrana bez zarazeni dostane kod pod 00-00-000 a ceka, az ji spravce v appce priradi ke skutecnemu dilcimu procesu. Kod aktivity se odvozuje od kodu rodice, takze bez rodice by sirotek nemel pod cim vzniknout - Title je povinny.",
+  "prefix_nezarazeno": "00-00-000",
+  "polozky": [
+   {
+    "list": "Agendy",
+    "Title": "00",
+    "nazev": "Nezařazeno"
+   },
+   {
+    "list": "Procesy",
+    "Title": "00-00",
+    "nazev": "Nezařazeno",
+    "agenda_kod": "00"
+   },
+   {
+    "list": "DilciProcesy",
+    "Title": "00-00-000",
+    "nazev": "Nezařazeno",
+    "proces_kod": "00-00"
+   }
+  ]
+ },
  "lists": [
   {
    "name": "Agendy",
@@ -718,6 +741,26 @@ async function nastavRazeni(id, lst) {
   }, true);
 }
 
+// ---------- technicke polozky (seed) ----------
+
+// Aktivita nahrana bez zarazeni dostane kod pod 00-00-000. Kod se odvozuje od
+// kodu rodice a Title je povinny, takze bez teto trojice by sirotek nemel pod
+// cim vzniknout. Zaklada je provisioning, aby existovala i na prazdnem webu.
+async function najdiPolozku(idListu, kod) {
+  const j = await get("web/lists(guid'" + idListu + "')/items" +
+                      "?$select=Id,Title&$filter=Title eq '" +
+                      kod.replace(/'/g, "''") + "'&$top=1");
+  return (j.value || [])[0] || null;
+}
+
+async function zalozSeed(idListu, nazevListu, polozka) {
+  const telo = { __metadata: { type: "SP.Data." + nazevListu + "ListItem" } };
+  for (const klic of Object.keys(polozka)) {
+    if (klic !== "list") telo[klic] = polozka[klic];
+  }
+  await post("web/lists(guid'" + idListu + "')/items", telo);
+}
+
 // ---------- hlavni beh ----------
 
 WEB = await urciWeb();
@@ -834,6 +877,20 @@ for (const lst of SCHEMA.lists) {
       typ: f.TypeAsString, ve_zobrazeni: "-", skryty: f.Hidden ? "ano" : "ne",
       zobrazovany_nazev: f.Title,
     });
+  }
+}
+
+// ---------- technicke polozky ----------
+
+for (const polozka of ((SCHEMA.seed || {}).polozky || [])) {
+  const list = await najdiList(polozka.list);
+  if (!list) { zprava.push("SEED " + polozka.Title + ": list " + polozka.list + " chybi"); continue; }
+  const mam = await najdiPolozku(list.Id, polozka.Title);
+  if (mam) {
+    zprava.push("seed " + polozka.Title + " (" + polozka.list + "): existoval");
+  } else {
+    await zalozSeed(list.Id, polozka.list, polozka);
+    zprava.push("seed " + polozka.Title + " (" + polozka.list + "): zalozen");
   }
 }
 

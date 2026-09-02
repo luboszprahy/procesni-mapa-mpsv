@@ -142,6 +142,17 @@ function falesnySharePoint(predpripraveneListy) {
       }
 
       // polozky
+      // Dohledani jedne polozky podle klice - tak si provisioning overuje,
+      // jestli uz technicka polozka (seed) existuje. Bez toho by ji zakladal
+      // pri kazdem spusteni a druhy beh by spadl na duplicitnim klici.
+      const dohled = zbytek.match(
+        /^\/items\?\$select=Id,Title&\$filter=Title eq '(.*)'&\$top=1$/);
+      if (dohled && m === "GET") {
+        const kod = dohled[1].replace(/''/g, "'");
+        const nalez = l.items.filter((i) => i.Title === kod)
+                             .map((i) => ({ Id: i.Id, Title: i.Title }));
+        return ok({ value: nalez });
+      }
       if (zbytek.startsWith("/items?$select=Title")) {
         const top = Number((/\$top=(\d+)/.exec(zbytek) || [0, 100])[1]);
         const skip = Number((/\$skiptoken=(\d+)/.exec(zbytek) || [0, 0])[1]);

@@ -225,6 +225,26 @@ async function nastavRazeni(id, lst) {
   }, true);
 }
 
+// ---------- technicke polozky (seed) ----------
+
+// Aktivita nahrana bez zarazeni dostane kod pod 00-00-000. Kod se odvozuje od
+// kodu rodice a Title je povinny, takze bez teto trojice by sirotek nemel pod
+// cim vzniknout. Zaklada je provisioning, aby existovala i na prazdnem webu.
+async function najdiPolozku(idListu, kod) {
+  const j = await get("web/lists(guid'" + idListu + "')/items" +
+                      "?$select=Id,Title&$filter=Title eq '" +
+                      kod.replace(/'/g, "''") + "'&$top=1");
+  return (j.value || [])[0] || null;
+}
+
+async function zalozSeed(idListu, nazevListu, polozka) {
+  const telo = { __metadata: { type: "SP.Data." + nazevListu + "ListItem" } };
+  for (const klic of Object.keys(polozka)) {
+    if (klic !== "list") telo[klic] = polozka[klic];
+  }
+  await post("web/lists(guid'" + idListu + "')/items", telo);
+}
+
 // ---------- hlavni beh ----------
 
 const zprava = [];
@@ -341,6 +361,20 @@ for (const lst of SCHEMA.lists) {
   }
 }
 
+// ---------- technicke polozky ----------
+
+for (const polozka of ((SCHEMA.seed || {}).polozky || [])) {
+  const list = await najdiList(polozka.list);
+  if (!list) { zprava.push("SEED " + polozka.Title + ": list " + polozka.list + " chybi"); continue; }
+  const mam = await najdiPolozku(list.Id, polozka.Title);
+  if (mam) {
+    zprava.push("seed " + polozka.Title + " (" + polozka.list + "): existoval");
+  } else {
+    await zalozSeed(list.Id, polozka.list, polozka);
+    zprava.push("seed " + polozka.Title + " (" + polozka.list + "): zalozen");
+  }
+}
+
 // ---------- zaverecny vypis ----------
 
 console.log("web: " + WEB);
@@ -377,9 +411,10 @@ def main():
     io.open(out, "w", encoding="utf-8", newline="\n").write(js)
 
     sloupcu = sum(len(l["columns"]) for l in schema["lists"])
-    print("%s (%.1f kB) - %d listu, %d sloupcu, %d knihoven"
+    seed = (schema.get("seed") or {}).get("polozky") or []
+    print("%s (%.1f kB) - %d listu, %d sloupcu, %d knihoven, %d technickych polozek"
           % (out, out.stat().st_size / 1000.0, len(schema["lists"]), sloupcu,
-             len(schema.get("libraries") or [])))
+             len(schema.get("libraries") or []), len(seed)))
 
 
 if __name__ == "__main__":
