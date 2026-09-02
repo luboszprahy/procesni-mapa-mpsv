@@ -2,8 +2,8 @@
 
 Aktualizováno: **2026-09-02 20:40** — balík **1.0.0.91**: holé aktivity bez
 zařazení (F13/C2) a rozbalovátka v importní šabloně (F13/B1+B2). Obnova ze
-zálohy funguje ověřeně na datech. **Import z tabulky funguje** — příčinou selhání byl citlivostní
-štítek sešitu, ne vada řešení.
+zálohy funguje ověřeně na datech. **Import z tabulky funguje včetně zápisu — F11 uzavřena.**
+Příčinou selhání byl citlivostní štítek sešitu, ne vada řešení.
 Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## STAV ZKOUŠEK
@@ -15,7 +15,7 @@ Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 | náhled obnovy | **OK** |
 | **obnova na datech** | **OK** — potvrzeno 02.09. 19:55 |
 | **import z tabulky — náhled** | **OK** — 200 řádků, 198 prázdných, 2 založí, 1 bez zařazení |
-| import na datech — **zápis** | nezkoušeno — *Provést import* zatím nikdo nezmáčkl |
+| import na datech — **zápis** | **OK** — potvrzeno 02.09. 20:59. **F11 uzavřena.** |
 
 ### VYŘEŠENO (02.09.2026 20:54): citlivostní štítek sešitu
 
