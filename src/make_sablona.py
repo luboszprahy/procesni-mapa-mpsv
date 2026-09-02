@@ -66,6 +66,17 @@ NAPOVEDA = {
             "které už prošly schválením.",
 }
 
+# Kolik prazdnych radku ma Tabulka mit hned pri zalozeni.
+#
+# Duvod je nalez z provozu (02.09.2026): sesit s jednim datovym radkem svadi
+# k tomu, napsat aktivity nekam nize - a radky MIMO Tabulku konektor Excelu
+# vubec nevidi. Import pak hlasi prazdny sesit a vypada to jako vada flow.
+# Excel rozsiruje Tabulku sam jen tehdy, kdyz se pise do radku tesne pod ni.
+#
+# 200 je zaroven bezpecne pod limitem akce `List rows present in a table`,
+# ktera bez strankovani vraci nejvyse 256 radku.
+DATOVYCH_RADKU = 200
+
 SIRKA_PODLE_TYPU = {"Note": 42, "Choice": 14}
 HLAVICKA_VYSKA = 30
 POSLEDNI_RADEK_KONTROLY = 1000
@@ -109,10 +120,12 @@ def zaloz_tabulku(sesit, sloupce):
         list_dat.column_dimensions[get_column_letter(index)].width = sirka(sloupec)
     list_dat.row_dimensions[1].height = HLAVICKA_VYSKA
 
-    # Tabulka se zakládá s jedním prázdným datovým řádkem: Tabulku bez datového
-    # řádku Excel při otevření „opravuje". Prázdné řádky musí import přeskočit.
+    # Prázdné řádky musí import přeskočit — dělá to krok `Prazdne` ve flow.
+    # Tabulka bez jediného datového řádku by se navíc Excelu jevila jako vadná
+    # a při otevření by ji „opravoval".
     posledni = get_column_letter(len(sloupce))
-    tabulka = Table(displayName=TABULKA, ref=f"A1:{posledni}2")
+    tabulka = Table(displayName=TABULKA,
+                    ref=f"A1:{posledni}{1 + DATOVYCH_RADKU}")
     tabulka.tableStyleInfo = TableStyleInfo(
         name="TableStyleMedium2", showRowStripes=True)
     list_dat.add_table(tabulka)
@@ -151,9 +164,15 @@ def zaloz_pokyny(sesit, sloupce):
         "1. Vyplňujte POUZE list „Aktivity“, jeden řádek = jedna aktivita.",
         "2. Nepřejmenovávejte list ani sloupce a žádné nepřidávejte —"
         " import čte tabulku podle jejich názvů.",
-        "3. Identifikační kód nevyplňujte, přiděluje ho aplikace při importu.",
-        "4. Soubor ukládejte jako .xlsx a nahrajte do knihovny „Import“.",
-        "5. Import nejdřív ukáže náhled (co vznikne / co je duplicita /"
+        "3. Pište od prvního prázdného řádku dolů, bez mezer. Sešit má"
+        f" připravených {DATOVYCH_RADKU} řádků; když potřebujete víc, pište"
+        " těsně pod poslední řádek tabulky a Excel ji rozšíří sám.",
+        "   POZOR: řádky napsané NÍŽE, oddělené od tabulky prázdným místem,"
+        " import vůbec neuvidí — jsou mimo tabulku a hlásí se jako prázdný"
+        " sešit.",
+        "4. Identifikační kód nevyplňujte, přiděluje ho aplikace při importu.",
+        "5. Soubor ukládejte jako .xlsx a nahrajte do knihovny „Import“.",
+        "6. Import nejdřív ukáže náhled (co vznikne / co je duplicita /"
         " co je chyba) a teprve po potvrzení zapisuje.",
         "",
     ]
@@ -201,7 +220,8 @@ def main():
     sesit.save(cesta)
 
     print(f"zapsáno: {cesta}")
-    print(f"tabulka {TABULKA}: {len(sloupce)} sloupců "
+    print(f"tabulka {TABULKA}: {len(sloupce)} sloupců, "
+          f"{DATOVYCH_RADKU} prázdných řádků "
           f"({', '.join(c['display'] for c in sloupce)})")
     return 0
 

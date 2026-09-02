@@ -27,7 +27,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 sys.path.insert(0, "src")
-from make_sablona import (LIST, LIST_POKYNY, NAPOVEDA, SCHEMA,  # noqa: E402
+from make_sablona import (DATOVYCH_RADKU, LIST, LIST_POKYNY, NAPOVEDA, SCHEMA,  # noqa: E402
                           TABULKA, VYSTUP, nacti_schema, omezeni,
                           sloupce_sablony)
 
@@ -74,10 +74,27 @@ def zkontroluj_tabulku(list_dat, pocet_sloupcu):
 
     zacatek, konec = tabulka.ref.split(":")
     overit(zacatek == "A1", f"Tabulka začíná na {zacatek}, čekám A1")
-    ocekavany_konec = f"{get_column_letter(pocet_sloupcu)}2"
+    ocekavany_konec = f"{get_column_letter(pocet_sloupcu)}{1 + DATOVYCH_RADKU}"
     overit(konec == ocekavany_konec,
            f"Tabulka končí na {konec}, čekám {ocekavany_konec} "
-           f"(hlavička + jeden prázdný řádek)")
+           f"(hlavička + {DATOVYCH_RADKU} prázdných řádků)")
+
+    # Dva stropy, mezi kterými se musí rozsah vejít.
+    #
+    # Zdola: sešit s jedním datovým řádkem svádí k tomu, napsat aktivity někam
+    # níž — a řádky MIMO Tabulku konektor Excelu vůbec nevidí. Import pak
+    # hlásí prázdný sešit a vypadá to jako vada flow (nález z 02.09.2026).
+    #
+    # Shora: akce `List rows present in a table` vrací bez stránkování nejvýš
+    # 256 řádků. Větší Tabulka by tiše zahodila konec sešitu — a to je horší
+    # než chyba, protože import proběhne „úspěšně" a část dat chybí.
+    overit(DATOVYCH_RADKU >= 50,
+           f"Tabulka má jen {DATOVYCH_RADKU} datových řádků — správce napíše "
+           f"pod ni a konektor ty řádky neuvidí")
+    overit(DATOVYCH_RADKU <= 250,
+           f"Tabulka má {DATOVYCH_RADKU} datových řádků, ale Excel konektor "
+           f"jich bez stránkování vrátí nejvýš 256 — konec sešitu by se tiše "
+           f"zahodil")
 
     # Konektor nečte buňky hlavičky, ale jména sloupců zapsaná v definici
     # Tabulky. Rozejít se můžou — a rozejdou-li se, import čte jinou sadu klíčů,

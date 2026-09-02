@@ -332,28 +332,136 @@ Screens:
                 Control: Label@2.5.1
                 Properties:
                   Align: =Align.Right
-                  Color: =If(ThisItem.Poradi = 3, stylAkce, stylText)
+                  # Nula je informace, ze se nic nedeje - nema pritahovat oko.
+                  # Barva rozlisuje, co cislo znamena: zelena = zalozi se,
+                  # oranzova = radek, ktery se NEzalozi a je treba se na nej
+                  # podivat. Bez toho byla vsechna cisla stejne tmava.
+                  Color: |-
+                    =If(
+                        ThisItem.Pocet = 0, stylTextSlaby,
+                        ThisItem.Poradi = 3, stylUspech,
+                        ThisItem.Poradi >= 4, stylPozor,
+                        stylText
+                    )
                   Font: =Font.'Open Sans'
-                  FontWeight: =If(ThisItem.Poradi = 3, FontWeight.Semibold, FontWeight.Normal)
+                  FontWeight: |-
+                    =If(
+                        ThisItem.Pocet > 0 && ThisItem.Poradi >= 3,
+                        FontWeight.Semibold,
+                        FontWeight.Normal
+                    )
                   Height: =32
-                  Size: =11 + varFs
+                  Size: =12 + varFs
                   Text: =Text(ThisItem.Pocet)
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =120
+                  Width: =110
                   X: =450
                   Y: =0
+            - rec_SouhrnLinkaN:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =560
+                  X: =0
+                  Y: =33
+      # Hlavicka nad galerii obnovy. Ctyri cisla na radku se bez popisku nedaji
+      # precist a legenda pod tabulkou nutila oko skakat dolu a zpatky.
+      - lbl_h_ObnovaListN:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =20
+            Size: =9 + varFs
+            Text: ="Seznam"
+            VerticalAlign: =VerticalAlign.Bottom
+            Visible: =varNahledRezim <> "import"
+            Width: =186
+            X: =60
+            Y: =202
+      - lbl_h_ObnovaZalozitN:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =20
+            Size: =9 + varFs
+            Text: ="založit"
+            VerticalAlign: =VerticalAlign.Bottom
+            Visible: =varNahledRezim <> "import"
+            Width: =86
+            X: =246
+            Y: =202
+      - lbl_h_ObnovaZmenitN:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =20
+            Size: =9 + varFs
+            Text: ="změnit"
+            VerticalAlign: =VerticalAlign.Bottom
+            Visible: =varNahledRezim <> "import"
+            Width: =86
+            X: =332
+            Y: =202
+      - lbl_h_ObnovaNavicN:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =20
+            Size: =9 + varFs
+            Text: ="navíc"
+            VerticalAlign: =VerticalAlign.Bottom
+            Visible: =varNahledRezim <> "import"
+            Width: =86
+            X: =418
+            Y: =202
+      - lbl_h_ObnovaCelkemN:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =20
+            Size: =9 + varFs
+            Text: ="ve snímku"
+            VerticalAlign: =VerticalAlign.Bottom
+            Visible: =varNahledRezim <> "import"
+            Width: =110
+            X: =504
+            Y: =202
+      - rec_ObnovaHlavickaLinkaN:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylOkraj
+            Height: =1
+            Visible: =varNahledRezim <> "import"
+            Width: =554
+            X: =60
+            Y: =224
       - gal_SouhrnObnovaN:
           Control: Gallery@2.15.0
           Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
           Properties:
-            Height: =260
+            Height: =250
             Items: =colNahledObnova
             TemplatePadding: =0
             TemplateSize: =34
             Visible: =varNahledRezim <> "import"
             Width: =580
             X: =60
-            Y: =204
+            Y: =230
           Children:
             - lbl_ObnovaListN:
                 Control: Label@2.5.1
@@ -363,36 +471,77 @@ Screens:
                   Size: =11 + varFs
                   Text: =ThisItem.Seznam
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =260
+                  Width: =186
                   X: =0
                   Y: =0
-            - lbl_ObnovaCislaN:
+            # Ctyri samostatne sloupce misto jednoho retezce s teckami. Nula
+            # je utlumena, nenulove cislo dostane barvu podle vyznamu:
+            # zelena = vrati se, modra = prepise se, oranzova = zustane navic
+            # (obnova nikdy nemaze, takze to je jediny sloupec, ktery zada
+            # rozhodnuti cloveka).
+            - lbl_ObnovaZalozitN:
                 Control: Label@2.5.1
                 Properties:
                   Align: =Align.Right
+                  Color: =If(ThisItem.Zalozit > 0, stylUspech, stylTextSlaby)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =If(ThisItem.Zalozit > 0, FontWeight.Semibold, FontWeight.Normal)
+                  Height: =32
+                  Size: =12 + varFs
+                  Text: =Text(ThisItem.Zalozit)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =86
+                  X: =186
+                  Y: =0
+            - lbl_ObnovaZmenitN:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =If(ThisItem.Zmenit > 0, stylAkce, stylTextSlaby)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =If(ThisItem.Zmenit > 0, FontWeight.Semibold, FontWeight.Normal)
+                  Height: =32
+                  Size: =12 + varFs
+                  Text: =Text(ThisItem.Zmenit)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =86
+                  X: =272
+                  Y: =0
+            - lbl_ObnovaNavicN:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =If(ThisItem.Navic > 0, stylPozor, stylTextSlaby)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =If(ThisItem.Navic > 0, FontWeight.Semibold, FontWeight.Normal)
+                  Height: =32
+                  Size: =12 + varFs
+                  Text: =Text(ThisItem.Navic)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =86
+                  X: =358
+                  Y: =0
+            - lbl_ObnovaCelkemN:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =stylText
                   Font: =Font.'Open Sans'
                   Height: =32
-                  Size: =11 + varFs
-                  Text: |-
-                    =Text(ThisItem.Zalozit) & "  ·  " & Text(ThisItem.Zmenit) &
-                    "  ·  " & Text(ThisItem.Navic) & "  ·  " & Text(ThisItem.Celkem)
+                  Size: =12 + varFs
+                  Text: =Text(ThisItem.Celkem)
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =300
-                  X: =270
+                  Width: =110
+                  X: =444
                   Y: =0
-      - lbl_l_LegendaN:
-          Control: Label@2.5.1
-          Properties:
-            Align: =Align.Right
-            Color: =stylTextSlaby
-            Font: =Font.'Open Sans'
-            Height: =24
-            Size: =9 + varFs
-            Text: ="založit · změnit · navíc · celkem ve snímku"
-            Visible: =varNahledRezim <> "import"
-            Width: =300
-            X: =330
-            Y: =472
+            - rec_ObnovaLinkaN:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =554
+                  X: =0
+                  Y: =33
       - btn_ProvestN:
           Control: Classic/Button@2.2.0
           Properties:
