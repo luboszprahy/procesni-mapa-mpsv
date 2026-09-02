@@ -1,22 +1,37 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-02 19:20** — nové zadání **F13** (číselníky v importní
-šabloně, sirotčí aktivity, čas u záloh). Blok **A hotový**, vydán balík
-**1.0.0.89**. Import dat z 01.09. **pořád nemá vysvětlené selhání**.
+Aktualizováno: **2026-09-02 20:00** — balík **1.0.0.90**. Obnova ze zálohy
+**funguje ověřeně na datech**, datum u snímků taky. Import z tabulky pořád
+padá na `502 BadGateway` a **příčina není známá** — chybí run history.
 Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
-## KDE SE POKRAČUJE
+## STAV ZKOUŠEK (2026-09-02 20:00)
 
-Dvě věci běží vedle sebe a **nesmí se splést**:
+| co | stav |
+|---|---|
+| import balíku, otevření ve Studiu | **OK** |
+| datum a čas u seznamu záloh | **OK** — `rejstrik_2026-09-02_1750.json · 2.9.2026 19:50` |
+| náhled obnovy | **OK** — nuly u všech listů, nic se nezapsalo |
+| **obnova na datech** | **OK** — potvrzeno uživatelem 02.09. 19:55 |
+| **import z tabulky** | **PADÁ** — `ImportFlow.Run failed: 502 BadGateway / NoResponse` |
+| import na datech | nezkoušeno (blokuje předchozí řádek) |
 
-1. **Stará, nedořešená:** import dat 01.09. selhal a příčina je neznámá.
-   Diagnostika níž v „CO JE NA TOBĚ" bod 1 — beze změny, pořád platí.
-2. **Nová (zadáno 02.09. 18:52):** F13 v `PLAN.md`. Blok A (datum u záloh)
-   je hotový, na řadě je blok C (sirotci), pak B (číselníky v šabloně).
+### Nález: sešit vyplněný mimo Tabulku (02.09.2026)
 
-Proč to pořadí: `C2` sahá do `ImportFlow`, tedy do téhož flow, které 01.09.
-selhalo. Kdyby se to udělalo dřív, než se najde příčina, nepůjde rozlišit
-stará vada od nové.
+Uživatel vyplnil aktivity na **řádky 11–15**. Tabulka `Aktivity` měla rozsah
+**A1:H2** — hlavičku a jeden datový řádek. Vše pod tím je **mimo Tabulku**
+a konektor Excelu to nevidí; Excel Tabulku rozšíří sám jen tehdy, když se píše
+do řádku těsně pod ní.
+
+**Opraveno v 1.0.0.90:** šablona má 200 prázdných řádků a pokyny říkají, kam
+psát. Horní hranici drží limit akce `List rows present in a table` — bez
+stránkování vrací nejvýš **256 řádků**, takže větší Tabulka by tiše zahodila
+konec sešitu. Brána hlídá oba stropy.
+
+**ALE tenhle nález selhání NEVYSVĚTLUJE.** Kdyby šlo jen o prázdnou Tabulku,
+flow by odpovědělo „1 řádek v sešitě, 1 prázdný, 0 založí se" — tedy nuly,
+ne `502`. `NoResponse` znamená, že flow neodpovědělo vůbec: nějaká akce spadla,
+nebo běh vypršel. **Run history je pořád potřeba.**
 
 ## CO JE NA TOBĚ — testovací seznam k balíku 1.0.0.89
 
