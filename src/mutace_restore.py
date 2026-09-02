@@ -14,6 +14,7 @@ Spouštět z kořene projektu:
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -159,6 +160,23 @@ def adresa_pres_guid(definice):
         "@concat('_api/web/lists(guid''3f2b6d41-8c55-4a37-9d21-5b8e0c47a9f2'')/items')")
 
 
+def seznam_bez_created(definice):
+    """Bez Created v $select nemá appka u snímků co ukázat vedle jména."""
+    akce = definice["actions"]["Rezim_seznam"]["actions"]["Soubory"]
+    parametry = akce["inputs"]["parameters"]
+    parametry["parameters/uri"] = parametry["parameters/uri"].replace(
+        "FileLeafRef,Created", "FileLeafRef")
+
+
+def seznam_bez_prevodu_pasma(definice):
+    """Created je UTC. Bez převodu by noční záloha hlásila čas o dvě hodiny
+    dřív, než v kolik opravdu vznikla — a vypadala by jako cizí soubor."""
+    akce = definice["actions"]["Rezim_seznam"]["actions"]["Jmena"]
+    vyber = akce["inputs"]["select"]
+    akce["inputs"]["select"] = re.sub(
+        r"convertFromUtc\(([^,]+), '[^']*'\)", r"", vyber)
+
+
 MUTACE = [
     ("zápis podle ID ze snímku", podle_id_ze_snimku),
     ("dohledání podle kódu vypadlo", bez_dohledani),
@@ -175,6 +193,8 @@ MUTACE = [
     ("sloupec se nezapisuje", sloupec_se_nezapisuje),
     ("mazání ve smyčce", mazani_ve_smycce),
     ("adresa listu přes GUID", adresa_pres_guid),
+    ("seznam snímků bez data pořízení", seznam_bez_created),
+    ("datum snímku se nepřevádí z UTC", seznam_bez_prevodu_pasma),
 ]
 
 

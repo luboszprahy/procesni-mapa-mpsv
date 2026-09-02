@@ -1,80 +1,65 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-01 15:12** — konec dne. Balík **1.0.0.88** nasazený,
-appka se otevírá. **Import dat se nepovedl — příčina zatím neznámá**, řeší se
-2.9.2026. Obnova ani ostatní části netestované na datech.
-Stroj 5CG5210MB2. Vše je v gitu, poslední commit viz `git log -1`.
+Aktualizováno: **2026-09-02 19:20** — nové zadání **F13** (číselníky v importní
+šabloně, sirotčí aktivity, čas u záloh). Blok **A hotový**, vydán balík
+**1.0.0.89**. Import dat z 01.09. **pořád nemá vysvětlené selhání**.
+Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
-## KDE SE ZÍTRA ZAČÍNÁ
+## KDE SE POKRAČUJE
 
-**Import z appky selhal. Nevím proč — a to je celý první krok.**
+Dvě věci běží vedle sebe a **nesmí se splést**:
 
-Nezačínej opravovat flow ani appku, dokud nebude jasné, co přesně spadlo.
-Tenhle projekt už dvakrát ukázal, že hláška, kterou vidí appka, o příčině
-neříká nic: canvas app u chyby flow ukáže jen
-`Flow.Run failed: 502 BadGateway / NoResponse`, ať je vevnitř cokoli.
+1. **Stará, nedořešená:** import dat 01.09. selhal a příčina je neznámá.
+   Diagnostika níž v „CO JE NA TOBĚ" bod 1 — beze změny, pořád platí.
+2. **Nová (zadáno 02.09. 18:52):** F13 v `PLAN.md`. Blok A (datum u záloh)
+   je hotový, na řadě je blok C (sirotci), pak B (číselníky v šabloně).
 
-**Co potřebuju, v tomhle pořadí:**
-
-1. **Doslovné znění toho, co appka ukázala** (hláška z Notify, nebo že se
-   nestalo nic).
-2. **Run history `ImportFlow`** (Power Automate → ImportFlow → Runs → poslední
-   běh). Zajímá mě: **která akce je červená** a její chybová hláška. Kdyby
-   běh vůbec nevznikl, je problém na straně appky, ne flow, a je to jiná
-   diagnóza.
-3. U červené akce **Show raw inputs** — zvlášť u `Radky` (excelová akce),
-   protože tam se skládají čtyři parametry za běhu a je vidět, co z nich
-   vyšlo.
-
-**Na co se dívat jako první** — podle toho, kde to spadne:
-
-| akce | co to nejspíš znamená |
-|---|---|
-| `Disky` nebo `Disk` je prázdný | knihovna `Import` na webu není (neproběhl `setup_sharepoint.js`), nebo se jmenuje jinak než URL segment `/Import` |
-| `Soubor` (GetFileMetadataByPath) | soubor v knihovně `Import` není, nebo se název z appky neshoduje |
-| `Radky` (Excel) | sešit není podle šablony — tabulka se musí jmenovat `Aktivity`; nebo `drive`/`source` vyšly špatně |
-| flow vůbec neběželo | `ImportFlow` není zapnuté, nebo appka nebyla po importu otevřena a publikována ve Studiu |
-
-**Nezkoušet to opravovat naslepo.** Flow má bránu se 159 kontrolami a mutační
-test 21/21, takže vada je spíš v datech, v prostředí nebo v předpokladu, který
-se ukázal jako mylný — a ten se musí najít, ne obejít.
+Proč to pořadí: `C2` sahá do `ImportFlow`, tedy do téhož flow, které 01.09.
+selhalo. Kdyby se to udělalo dřív, než se najde příčina, nepůjde rozlišit
+stará vada od nové.
 
 ## CO JE NA TOBĚ
 
+0. **Naimportuj `deploy/procesnimapa_1_0_0_89.zip`** (nahrazuje 88).
+   Po importu appku jednou otevři ve Studiu — z YAML zabalená appka se
+   validuje až tam. Nové flow nepřibylo, registrace se nemění.
 
-0. **Naimportuj `deploy/procesnimapa_1_0_0_88.zip`** — balík 87 appku rozbil,
-   88 to opravuje. Nic jiného se proti 87 nemění.
+1. **Diagnostika selhaného importu — pořád první v pořadí.**
+   Nezačínej opravovat flow ani appku, dokud nebude jasné, co přesně spadlo.
+   Canvas app u chyby flow ukáže vždycky jen
+   `Flow.Run failed: 502 BadGateway / NoResponse`, ať je vevnitř cokoli.
 
-1. **Spusť znovu `src/setup_sharepoint.js`** — zakládá knihovnu **`Import`**;
-   bez ní `ImportFlow` spadne na neexistující složce. Pokud jsi to udělal už
-   po balíku 85, přeskoč.
+   Potřebuju, v tomhle pořadí:
+   - **doslovné znění toho, co appka ukázala** (hláška z Notify, nebo že se
+     nestalo nic),
+   - **run history `ImportFlow`** (Power Automate → ImportFlow → Runs →
+     poslední běh): **která akce je červená** a její chybová hláška. Kdyby
+     běh vůbec nevznikl, je problém na straně appky, ne flow, a je to jiná
+     diagnóza,
+   - u červené akce **Show raw inputs**, zvlášť u `Radky` (excelová akce) —
+     tam se skládají čtyři parametry za běhu a je vidět, co z nich vyšlo.
 
-2. **Po importu appku jednou otevři ve Studiu.** Obě flow už zapnutá máš,
-   nová nepřibyla. Po importu appku jednou otevři ve Studiu — z YAML zabalená
-   appka se validuje až tam.
+   | akce | co to nejspíš znamená |
+   |---|---|
+   | `Disky` nebo `Disk` je prázdný | knihovna `Import` na webu není (neproběhl `setup_sharepoint.js`), nebo se jmenuje jinak než URL segment `/Import` |
+   | `Soubor` (GetFileMetadataByPath) | soubor v knihovně `Import` není, nebo se název z appky neshoduje |
+   | `Radky` (Excel) | sešit není podle šablony — tabulka se musí jmenovat `Aktivity`; nebo `drive`/`source` vyšly špatně |
+   | flow vůbec neběželo | `ImportFlow` není zapnuté, nebo appka nebyla po importu otevřena a publikována ve Studiu |
 
-   **Testovací flow `test test` jsem z balíku vyndal** (veze natvrdo adresu
-   webu PPF), ale z prostředí ho to nesmaže. Smaž ho v Power Automate ručně;
-   spojení na Excel nech být, `ImportFlow` ho používá.
+2. **Zkouška data u záloh (nové v 89).** `Data ▾ → Obnova ze zálohy` →
+   rozbal seznam. U každého snímku má být za názvem datum a čas pořízení,
+   ve tvaru `rejstrik_2026-09-02_0300.json · 2.9.2026 5:00`.
 
-3. **Vyzkoušej obojí z appky** — import 01.09. NESELHAL na obrazovce,
-   ale na datech; obnova zatím nezkoušena — `Data ▾ → Import z tabulky` a
-   `Data ▾ → Obnova ze zálohy`. Obojí vede na tutéž obrazovku:
-   vyber soubor → **Zkontrolovat** → podívej se na čísla → teprve pak
-   **Provést** (a to se ještě ptá).
+   **Na čem záleží nejvíc:** po výběru musí *Zkontrolovat* proběhnout —
+   flow dostává jen holý název, datum se ořezává v appce. Kdyby se posílal
+   celý popisek, flow spadne na nenalezeném souboru.
 
-   **Ověření, na kterém záleží nejvíc:** po *Zkontrolovat* **nesmí v listech
-   přibýt ani se změnit jediná položka**.
+   Čas je ze SharePointu a v našem pásmu, takže noční záloha ukáže **5:00**,
+   ne 3:00, jak stojí v názvu souboru (ten je v UTC). To je správně.
 
-4. **Zkouška importu na datech.** Stáhni šablonu (`Data ▾ → Vzorová tabulka
-   pro import`), vyplň pár řádků — a schválně mezi ně dej **jeden s
-   neexistujícím dílčím procesem** a **jeden duplicitní** —, nahraj do
-   knihovny `Import` a spusť náhled. Čísla musí sedět a u chybných řádků musí
-   sedět **číslo řádku v sešitě**.
-
-5. **Zkouška obnovy na datech.** Smaž 3–5 řádků z `Aktivity`, spusť náhled —
-   musí je vypsat ve sloupci **založit** —, pak Provést, a nakonec znovu
-   náhled, který má být zase samé nuly.
+3. **Zbytek zkoušek z 01.09. pořád nezkoušen** — import na datech a obnova
+   na datech (body 4 a 5 z minulého STATUS). Dokud neproběhne bod 1, nemá
+   smysl je opakovat naslepo.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
@@ -82,12 +67,68 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-**Čekám na výsledek zkoušek z bodů 3–5.** Do té doby nic nestavím — obrazovku
-jsem ověřil bránou a offline, ale běh v prostředí nahradit nejde.
+Blok **C z F13 — sirotčí aktivity** (`PLAN.md`, F13/C1–C4): pseudo-rodič
+`00-00-000`, import bez zařazení, dlaždice nezařazených na přehledu,
+přiřazení v detailu. Pak blok B (číselníky v šabloně a noční refresh).
 
-Až bude F11 uzavřená, na řadě jsou nezačaté náměty z `PLAN.md`: R-2 (pohled
-„kdo má co dodělat") a R-3 (generování textu organizačního řádu), který je
-dnes lacinější, než býval — `ExportFlow` už umí skládat dokument.
+Pozor na to, co je v plánu u `C2` napsané tučně: náhrada prázdného dílčího
+procesu musí přijít **až za `S_obsahem`**. Kdyby se dosadila dřív, přestaly
+by být prázdné řádky prázdné a šablona by při každém importu založila stovky
+sirotků z prázdných řádků pod tabulkou.
+
+## Balík 1.0.0.89 — datum a čas u záloh (02.09.2026 19:20)
+
+První blok F13. Rozbalovátko snímků ukazovalo jen názvy souborů, takže se
+z něj nedalo poznat, který snímek je který — jména se liší jen razítkem
+uvnitř názvu, a to je v UTC.
+
+**Co se změnilo:** `RestoreFlow` v režimu `seznam` přidal do `$select`
+sloupec `Created` a skládá ho za název přes ` · ` s převodem do našeho
+pásma. **Schéma odpovědi zůstalo totožné** (dál čtyři řetězce), takže se
+flow nemuselo znovu registrovat ve Studiu — to je celý důvod, proč datum
+jde uvnitř existujícího řetězce a ne jako páté pole.
+
+Appka pak posílá flow jen část před oddělovačem. Ořezává se na **třech**
+místech (`OnChange`, `OnSelect` tlačítka Zkontrolovat, `DisplayMode`
+tlačítka Provést) — zapomenout na jednom z nich znamená, že jedno tlačítko
+funguje a druhé ne.
+
+### Dvě věci, které chytily brány
+
+- **`Split()` vrací sloupec `Value`, ne `Result`.** Napsal jsem `.Result`
+  na všech třech místech; appka by se s tím ve Studiu neotevřela. Chytila
+  to existující `kontrola_identifikatoru` v `check_app.py`.
+- **Kontrola `Created` byla nejdřív děravá.** Testovala „`Created` je někde
+  v adrese", jenže `Created` je i v `$orderby` — mutace `seznam_bez_created`
+  proto prošla. Zpřesněno na obsah `$select`. Bez toho mutačního testu by
+  brána vypadala zeleně a nehlídala nic.
+
+### Pojistka, která se musela dořešit
+
+`varNahledHotovo` (co bylo zkontrolováno) se porovnává s tím, co je vybráno
+v rozbalovátku. Kdyby se ořezávala jen jedna strana, byly by si ty hodnoty
+navždy nerovné a tlačítko *Provést* by nešlo zapnout — pojistka by z opatření
+udělala závoru. Ořezávají se obě; dva soubory téhož jména v jedné knihovně
+být nemůžou.
+
+### Brány na 89
+
+`check_solution` **571** · `check_restore_flow` **571** · `check_zaloha_flow`
+184 · `check_import_flow` 159 · `check_export_flow` 129 · `check_mapa_flow`
+139 · `check_flow` 26 · `check_app` (5 obrazovek, 234 prvků), `check_env`,
+`check_sablona` zeleně. Mutačně: `mutace_restore` **17/17** (dvě nové),
+`mutace_import` 21/21, `mutace_zaloha` 16/16, `mutace_sablona` 15/15,
+`mutace_export_mapa` 7/7, `mutace_parametry` 4/4, `mutace_napojeni` 5/5.
+
+Sestavení:
+
+```
+copy input/procesnimapa_1_0_0_86.zip runs/vstup_89.zip
+python src/odeber_flow.py --solution runs/vstup_89.zip --flow testtest
+python src/build_import_flow.py --solution runs/vstup_89.zip
+python src/build_restore_flow.py --solution runs/vstup_89.zip
+python src/build_app.py --solution runs/vstup_89.zip --verze 1.0.0.89
+```
 
 ## Balík 1.0.0.88 — oprava PA1011 (01.09.2026 14:55)
 

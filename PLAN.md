@@ -1886,6 +1886,227 @@ Tři věci naráz, protože všechny sedí ve stejném pruhu tlačítek nad stro
 ```
 
 ---
+## F13 — Číselníky v šabloně, sirotčí aktivity, čas u záloh (zadáno 02.09.2026)
+
+Zadání ze dne: import má být natolik veden číselníky, aby se údaj nemohl
+rozejít s rejstříkem; a aby šlo nahrát **holé aktivity** bez zařazení, které
+se doplní až v aplikaci. Vedle toho drobnost: u seznamu záloh vidět, kdy
+která vznikla.
+
+**Rozhodnutí zadavatele (02.09.2026 18:52):** refresh číselníků nočním flow
+jen při změně · dílčí proces dvoustupňově (Proces → Dílčí proces) · sirotci
+celé, včetně přiřazení v appce.
+
+### Rozhodnutí, které z toho plyne a je potřeba potvrdit
+
+**Přiřazení sirotka NENÍ přesun podle F10.** Varianta C (zánik + vznik)
+uzavírá kód, který něco znamenal. Kód `00-00-000-0001` nikdy platným kódem
+nebyl — je to provizorium do chvíle, než správce řekne, kam aktivita patří.
+Zapisovat každého sirotka do `HistorieKodu` by historii zaplnilo doklady
+o ničem.
+
+Proto: **sirotčí kód se při přiřazení přepíše a do historie nejde.** Rozlišení
+je strojové — prefix `00-00-000` znamená „nezařazeno", jakýkoli jiný prefix
+znamená platný kód a jeho změna spadá pod F10 krok 2. Obojí je táž obrazovka,
+liší se jen tím, odkud se přesouvá.
+
+### Proč šablona nemůže být čerstvá až při stažení
+
+`.xlsx` je zip a flow zip vyrobit neumí — proto je šablona statický soubor
+v Site Assets a `ExportFlow` na ni jen odkáže (`__sablona__`). Excel konektor
+do **existujícího** sešitu zapisovat umí, ale po jednom řádku: přepis 250
+dílčích procesů jsou stovky volání, jednotky minut. Při kliknutí na tlačítko
+je to nepoužitelné, v noci nikoho nezajímá.
+
+---
+
+### A. Datum a čas u seznamu záloh
+
+```
+A1. [Created do odpovědi režimu seznam] — co: src/build_restore_flow.py,
+    krok `Rezim_seznam` → `Soubory` ($select) a `Jmena` (Select)
+    Do `$select` přidat `Created`; `Jmena` složí název, oddělovač a datum
+    přes `formatDateTime(convertFromUtc(Created, 'Central Europe Standard
+    Time'), 'd.M.yyyy H:mm')`.
+    Schéma odpovědi se NEMĚNÍ (dál čtyři řetězce) — flow se proto nemusí
+    znovu registrovat ve Studiu a appka nepotřebuje druhé kolo.
+    verify: `check_restore_flow.py` rozšířit o kontrolu, že `$select` obsahuje
+      `Created` a že `Jmena` používá `convertFromUtc` (jinak by se ukazoval
+      UTC čas a lišil by se o hodinu/dvě od toho, co uživatel čeká).
+      Mutace v `mutace_restore.py`: odeber `Created` ze `$select` → brána
+      musí spadnout. Ruční: v appce rozbalit seznam — u každé položky datum.
+    edge cases: knihovna prázdná (Select nad prázdným polem projde, `join`
+      vrátí prázdný řetězec); soubor nahraný ručně mimo flow (má `Created`
+      také, formát jména může být jiný — datum se ukáže, název se nerozbije).
+    risk: časové pásmo natvrdo. Pro MPSV i PPF je to totéž pásmo, takže
+      to nevadí; kdyby se to někdy měnilo, je to jeden literál.
+
+A2. [Appka pošle flow holý název] — co: src/app_src/scr_Nahled.pa.yaml
+    `drp_SouborN.Items` zůstane tím, co vrátí flow (včetně data), ale všude,
+    kde se hodnota posílá do flow, se ořízne na část před oddělovačem.
+    Týká se i pojistky `varNahledHotovo <> drp_SouborN.Selected.Value` —
+    ta porovnává celé zobrazené hodnoty, takže tam se ořezávat NESMÍ,
+    jinak by přestala rozlišovat dva snímky se stejným názvem.
+    verify: `check_app.py` — nová kontrola, že žádné `Flow.Run` v appce
+      nedostane `.Selected.Value` bez oříznutí. Mutace: vrať neoříznutou
+      hodnotu → kontrola spadne.
+      Ruční: vyber zálohu → Zkontrolovat → flow musí soubor najít
+      (kdyby se posílal název i s datem, spadne na `Soubor`).
+    edge cases: název souboru sám obsahuje oddělovač — vyloučeno, jména dává
+      flow ve tvaru `rejstrik_RRRR-MM-DD_HHMM.json`.
+    risk: oříznutí se zapomene na jednom ze dvou míst (náhled/provést) →
+      jedno tlačítko funguje, druhé ne. Proto ta kontrola v bráně.
+```
+
+---
+
+### B. Číselníky v šabloně a jejich noční refresh
+
+```
+B1. [Číselníkový list v šabloně] — co: src/make_sablona.py
+    Nový list `Ciselniky` (skrytý, `sheet_state = "hidden"`) se třemi
+    pojmenovanými tabulkami: `Cis_Procesy` (kód + název), `Cis_DilciProcesy`
+    (kód, název, kód procesu), `Cis_Utvary` (kód + název). Fixní výška
+    (600 řádků u dílčích procesů, 200 u zbytku) — rozsah validace musí být
+    stálý, protože ho flow nepřepočítává.
+    verify: `check_sablona.py` — sešit má list `Ciselniky`, je skrytý, tabulky
+      mají očekávaná jména a šířku. Mutace v `mutace_sablona.py`: přejmenuj
+      tabulku → brána spadne.
+    edge cases: skrytý list jde v Excelu odkrýt — počítá se s tím, není to
+      ochrana, jen aby nepřekážel.
+    risk: 600 řádků je strop. Až rejstřík naroste, validace přestane pokrývat
+      poslední položky — brána proto hlídá, že počet položek < výška tabulky,
+      a build spadne dřív, než se to projeví tichým vynecháním.
+
+B2. [Dvoustupňová validace] — co: src/make_sablona.py
+    Nový sloupec `Proces (kód)` do tabulky `Aktivity`, hned před dílčí proces.
+    Validace: `Proces (kód)` = seznam z `Cis_Procesy`; `Primární dílčí proces
+    (kód)` = závislý rozsah přes pojmenovaný rozsah s `OFFSET`/`MATCH` podle
+    hodnoty ve sloupci Proces. `Vykonává útvar` = seznam z `Cis_Utvary`.
+    Všechny s `allow_blank=True` (prázdno je nově legitimní, viz blok C).
+    `Spolupracuje` rozbalovátko NEDOSTANE — je vícehodnotové a Excel umí
+    validovat jen jednu hodnotu na buňku; zůstává volným textem.
+    verify: `check_sablona.py` — každý číselníkový sloupec má DataValidation
+      se správným rozsahem a `allow_blank`. Mutace: odeber validaci u dílčího
+      procesu → brána spadne.
+      Ruční test (nenahraditelný): otevřít vygenerovaný sešit v Excelu,
+      vybrat proces, ověřit, že nabídka dílčích procesů se zúžila jen na jeho
+      potomky, a že po změně procesu zůstane v buňce nesmyslná hodnota
+      (Excel starou hodnotu nemaže — proto kontrola v ImportFlow zůstává).
+    edge cases: `Proces (kód)` je sloupec navíc, který import IGNORUJE —
+      slouží jen k filtrování nabídky. Musí se doplnit mezi ignorované,
+      jinak ho ImportFlow bude číst jako neznámé pole.
+    risk: závislý rozsah přes OFFSET je v Excelu Online vrtkavý. Když se
+      ukáže, že tam nefunguje, fallback je jeden dlouhý seznam ve tvaru
+      `01-02-003 — Název` (varianta B z nabídky) — proto se před stavbou
+      refreshe (B3) ověří ručně otevřením v Excelu Online, ne až v provozu.
+
+B3. [Noční refresh číselníků] — co: src/build_ciselnik_flow.py (nové),
+    src/check_ciselnik_flow.py (nové), deploy/flow_Ciselnik.md
+    Naplánované flow 1x/24 h: přečte `Procesy`, `DilciProcesy`, `Utvary`
+    (REST, stránkovaně), spočítá otisk (počet + spojené kódy) a porovná
+    s otiskem uloženým v prvním řádku listu `Ciselniky`. Shoda → konec bez
+    zápisu. Neshoda → přes Excel konektor přepíše řádky tabulek a uloží nový
+    otisk.
+    verify: `check_ciselnik_flow.py` (~120 kontrol) + `mutace_ciselnik.py` —
+      mutace: odeber porovnání otisku → flow by přepisovalo denně naprázdno,
+      brána musí spadnout. Ruční: spustit flow ručně dvakrát za sebou —
+      druhý běh musí skončit větví „beze změny" a NESMÍ zapsat ani řádek.
+    edge cases: sešit má někdo otevřený v Excelu Online (zámek) → zápis
+      selže; flow to musí ohlásit, ne tiše přeskočit. Číselník se zkrátí →
+      zbylé řádky se musí VYMAZAT, ne nechat ležet, jinak zůstanou v nabídce
+      neexistující kódy.
+    risk: zápis po řádcích trvá minuty a Excel konektor je pomalý. Proto
+      noční plán a proto porovnání otisku — většinu dní neproběhne nic.
+      Druhé riziko: zápis do souboru, který si zrovna někdo stahuje. Řeší
+      se tím, že refresh běží ve 3:00, kdy stahování nikdo nedělá.
+```
+
+---
+
+### C. Sirotčí aktivity
+
+```
+C1. [Pseudo-rodič „nezařazeno"] — co: src/schema.json (seed),
+    src/make_import.py, src/setup_sharepoint.js
+    Do rejstříku patří tři technické položky: agenda `00` / proces `00-00` /
+    dílčí proces `00-00-000`, všechny s názvem „Nezařazeno". Zakládá je
+    provisioning, ne import dat — musí existovat i na prázdném webu.
+    verify: `node src/check_setup.js` rozšířit o kontrolu, že po provisioningu
+      ty tři položky existují. Mutace: odeber seed → kontrola spadne.
+    edge cases: mapa, strom a export OŘ nesmí větev `00` zobrazovat jako
+      běžnou agendu — vyfiltrovat na jednom místě (`colStrom`), ne v každé
+      obrazovce zvlášť.
+    risk: kdyby někdo `00-00-000` smazal, import sirotků začne padat na
+      neznámý dílčí proces. Proto je to seed provisioningu a ne ruční krok.
+
+C2. [Import bez zařazení] — co: src/build_import_flow.py
+    Mezi `S_obsahem` a `Chybne` přibude krok `Doplneny_rodic` (Select), který
+    prázdnému `dilci_proces_kod` dosadí `00-00-000`.
+    POŘADÍ JE PODSTATNÉ: náhrada MUSÍ být až za `S_obsahem`. Kdyby se dosadilo
+    dřív, přestaly by být prázdné řádky prázdné (`vsechny_prazdne` by
+    neplatilo) a šablona by při každém importu založila stovky sirotků
+    z prázdných řádků pod tabulkou.
+    `dilci_proces_kod` zůstává ve schématu `required` — SharePoint list se
+    nemění, prázdno řeší import, ne list.
+    verify: `check_import_flow.py` — kontrola, že `Doplneny_rodic` běží po
+      `S_obsahem` a před `Chybne`. Mutace v `mutace_import.py`: přesuň krok
+      před `Prazdne` → brána spadne (to je ta past výše).
+      Ruční test na datech: sešit se třemi řádky — jeden úplný, jeden bez
+      dílčího procesu, jeden úplně prázdný. Náhled musí ohlásit
+      1 k založení + 1 sirotek + 0 chyb, prázdný řádek se nesmí objevit nikde.
+    edge cases: řádek s vyplněným procesem, ale prázdným dílčím procesem —
+      chová se stejně jako holá aktivita (sloupec Proces import ignoruje).
+    risk: nejzávažnější v celé fázi je právě záměna pořadí kroků. Proto
+      mutace, ne jen kontrola.
+
+C3. [Sirotci v appce] — co: src/app_src/scr_Dashboard.pa.yaml
+    Filtr / dlaždice „Nezařazené aktivity (N)" na přehledu, která vypíše
+    aktivity s prefixem `00-00-000`. Bez toho by sirotky nikdo nenašel.
+    verify: `check_app.py` — dlaždice existuje a počítá z `colStrom`.
+      Ruční: po importu sirotků musí číslo sedět s počtem z náhledu.
+    edge cases: nula sirotků → dlaždice zhasne, ne „0" natvrdo svítící.
+    risk: přehled má strop delegace; filtr na prefix `00-00-000` musí jít
+      přes už načtenou kolekci, ne přes nový dotaz do SharePointu.
+
+C4. [Přiřazení sirotka] — co: src/app_src/scr_Detail.pa.yaml
+    U aktivity s prefixem `00-00-000` je výběr dílčího procesu editovatelný
+    a uložení provede: nový kód pod vybraným rodičem (týmž vzorcem jako
+    ImportFlow — maximum přes živý list i `HistorieKodu`, viz F10 pravidlo 1),
+    Patch `Title` a `dilci_proces_kod`, přepis vazby v `AktivitaDilciProces`,
+    `puvodni_kod` = sirotčí kód. Do `HistorieKodu` se NEZAPISUJE (viz
+    rozhodnutí na začátku fáze).
+    U aktivity s jakýmkoli JINÝM prefixem zůstává výběr zamčený až do F10/2 —
+    dnes se tam totiž tiše děje varianta A (kód zůstane, prefix začne lhát),
+    což je nález z F10, který se touto fází NEOPRAVUJE. Zamčení je menší zlo
+    než tichá lež v kódu.
+    verify: `check_app.py` — kontrola, že větev přiřazení běží jen pro prefix
+      `00-00-000` a že u ostatních je `drp_Dilci` v `DisplayMode.View`.
+      Mutace: povol editaci všem → kontrola spadne.
+      Ruční test na PPF DEV: naimportuj holou aktivitu, přiřaď ji, ověř nový
+      kód, vazbu, `puvodni_kod`, a že v `HistorieKodu` NEPŘIBYL řádek.
+    edge cases: dva správci přiřadí sirotka současně → oba dostanou týž nový
+      kód. Ošetří se tím, že se po Patchi ověří, že kód nebyl mezitím obsazen
+      (stejná pojistka jako u zakládání aktivity).
+    risk: Patch `Title` mění přirozený klíč. Vazby, které na starý kód
+      ukazují, se musí přepsat ve stejném kroku — jinak vznikne osiřelá vazba,
+      kterou přehled ukáže jako chybu. Test to musí ověřit explicitně.
+```
+
+### Pořadí a proč
+
+`A` první — je hotové rychle a nedotýká se ničeho, co se dál mění.
+Pak `C` (sirotci), protože to je vlastní zadání a `B2` na něm závisí
+(prázdný dílčí proces musí být legitimní dřív, než šablona nabídne prázdno).
+`B3` (noční refresh) jde poslední — je nejdražší a nejmíň naléhavý, číselníky
+se dnes mění řádově jednou za týdny.
+
+**Nezávislá brzda:** F11 (import dat) pořád nemá vysvětlené selhání z 01.09.
+`C2` mění právě `ImportFlow`, takže se do něj sahá dřív, než se ví, proč
+neběžel. Pořadí kroků je proto psané tak, aby se `C2` dala nasadit samostatně
+a rozlišilo se, co je nová vada a co ta stará.
+
+---
 ## Náměty na rozšíření (neschválené, k připomenutí)
 
 Přepracováno 25.08.2026 (původní seznam z 23.08.2026 byl psaný před exportem

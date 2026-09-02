@@ -78,6 +78,14 @@ ODDELOVAC = "|~|"
 ODD_POLE = "|~|"
 ODD_RADKU = "|#|"
 
+# Oddělovač jména snímku od jeho data v režimu `seznam`. Na rozdíl od
+# ODD_POLE ho uživatel VIDÍ — je to popisek v rozbalovátku —, takže musí být
+# čitelný. Appka podle něj hodnotu rozděluje zpátky; jsou to dvě místa v
+# různých souborech, hlídá je brána `check_app.py`.
+ODD_POPISKU = " · "
+PASMO = "Central Europe Standard Time"
+FORMAT_CASU = "d.M.yyyy H:mm"
+
 
 REZIM_NAHLED = "nahled"
 # Třetí režim: vrátí jen seznam snímků v knihovně, ve stejném tvaru jména,
@@ -191,14 +199,20 @@ def akce(schema):
                  "parameters/uri": (
                      "@concat('_api/web/GetList(" + chr(39) * 3 + ", outputs('Cesta_seznamu'), "
                      + lit(KNIHOVNA) + ", " + chr(39) * 3
-                     + ")/items?$select=FileLeafRef&$top=500&$orderby=Created desc')"),
+                     + ")/items?$select=FileLeafRef,Created&$top=500&$orderby=Created desc')"),
                  "parameters/headers": {"Accept": "application/json;odata=nometadata"}},
                 None),
+            # Za jméno se připojuje čas pořízení, aby šlo v appce poznat, který
+            # snímek je který. `Created` ze SharePointu je UTC — bez převodu by
+            # noční záloha hlásila 3:00 místo 5:00 a vypadala jako cizí soubor.
+            # Appka si jméno před odesláním do flow ořízne po ODD_POPISKU.
             "Jmena": {
                 "type": "Select",
                 "inputs": {
                     "from": "@coalesce(body('Soubory')?['value'], createArray())",
-                    "select": "@item()?['FileLeafRef']",
+                    "select": ("@concat(item()?['FileLeafRef'], " + lit(ODD_POPISKU)
+                               + ", formatDateTime(convertFromUtc(item()?['Created'], "
+                               + lit(PASMO) + "), " + lit(FORMAT_CASU) + "))"),
                 },
                 "runAfter": {"Soubory": ["Succeeded"]},
             },

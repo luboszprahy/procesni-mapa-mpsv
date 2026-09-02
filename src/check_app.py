@@ -13,6 +13,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, "src")
+from build_restore_flow import ODD_POPISKU  # noqa: E402
+
 APP_SRC = Path("src/app_src")
 SCHEMA = Path("src/schema.json")
 SABLONY = Path("src/control_templates.json")
@@ -1009,6 +1012,42 @@ def kontrola_rezimu_ciselniku(vzorce):
             )
 
 
+def bez_mezer(text):
+    return re.sub(r"\s+", "", text)
+
+
+def kontrola_orezani_popisku(vzorce):
+    """Do flow smí jít jen holý název souboru, ne popisek i s datem.
+
+    Rozbalovátko snímků ukazuje `nazev.json · 2.9.2026 5:00`, protože jinak
+    nejde poznat, který snímek je který. Flow ale přijímá jméno souboru —
+    kdyby dostalo popisek, spadne až za běhu na nenalezeném souboru a appka
+    z toho ukáže jen 502 BadGateway.
+
+    Kontroluje se každé čtení hodnoty rozbalovátka kromě testu na prázdno:
+    buď je obalené oříznutím, nebo je to chyba. Oddělovač se bere z
+    generátoru flow, takže se ta dvě místa nemají jak rozejít.
+    """
+    # Porovnává se bez bílých znaků: vzorec bývá zalomený přes dva řádky.
+    # Mezery mizí i uvnitř řetězcového literálu oddělovače, proto se stejným
+    # způsobem zhušťuje i vzor, se kterým se srovnává.
+    hodnota = "drp_SouborN.Selected.Value"
+    orezani = bez_mezer(f'Split({hodnota}, "{ODD_POPISKU}")')
+    for cesta, prop, text in vzorce:
+        zhusteny = bez_mezer(text)
+        pouziti = zhusteny.count(hodnota)
+        if not pouziti:
+            continue
+        povolene = (zhusteny.count(f"IsBlank({hodnota})")
+                    + zhusteny.count(orezani))
+        if povolene < pouziti:
+            chyby.append(
+                f"{cesta}.{prop}: hodnota rozbalovátka snímků se bere bez "
+                f"oříznutí popisku — do flow by šel název i s datem "
+                f"({pouziti}x použito, {povolene}x ošetřeno)"
+            )
+
+
 # Funkce, které uvnitř predikátu Filter zabijí delegaci celého dotazu.
 NEDELEGOVATELNE_V_PREDIKATU = ("LookUp", "CountRows", "Search", "Concat", "Sum")
 
@@ -1425,6 +1464,7 @@ def main():
     kontrola_concurrent(soubory)
     kontrola_sloupcu_kolekci(vzorce)
     kontrola_predikatu(vzorce)
+    kontrola_orezani_popisku(vzorce)
     kontrola_stareho_result(vzorce)
     kontrola_varianty(soubory)
     kontrola_prekryvu(soubory)

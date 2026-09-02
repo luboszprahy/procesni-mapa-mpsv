@@ -127,8 +127,11 @@ Screens:
             Items: =Split(varNahledSeznam, "|#|")
             # Změna souboru zneplatní náhled: čísla níž patřila jinému souboru
             # a zápis podle nich by byl zápis naslepo.
+            # U záloh nese položka za názvem ještě datum pořízení (" · "),
+            # aby šlo poznat, který snímek je který. Flow ale přijímá holý
+            # název, takže se všude posílá jen část před oddělovačem.
             OnChange: |-
-              =Set(varNahledSoubor, drp_SouborN.Selected.Value);
+              =Set(varNahledSoubor, Trim(First(Split(drp_SouborN.Selected.Value, " · ")).Value));
               Set(varNahledHotovo, "");
               Set(varNahledHlaseni, "");
               Clear(colNahledSouhrn);
@@ -158,7 +161,7 @@ Screens:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylAkceHover
             OnSelect: |-
-              =Set(varNahledSoubor, drp_SouborN.Selected.Value);
+              =Set(varNahledSoubor, Trim(First(Split(drp_SouborN.Selected.Value, " · ")).Value));
               Set(varNahledBezi, true);
               Set(varNahledHotovo, "");
               Set(varNahledOdpoved, "");
@@ -401,7 +404,7 @@ Screens:
             DisplayMode: |-
               =If(
                   varNahledBezi || IsBlank(varNahledHotovo) ||
-                  varNahledHotovo <> drp_SouborN.Selected.Value,
+                  varNahledHotovo <> Trim(First(Split(drp_SouborN.Selected.Value, " · ")).Value),
                   DisplayMode.Disabled,
                   DisplayMode.Edit
               )

@@ -35,8 +35,9 @@ from pathlib import Path
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
 from build_restore_flow import (FLOW, FLOW_GUID, KNIHOVNA, ODD_POLE,  # noqa: E402
-                                ODD_RADKU, ODDELOVAC, REZIM_SEZNAM,
-                                REZIM_ZAPIS, STRANKOVANI, nacti_schema)
+                                ODD_POPISKU, ODD_RADKU, ODDELOVAC,
+                                REZIM_SEZNAM, REZIM_ZAPIS, STRANKOVANI,
+                                nacti_schema)
 
 chyby = []
 kontrol = 0
@@ -365,6 +366,23 @@ def zkontroluj_seznam(akce):
                .get("parameters") or {}).get("parameters/uri", ""))
     overit(KNIHOVNA in uri, f"seznam se nečte z knihovny {KNIHOVNA}: {uri[:70]}")
     overit("FileLeafRef" in uri, "seznam nevybírá název souboru (FileLeafRef)")
+    # Hledat "Created" v celé adrese by nestačilo — je i v $orderby, takže
+    # by kontrola prošla i tehdy, kdyby ze $select vypadlo.
+    vybrane = re.search(r"[$]select=([^&']*)", uri)
+    overit(vybrane is not None and "Created" in vybrane.group(1),
+           "seznam nevybírá Created v $select — appka by u snímků "
+           "neukázala datum pořízení")
+
+    # Datum se skládá do téhož řetězce jako jméno, aby se nemuselo měnit
+    # schéma odpovědi (to by znamenalo novou registraci flow ve Studiu).
+    vyber = str((((vnitrek.get("Jmena") or {}).get("inputs") or {})
+                 .get("select", "")))
+    overit(ODD_POPISKU in vyber,
+           f"jméno snímku se nespojuje s datem oddělovačem {ODD_POPISKU!r} — "
+           "appka by hodnotu neuměla rozdělit zpátky")
+    overit("convertFromUtc" in vyber,
+           "datum snímku se nepřevádí z UTC — noční záloha by hlásila čas "
+           "o dvě hodiny dřív a vypadala jako cizí soubor")
 
     hlavni = (((akce.get("Odpoved") or {}).get("inputs") or {})
               .get("schema") or {}).get("properties") or {}
