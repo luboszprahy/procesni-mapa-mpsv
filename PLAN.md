@@ -2001,6 +2001,20 @@ B2. [Dvoustupňová validace] — co: src/make_sablona.py
       `01-02-003 — Název` (varianta B z nabídky) — proto se před stavbou
       refreshe (B3) ověří ručně otevřením v Excelu Online, ne až v provozu.
 
+B3. POZNÁMKA Z REALIZACE (02.09.2026): zadání tohoto kroku se změnilo.
+    Pojmenované rozsahy číselníků jsou PŘESNĚ podle počtu položek, ne natažené
+    na strop — strop by do nabídky přidal tolik prázdných řádků, kolik zbývá
+    (u osmi útvarů 192). Jenže Excel konektor umí přepsat BUŇKY, ne definici
+    pojmenovaného rozsahu; refresh proto sám o sobě NESTAČÍ, jakmile položek
+    přibude nebo ubude.
+    Zbývají dvě cesty a je potřeba mezi nimi rozhodnout:
+      (a) refresh jen přepisuje hodnoty a šablona se přegeneruje ručně, když
+          se počet položek změní (jednoduché, ale „automatické" jen zpola);
+      (b) číselníky jako Excel Tabulky a pojmenovaný rozsah na jejich sloupec
+          (`TabProcesy[Nabídka]`) — rozsah pak roste sám se zápisem řádků.
+          Neověřeno; a kaskádové rozsahy P_<kód> jsou podmnožiny, ty takhle
+          řešit nejdou tak jako tak.
+
 B3. [Noční refresh číselníků] — co: src/build_ciselnik_flow.py (nové),
     src/check_ciselnik_flow.py (nové), deploy/flow_Ciselnik.md
     Naplánované flow 1x/24 h: přečte `Procesy`, `DilciProcesy`, `Utvary`
