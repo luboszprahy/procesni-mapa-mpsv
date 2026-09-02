@@ -178,3 +178,29 @@ Pole se proto spojují oddělovači `|~|` (pole) a `|#|` (řádky) a appka je
 rozebírá `Split()`. **Bere je podle POŘADÍ**, ne podle klíče — oddělovaný text
 jméno pole nenese —, takže pořadí je součástí kontraktu a hlídá ho brána.
 
+## Když import hlásí „Nemáte oprávnění k otevření tohoto souboru"
+
+Ověřeno v provozu 02.09.2026 (PPF DEV). Akce `Radky` skončí na:
+
+```
+The request is forbidden by Graph API.
+Error code is 'OpenWorkbookAccessDenied'.
+Error message is 'Nemáte oprávnění k otevření tohoto souboru.'
+statusCode: 403
+```
+
+**Příčina je citlivostní štítek sešitu, ne oprávnění k webu.** Štítek
+**„Interní" projde**; přísnější stupeň soubor zašifruje a Excel Online
+(Business) ho přes Graph API neotevře — ani člověku, který ho vlastní.
+Náprava: přeštítkovat sešit na „Interní" a spustit náhled znovu.
+
+**Proč to vypadá jako chyba flow.** Štítek si sešit vezme až při uložení
+v desktop Excelu, takže vydaná šablona je čistá a vadný je až vyplněný sešit.
+Všechny akce před `Radky` přitom projdou zeleně — `Soubor`
+(`GetFileMetadataByPath`) čte metadata, a ta šifrovaná nejsou. Z appky je
+navíc vidět jen `Flow.Run failed: 502 BadGateway / NoResponse`, jako u každé
+jiné chyby flow.
+
+**Rozlišovací test**, kdyby se to opakovalo: nahrát do knihovny `Import` sešit,
+který nikdo neotevřel v desktop Excelu, a spustit náhled. Projde-li, je to
+štítek. Padne-li stejně, je to účet u Excel Online connection.

@@ -2,9 +2,8 @@
 
 Aktualizováno: **2026-09-02 20:40** — balík **1.0.0.91**: holé aktivity bez
 zařazení (F13/C2) a rozbalovátka v importní šabloně (F13/B1+B2). Obnova ze
-zálohy funguje ověřeně na datech. Import z tabulky padá na
-**403 `OpenWorkbookAccessDenied`** v akci `Radky` — příčina je mimo flow,
-Excel konektor nesmí otevřít sešit.
+zálohy funguje ověřeně na datech. **Import z tabulky funguje** — příčinou selhání byl citlivostní
+štítek sešitu, ne vada řešení.
 Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
 ## STAV ZKOUŠEK
@@ -15,46 +14,34 @@ Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 | datum a čas u seznamu záloh | **OK** — `rejstrik_2026-09-02_1750.json · 2.9.2026 19:50` |
 | náhled obnovy | **OK** |
 | **obnova na datech** | **OK** — potvrzeno 02.09. 19:55 |
-| **import z tabulky** | **PADÁ v `Radky`** — 403 OpenWorkbookAccessDenied; vše před ní zelené |
-| import na datech | nezkoušeno (blokuje předchozí řádek) |
+| **import z tabulky — náhled** | **OK** — 200 řádků, 198 prázdných, 2 založí, 1 bez zařazení |
+| import na datech — **zápis** | nezkoušeno — *Provést import* zatím nikdo nezmáčkl |
 
-### PŘÍČINA NALEZENA (02.09.2026 20:49): 403 OpenWorkbookAccessDenied
+### VYŘEŠENO (02.09.2026 20:54): citlivostní štítek sešitu
 
-Run history `ImportFlow`:
+Akce `Radky` vracela 403 `OpenWorkbookAccessDenied` — „Nemáte oprávnění
+k otevření tohoto souboru". **Příčinou byl citlivostní štítek.** Se štítkem
+**„Interní" import projde**; přísnější stupeň sešit zašifruje a Excel Online
+(Business) ho přes Graph API neotevře ani vlastníkovi.
 
-```
-Action 'Radky' failed: The request is forbidden by Graph API.
-Error code is 'OpenWorkbookAccessDenied'.
-Error message is 'Nemáte oprávnění k otevření tohoto souboru.'
-statusCode: 403
-```
+Ověřeno na datech: náhled `import2.xlsx` vrátil **200 řádků v sešitě, 198
+prázdných, 2 se založí, z toho 1 bez zařazení** — přesně podle obsahu sešitu.
+Tím je zároveň ověřená nová šablona (200 řádků) i C2 (aktivita bez zařazení).
 
-**Všechny akce před `Radky` jsou zelené** — `Site_id`, `Web_id`, `Disky`,
-`Zdroj`, `Disk kandidati`, `Disk`, `Soubor`. To je podstatné: parametry
-excelového konektoru se skládají SPRÁVNĚ, knihovna se najde, soubor se najde.
-Vada tedy není ve flow ani v sešitě, ani v tom, jak se skládá `drive`/`source`
-— celá ta část je tímhle během ověřená jako funkční.
+**Proč se to hledalo půl dne** — a proč je to zapsané na třech místech:
+- štítek si sešit vezme **až při uložení v desktop Excelu**, takže vydaná
+  šablona je čistá a vadný je až vyplněný sešit;
+- **všechny akce před `Radky` projdou zeleně** (`Soubor` čte metadata, a ta
+  šifrovaná nejsou), takže to vypadá jako chyba ve skládání parametrů
+  excelového konektoru — přesně tam, kde se hledá nejdřív;
+- z appky je vidět jen `502 BadGateway / NoResponse`, jako u každé jiné chyby.
 
-Selhává až samotné otevření sešitu přes Graph API. `Soubor`
-(SharePoint `GetFileMetadataByPath`) přitom projde — metadata číst jde, obsah
-ne. To ukazuje na jednu ze tří věcí, seřazeno podle pravděpodobnosti:
+Zapsáno do: `power-Apps-skill` (fakta o prostředí PPF), `deploy/flow_Import.md`
+(kontrakt flow) a do **pokynů v samotné šabloně**, kde to správce uvidí dřív,
+než chybu udělá.
 
-1. **Citlivostní štítek (sensitivity label) se šifrováním.** Sešit vyplněný
-   a uložený v desktop Excelu ho dostane, pokud má tenant povinný default.
-   Zašifrovaný sešit Graph API neotevře, i když je vlastníkem tentýž člověk.
-   Indicie: v Ribbonu screenshotu je tlačítko **Sensitivity**, a šablona
-   otevřená z knihovny hlásila **READ-ONLY … opened read-only from the server**.
-2. **Sešit je zamčený, protože zůstal otevřený v desktop Excelu.**
-   Nejlevnější na vyloučení — zavřít a spustit znovu.
-3. **Excel Online (Business) connection běží pod jiným účtem** než SharePoint
-   connection a ten k webu přístup nemá.
-
-**Rozlišovací test (levný a jednoznačný):** nahrát do knihovny `Import`
-šablonu, kterou nikdo neotevřel v desktop Excelu (stáhnout přes `Data ▾ →
-Vzorová tabulka pro import` a rovnou nahrát), a spustit náhled.
-- projde a vrátí samé nuly → je to **štítek** (bod 1), soubor ho dostal při
-  uložení;
-- padne stejně → je to **oprávnění nebo účet connection** (bod 3).
+**Vedlejší zisk:** ten běh potvrdil, že skládání `drive`/`source` za běhu,
+které STATUS vedl jako hlavního podezřelého a dvakrát se ladilo, funguje.
 
 ## CO JE NA TOBĚ — testovací seznam k balíku 1.0.0.89
 

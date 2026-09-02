@@ -339,6 +339,10 @@ def zaloz_pokyny(sesit, sloupce):
         " sešit.",
         "4. Identifikační kód nevyplňujte, přiděluje ho aplikace při importu.",
         "5. Soubor ukládejte jako .xlsx a nahrajte do knihovny „Import“.",
+        "   POZOR na citlivostní štítek: nechte „Interní“. Přísnější štítek"
+        " sešit zašifruje a import ho pak nedokáže otevřít — ohlásí"
+        " „Nemáte oprávnění k otevření tohoto souboru“, přestože soubor"
+        " vlastníte.",
         "6. Import nejdřív ukáže náhled (co vznikne / co je duplicita /"
         " co je chyba) a teprve po potvrzení zapisuje.",
         "",
