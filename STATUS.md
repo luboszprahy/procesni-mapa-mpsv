@@ -18,48 +18,136 @@ Proč to pořadí: `C2` sahá do `ImportFlow`, tedy do téhož flow, které 01.0
 selhalo. Kdyby se to udělalo dřív, než se najde příčina, nepůjde rozlišit
 stará vada od nové.
 
-## CO JE NA TOBĚ
+## CO JE NA TOBĚ — testovací seznam k balíku 1.0.0.89
 
-0. **Naimportuj `deploy/procesnimapa_1_0_0_89.zip`** (nahrazuje 88).
-   Po importu appku jednou otevři ve Studiu — z YAML zabalená appka se
-   validuje až tam. Nové flow nepřibylo, registrace se nemění.
+Osm kroků, v tomhle pořadí. **Bod 5 je ten důležitý** — bez něj se nedá dělat
+nic dalšího. Body 1–4 jsou příprava a rychlé ověření, že se nic nerozbilo.
 
-1. **Diagnostika selhaného importu — pořád první v pořadí.**
-   Nezačínej opravovat flow ani appku, dokud nebude jasné, co přesně spadlo.
-   Canvas app u chyby flow ukáže vždycky jen
-   `Flow.Run failed: 502 BadGateway / NoResponse`, ať je vevnitř cokoli.
+Ke každému je napsané, **co má vyjít**. Když vyjde něco jiného, zastav se
+u toho a pošli, co jsi viděl — pokračovat dál nemá smysl, další kroky by
+stavěly na rozbitém základu.
 
-   Potřebuju, v tomhle pořadí:
-   - **doslovné znění toho, co appka ukázala** (hláška z Notify, nebo že se
-     nestalo nic),
-   - **run history `ImportFlow`** (Power Automate → ImportFlow → Runs →
-     poslední běh): **která akce je červená** a její chybová hláška. Kdyby
-     běh vůbec nevznikl, je problém na straně appky, ne flow, a je to jiná
-     diagnóza,
-   - u červené akce **Show raw inputs**, zvlášť u `Radky` (excelová akce) —
-     tam se skládají čtyři parametry za běhu a je vidět, co z nich vyšlo.
+### 1. Import balíku
 
-   | akce | co to nejspíš znamená |
-   |---|---|
-   | `Disky` nebo `Disk` je prázdný | knihovna `Import` na webu není (neproběhl `setup_sharepoint.js`), nebo se jmenuje jinak než URL segment `/Import` |
-   | `Soubor` (GetFileMetadataByPath) | soubor v knihovně `Import` není, nebo se název z appky neshoduje |
-   | `Radky` (Excel) | sešit není podle šablony — tabulka se musí jmenovat `Aktivity`; nebo `drive`/`source` vyšly špatně |
-   | flow vůbec neběželo | `ImportFlow` není zapnuté, nebo appka nebyla po importu otevřena a publikována ve Studiu |
+`deploy/procesnimapa_1_0_0_89.zip` → Power Apps → Solutions → Import solution
+(upgrade). Nahrazuje 88.
 
-2. **Zkouška data u záloh (nové v 89).** `Data ▾ → Obnova ze zálohy` →
-   rozbal seznam. U každého snímku má být za názvem datum a čas pořízení,
-   ve tvaru `rejstrik_2026-09-02_0300.json · 2.9.2026 5:00`.
+**Po importu appku jednou otevři ve Studiu** — z YAML zabalená appka se
+validuje až tam, import solution projde i tehdy, když je uvnitř chyba
+(přesně tohle se stalo balíku 87).
 
-   **Na čem záleží nejvíc:** po výběru musí *Zkontrolovat* proběhnout —
-   flow dostává jen holý název, datum se ořezává v appce. Kdyby se posílal
-   celý popisek, flow spadne na nenalezeném souboru.
+- **má vyjít:** appka se otevře bez `Error opening file`
+- **nové flow nepřibylo**, registrace se nemění, nic připojovat nemusíš
 
-   Čas je ze SharePointu a v našem pásmu, takže noční záloha ukáže **5:00**,
-   ne 3:00, jak stojí v názvu souboru (ten je v UTC). To je správně.
+### 2. Knihovna Import — spusť `src/setup_sharepoint.js`
 
-3. **Zbytek zkoušek z 01.09. pořád nezkoušen** — import na datech a obnova
-   na datech (body 4 a 5 z minulého STATUS). Dokud neproběhne bod 1, nemá
-   smysl je opakovat naslepo.
+F12 → Console na stránce webu s rejstříkem → vlož celý soubor → Enter.
+Idempotentní, můžeš ho spustit i opakovaně.
+
+**Bez tohohle kroku import z tabulky nemůže fungovat** — knihovna `Import`
+je místo, odkud `ImportFlow` čte sešity. Je to jeden z kandidátů na příčinu
+selhání z 01.09.
+
+- **má vyjít:** tabulka na konci, žádný řádek `CHYBI`, a v hlášeních
+  `Import: zalozen` nebo `existoval`
+- **uvidíš navíc:** tři řádky `seed 00 … zalozen` — technické položky
+  „Nezařazeno" pro aktivity nahrané bez zařazení (F13/C1, dnešní práce)
+- **vedlejší efekt, který je očekávaný:** ve stromu se objeví prázdná agenda
+  **„Nezařazeno"**. Je to kosmetika, skryje ji krok C3. Nelekej se jí.
+
+### 3. Rychlá regrese — nic z toho, co fungovalo, se nesmí rozbít
+
+Měnil jsem obrazovku náhledu, kterou **sdílí import i obnova**. Takže i to,
+co dřív šlo, se musí přeťuknout.
+
+- `Data ▾` má **šest** položek: Export do Wordu, Export do Excelu, Vzorová
+  tabulka pro import, Záloha rejstříku, Import z tabulky, Obnova ze zálohy
+- **Záloha rejstříku** — proběhne a v knihovně `Zálohy` přibude nový snímek
+- **Export do Wordu / Excelu** — soubor se stáhne
+- **Vzorová tabulka pro import** — sešit se stáhne a má listy `Aktivity`
+  a `Pokyny`
+
+### 4. Datum u záloh — jediná nová funkce v tomhle balíku
+
+`Data ▾ → Obnova ze zálohy` → rozbal seznam souborů.
+
+- **má vyjít:** za názvem je datum a čas, `rejstrik_2026-09-02_0300.json ·
+  2.9.2026 5:00`
+- **čas je o dvě hodiny vyšší, než stojí v názvu** — a je to správně. Název
+  nese UTC, zobrazený čas je náš. Noční záloha ve 3:00 UTC = 5:00 u nás.
+- **nejdůležitější:** vyber snímek a dej **Zkontrolovat**. Musí to projít.
+  Flow dostává jen holý název, datum se ořezává v appce — kdyby se posílal
+  celý popisek, spadne to na nenalezeném souboru.
+
+### 5. Import z tabulky — DIAGNOSTIKA (tady se to 01.09. zaseklo)
+
+`Data ▾ → Import z tabulky` → vyber sešit → **Zkontrolovat**.
+
+Pokud to spadne, **nesnaž se to opravit** — potřebuju tři věci, v tomhle
+pořadí. Canvas app u chyby flow ukáže vždycky jen `Flow.Run failed: 502
+BadGateway / NoResponse`, ať je vevnitř cokoli, takže z hlášky v appce se
+příčina poznat nedá.
+
+1. **doslovné znění toho, co appka ukázala** (hláška z Notify, nebo že se
+   nestalo nic)
+2. **run history `ImportFlow`** (Power Automate → ImportFlow → Runs →
+   poslední běh): **která akce je červená** a její chybová hláška
+3. u té červené akce **Show raw inputs** — zvlášť u `Radky` (excelová akce),
+   tam se skládají čtyři parametry za běhu a je vidět, co z nich vyšlo
+
+| akce | co to nejspíš znamená |
+|---|---|
+| `Disky` nebo `Disk` je prázdný | knihovna `Import` na webu není (neproběhl krok 2), nebo se jmenuje jinak než URL segment `/Import` |
+| `Soubor` (GetFileMetadataByPath) | soubor v knihovně `Import` není, nebo se název z appky neshoduje |
+| `Radky` (Excel) | sešit není podle šablony — tabulka se musí jmenovat `Aktivity`; nebo `drive`/`source` vyšly špatně |
+| **běh vůbec nevznikl** | `ImportFlow` není zapnuté, nebo appka nebyla po importu otevřena ve Studiu. **Jiná diagnóza — problém je na straně appky, ne flow.** |
+
+### 6. Náhled nesmí zapisovat — ověření, na kterém záleží nejvíc
+
+Platí pro **obě** operace. Po stisku **Zkontrolovat** (ne Provést!):
+
+- **v žádném listu nesmí přibýt ani se změnit jediná položka**
+- tlačítko **Provést** se odemkne teprve po náhledu, a jen pro **ten** soubor,
+  nad kterým náhled proběhl. Zkus přepnout v rozbalovátku na jiný soubor —
+  *Provést* musí zase zhasnout.
+
+### 7. Import na datech
+
+Stáhni šablonu (`Data ▾ → Vzorová tabulka pro import`), vyplň pár řádků a
+**schválně mezi ně dej**:
+
+- jeden řádek s **neexistujícím dílčím procesem** (např. `99-99-999`)
+- jeden **duplicitní** (stejný název i dílčí proces jako řádek, který už
+  v rejstříku je)
+- jeden **úplně prázdný** řádek mezi vyplněnými
+
+Nahraj do knihovny `Import`, spusť náhled. Ukáže šest čísel:
+
+| řádek souhrnu | co má sedět |
+|---|---|
+| Řádků v sešitě | všechny neprázdné |
+| Prázdné (přeskočí se) | tvůj prázdný řádek |
+| Založí se | jen ty správné |
+| Duplicitní (přeskočí se) | tvůj duplikát |
+| Chybné (chybí povinný údaj) | řádky bez názvu nebo kódu |
+| Neexistující dílčí proces | tvůj řádek s `99-99-999` |
+
+**A pod tím tabulka chyb — u každé musí sedět číslo řádku v sešitě.** To je
+to, co se dá snadno rozbít a špatně se to pozná: číslo musí odkazovat na
+řádek v Excelu, ne na pořadí ve zpracování.
+
+Teprve pak **Provést** a ověř, že vzniklo přesně to, co náhled sliboval.
+
+### 8. Obnova na datech
+
+Smaž 3–5 řádků z listu `Aktivity`, spusť náhled obnovy.
+
+- **má vyjít:** smazané řádky ve sloupci **založit**, ostatní nuly
+- pak **Provést obnovu**
+- pak **znovu náhled** — teď mají být **samé nuly**
+
+Obnova nikdy nemaže: řádek, který dnes je a ve snímku není, se jen ohlásí
+ve sloupci **navíc**.
 
 **MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
 na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
