@@ -67,9 +67,16 @@ přístup.
 
 ## CO DĚLÁM JÁ (next step)
 
-Blok **C z F13 — sirotčí aktivity** (`PLAN.md`, F13/C1–C4): pseudo-rodič
-`00-00-000`, import bez zařazení, dlaždice nezařazených na přehledu,
-přiřazení v detailu. Pak blok B (číselníky v šabloně a noční refresh).
+Blok **C z F13 — sirotčí aktivity** (`PLAN.md`, F13/C1–C4).
+
+**C1 hotový** (commit `b9db775`): provisioning zakládá trojici
+`00` / `00-00` / `00-00-000` „Nezařazeno". `check_setup.js` má 64 kontrol
+(bylo 55), ověřeno mutací. **Do balíku 89 to nejde** — `setup_sharepoint.js`
+se pouští ručně v konzoli prohlížeče, ne z balíku.
+
+Zbývá C2 (import bez zařazení), C3 (dlaždice nezařazených + skrýt agendu `00`
+ve stromu), C4 (přiřazení v detailu). Pak blok B (číselníky v šabloně
+a noční refresh).
 
 Pozor na to, co je v plánu u `C2` napsané tučně: náhrada prázdného dílčího
 procesu musí přijít **až za `S_obsahem`**. Kdyby se dosadila dřív, přestaly
