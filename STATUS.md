@@ -1,37 +1,34 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-02 20:00** — balík **1.0.0.90**. Obnova ze zálohy
-**funguje ověřeně na datech**, datum u snímků taky. Import z tabulky pořád
-padá na `502 BadGateway` a **příčina není známá** — chybí run history.
+Aktualizováno: **2026-09-02 20:40** — balík **1.0.0.91**: holé aktivity bez
+zařazení (F13/C2) a rozbalovátka v importní šabloně (F13/B1+B2). Obnova ze
+zálohy funguje ověřeně na datech. Import z tabulky pořád padá na
+`502 BadGateway` a **příčina není známá** — chybí run history.
 Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
 
-## STAV ZKOUŠEK (2026-09-02 20:00)
+## STAV ZKOUŠEK
 
 | co | stav |
 |---|---|
 | import balíku, otevření ve Studiu | **OK** |
 | datum a čas u seznamu záloh | **OK** — `rejstrik_2026-09-02_1750.json · 2.9.2026 19:50` |
-| náhled obnovy | **OK** — nuly u všech listů, nic se nezapsalo |
-| **obnova na datech** | **OK** — potvrzeno uživatelem 02.09. 19:55 |
+| náhled obnovy | **OK** |
+| **obnova na datech** | **OK** — potvrzeno 02.09. 19:55 |
 | **import z tabulky** | **PADÁ** — `ImportFlow.Run failed: 502 BadGateway / NoResponse` |
 | import na datech | nezkoušeno (blokuje předchozí řádek) |
 
-### Nález: sešit vyplněný mimo Tabulku (02.09.2026)
+### Dvě příčiny, které se nesmí splést
 
-Uživatel vyplnil aktivity na **řádky 11–15**. Tabulka `Aktivity` měla rozsah
-**A1:H2** — hlavičku a jeden datový řádek. Vše pod tím je **mimo Tabulku**
-a konektor Excelu to nevidí; Excel Tabulku rozšíří sám jen tehdy, když se píše
-do řádku těsně pod ní.
+**1. Sešit vyplněný mimo Tabulku (nalezeno 02.09., OPRAVENO v 1.0.0.90).**
+Aktivity byly na řádcích 11–15, Tabulka `Aktivity` měla rozsah A1:H2 — vše pod
+tím je mimo ni a konektor Excelu to nevidí. Šablona má nově **200 prázdných
+řádků**; strop je 250, protože `List rows present in a table` vrací bez
+stránkování nejvýš 256 řádků.
 
-**Opraveno v 1.0.0.90:** šablona má 200 prázdných řádků a pokyny říkají, kam
-psát. Horní hranici drží limit akce `List rows present in a table` — bez
-stránkování vrací nejvýš **256 řádků**, takže větší Tabulka by tiše zahodila
-konec sešitu. Brána hlídá oba stropy.
-
-**ALE tenhle nález selhání NEVYSVĚTLUJE.** Kdyby šlo jen o prázdnou Tabulku,
-flow by odpovědělo „1 řádek v sešitě, 1 prázdný, 0 založí se" — tedy nuly,
-ne `502`. `NoResponse` znamená, že flow neodpovědělo vůbec: nějaká akce spadla,
-nebo běh vypršel. **Run history je pořád potřeba.**
+**2. `502 BadGateway` — NEVYSVĚTLENO.** Kdyby šlo jen o prázdnou Tabulku, flow
+by odpovědělo „1 řádek v sešitě, 1 prázdný, 0 založí se". `NoResponse` znamená,
+že flow neodpovědělo vůbec: nějaká akce spadla, nebo běh vypršel. **Run history
+je pořád potřeba** — bez ní je každá oprava střelba naslepo.
 
 ## CO JE NA TOBĚ — testovací seznam k balíku 1.0.0.89
 
