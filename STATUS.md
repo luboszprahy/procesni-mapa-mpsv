@@ -1,254 +1,124 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-02 20:40** — balík **1.0.0.91**: holé aktivity bez
-zařazení (F13/C2) a rozbalovátka v importní šabloně (F13/B1+B2). Obnova ze
-zálohy funguje ověřeně na datech. **Import z tabulky funguje včetně zápisu — F11 uzavřena.**
-Příčinou selhání byl citlivostní štítek sešitu, ne vada řešení.
-Stroj HP-LUBOS. Vše je v gitu, poslední commit viz `git log -1`.
+Aktualizováno: **2026-09-02 21:03** — konec dne. Balík **1.0.0.91**.
+**F11 (záloha a hromadný import) je uzavřená** — import z tabulky funguje
+včetně zápisu, ověřeno na datech. Z nového zadání F13 hotové bloky **A**,
+**C1**, **C2** a **B1+B2**. Stroj HP-LUBOS. Vše v gitu, poslední commit
+viz `git log -1`.
 
-## STAV ZKOUŠEK
+## KDE SE ZÍTRA ZAČÍNÁ
+
+**Nic nevisí a nic není rozbité.** Poprvé za tři dny se nezačíná diagnostikou.
+
+Pořadí práce je domluvené (02.09. 21:03):
+
+1. **F13/C3 + C4** — dokončit sirotky. Dnes se dají holé aktivity naimportovat,
+   ale najdou se jen procházením stromu a přiřadit je nejde.
+2. **F10 krok 2** — přesun aktivity mezi dílčími procesy jako zánik + vznik.
+3. **F10 kaskáda — přesun procesu pod jinou agendu.** Zadáno uživatelem
+   02.09. 20:59 („přesun uděláme v dalších dnech"). Je to největší kus:
+   mění se prefix všem potomkům, takže přesun procesu s 8 dílčími procesy
+   a 40 aktivitami uzavře 49 kódů a založí 49 nových, plus protokol.
+
+**Proč právě takhle:** C4 (přiřazení sirotka) je nejmenší instance téže
+operace — přečíslování kódu, přepis vazby, `puvodni_kod`. Postaví se na ní
+vzor, který kaskáda použije. Dělat kaskádu první by znamenalo vymýšlet ten
+vzor rovnou v nejsložitějším případě.
+
+## CO JE NA TOBĚ
+
+1. **Nahraj do Site Assets novou šablonu** `deploy/sablona_import_aktivit.xlsx`.
+   Ta v prostředí je ještě bez varování o citlivostním štítku a bez rozbalovátek.
+
+2. **Nic dalšího** — vše ostatní je odzkoušené (viz tabulka níž).
+
+## MPSV — co bude potřeba, až bude přístup
+
+**MPSV běží na 1.0.0.65, PPF DEV na 1.0.0.91.** Mezi nimi je 26 verzí a
+`deploy/mpsv/` je snímek k té staré. Ověřeno 02.09.2026 porovnáním se
+schématem — **snímku chybí**:
+
+| co chybí ve snímku 65 | přibylo ve verzi |
+|---|---|
+| list `HistorieKodu` | F10/1 (31.08.) |
+| knihovna `Zalohy` | F11 |
+| knihovna `Exporty` | 1.0.0.81 |
+| knihovna `Import` | 1.0.0.85 |
+| technické položky `00` / `00-00` / `00-00-000` | F13/C1 (02.09.) |
+
+**Z toho plyne: `deploy/mpsv/` se před přenosem MUSÍ přegenerovat.** Kdyby se
+tam nasadil balík 91 se starým `01_zaloz_listy.js`, appka by nenašla listy ani
+knihovny a flow by padaly na neexistujících složkách. Přegenerování je jeden
+příkaz (`make_setup.py` + `make_import.py`), ale musí se na něj myslet —
+snímek vypadá hotově a nic nehlásí, že je zastaralý.
+
+Soubory potřebné pro přenos jsou zkontrolované a na místě (02.09.):
+`deploy/mpsv/*` (4 skripty + README + balík 65 + schéma), `src/setup_sharepoint.js`,
+`src/import_data.js`, `src/make_setup.py`, `src/make_import.py`, `src/schema.json`,
+`kody.json`, `deploy/INSTALACE.md`, `deploy/sablona_import_aktivit.xlsx`,
+`runs/normalize/` a `runs/anonym/` (data k importu).
+
+**Přístup do tenantu MPSV chybí už několik dní** — do té doby se nedá nic z toho
+ověřit.
+
+## STAV ZKOUŠEK (vše ověřeno na datech 02.09.)
 
 | co | stav |
 |---|---|
 | import balíku, otevření ve Studiu | **OK** |
 | datum a čas u seznamu záloh | **OK** — `rejstrik_2026-09-02_1750.json · 2.9.2026 19:50` |
 | náhled obnovy | **OK** |
-| **obnova na datech** | **OK** — potvrzeno 02.09. 19:55 |
-| **import z tabulky — náhled** | **OK** — 200 řádků, 198 prázdných, 2 založí, 1 bez zařazení |
-| import na datech — **zápis** | **OK** — potvrzeno 02.09. 20:59. **F11 uzavřena.** |
+| obnova na datech | **OK** |
+| import — náhled | **OK** — 200 řádků, 198 prázdných, 2 založí, 1 bez zařazení |
+| import — zápis | **OK** — nové položky vznikly |
+| rozbalovátka v šabloně | **OK** — kaskáda proces → dílčí proces funguje |
 
-### VYŘEŠENO (02.09.2026 20:54): citlivostní štítek sešitu
+## Co se dnes udělalo (02.09.2026)
 
-Akce `Radky` vracela 403 `OpenWorkbookAccessDenied` — „Nemáte oprávnění
-k otevření tohoto souboru". **Příčinou byl citlivostní štítek.** Se štítkem
-**„Interní" import projde**; přísnější stupeň sešit zašifruje a Excel Online
-(Business) ho přes Graph API neotevře ani vlastníkovi.
+**Balík 1.0.0.89 — datum u záloh (F13/A).** `RestoreFlow` v režimu `seznam`
+přidal `Created` a skládá ho za název; schéma odpovědi zůstalo totožné, takže
+flow nepotřebovalo novou registraci. Appka posílá zpět jen holý název, ořezává
+na třech místech.
 
-Ověřeno na datech: náhled `import2.xlsx` vrátil **200 řádků v sešitě, 198
-prázdných, 2 se založí, z toho 1 bez zařazení** — přesně podle obsahu sešitu.
-Tím je zároveň ověřená nová šablona (200 řádků) i C2 (aktivita bez zařazení).
+**F13/C1 — technické položky.** Provisioning zakládá `00` / `00-00` /
+`00-00-000` „Nezařazeno". Bez nich by aktivita bez zařazení neměla pod čím
+vzniknout — kód se odvozuje od rodiče a `Title` je povinný.
 
-**Proč se to hledalo půl dne** — a proč je to zapsané na třech místech:
-- štítek si sešit vezme **až při uložení v desktop Excelu**, takže vydaná
-  šablona je čistá a vadný je až vyplněný sešit;
-- **všechny akce před `Radky` projdou zeleně** (`Soubor` čte metadata, a ta
-  šifrovaná nejsou), takže to vypadá jako chyba ve skládání parametrů
-  excelového konektoru — přesně tam, kde se hledá nejdřív;
-- z appky je vidět jen `502 BadGateway / NoResponse`, jako u každé jiné chyby.
+**Balík 1.0.0.90 — čitelný souhrn a šablona na 200 řádků.** Čtyři čísla obnovy
+byla slepená do `0 · 0 · 0 · 6`; teď jsou to sloupce s hlavičkou a nula je
+utlumená, aby nenulové číslo vyskočilo. Šablona měla jeden datový řádek, takže
+cokoli napsaného níž bylo **mimo Tabulku** a konektor to nevidí.
 
-Zapsáno do: `power-Apps-skill` (fakta o prostředí PPF), `deploy/flow_Import.md`
-(kontrakt flow) a do **pokynů v samotné šabloně**, kde to správce uvidí dřív,
-než chybu udělá.
+**Balík 1.0.0.91 — holé aktivity (C2) a rozbalovátka (B1+B2).** Prázdný dílčí
+proces se nahradí `00-00-000`; náhrada běží až za oddělením prázdných řádků,
+jinak by šablona zakládala dvě stě sirotků z prázdných řádků. Šablona má list
+`Ciselniky` a kaskádu proces → dílčí proces přes pojmenované rozsahy.
 
-**Vedlejší zisk:** ten běh potvrdil, že skládání `drive`/`source` za běhu,
-které STATUS vedl jako hlavního podezřelého a dvakrát se ladilo, funguje.
+**Nález dne: citlivostní štítek.** Import padal na 403
+`OpenWorkbookAccessDenied`. Štítek **„Interní" projde**, přísnější sešit
+zašifruje a Excel Online ho přes Graph API neotevře ani vlastníkovi. Zapsáno
+do `power-Apps-skill`, `deploy/flow_Import.md` a do pokynů v šabloně.
 
-## CO JE NA TOBĚ — testovací seznam k balíku 1.0.0.89
+## Co zbývá z F13
 
-Osm kroků, v tomhle pořadí. **Bod 5 je ten důležitý** — bez něj se nedá dělat
-nic dalšího. Body 1–4 jsou příprava a rychlé ověření, že se nic nerozbilo.
-
-Ke každému je napsané, **co má vyjít**. Když vyjde něco jiného, zastav se
-u toho a pošli, co jsi viděl — pokračovat dál nemá smysl, další kroky by
-stavěly na rozbitém základu.
-
-### 1. Import balíku
-
-`deploy/procesnimapa_1_0_0_89.zip` → Power Apps → Solutions → Import solution
-(upgrade). Nahrazuje 88.
-
-**Po importu appku jednou otevři ve Studiu** — z YAML zabalená appka se
-validuje až tam, import solution projde i tehdy, když je uvnitř chyba
-(přesně tohle se stalo balíku 87).
-
-- **má vyjít:** appka se otevře bez `Error opening file`
-- **nové flow nepřibylo**, registrace se nemění, nic připojovat nemusíš
-
-### 2. Knihovna Import — spusť `src/setup_sharepoint.js`
-
-F12 → Console na stránce webu s rejstříkem → vlož celý soubor → Enter.
-Idempotentní, můžeš ho spustit i opakovaně.
-
-**Bez tohohle kroku import z tabulky nemůže fungovat** — knihovna `Import`
-je místo, odkud `ImportFlow` čte sešity. Je to jeden z kandidátů na příčinu
-selhání z 01.09.
-
-- **má vyjít:** tabulka na konci, žádný řádek `CHYBI`, a v hlášeních
-  `Import: zalozen` nebo `existoval`
-- **uvidíš navíc:** tři řádky `seed 00 … zalozen` — technické položky
-  „Nezařazeno" pro aktivity nahrané bez zařazení (F13/C1, dnešní práce)
-- **vedlejší efekt, který je očekávaný:** ve stromu se objeví prázdná agenda
-  **„Nezařazeno"**. Je to kosmetika, skryje ji krok C3. Nelekej se jí.
-
-### 3. Rychlá regrese — nic z toho, co fungovalo, se nesmí rozbít
-
-Měnil jsem obrazovku náhledu, kterou **sdílí import i obnova**. Takže i to,
-co dřív šlo, se musí přeťuknout.
-
-- `Data ▾` má **šest** položek: Export do Wordu, Export do Excelu, Vzorová
-  tabulka pro import, Záloha rejstříku, Import z tabulky, Obnova ze zálohy
-- **Záloha rejstříku** — proběhne a v knihovně `Zálohy` přibude nový snímek
-- **Export do Wordu / Excelu** — soubor se stáhne
-- **Vzorová tabulka pro import** — sešit se stáhne a má listy `Aktivity`
-  a `Pokyny`
-
-### 4. Datum u záloh — jediná nová funkce v tomhle balíku
-
-`Data ▾ → Obnova ze zálohy` → rozbal seznam souborů.
-
-- **má vyjít:** za názvem je datum a čas, `rejstrik_2026-09-02_0300.json ·
-  2.9.2026 5:00`
-- **čas je o dvě hodiny vyšší, než stojí v názvu** — a je to správně. Název
-  nese UTC, zobrazený čas je náš. Noční záloha ve 3:00 UTC = 5:00 u nás.
-- **nejdůležitější:** vyber snímek a dej **Zkontrolovat**. Musí to projít.
-  Flow dostává jen holý název, datum se ořezává v appce — kdyby se posílal
-  celý popisek, spadne to na nenalezeném souboru.
-
-### 5. Import z tabulky — DIAGNOSTIKA (tady se to 01.09. zaseklo)
-
-`Data ▾ → Import z tabulky` → vyber sešit → **Zkontrolovat**.
-
-Pokud to spadne, **nesnaž se to opravit** — potřebuju tři věci, v tomhle
-pořadí. Canvas app u chyby flow ukáže vždycky jen `Flow.Run failed: 502
-BadGateway / NoResponse`, ať je vevnitř cokoli, takže z hlášky v appce se
-příčina poznat nedá.
-
-1. **doslovné znění toho, co appka ukázala** (hláška z Notify, nebo že se
-   nestalo nic)
-2. **run history `ImportFlow`** (Power Automate → ImportFlow → Runs →
-   poslední běh): **která akce je červená** a její chybová hláška
-3. u té červené akce **Show raw inputs** — zvlášť u `Radky` (excelová akce),
-   tam se skládají čtyři parametry za běhu a je vidět, co z nich vyšlo
-
-| akce | co to nejspíš znamená |
+| blok | stav |
 |---|---|
-| `Disky` nebo `Disk` je prázdný | knihovna `Import` na webu není (neproběhl krok 2), nebo se jmenuje jinak než URL segment `/Import` |
-| `Soubor` (GetFileMetadataByPath) | soubor v knihovně `Import` není, nebo se název z appky neshoduje |
-| `Radky` (Excel) | sešit není podle šablony — tabulka se musí jmenovat `Aktivity`; nebo `drive`/`source` vyšly špatně |
-| **běh vůbec nevznikl** | `ImportFlow` není zapnuté, nebo appka nebyla po importu otevřena ve Studiu. **Jiná diagnóza — problém je na straně appky, ne flow.** |
+| A — datum u záloh | **hotovo** (1.0.0.89) |
+| B1 + B2 — rozbalovátka v šabloně | **hotovo** (1.0.0.91) |
+| B3 — automatický refresh číselníků | **nezačato**, a zadání se změnilo — viz `PLAN.md` |
+| C1 — technické položky | **hotovo** |
+| C2 — import bez zařazení | **hotovo** (1.0.0.91) |
+| C3 — dlaždice nezařazených | **nezačato** |
+| C4 — přiřazení sirotka v appce | **nezačato** |
 
-### 6. Náhled nesmí zapisovat — ověření, na kterém záleží nejvíc
+**Pozor u C3:** agendu `00` „Nezařazeno" **neskrývat dřív, než bude dlaždice**.
+Dnes je to jediná cesta, jak se k nezařazeným aktivitám ve stromu dostat —
+skrýt ji bez náhrady by je zneviditelnilo.
 
-Platí pro **obě** operace. Po stisku **Zkontrolovat** (ne Provést!):
-
-- **v žádném listu nesmí přibýt ani se změnit jediná položka**
-- tlačítko **Provést** se odemkne teprve po náhledu, a jen pro **ten** soubor,
-  nad kterým náhled proběhl. Zkus přepnout v rozbalovátku na jiný soubor —
-  *Provést* musí zase zhasnout.
-
-### 7. Import na datech
-
-Stáhni šablonu (`Data ▾ → Vzorová tabulka pro import`), vyplň pár řádků a
-**schválně mezi ně dej**:
-
-- jeden řádek s **neexistujícím dílčím procesem** (např. `99-99-999`)
-- jeden **duplicitní** (stejný název i dílčí proces jako řádek, který už
-  v rejstříku je)
-- jeden **úplně prázdný** řádek mezi vyplněnými
-
-Nahraj do knihovny `Import`, spusť náhled. Ukáže šest čísel:
-
-| řádek souhrnu | co má sedět |
-|---|---|
-| Řádků v sešitě | všechny neprázdné |
-| Prázdné (přeskočí se) | tvůj prázdný řádek |
-| Založí se | jen ty správné |
-| Duplicitní (přeskočí se) | tvůj duplikát |
-| Chybné (chybí povinný údaj) | řádky bez názvu nebo kódu |
-| Neexistující dílčí proces | tvůj řádek s `99-99-999` |
-
-**A pod tím tabulka chyb — u každé musí sedět číslo řádku v sešitě.** To je
-to, co se dá snadno rozbít a špatně se to pozná: číslo musí odkazovat na
-řádek v Excelu, ne na pořadí ve zpracování.
-
-Teprve pak **Provést** a ověř, že vzniklo přesně to, co náhled sliboval.
-
-### 8. Obnova na datech
-
-Smaž 3–5 řádků z listu `Aktivity`, spusť náhled obnovy.
-
-- **má vyjít:** smazané řádky ve sloupci **založit**, ostatní nuly
-- pak **Provést obnovu**
-- pak **znovu náhled** — teď mají být **samé nuly**
-
-Obnova nikdy nemaže: řádek, který dnes je a ve snímku není, se jen ohlásí
-ve sloupci **navíc**.
-
-**MPSV je odložené** — několik dní bez přístupu do jejich tenantu. MPSV běží
-na 1.0.0.65 a `deploy/mpsv/` je snímek k té verzi; přegeneruje se, až bude
-přístup.
-
-## CO DĚLÁM JÁ (next step)
-
-Blok **C z F13 — sirotčí aktivity** (`PLAN.md`, F13/C1–C4).
-
-**C1 hotový** (commit `b9db775`): provisioning zakládá trojici
-`00` / `00-00` / `00-00-000` „Nezařazeno". `check_setup.js` má 64 kontrol
-(bylo 55), ověřeno mutací. **Do balíku 89 to nejde** — `setup_sharepoint.js`
-se pouští ručně v konzoli prohlížeče, ne z balíku.
-
-Zbývá C2 (import bez zařazení), C3 (dlaždice nezařazených + skrýt agendu `00`
-ve stromu), C4 (přiřazení v detailu). Pak blok B (číselníky v šabloně
-a noční refresh).
-
-Pozor na to, co je v plánu u `C2` napsané tučně: náhrada prázdného dílčího
-procesu musí přijít **až za `S_obsahem`**. Kdyby se dosadila dřív, přestaly
-by být prázdné řádky prázdné a šablona by při každém importu založila stovky
-sirotků z prázdných řádků pod tabulkou.
-
-## Balík 1.0.0.89 — datum a čas u záloh (02.09.2026 19:20)
-
-První blok F13. Rozbalovátko snímků ukazovalo jen názvy souborů, takže se
-z něj nedalo poznat, který snímek je který — jména se liší jen razítkem
-uvnitř názvu, a to je v UTC.
-
-**Co se změnilo:** `RestoreFlow` v režimu `seznam` přidal do `$select`
-sloupec `Created` a skládá ho za název přes ` · ` s převodem do našeho
-pásma. **Schéma odpovědi zůstalo totožné** (dál čtyři řetězce), takže se
-flow nemuselo znovu registrovat ve Studiu — to je celý důvod, proč datum
-jde uvnitř existujícího řetězce a ne jako páté pole.
-
-Appka pak posílá flow jen část před oddělovačem. Ořezává se na **třech**
-místech (`OnChange`, `OnSelect` tlačítka Zkontrolovat, `DisplayMode`
-tlačítka Provést) — zapomenout na jednom z nich znamená, že jedno tlačítko
-funguje a druhé ne.
-
-### Dvě věci, které chytily brány
-
-- **`Split()` vrací sloupec `Value`, ne `Result`.** Napsal jsem `.Result`
-  na všech třech místech; appka by se s tím ve Studiu neotevřela. Chytila
-  to existující `kontrola_identifikatoru` v `check_app.py`.
-- **Kontrola `Created` byla nejdřív děravá.** Testovala „`Created` je někde
-  v adrese", jenže `Created` je i v `$orderby` — mutace `seznam_bez_created`
-  proto prošla. Zpřesněno na obsah `$select`. Bez toho mutačního testu by
-  brána vypadala zeleně a nehlídala nic.
-
-### Pojistka, která se musela dořešit
-
-`varNahledHotovo` (co bylo zkontrolováno) se porovnává s tím, co je vybráno
-v rozbalovátku. Kdyby se ořezávala jen jedna strana, byly by si ty hodnoty
-navždy nerovné a tlačítko *Provést* by nešlo zapnout — pojistka by z opatření
-udělala závoru. Ořezávají se obě; dva soubory téhož jména v jedné knihovně
-být nemůžou.
-
-### Brány na 89
-
-`check_solution` **571** · `check_restore_flow` **571** · `check_zaloha_flow`
-184 · `check_import_flow` 159 · `check_export_flow` 129 · `check_mapa_flow`
-139 · `check_flow` 26 · `check_app` (5 obrazovek, 234 prvků), `check_env`,
-`check_sablona` zeleně. Mutačně: `mutace_restore` **17/17** (dvě nové),
-`mutace_import` 21/21, `mutace_zaloha` 16/16, `mutace_sablona` 15/15,
-`mutace_export_mapa` 7/7, `mutace_parametry` 4/4, `mutace_napojeni` 5/5.
-
-Sestavení:
-
-```
-copy input/procesnimapa_1_0_0_86.zip runs/vstup_89.zip
-python src/odeber_flow.py --solution runs/vstup_89.zip --flow testtest
-python src/build_import_flow.py --solution runs/vstup_89.zip
-python src/build_restore_flow.py --solution runs/vstup_89.zip
-python src/build_app.py --solution runs/vstup_89.zip --verze 1.0.0.89
-```
+**Pozor u B3:** pojmenované rozsahy číselníků jsou přesně podle počtu položek
+(jinak by nabídka měla prázdné řádky), ale Excel konektor umí přepsat buňky,
+**ne definici rozsahu**. Refresh sám o sobě proto nestačí, jakmile položek
+přibude nebo ubude. Dvě cesty k rozhodnutí jsou v `PLAN.md` u kroku B3.
 
 ## Balík 1.0.0.88 — oprava PA1011 (01.09.2026 14:55)
 
