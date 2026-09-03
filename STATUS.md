@@ -23,6 +23,13 @@ Do té doby má obrazovka tlačítka bez funkce a říká to.
 Vzorce pro krok 5 jsou hotové v `deploy/flow_Presun.md` — zítra je to jen
 vložit, ne vymýšlet.
 
+**Testovací scénář ke všemu novému je v `deploy/TESTOVACI_SCENAR.md`** —
+bodově, s očekávaným výsledkem u každého kroku. Bloky A–E pokrývají balík 92
+(sirotčí aktivity), F–H balík 93 (přesun), I–J plný přesun po registraci
+flow. Blok **F jde projít hned** — otestuje výpočet kaskády na skutečných
+datech přes Power Automate, ještě než se k ní pustí aplikace, a v režimu
+`nahled` nic nezapisuje.
+
 Zbývá taky odzkoušet **balík 92** (14bodový seznam níž) — na prostředí ještě
 neběžel.
 
