@@ -2074,7 +2074,27 @@ C2. [Import bez zařazení] — co: src/build_import_flow.py
     risk: nejzávažnější v celé fázi je právě záměna pořadí kroků. Proto
       mutace, ne jen kontrola.
 
-C3. [Sirotci v appce] — co: src/app_src/scr_Dashboard.pa.yaml
+C3. [Sirotci v appce] — HOTOVO 03.09.2026 (1.0.0.92)
+    Chip „nezařazené (N)" v pruhu filtrů vedle osiřelých; strom se přepne na
+    plochý seznam aktivit s rodičem 00-00-000. Počítá se z colAkt, ne colStrom:
+    colStrom nese i vedlejší vazby, takže by chip ukazoval počet ZAŘAZENÍ,
+    ne počet aktivit, a nesouhlasil by s kartou AKTIVITY.
+    Chip zůstává viditelný i s nulou, dokud je režim zapnutý — jinak by po
+    přiřazení posledního sirotka zmizel a strom by zůstal prázdný bez cesty zpět.
+    ZÁROVEŇ dotažen edge case z C1: technická větev 00 se skrývá ve stromu,
+    v kartách nahoře, ve správě číselníku, v nabídce nadřazené položky
+    a v publikované HTML mapě ($filter u všech pěti GetItems v MapaPublishFlow).
+    Export z appky se vyřešil sám — bere to, co je vidět ve stromu.
+    Pruh filtrů byl plný na pixel: popisek počtu řádků se proto přestěhoval
+    do hlavičky stromu, kam patří, a tlačítka nabídek se posunula doprava.
+    Tím na sebe vlezly panely obou nabídek — za běhu se vylučují, ale nic to
+    nehlídalo, takže to hlídá nová kontrola `vylucne_nabidky` (ověřeno mutací:
+    když jeden přepínač zapomene zavřít druhou nabídku, brána spadne).
+    Brána `kontrola_nezarazenych` v check_app.py + `$filter` v check_mapa_flow.py.
+    Mutačně 4/4 (chybí chip · větev míří jinam · strom nevylučuje 00 ·
+    karta počítá technickou položku) a 1/1 na mapě.
+
+C3. PŮVODNÍ ZADÁNÍ — co: src/app_src/scr_Dashboard.pa.yaml
     Filtr / dlaždice „Nezařazené aktivity (N)" na přehledu, která vypíše
     aktivity s prefixem `00-00-000`. Bez toho by sirotky nikdo nenašel.
     verify: `check_app.py` — dlaždice existuje a počítá z `colStrom`.
@@ -2083,7 +2103,27 @@ C3. [Sirotci v appce] — co: src/app_src/scr_Dashboard.pa.yaml
     risk: přehled má strop delegace; filtr na prefix `00-00-000` musí jít
       přes už načtenou kolekci, ne přes nový dotaz do SharePointu.
 
-C4. [Přiřazení sirotka] — co: src/app_src/scr_Detail.pa.yaml
+C4. [Přiřazení sirotka] — HOTOVO 03.09.2026 (1.0.0.92)
+    Sirotek (`varSirotek`, poznaný v OnVisible podle rodiče 00-00-000) má
+    kaskádu odemčenou a při uložení dostane nový kód pod vybraným dílčím
+    procesem — týmž vzorcem jako nová aktivita, včetně kolizní pojistky.
+    `puvodni_kod` = sirotčí kód, do HistorieKodu se nezapisuje.
+    Vazby: nejdřív se VŠECHNY přepíšou na nový kód (i vedlejší), teprve pak
+    běží stávající blok, který srovná primární zařazení. V opačném pořadí by
+    se mazalo podle kódu, který v tabulce ještě není.
+    Uložení sirotka BEZ změny dílčího procesu kód nepřečísluje (`varPresun`) —
+    jinak by každé uložení rozdávalo nové 00-00-000-XXXX za nic.
+    U aktivity s platným kódem je zamčená CELÁ kaskáda, ne jen dílčí proces:
+    se zamčeným jen dílčím procesem by změna agendy vynulovala výběr níž
+    a aktivita by pak nešla uložit vůbec.
+    NEDODĚLEK, vědomý: přidělení bere maximum jen z živého listu `Aktivity`,
+    ne z `HistorieKodu` — ta je zatím prázdná a appka ji nemá připojenou jako
+    datový zdroj. Doplní se v F10/3 na všech pěti místech naráz.
+    Brána `kontrola_prirazeni_sirotka` v check_app.py, mutačně 4/4
+    (odemčená kaskáda · kód jen pro novou · chybí puvodni_kod · vazby se
+    nepřepisují).
+
+C4. PŮVODNÍ ZADÁNÍ — co: src/app_src/scr_Detail.pa.yaml
     U aktivity s prefixem `00-00-000` je výběr dílčího procesu editovatelný
     a uložení provede: nový kód pod vybraným rodičem (týmž vzorcem jako
     ImportFlow — maximum přes živý list i `HistorieKodu`, viz F10 pravidlo 1),

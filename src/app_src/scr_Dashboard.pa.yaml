@@ -193,7 +193,7 @@ Screens:
             );
             Set(
                 varZmapovanoDp,
-                CountRows(Filter(colStrom, uroven = 3, pocet > 0))
+                CountRows(Filter(colStrom, uroven = 3, kod <> "00-00-000", pocet > 0))
             );
             Set(varAktStale, false)
         );
@@ -419,7 +419,7 @@ Screens:
             FontWeight: =FontWeight.Semibold
             Height: =24
             Size: =16
-            Text: =CountRows(colAgendy)
+            Text: =CountRows(Filter(colAgendy, Title <> "00"))
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
             X: =60
@@ -472,7 +472,7 @@ Screens:
             FontWeight: =FontWeight.Semibold
             Height: =24
             Size: =16
-            Text: =CountRows(colProcesy)
+            Text: =CountRows(Filter(colProcesy, Title <> "00-00"))
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
             X: =340
@@ -525,7 +525,7 @@ Screens:
             FontWeight: =FontWeight.Semibold
             Height: =24
             Size: =16
-            Text: =CountRows(colDilci)
+            Text: =CountRows(Filter(colDilci, Title <> "00-00-000"))
             VerticalAlign: =VerticalAlign.Middle
             Width: =70
             X: =620
@@ -717,7 +717,9 @@ Screens:
             Height: =28
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =stylPozor
-            OnSelect: =Set(varDashOsirele, !varDashOsirele)
+            OnSelect: |-
+              =Set(varDashOsirele, !varDashOsirele);
+              Set(varDashNezarazene, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylPozor
             Size: =10
@@ -725,6 +727,39 @@ Screens:
             Tooltip: '="Vypíše položky, jejichž nadřazená úroveň v číselníku není: proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího procesu. U agendy, která nadřazenou úroveň nemá, to znamená agendu bez jediného procesu. Ve stromu je jinak nenajdeš - strom ukazuje jen to, co visí pod otevřeným předkem, a sirotek žádného předka nemá. Uklidit je jde na obrazovce Editace nebo rovnou košem v řádku."'
             Width: =84
             X: =814
+            Y: =116
+      # Nezařazená aktivita rodiče MÁ (technický dílčí proces 00-00-000), takže
+      # mezi osiřelé nespadne a ve stromu ji nic neukáže - větev 00 je z něj
+      # schválně skrytá. Tenhle chip je jediná cesta, jak se k sirotkům dostat,
+      # a číslo v něm je zároveň to, co po importu holých aktivit zbývá dodělat.
+      # Vidět zůstane i s nulou, dokud je režim zapnutý - jinak by po přiřazení
+      # posledního sirotka zmizel a strom by zůstal prázdný bez cesty zpátky.
+      - btn_NezarazeneD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varDashNezarazene, stylPozor, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varDashNezarazene, RGBA(255, 255, 255, 1), stylPozor)
+            Fill: =If(varDashNezarazene, stylPozor, stylKarta)
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: |-
+              =Set(varDashNezarazene, !varDashNezarazene);
+              Set(varDashOsirele, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =10
+            Text: |-
+              ="nezařazené (" & CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) & ")"
+            Tooltip: '="Aktivity nahrané hromadným importem bez zařazení. Mají zatím technický kód pod 00-00-000 a čekají, až jim správce určí dílčí proces - teprve tím dostanou platný kód. Ve stromu je nenajdeš, větev Nezařazeno je z něj skrytá. Přiřazení se dělá v detailu aktivity výběrem dílčího procesu."'
+            Visible: |-
+              =varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0
+            Width: =110
+            X: =902
             Y: =116
       - btn_RozbalitMenu:
           Control: Classic/Button@2.2.0
@@ -783,7 +818,7 @@ Screens:
             Text: ="HTML mapa  ▾"
             Tooltip: '="Publikovaná HTML mapa: otevření a obnovení. Mapa data nečte živě - ukazuje stav k okamžiku poslední publikace."'
             Width: =110
-            X: =902
+            X: =1022
             Y: =116
       # Nabídka práce se souborem: export, vzorová tabulka pro import, záloha.
       # Sjednoceno 01.09.2026 — tři samostatná tlačítka v pruhu už se nevešla
@@ -833,9 +868,9 @@ Screens:
             PressedFill: =stylAkceStisk
             Size: =10
             Text: ="Data  ▾"
-            Tooltip: '="Práce se souborem: export toho, co je právě vidět ve stromu, prázdná tabulka pro hromadný import a záloha celého rejstříku. Export bere momentální pohled - po filtru stavu, hledání i chipu osiřelých - ne celý rejstřík."'
+            Tooltip: '="Práce se souborem: export toho, co je právě vidět ve stromu, prázdná tabulka pro hromadný import a záloha celého rejstříku. Export bere momentální pohled - po filtru stavu, hledání i chipech osiřelých a nezařazených - ne celý rejstřík."'
             Width: =100
-            X: =1016
+            X: =1136
             Y: =116
       - btn_KodD:
           Control: Classic/Button@2.2.0
@@ -859,6 +894,8 @@ Screens:
             Width: =60
             X: =460
             Y: =116
+      # Sedí v hlavičce stromu, ne v pruhu filtrů: patří k tabulce pod ním
+      # a v pruhu zabíral místo, které od 1.0.0.92 potřebuje chip nezařazených.
       - lbl_RozpadPocet:
           Control: Label@2.5.1
           Properties:
@@ -869,15 +906,20 @@ Screens:
             Size: =10
             Text: |-
               =CountRows(gal_Strom.AllItems) &
-              If(varDashOsirele, " osiřelých", If(IsBlank(txt_HledatD.Text), " řádků", " nalezených")) &
-              If(varDashOsirele || !IsBlank(txt_HledatD.Text), " · plochý seznam",
+              If(
+                  varDashNezarazene, " nezařazených",
+                  varDashOsirele, " osiřelých",
+                  IsBlank(txt_HledatD.Text), " řádků",
+                  " nalezených"
+              ) &
+              If(varDashNezarazene || varDashOsirele || !IsBlank(txt_HledatD.Text), " · plochý seznam",
                   If(varDashUroven = 0, " · vlastní rozbalení", "")) &
-              If(varDashStav = "", "", " · jen " & varDashStav)
-            Tooltip: '="Při hledání i u osiřelých se strom přepne na plochý seznam - vypisuje nalezené uzly napříč úrovněmi bez ohledu na rozbalení. Počty aktivit pracují s prvním oknem dat (2 000 záznamů); dnes je jich v rejstříku 49, takže je výsledek úplný."'
+              If(varDashStav = "" || varDashOsirele || varDashNezarazene, "", " · jen " & varDashStav)
+            Tooltip: '="Při hledání i u obou chipů se strom přepne na plochý seznam - vypisuje nalezené uzly napříč úrovněmi bez ohledu na rozbalení. Filtr stavu na chipy neplatí, proto se u nich za počtem neukazuje. Počty aktivit pracují s prvním oknem dat (2 000 záznamů); dnes je jich v rejstříku 49, takže je výsledek úplný."'
             VerticalAlign: =VerticalAlign.Middle
             Width: =200
             X: =Parent.Width - 240
-            Y: =116
+            Y: =154
       - rec_StromKarta:
           Control: Rectangle@2.3.0
           Properties:
@@ -943,6 +985,12 @@ Screens:
             Height: =Parent.Height - 228
             Items: |-
               =If(
+                  varDashNezarazene,
+                  Sort(
+                      Filter(colStrom, uroven = 4, !vedlejsi, rodic = "00-00-000"),
+                      kod,
+                      SortOrder.Ascending
+                  ),
                   varDashOsirele,
                   Sort(Filter(colStrom, osirely, !vedlejsi), kod, SortOrder.Ascending),
                   !IsBlank(txt_HledatD.Text),
@@ -964,6 +1012,7 @@ Screens:
                   Sort(
                   Filter(
                       colStrom,
+                      Left(kod, 2) <> "00",
                       uroven = 1
                       || (uroven = 2 && !IsBlank(LookUp(colOtevrene, Kod = rodic)))
                       || (
@@ -1477,7 +1526,7 @@ Screens:
             Height: =84
             Visible: =varMenuMapa
             Width: =220
-            X: =792
+            X: =912
             Y: =144
       - btn_MapaHtml:
           Control: Classic/Button@2.2.0
@@ -1515,7 +1564,7 @@ Screens:
             Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami bez ohledu na jejich počet. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
             Visible: =varMenuMapa
             Width: =212
-            X: =796
+            X: =916
             Y: =148
       # Přejmenováno z „Obnovit mapu" na „Obnovit HTML" (23.08.2026): mapa
       # se v appce nemění, mění se ta publikovaná HTML stránka.
@@ -1551,7 +1600,7 @@ Screens:
             Tooltip: '="Přegeneruje publikovanou HTML stránku z dnešního obsahu rejstříku. Stránka data nečte živě - ukazuje stav k okamžiku poslední publikace, takže po každé dávce úprav ji je potřeba obnovit. Běh trvá několik sekund a probíhá na pozadí; hlášení potvrzuje spuštění, ne dokončení. Kromě toho se stránka obnovuje sama každý den v 7:00."'
             Visible: =varMenuMapa
             Width: =212
-            X: =796
+            X: =916
             Y: =184
       # ---------- potvrzení smazání ----------
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad

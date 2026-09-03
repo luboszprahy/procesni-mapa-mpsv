@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
-from build_mapa_flow import LISTY  # noqa: E402
+from build_mapa_flow import FILTR_NEZARAZENO, LISTY  # noqa: E402
 
 # název kroku ve flow -> zobrazovaný název listu, podle kterého se hledá proměnná
 KROK_LIST = {krok: zobrazovany for zobrazovany, krok, _ in LISTY}
@@ -216,6 +216,11 @@ def main():
         overit(akce[jmeno]["inputs"]["host"]["operationId"] == "GetItems",
                f"{jmeno}: čekám operaci GetItems")
         overit(parametry.get("$top", 0) >= 5000, f"{jmeno}: $top musí být aspoň 5000")
+        # Bez tohohle by se do publikované mapy dostala technická větev
+        # „Nezařazeno" a tvářila se v ní jako běžná agenda (F13/C3).
+        overit(parametry.get("$filter") == FILTR_NEZARAZENO[krok],
+               f"{jmeno}: chybí $filter '{FILTR_NEZARAZENO[krok]}' — technická "
+               "větev Nezařazeno by se publikovala jako součást rejstříku")
         strankovani = (akce[jmeno].get("runtimeConfiguration", {})
                        .get("paginationPolicy", {}).get("minimumItemCount", 0))
         overit(strankovani >= 5000,

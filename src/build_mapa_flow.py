@@ -38,6 +38,18 @@ META = {"sekce": "3"}
 
 # Zobrazovaný název listu v canvas appce -> název kroku ve flow a mapování
 # sloupců na datový kontrakt. 'kod' je v SharePointu vždy ve sloupci Title.
+# Technická větev „Nezařazeno" (00 / 00-00 / 00-00-000) a aktivity, které pod
+# ní čekají na přiřazení, do publikované mapy nepatří — je to provizorium pro
+# import holých aktivit, ne kus rejstříku. Filtruje se u zdroje, ne až v mapě:
+# co se nenačte, nemůže se do stránky omylem dostat jinou cestou (F13/C3).
+FILTR_NEZARAZENO = {
+    "Agendy": "Title ne '00'",
+    "Procesy": "Title ne '00-00'",
+    "DilciProcesy": "Title ne '00-00-000'",
+    "Aktivity": "dilci_proces_kod ne '00-00-000'",
+    "Vazby": "dilci_proces_kod ne '00-00-000'",
+}
+
 LISTY = [
     ("Agendy", "Agendy", {
         "kod": "Title", "nazev": "nazev", "vlastnik": "vlastnik",
@@ -122,7 +134,8 @@ def akce(web, tabulky):
         jmeno = f"Nacti_{krok}"
         kroky[jmeno] = sp_akce(
             "GetItems",
-            {"dataset": ep.web(), "table": ep.list_param(zobrazovany), "$top": STRANKOVANI},
+            {"dataset": ep.web(), "table": ep.list_param(zobrazovany),
+             "$filter": FILTR_NEZARAZENO[krok], "$top": STRANKOVANI},
             predchozi)
         # Bez pagination načte konektor jen prvních 100 položek a mapa vypadá,
         # že v rejstříku chybí data. Tichá chyba, nic nespadne.

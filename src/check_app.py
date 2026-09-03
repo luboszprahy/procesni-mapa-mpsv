@@ -644,7 +644,7 @@ def souradnice_v_px(vyraz, rozmer):
     return zaklad - int(shoda.group(3)) if shoda.group(2) == "-" else zaklad + int(shoda.group(3))
 
 
-def kontrola_prekryvu(soubory):
+def kontrola_prekryvu(soubory, vylucne):
     """Dva prvky s obsahem nesmějí ležet přes sebe.
 
     Vzniklo z lbl_l_Vazby (20.08.2026): popisek široký 740 px zasahoval do
@@ -693,7 +693,7 @@ def kontrola_prekryvu(soubory):
                         viditelnost = str(vlastnosti.get("Visible", "")).strip()
                         obdelniky.append((jmeno, souradnice, viditelnost))
 
-                    porovnej(jmeno_obrazovky, obdelniky)
+                    porovnej(jmeno_obrazovky, obdelniky, vylucne)
 
 
 def vylucuji_se(va, vb):
@@ -732,7 +732,147 @@ def je_nabidka(visible):
     return "varMenu" in str(visible)
 
 
-def porovnej(jmeno_obrazovky, obdelniky):
+def nabidkova_promenna(visible):
+    """Proměnná `varMenu…`, která řídí zobrazení prvku nabídky."""
+    nalezene = re.findall(r"varMenu[A-Za-z0-9_]*", str(visible))
+    return nalezene[0] if nalezene else ""
+
+
+def _zavira(normalizovane, a, b):
+    """Každý vzorec, který otevírá nabídku `a`, zavírá nabídku `b`."""
+    otevirajici = [t for t in normalizovane
+                   if f"Set({a},!{a})" in t or f"Set({a},true)" in t]
+    return bool(otevirajici) and all(f"Set({b},false)" in t for t in otevirajici)
+
+
+def vylucne_nabidky(vzorce):
+    """Dvojice nabídkových proměnných, z nichž je otevřená vždy nanejvýš jedna.
+
+    Panel jedné nabídky smí ležet přes panel druhé — ale jen tehdy, když se
+    ty nabídky opravdu vylučují, tedy když KAŽDÉ tlačítko, které svou nabídku
+    otevírá, ostatní zavírá. Vzniklo z 1.0.0.92: chip nezařazených si vyžádal
+    místo v pruhu filtrů, tlačítka nabídek se posunula doprava a jejich panely
+    na sebe geometricky vlezly. Bez téhle kontroly by stačilo v jednom
+    OnSelect zapomenout `Set(varMenu…, false)` a dvě nabídky by se otevřely
+    přes sebe, aniž by na to brána překryvu upozornila.
+    """
+    normalizovane = [re.sub(r"\s+", "", bez_retezcu(text)) for _, _, text in vzorce]
+    promenne = sorted({jmeno for text in normalizovane
+                       for jmeno in re.findall(r"varMenu[A-Za-z0-9_]*", text)})
+    return {(a, b) for a in promenne for b in promenne
+            if a < b and _zavira(normalizovane, a, b) and _zavira(normalizovane, b, a)}
+
+
+def nacti_prefix_nezarazeno():
+    """Kód technického dílčího procesu ze schématu — nikdy natvrdo v bráně."""
+    data = json.loads(SCHEMA.read_text(encoding="utf-8-sig"))
+    return data["seed"]["prefix_nezarazeno"]
+
+
+def kontrola_nezarazenych(vzorce):
+    """Nezařazené aktivity musí mít v přehledu vlastní cestu — a technická
+    větev `00` v běžném stromu být nesmí.
+
+    Aktivita nahraná bez zařazení dostane rodiče `00-00-000`, takže NENÍ
+    osiřelá a chip osiřelých ji neukáže. Kdyby zmizel chip nezařazených nebo
+    kdyby ze stromu nezmizela agenda „00 Nezařazeno", výsledek je pokaždé
+    špatně: buď se sirotci nedají najít, nebo se technická větev tváří jako
+    běžná agenda a lezou z ní čísla do karet nahoře. Obojí Studio ani packer
+    nehlásí — pozná se to až na obrazovce (F13/C3, 03.09.2026).
+    """
+    prefix = nacti_prefix_nezarazeno()
+    agenda = prefix.split("-")[0]
+    text_chipu = ""
+    items_stromu = ""
+    for cesta, prop, text in vzorce:
+        if (cesta, prop) == ("btn_NezarazeneD", "Text"):
+            text_chipu = text
+        if (cesta, prop) == ("gal_Strom", "Items"):
+            items_stromu = text
+
+    if not text_chipu:
+        chyby.append(
+            "scr_Dashboard: chybí chip 'btn_NezarazeneD' — bez něj se "
+            "k nezařazeným aktivitám nedá dostat, ve stromu nejsou vidět "
+            "a mezi osiřelé nespadnou (mají rodiče " + prefix + ")")
+    elif f'dilci_proces_kod = "{prefix}"' not in text_chipu:
+        chyby.append(
+            f"btn_NezarazeneD.Text: nepočítá aktivity s rodičem {prefix} — "
+            "číslo v chipu pak neodpovídá tomu, co je pod ním vidět")
+
+    if not items_stromu:
+        chyby.append("scr_Dashboard: nenašel jsem 'gal_Strom.Items'")
+        return
+    if "varDashNezarazene" not in items_stromu or f'rodic = "{prefix}"' not in items_stromu:
+        chyby.append(
+            f"gal_Strom.Items: chybí větev varDashNezarazene s filtrem "
+            f"rodic = \"{prefix}\" — chip by se dal zapnout, ale strom by "
+            "ukazoval dál totéž co předtím")
+    if f'Left(kod, 2) <> "{agenda}"' not in items_stromu:
+        chyby.append(
+            f"gal_Strom.Items: stromový režim nevylučuje technickou větev "
+            f"'{agenda}' — 'Nezařazeno' se v přehledu tváří jako běžná agenda")
+
+    for kolekce, technicka in (("colAgendy", agenda),
+                               ("colProcesy", "-".join(prefix.split("-")[:2])),
+                               ("colDilci", prefix)):
+        for cesta, prop, text in vzorce:
+            if f"CountRows({kolekce})" in text:
+                chyby.append(
+                    f"{cesta}.{prop}: CountRows({kolekce}) počítá i technickou položku "
+                    f"'{technicka}' — karta na přehledu pak ukazuje o jednu víc, "
+                    "než kolik je v rejstříku doopravdy")
+
+
+def kontrola_prirazeni_sirotka(vzorce):
+    """Dílčí proces smí u uložené aktivity změnit jen sirotek — a musí přitom
+    dostat nový kód.
+
+    Dvě chyby, které se tudy dají udělat, vypadají obě jako drobnost:
+
+    (a) kaskáda zůstane odemčená všem. Pak appka dělá u běžné aktivity
+        variantu A: `dilci_proces_kod` se přepíše, `Title` zůstane a prefix
+        kódu začne lhát o tom, kam aktivita patří. To je nález z F10 a opraví
+        ho až F10/2 (zánik + vznik), do té doby je zámek jediná obrana.
+    (b) sirotek se přiřadí, ale kód si nechá technický. Aktivita pak visí
+        v dílčím procesu, do kterého podle kódu nepatří, a chip nezařazených
+        ji dál počítá.
+
+    Studio nic z toho nehlásí — projeví se to až v datech (F13/C4, 03.09.2026).
+    """
+    prefix = nacti_prefix_nezarazeno()
+    for jmeno in ("drp_Agenda", "drp_Proces", "drp_Dilci"):
+        rezim = next((t for c, p, t in vzorce
+                      if (c, p) == (jmeno, "DisplayMode")), "")
+        if "varSirotek" not in rezim or "DisplayMode.View" not in rezim:
+            chyby.append(
+                f"{jmeno}.DisplayMode: kaskáda není zamčená pro aktivitu "
+                f"s platným kódem — appka by u ní přesunula zařazení a nechala "
+                f"starý kód, takže by prefix lhal (varianta A, nález F10)")
+
+    ulozeni = next((t for c, p, t in vzorce if (c, p) == ("btn_Ulozit", "OnSelect")), "")
+    if not ulozeni:
+        chyby.append("scr_Detail: nenašel jsem 'btn_Ulozit.OnSelect'")
+        return
+    cisty = bez_retezcu(ulozeni)
+    prideleni = re.search(r"Set\(\s*varNovyKod\s*,", cisty)
+    if not prideleni:
+        chyby.append("btn_Ulozit.OnSelect: nenašel jsem přidělení 'varNovyKod'")
+    elif "varPresun" not in argumenty_volani(cisty, cisty.index("(", prideleni.start())):
+        chyby.append(
+            "btn_Ulozit.OnSelect: nový kód se přiděluje jen nové aktivitě — "
+            "přiřazený sirotek by si nechal technický kód pod " + prefix)
+    if "puvodni_kod" not in ulozeni:
+        chyby.append(
+            "btn_Ulozit.OnSelect: přiřazený sirotek nemá zapsaný 'puvodni_kod' — "
+            "po přepisu kódu by nešlo dohledat, pod čím byl naimportovaný")
+    if "aktivita_kod = varStaryKod" not in ulozeni:
+        chyby.append(
+            "btn_Ulozit.OnSelect: vazby sirotka se nepřepisují na nový kód — "
+            "zůstaly by viset na kódu, který už žádná aktivita nemá")
+
+
+def porovnej(jmeno_obrazovky, obdelniky, vylucne):
     for i, (jmeno_a, (xa, ya, wa, ha), va) in enumerate(obdelniky):
         for jmeno_b, (xb, yb, wb, hb), vb in obdelniky[i + 1:]:
             prekryv_x = min(xa + wa, xb + wb) - max(xa, xb)
@@ -743,6 +883,11 @@ def porovnej(jmeno_obrazovky, obdelniky):
                 continue
             if je_nabidka(va) != je_nabidka(vb):
                 continue
+            if je_nabidka(va):
+                dvojice = tuple(sorted((nabidkova_promenna(va),
+                                        nabidkova_promenna(vb))))
+                if dvojice[0] != dvojice[1] and dvojice in vylucne:
+                    continue
             chyby.append(
                 f"{jmeno_obrazovky}: '{jmeno_a}' a '{jmeno_b}' se překrývají "
                 f"o {prekryv_x}×{prekryv_y} px — Studio to nehlásí, "
@@ -1467,7 +1612,9 @@ def main():
     kontrola_orezani_popisku(vzorce)
     kontrola_stareho_result(vzorce)
     kontrola_varianty(soubory)
-    kontrola_prekryvu(soubory)
+    kontrola_prekryvu(soubory, vylucne_nabidky(vzorce))
+    kontrola_nezarazenych(vzorce)
+    kontrola_prirazeni_sirotka(vzorce)
     kontrola_adresy_mapy(vzorce)
     kontrola_notify(vzorce, soubory)
     kontrola_potvrzeni_mazani(soubory)

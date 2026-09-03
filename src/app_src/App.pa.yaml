@@ -67,6 +67,13 @@ App:
       Set(varNova, false);
       Set(varAktivita, Blank());
       Set(varAktStale, true);
+      // Sirotek = aktivita nahraná importem bez zařazení. Jako jediná smí
+      // změnit dílčí proces: její kód 00-00-000-XXXX nikdy platný nebyl,
+      // takže se přepíše a do HistorieKodu nejde. U aktivity s platným
+      // kódem je kaskáda zamčená až do F10/2 — přesun je tam zánik a vznik.
+      Set(varSirotek, false);
+      Set(varPresun, false);
+      Set(varStaryKod, "");
       Set(varZobrazitKod, true);
       Set(varDetailZpet, "seznam");
       Set(varUrovenTyp, "agenda");
@@ -84,6 +91,7 @@ App:
       Set(varFs, -2);
       Set(varDashStav, "");
       Set(varDashOsirele, false);
+      Set(varDashNezarazene, false);
       Set(varMenuRozbalit, false);
       Set(varMenuMapa, false);
       Set(varMenuData, false);

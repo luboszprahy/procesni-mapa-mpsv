@@ -1,36 +1,136 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-02 21:03** — konec dne. Balík **1.0.0.91**.
-**F11 (záloha a hromadný import) je uzavřená** — import z tabulky funguje
-včetně zápisu, ověřeno na datech. Z nového zadání F13 hotové bloky **A**,
-**C1**, **C2** a **B1+B2**. Stroj HP-LUBOS. Vše v gitu, poslední commit
-viz `git log -1`.
+Aktualizováno: **2026-09-03 21:30**. Balík **1.0.0.92**.
+**F13 je celá hotová kromě B3** — sirotčí aktivity jdou po importu najít
+(chip na přehledu) i přiřadit ke skutečnému dílčímu procesu (detail aktivity).
+Technická větev „Nezařazeno" zmizela odevšad, kde se tvářila jako běžná
+agenda. Stroj HP-LUBOS. Vše v gitu, poslední commit viz `git log -1`.
 
 ## KDE SE ZÍTRA ZAČÍNÁ
 
-**Nic nevisí a nic není rozbité.** Poprvé za tři dny se nezačíná diagnostikou.
+**Nic nevisí a nic není rozbité.** Balík 92 je postavený a všechny brány jsou
+zelené; na prostředí zatím neběžel — to je první krok zítřka.
 
-Pořadí práce je domluvené (02.09. 21:03):
-
-1. **F13/C3 + C4** — dokončit sirotky. Dnes se dají holé aktivity naimportovat,
-   ale najdou se jen procházením stromu a přiřadit je nejde.
+1. **Odzkoušet 92 na PPF DEV** (postup níž v „Zkušební seznam k balíku 92").
+   Import → otevřít ve Studiu → mikro-změna, Save, Publish.
 2. **F10 krok 2** — přesun aktivity mezi dílčími procesy jako zánik + vznik.
-3. **F10 kaskáda — přesun procesu pod jinou agendu.** Zadáno uživatelem
-   02.09. 20:59 („přesun uděláme v dalších dnech"). Je to největší kus:
-   mění se prefix všem potomkům, takže přesun procesu s 8 dílčími procesy
-   a 40 aktivitami uzavře 49 kódů a založí 49 nových, plus protokol.
+   Zámek kaskády, který přinesl balík 92, je do té doby jediná obrana proti
+   tiché variantě A; F10/2 ho vymění za potvrzovací modál a zápis do historie.
+3. **F10 krok 3** — přidělování kódů respektuje `HistorieKodu`. Souvisí:
+   C4 dnes bere maximum jen z živého listu (viz nedodělek níž).
+4. **F10 kaskáda — přesun procesu pod jinou agendu.** Největší kus: mění se
+   prefix všem potomkům, takže přesun procesu s 8 dílčími procesy a 40
+   aktivitami uzavře 49 kódů a založí 49 nových, plus protokol.
+5. **F13/B3** — noční refresh číselníků v šabloně; čeká na rozhodnutí mezi
+   dvěma cestami (viz `PLAN.md` u kroku B3).
 
-**Proč právě takhle:** C4 (přiřazení sirotka) je nejmenší instance téže
-operace — přečíslování kódu, přepis vazby, `puvodni_kod`. Postaví se na ní
-vzor, který kaskáda použije. Dělat kaskádu první by znamenalo vymýšlet ten
-vzor rovnou v nejsložitějším případě.
+**Proč tohle pořadí:** C4 se právě postavilo jako nejmenší instance přesunu
+(nový kód pod novým rodičem, přepis vazeb, `puvodni_kod`). F10/2 z něj vychází
+a přidává to, co u sirotka schválně chybí — uzavření starého kódu v historii.
 
 ## CO JE NA TOBĚ
 
 1. **Nahraj do Site Assets novou šablonu** `deploy/sablona_import_aktivit.xlsx`.
    Ta v prostředí je ještě bez varování o citlivostním štítku a bez rozbalovátek.
 
-2. **Nic dalšího** — vše ostatní je odzkoušené (viz tabulka níž).
+2. **Naimportuj balík `deploy/procesnimapa_1_0_0_92.zip`** do PPF DEV jako
+   upgrade a projdi zkušební seznam níž.
+
+3. **Nic dalšího** — vše ostatní je odzkoušené na datech (viz tabulka níž).
+
+## Co se udělalo 03.09.2026 — balík 1.0.0.92 (F13/C3 + C4)
+
+**C3 — sirotci jsou vidět.** Pruh filtrů má nový chip „nezařazené (N)"; strom
+se po něm přepne na plochý seznam aktivit s rodičem `00-00-000`. Číslo se
+počítá z `colAkt`, ne z `colStrom` — ten nese i vedlejší vazby, takže by chip
+ukazoval počet zařazení místo počtu aktivit a nesouhlasil by s kartou AKTIVITY.
+Chip zůstane vidět i s nulou, dokud je režim zapnutý; jinak by po přiřazení
+posledního sirotka zmizel a strom by zůstal prázdný bez cesty zpátky.
+
+**Dotažen edge case z C1.** Technická větev `00 Nezařazeno` se do dneška
+tvářila jako běžná agenda. Teď je skrytá ve stromu, v kartách nahoře, ve
+správě číselníku, v nabídce nadřazené položky **a v publikované HTML mapě**
+(`$filter` u všech pěti `GetItems` v `MapaPublishFlow`). Export z appky se
+vyřešil sám — bere to, co je právě vidět ve stromu. Sirotčí aktivity ale
+v číselníku vidět zůstávají, jinak by se nedaly otevřít a přiřadit.
+
+**C4 — přiřazení sirotka.** Aktivita s rodičem `00-00-000` má kaskádu
+odemčenou a při uložení dostane platný kód pod vybraným dílčím procesem,
+`puvodni_kod` si nese ten sirotčí a do `HistorieKodu` se nezapisuje (kód
+`00-00-000-XXXX` platným kódem nikdy nebyl). Vazby se nejdřív všechny
+přepíšou na nový kód, teprve pak běží stávající blok srovnávající primární
+zařazení — v opačném pořadí by se mazalo podle kódu, který v tabulce ještě
+není. Uložení sirotka beze změny dílčího procesu kód nepřečísluje.
+
+**Zámek kaskády u aktivit s platným kódem.** Zamčená je celá trojice
+agenda → proces → dílčí proces, ne jen poslední pole: se zamčeným jen dílčím
+procesem by změna agendy vynulovala výběr níž a aktivita by pak nešla uložit
+vůbec. Do F10/2 je to jediná obrana proti tiché variantě A (kód zůstane,
+prefix začne lhát).
+
+**Vedlejší nález — panely nabídek.** Pruh filtrů byl plný na pixel, takže se
+popisek počtu řádků přestěhoval do hlavičky stromu (kam patří) a tlačítka
+nabídek se posunula doprava. Tím na sebe panely obou nabídek geometricky
+vlezly. Za běhu se vylučují, protože každé tlačítko ostatní zavírá — jenže to
+nic nehlídalo. Nová kontrola `vylucne_nabidky` tu invariantu ověřuje: stačí
+v jednom `OnSelect` zapomenout `Set(varMenu…, false)` a brána spadne.
+
+### Nedodělek, vědomý
+
+Přidělení kódu při přiřazení sirotka bere maximum **jen z živého listu
+`Aktivity`**, ne z `HistorieKodu` (pravidlo F10/1). Historie je zatím prázdná
+a appka ji nemá připojenou jako datový zdroj, takže by to znamenalo druhé kolo
+se Studiem za nic. Doplní se v **F10 kroku 3** na všech pěti přidělovacích
+místech naráz.
+
+### Zkušební seznam k balíku 92
+
+| # | co udělat | očekávaný výsledek |
+|---|---|---|
+| 1 | import 92 jako upgrade, otevřít ve Studiu | otevře se bez „Error opening file" |
+| 2 | mikro-změna, Save, Publish | tooltip názvu appky ukáže `1.0.0.92` |
+| 3 | přehled — karty nahoře | AGENDY o jednu míň než dřív (technická `00` se nepočítá) |
+| 4 | přehled — strom | větev `00 Nezařazeno` v něm není |
+| 5 | naimportovat sešit s holou aktivitou | chip „nezařazené (1)" se rozsvítí |
+| 6 | kliknout na chip | plochý seznam, v hlavičce stromu „1 nezařazených · plochý seznam" |
+| 7 | otevřít sirotka, vybrat agendu → proces → dílčí proces | pole jsou odemčená |
+| 8 | uložit | hláška „Uloženo jako AA-BB-CCC-DDDD" s **novým** kódem |
+| 9 | zkontrolovat v listu Aktivity | `puvodni_kod` = původní `00-00-000-XXXX` |
+| 10 | zkontrolovat list Vazba aktivita–dílčí proces | vazba je na nový kód a nový dílčí proces, na starý kód nic nezbylo |
+| 11 | zkontrolovat list HistorieKodu | **nepřibyl** žádný řádek |
+| 12 | chip nezařazených | ukazuje `(0)` a zůstává vidět, dokud je režim zapnutý |
+| 13 | otevřít běžnou aktivitu s platným kódem | agenda, proces i dílčí proces jsou jen ke čtení |
+| 14 | publikovat HTML mapu | `Nezařazeno` v ní není na žádné úrovni |
+
+### Brány na 92
+
+`check_solution` **582** · `check_restore_flow` 571 · `check_zaloha_flow` 184 ·
+`check_import_flow` 175 · `check_sablona` 185 · `check_mapa_flow` **144**
+(bylo 139) · `check_export_flow` 129 · `check_flow`, `check_env`,
+`check_schema` zeleně. `check_app`: 5 obrazovek, **245 prvků**.
+`node check_setup.js` i `node check_import.js` smoke OK.
+Mutačně: `mutace_import` 25/25, `mutace_restore` 17/17, `mutace_zaloha` 16/16,
+`mutace_export_mapa` 7/7, `mutace_parametry` 4/4, `mutace_napojeni` 5/5.
+Nové kontroly ověřeny mutací zvlášť: C3 4/4, C4 4/4, výlučnost nabídek 1/1,
+`$filter` v mapě 1/1.
+
+Sestavení:
+
+```
+copy deploy\procesnimapa_1_0_0_91.zip runs\vstup_92.zip
+python src/build_mapa_flow.py --solution runs/vstup_92.zip
+python src/add_mapa_schedule.py --solution runs/vstup_92.zip
+python src/build_app.py --solution runs/vstup_92.zip --verze 1.0.0.92
+```
+
+**Pozor na dvojče:** `build_mapa_flow.py` přepíše jen `MapaPublishFlow`.
+Plánované `MapaPublishScheduled` je jeho klon a musí se přegenerovat hned
+po něm, jinak `check_mapa_flow` hlásí „akce dvojčete se liší od ručního flow"
+a v noci by se publikovalo podle staré definice.
+
+**Pozor na `--base`:** `check_mapa_flow.py` má ve výchozím stavu
+`input/procesnimapa_1_0_0_66.zip`, který se při úklidu 02.09. smazal.
+Spouštět s `--base input/procesnimapa_1_0_0_86.zip`.
 
 ## MPSV — co bude potřeba, až bude přístup
 
@@ -108,12 +208,12 @@ do `power-Apps-skill`, `deploy/flow_Import.md` a do pokynů v šabloně.
 | B3 — automatický refresh číselníků | **nezačato**, a zadání se změnilo — viz `PLAN.md` |
 | C1 — technické položky | **hotovo** |
 | C2 — import bez zařazení | **hotovo** (1.0.0.91) |
-| C3 — dlaždice nezařazených | **nezačato** |
-| C4 — přiřazení sirotka v appce | **nezačato** |
+| C3 — dlaždice nezařazených | **hotovo** (1.0.0.92) |
+| C4 — přiřazení sirotka v appce | **hotovo** (1.0.0.92) |
 
-**Pozor u C3:** agendu `00` „Nezařazeno" **neskrývat dřív, než bude dlaždice**.
-Dnes je to jediná cesta, jak se k nezařazeným aktivitám ve stromu dostat —
-skrýt ji bez náhrady by je zneviditelnilo.
+**C3 vyřešilo i to, co u něj stálo jako varování:** agenda `00` „Nezařazeno"
+se skrývá teprve teď, kdy je náhradou chip na přehledu. Ve stromu, v kartách,
+v číselníku ani v publikované mapě už není.
 
 **Pozor u B3:** pojmenované rozsahy číselníků jsou přesně podle počtu položek
 (jinak by nabídka měla prázdné řádky), ale Excel konektor umí přepsat buňky,

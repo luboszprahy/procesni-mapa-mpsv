@@ -8,6 +8,7 @@ Screens:
       LoadingSpinnerColor: =stylAkce
       OnVisible: |-
         =Set(varDpKod, If(varNova, varNovyDpKod, varAktivita.dilci_proces_kod));
+        Set(varSirotek, !varNova && varAktivita.dilci_proces_kod = "00-00-000");
         Reset(drp_Agenda);
         Reset(drp_Proces);
         Reset(drp_Dilci)
@@ -158,7 +159,7 @@ Screens:
             HoverBorderColor: =stylAkce
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem, vlastníkem je sekce. Výběr agendy určuje, které procesy se nabídnou níž. Když agendu změníš, proces i dílčí proces se vynulují — kombinace z různých agend neexistuje."'
+            Tooltip: '="První úroveň hierarchie: oblast činnosti daná zákonem nebo vnitřním předpisem, vlastníkem je sekce. Výběr agendy určuje, které procesy se nabídnou níž. Když agendu změníš, proces i dílčí proces se vynulují — kombinace z různých agend neexistuje.  U aktivity, která už platný kód má, je pole jen ke čtení: přesun pod jiného rodiče není přejmenování - starý kód se musí uzavřít a vzniknout nový, a to appka zatím neumí. Odemčené je jen u nové aktivity a u aktivity nahrané bez zařazení (kód pod 00-00-000), které se kód přiděluje teprve teď."'
             AllowEmptySelection: =true
             Default: |-
               =If(
@@ -166,9 +167,11 @@ Screens:
                   "",
                   LookUp(colAgendy, Title = Left(varDpKod, 2), Title & " · " & nazev)
               )
+            DisplayMode: =If(varNova || varSirotek, DisplayMode.Edit, DisplayMode.View)
             Font: =Font.'Open Sans'
             Height: =32
-            Items: =Distinct(colAgendy, Title & " · " & nazev)
+            Items: |-
+              =Distinct(Filter(colAgendy, varSirotek || Title <> "00"), Title & " · " & nazev)
             OnChange: |-
               =Reset(drp_Proces);
               Reset(drp_Dilci)
@@ -193,9 +196,14 @@ Screens:
             HoverBorderColor: =stylAkce
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem, vlastníkem je odbor. Nabízejí se jen procesy vybrané agendy. Dokud není vybraná agenda, je pole zašedlé — to není chyba, jen kaskáda čeká na nadřazenou úroveň."'
+            Tooltip: '="Druhá úroveň: tok činností s definovaným vstupem a výstupem, vlastníkem je odbor. Nabízejí se jen procesy vybrané agendy. Dokud není vybraná agenda, je pole zašedlé — to není chyba, jen kaskáda čeká na nadřazenou úroveň.  U aktivity, která už platný kód má, je pole jen ke čtení: přesun pod jiného rodiče není přejmenování - starý kód se musí uzavřít a vzniknout nový, a to appka zatím neumí. Odemčené je jen u nové aktivity a u aktivity nahrané bez zařazení (kód pod 00-00-000), které se kód přiděluje teprve teď."'
             AllowEmptySelection: =true
-            DisplayMode: =If(IsBlank(drp_Agenda.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
+            DisplayMode: |-
+              =If(
+                  !varNova && !varSirotek,
+                  DisplayMode.View,
+                  If(IsBlank(drp_Agenda.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
+              )
             Default: |-
               =If(
                   IsBlank(varDpKod),
@@ -231,9 +239,14 @@ Screens:
             HoverBorderColor: =stylAkce
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
-            Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…“."'
+            Tooltip: '="Třetí úroveň: vymezený úsek procesu, vlastníkem je odbor. Tenhle výběr je klíčový — určuje kód aktivity a její primární zařazení v procesní mapě. Nabízejí se jen dílčí procesy vybraného procesu. Aktivitu lze zařadit i do dalších dílčích procesů tlačítkem „Další dílčí procesy…“.  U aktivity, která už platný kód má, je pole jen ke čtení: přesun pod jiného rodiče není přejmenování - starý kód se musí uzavřít a vzniknout nový, a to appka zatím neumí. Odemčené je jen u nové aktivity a u aktivity nahrané bez zařazení (kód pod 00-00-000), které se kód přiděluje teprve teď."'
             AllowEmptySelection: =true
-            DisplayMode: =If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
+            DisplayMode: |-
+              =If(
+                  !varNova && !varSirotek,
+                  DisplayMode.View,
+                  If(IsBlank(drp_Proces.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
+              )
             Default: |-
               =If(IsBlank(varDpKod), "", LookUp(colDilci, Title = varDpKod, Title & " · " & nazev))
             Font: =Font.'Open Sans'
@@ -669,7 +682,7 @@ Screens:
             PressedColor: =RGBA(255, 255, 255, 1)
             FocusedBorderColor: =stylPrimarni
             FocusedBorderThickness: =2
-            Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód AA-BB-CCC-DDDD: AA agenda, BB proces, CCC dílčí proces, DDDD první volné čtyřčíslí v tom dílčím procesu. Zároveň se založí primární vazba do rejstříku. Jednou přidělený kód se už nikdy nemění, ani při přesunu do jiného dílčího procesu - vazby v rejstříku i v mapě na něm stojí. Vlastník součástí kódu není, eviduje se zvlášť. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu."'
+            Tooltip: '="Uloží změny. U nové aktivity se teprve teď přidělí kód AA-BB-CCC-DDDD: AA agenda, BB proces, CCC dílčí proces, DDDD první volné čtyřčíslí v tom dílčím procesu. Zároveň se založí primární vazba do rejstříku. Jednou přidělený kód se už nikdy nemění, ani při přesunu do jiného dílčího procesu - vazby v rejstříku i v mapě na něm stojí. Výjimka je aktivita nahraná bez zařazení: její kód pod 00-00-000 platným kódem nikdy nebyl, takže se při přiřazení k dílčímu procesu přepíše na nový, původní zůstane zapsaný u záznamu a všechna zařazení se přenesou. Vlastník součástí kódu není, eviduje se zvlášť. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu."'
             Fill: =stylAkce
             Font: =Font.'Open Sans'
             Height: =32
@@ -681,11 +694,20 @@ Screens:
                   !IsBlank(varChyba),
                   Notify(varChyba, NotificationType.Warning, varNotifyMs),
                   Set(varStaryDp, If(varNova, "", varAktivita.dilci_proces_kod));
+                  Set(varStaryKod, If(varNova, "", varAktivita.Title));
+                  // Přiřazení sirotka: teprve teď dostává aktivita platný kód.
+                  // Sirotek, který se ukládá se stejným (tedy pořád technickým)
+                  // dílčím procesem, se NEPŘEČÍSLOVÁVÁ — jinak by každé uložení
+                  // rozdávalo nové 00-00-000-XXXX za nic.
+                  Set(
+                      varPresun,
+                      varSirotek && Left(drp_Dilci.Selected.Value, 9) <> varStaryDp
+                  );
                   Set(varPrefix, Left(drp_Dilci.Selected.Value, 9) & "-");
                   Set(
                       varNovyKod,
                       If(
-                          varNova,
+                          varNova || varPresun,
                           varPrefix & Right(
                               "000" & (Value(
                                   Right(
@@ -699,7 +721,7 @@ Screens:
                       )
                   );
                   If(
-                      varNova && !IsBlank(LookUp(Aktivity, Title = varNovyKod)),
+                      (varNova || varPresun) && !IsBlank(LookUp(Aktivity, Title = varNovyKod)),
                       Notify("Kód " & varNovyKod & " mezitím někdo použil, zkus uložit znovu.", NotificationType.Warning, varNotifyMs),
                       IfError(
                           Patch(
@@ -716,8 +738,27 @@ Screens:
                                   text_pro_or: txt_TextOR.Text,
                                   sekce: Left(drp_SekceDetail.Selected.Value, Find(" ·", drp_SekceDetail.Selected.Value & " ·") - 1),
                                   stav: { Value: drp_StavDetail.Selected.Value },
+                                  puvodni_kod: If(
+                                      varPresun,
+                                      varStaryKod,
+                                      If(varNova, "", varAktivita.puvodni_kod)
+                                  ),
                                   datum_aktualizace: Now()
                               }
+                          );
+                          If(
+                              varPresun,
+                              ForAll(
+                                  Filter('Vazba aktivita–dílčí proces', aktivita_kod = varStaryKod) As v,
+                                  Patch(
+                                      'Vazba aktivita–dílčí proces',
+                                      v,
+                                      {
+                                          Title: varNovyKod & "__" & v.dilci_proces_kod,
+                                          aktivita_kod: varNovyKod
+                                      }
+                                  )
+                              )
                           );
                           If(
                               varNova || varStaryDp <> Left(drp_Dilci.Selected.Value, 9),

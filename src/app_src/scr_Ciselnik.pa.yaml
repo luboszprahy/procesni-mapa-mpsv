@@ -656,6 +656,7 @@ Screens:
                       Filter(
                           colCiselnik,
                           uroven = varUrovenTyp,
+                          uroven = "aktivita" || Left(kod, 2) <> "00",
                           !varUklidC || uklid,
                           varUrovenTyp <> "aktivita" || IsBlank(varSekceKodC) || sekce = varSekceKodC,
                           varUrovenTyp <> "aktivita" || IsBlank(varUtvarKodC) || vlastnik = varUtvarKodC,
@@ -949,7 +950,8 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =32
             HoverBorderColor: =stylAkce
-            Items: =Distinct(colAgendy, Title & " · " & nazev)
+            Items: |-
+              =Distinct(Filter(colAgendy, Title <> "00"), Title & " · " & nazev)
             OnChange: =Reset(drp_ProcesC)
             Size: =11 + varFs
             Tooltip: '="Agenda, pod kterou nová položka patří. U procesu určuje první dvojčíslí kódu, u dílčího procesu navíc omezuje nabídku procesů. Když agendu změníš, výběr procesu se vynuluje — kombinace z různých agend neexistuje. Při úpravě je pole zamčené: přesun pod jiného rodiče by znamenal jiný kód, a ten se nikdy nemění."'
@@ -995,7 +997,11 @@ Screens:
             HoverBorderColor: =stylAkce
             Items: |-
               =Distinct(
-                  Filter(colProcesy, agenda_kod = Left(drp_AgendaC.Selected.Value, 2)),
+                  Filter(
+                      colProcesy,
+                      agenda_kod = Left(drp_AgendaC.Selected.Value, 2),
+                      Title <> "00-00"
+                  ),
                   Title & " · " & nazev
               )
             Size: =11 + varFs
