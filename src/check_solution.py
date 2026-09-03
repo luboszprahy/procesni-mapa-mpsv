@@ -486,7 +486,14 @@ def main():
         for polozka in polozky:
             if polozka.endswith(".pa.yaml"):
                 text = cti(msapp, Path(polozka).name) or ""
-                volana |= set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\.Run\(", text))
+                # Komentáře se odstraní: zmínka o volání v poznámce není
+                # volání. Vzniklo u PresunFlow (03.09.2026), jehož obrazovka
+                # v poznámce vysvětluje, proč `.Run()` zatím napsané NENÍ —
+                # a brána tu poznámku brala jako skutečné volání.
+                bez_poznamek = re.sub(r"//[^\r\n]*", "", text)
+                bez_poznamek = re.sub(r"(?m)^\s*#[^\r\n]*", "", bez_poznamek)
+                volana |= set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\.Run\(",
+                                         bez_poznamek))
         if datasources:
             overit(volana <= jmena,
                    f"appka volá .Run() na neexistující datový zdroj: {sorted(volana - jmena)} "

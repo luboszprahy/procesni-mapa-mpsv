@@ -1,0 +1,687 @@
+# Obrazovka 6 — přesun procesu nebo dílčího procesu pod jiného rodiče.
+#
+# Tvar je schválně týž jako scr_Nahled, protože je to táž úloha: vyber →
+# spočítej nanečisto → podívej se, co z toho vyjde → teprve pak zapiš.
+# Rozlišuje je `varPresunUroven` ("proces" / "dilci_proces").
+#
+# VARIANTA C — ZÁNIK A VZNIK. Přesun není přejmenování. Starý kód se uzavře
+# v listu Historie kódů a zůstane jako doklad, nový kód vznikne pod novým
+# rodičem a obě strany na sebe ukazují (`nastupce_kod` a `puvodni_kod`).
+# Kód tím navždy znamená jednu jedinou věc — vlastnost, kterou po schválení
+# organizačního řádu už nejde dodělat zpětně.
+#
+# PŘEČÍSLOVÁVÁ SE JEN PŘESOUVANÁ ÚROVEŇ. Potomci dědí nový prefix a nechají
+# si své pořadové číslo:
+#     proces  07-08          → 03-05           (první volné BB v agendě 03)
+#       dílčí proces 07-08-001   → 03-05-001    (CCC beze změny)
+#         aktivita   07-08-001-0006 → 03-05-001-0006  (DDDD beze změny)
+# Hledat pod novým rodičem volná CCC/DDDD není potřeba: číslují se v rámci
+# svého rodiče a ten je nový, takže jsou volná všechna.
+#
+# VŠECHNO SE POČÍTÁ NAD KOLEKCEMI, ne nad zdrojem — kaskáda se ptá na tytéž
+# řádky mnohokrát a nad SharePointem by to byly stovky dotazů. Kolekce plní
+# OnVisible téhle obrazovky, ne přehled: sem se dá přijít i po delší práci
+# v jiné části appky a data z přehledu můžou být stará.
+#
+# PROČ TO NEDĚLÁ FLOW. Původní plán počítal s `PresunFlow`, protože kaskáda
+# vypadala na rekurzi. Není rekurzivní — hierarchie má pevné tři úrovně, takže
+# stačí tři průchody. A nové flow by znamenalo kolo se Studiem (`Flow.Run` jde
+# napsat teprve po registraci flow jako datového zdroje, `FlowNameId` přiděluje
+# až prostředí při importu), zatímco všechny potřebné listy včetně
+# `Historie kódů` už appka připojené má.
+Screens:
+  scr_Presun:
+    Properties:
+      Fill: =stylPlocha
+      LoadingSpinnerColor: =stylAkce
+      OnVisible: |-
+        =Set(varPresunHotovo, "");
+        Set(varPresunNovyPrefix, "");
+        Set(varPresunPotvrdit, false);
+        Set(varPresunBezi, false);
+        // ClearCollect + Clear, ne samotný Clear: prázdné kolekci by Studio
+        // neznalo sloupce a galerie by hlásila neznámé ThisItem.stary.
+        // Tvar musí sedět s tím, co do ní nasype odpověď PresunFlow.
+        ClearCollect(colPresun, { stary: "", novy: "", uroven: "", nazev: "" });
+        Clear(colPresun);
+        Reset(drp_CilAgendaP);
+        Reset(drp_CilProcesP);
+        Reset(txt_DuvodP);
+        If(
+            IsEmpty(colAgendy) || IsEmpty(colProcesy) || IsEmpty(colDilci),
+            ClearCollect(colAgendy, ShowColumns(Agendy, Title, nazev, vlastnik));
+            ClearCollect(colProcesy, ShowColumns(Procesy, Title, nazev, agenda_kod, vlastnik));
+            ClearCollect(colDilci, ShowColumns('Dílčí procesy', Title, nazev, proces_kod, vlastnik))
+        );
+        // Aktivity, vazby a historie se načítají VŽDY, ne jen když jsou
+        // prázdné: kaskáda podle nich počítá, co se uzavře, a snímek starý
+        // o celou session by přečísloval podle neaktuálního stavu.
+        ClearCollect(
+            colAkt,
+            ShowColumns(Aktivity, Title, nazev, nazev_kratky, dilci_proces_kod, vykonava, sekce, stav)
+        );
+        ClearCollect(
+            colVazby,
+            ShowColumns('Vazba aktivita–dílčí proces', aktivita_kod, dilci_proces_kod, primarni)
+        )
+    Children:
+      - rec_HlavickaP:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPrimarni
+            Height: =48
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - ico_ZpetP:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =40
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(255, 255, 255, 0.18)
+            Icon: =Icon.ChevronLeft
+            OnSelect: |-
+              =Set(varUrovenTyp, If(varPresunUroven = "proces", "proces", "dilci"));
+              Set(varCiselnikNova, true);
+              Set(varCiselnikKod, "");
+              Set(varRodicC, "");
+              Navigate(scr_Ciselnik, ScreenTransition.UnCover)
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedFill: =RGBA(255, 255, 255, 0.28)
+            Tooltip: '="Zpět do číselníku. Nedokončený náhled se nikam neukládá a nic nezapisuje."'
+            Width: =40
+            X: =16
+            Y: =4
+      - lbl_NadpisP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =14 + varFs
+            Text: |-
+              =If(
+                  varPresunUroven = "proces",
+                  "Přesun procesu pod jinou agendu",
+                  "Přesun dílčího procesu pod jiný proces"
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =900
+            X: =68
+            Y: =8
+      - lbl_VysvetleniP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =40
+            Size: =10 + varFs
+            Text: |-
+              ="Přesun je zánik a vznik, ne přejmenování. Starý kód se uzavře v Historii kódů a zůstane jako doklad; pod novým rodičem vznikne nový kód a obě strany na sebe ukazují. Mění se prefix celého podstromu, takže se to týká i dílčích procesů a aktivit pod ním — pořadová čísla si ale ponechají. Nic se nezapíše, dokud si náhled neodklepneš."
+            Width: =1286
+            X: =40
+            Y: =56
+      - rec_KartaCoP:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =64
+            Width: =1286
+            X: =40
+            Y: =104
+      - rec_PruhCoP:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPrimarni
+            Height: =64
+            Width: =4
+            X: =40
+            Y: =104
+      - lbl_l_CoP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =14
+            Size: =8
+            Text: ="PŘESOUVÁ SE"
+            Width: =200
+            X: =60
+            Y: =112
+      - lbl_CoP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =12 + varFs
+            Text: |-
+              =If(
+                  IsBlank(varPresunKod),
+                  "Nevybráno — vrať se do číselníku a vyber proces nebo dílčí proces.",
+                  varPresunKod & " · " & varPresunNazev
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =700
+            X: =60
+            Y: =128
+      - lbl_CoPocetP:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =28
+            Size: =10 + varFs
+            Text: |-
+              =If(
+                  IsBlank(varPresunKod),
+                  "",
+                  If(
+                      varPresunUroven = "proces",
+                      CountRows(Filter(colDilci, proces_kod = varPresunKod)) & " dílčích procesů · " &
+                      CountRows(Filter(colAkt, Left(dilci_proces_kod, 5) = varPresunKod)) & " aktivit pod tím",
+                      CountRows(Filter(colAkt, dilci_proces_kod = varPresunKod)) & " aktivit pod tím"
+                  )
+              )
+            Tooltip: '="Kolik položek přesun zasáhne. Každé z nich se uzavře kód a vznikne nový, protože se jim mění prefix - to je podstata varianty C. Aktivity se počítají podle primárního zařazení; vedlejší vazby se přenesou taky, ale nový kód nedostávají."'
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =546
+            X: =770
+            Y: =128
+      - lbl_l_CilAgendaP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10 + varFs
+            Text: |-
+              =If(varPresunUroven = "proces", "Cílová agenda", "Agenda cílového procesu")
+            Width: =400
+            X: =40
+            Y: =184
+      - drp_CilAgendaP:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AllowEmptySelection: =true
+            BorderColor: =stylOkraj
+            ChevronBackground: =stylKarta
+            ChevronFill: =stylAkce
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            Height: =32
+            Items: |-
+              =Distinct(Filter(colAgendy, Title <> "00"), Title & " · " & nazev)
+            OnChange: |-
+              =Reset(drp_CilProcesP);
+              Set(varPresunHotovo, "");
+              Clear(colPresun)
+            Size: =11 + varFs
+            Tooltip: '="Kam se má položka přestěhovat. Technická větev 00 Nezařazeno se nenabízí - je to provizorium pro import holých aktivit, ne kus rejstříku."'
+            Width: =400
+            X: =40
+            Y: =208
+      - lbl_l_CilProcesP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10 + varFs
+            Text: ="Cílový proces"
+            Visible: =varPresunUroven = "dilci_proces"
+            Width: =400
+            X: =460
+            Y: =184
+      - drp_CilProcesP:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AllowEmptySelection: =true
+            BorderColor: =stylOkraj
+            ChevronBackground: =stylKarta
+            ChevronFill: =stylAkce
+            Color: =stylText
+            DisplayMode: |-
+              =If(IsBlank(drp_CilAgendaP.Selected.Value), DisplayMode.Disabled, DisplayMode.Edit)
+            Font: =Font.'Open Sans'
+            Height: =32
+            Items: |-
+              =Distinct(
+                  Filter(
+                      colProcesy,
+                      agenda_kod = Left(drp_CilAgendaP.Selected.Value, 2),
+                      Title <> "00-00",
+                      Title <> varPresunKod
+                  ),
+                  Title & " · " & nazev
+              )
+            OnChange: |-
+              =Set(varPresunHotovo, "");
+              Clear(colPresun)
+            Size: =11 + varFs
+            Tooltip: '="Proces, pod který dílčí proces přejde. Nabízejí se jen procesy vybrané agendy; dokud agenda není vybraná, je pole zašedlé."'
+            Visible: =varPresunUroven = "dilci_proces"
+            Width: =400
+            X: =460
+            Y: =208
+      - lbl_l_DuvodP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =10 + varFs
+            Text: ="Důvod přesunu (zapíše se ke každému uzavřenému kódu)"
+            Width: =820
+            X: =40
+            Y: =260
+      - txt_DuvodP:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            BorderColor: =stylOkraj
+            Default: =""
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HintText: '="Například: organizační změna k 1.1.2027, agenda přechází pod sekci 4"'
+            HoverBorderColor: =stylAkce
+            Size: =11 + varFs
+            Tooltip: '="Důvod je povinný - metodika vyžaduje, aby změna kódu byla doložená. Zapíše se ke KAŽDÉMU uzavřenému kódu v této kaskádě, takže z historie jde později dohledat, proč se celá větev přečíslovala."'
+            Width: =820
+            X: =40
+            Y: =284
+      - btn_SpocitatP:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            DisplayMode: |-
+              =If(
+                  varPresunBezi
+                  || IsBlank(varPresunKod)
+                  || IsBlank(drp_CilAgendaP.Selected.Value)
+                  || (varPresunUroven = "dilci_proces" && IsBlank(drp_CilProcesP.Selected.Value))
+                  || IsBlank(txt_DuvodP.Text),
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
+            Fill: =stylAkce
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylAkceHover
+            # Nové číslo se hledá jako maximum přes ŽIVÝ list I HISTORII —
+            # uzavřený kód se nikdy nerecykluje (pravidlo F10/1). Bez historie
+            # by přesun zpátky tam, odkud položka přišla, oživil kód, který
+            # už jednou něco znamenal.
+            # BALÍK 93 — PŘECHODNÝ STAV. Výpočet i zápis dělá PresunFlow,
+            # ale `PresunFlow.Run()` sem jde napsat teprve tehdy, až bude
+            # flow zaregistrované jako datový zdroj appky (Studio → Add data).
+            # `FlowNameId` přiděluje až prostředí při importu, lokálně se
+            # dogenerovat nedá — appka by se s neznámým názvem neotevřela
+            # vůbec. Hotové vzorce k doplnění jsou v deploy/flow_Presun.md.
+            OnSelect: |-
+              =Notify(
+                  "Tok pro přesun ještě není v aplikaci zaregistrovaný. Postup je v návodu deploy/flow_Presun.md.",
+                  NotificationType.Warning,
+                  varNotifyMs
+              )
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =11 + varFs
+            Text: ="Spočítat náhled"
+            Tooltip: '="Spočítá, které kódy se uzavřou a jaké vzniknou. Nic nezapisuje. Nové číslo se hledá jako první volné pod cílovým rodičem, a to přes živý číselník I přes historii - uzavřený kód se nikdy nerecykluje."'
+            Width: =200
+            X: =880
+            Y: =284
+      - lbl_NovyKodP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylUspech
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =12 + varFs
+            Text: |-
+              =If(IsBlank(varPresunHotovo), "", "nový kód " & varPresunNovyPrefix)
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =230
+            X: =1096
+            Y: =284
+      - lbl_CekaNaTokP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylPozor
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =11 + varFs
+            # BALÍK 93 — přechodný stav. V balíku 94, kdy bude PresunFlow
+            # zaregistrované, se tenhle popisek odstraní celý.
+            Text: |-
+              ="Tok pro přesun se ještě registruje — obrazovka se zapne po dalším importu."
+            VerticalAlign: =VerticalAlign.Middle
+            Visible: =true
+            Width: =640
+            X: =40
+            Y: =704
+      - lbl_h_PresunStaryP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10 + varFs
+            Text: ="UZAVŘE SE"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =180
+            X: =56
+            Y: =336
+      - lbl_h_PresunNovyP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10 + varFs
+            Text: ="VZNIKNE"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =180
+            X: =268
+            Y: =336
+      - lbl_h_PresunUrovenP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10 + varFs
+            Text: ="ÚROVEŇ"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =140
+            X: =456
+            Y: =336
+      - lbl_h_PresunNazevP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =10 + varFs
+            Text: ="NÁZEV"
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =600
+            X: =604
+            Y: =336
+      - rec_KartaTabulkaP:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =288
+            Width: =1286
+            X: =40
+            Y: =364
+      - gal_PresunP:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+          Properties:
+            Height: =280
+            Items: =Sort(colPresun, stary, SortOrder.Ascending)
+            ShowScrollbar: =true
+            TemplatePadding: =0
+            TemplateSize: =30
+            Width: =1286
+            X: =40
+            Y: =368
+          Children:
+            - lbl_PresunStaryP:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylNebezpeci
+                  Font: =Font.'Open Sans'
+                  Height: =29
+                  Size: =11 + varFs
+                  Text: =ThisItem.stary
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =180
+                  X: =16
+                  Y: =0
+            - lbl_PresunSipkaP:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =29
+                  Size: =11 + varFs
+                  Text: ="→"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =32
+                  X: =196
+                  Y: =0
+            - lbl_PresunNovyP:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylUspech
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =29
+                  Size: =11 + varFs
+                  Text: =ThisItem.novy
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =180
+                  X: =228
+                  Y: =0
+            - lbl_PresunUrovenP:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =29
+                  Size: =10 + varFs
+                  Text: |-
+                    =Switch(
+                        ThisItem.uroven,
+                        "proces", "proces",
+                        "dilci_proces", "dílčí proces",
+                        "aktivita"
+                    )
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =140
+                  X: =416
+                  Y: =0
+            - lbl_PresunNazevP:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =29
+                  Size: =10 + varFs
+                  Text: =ThisItem.nazev
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =700
+                  X: =564
+                  Y: =0
+            - rec_PresunLinkaP:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =stylOkraj
+                  Height: =1
+                  Width: =1254
+                  X: =16
+                  Y: =29
+      - lbl_SouhrnP:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            Height: =36
+            Size: =11 + varFs
+            Text: |-
+              =If(
+                  IsBlank(varPresunHotovo),
+                  "Vyber cíl, vyplň důvod a dej Spočítat náhled.",
+                  "Uzavře se " & CountRows(colPresun) & " kódů a stejný počet vznikne pod " &
+                  varPresunNovyPrefix & ". Přenese se " &
+                  CountRows(
+                      Filter(
+                          colVazby,
+                          !IsBlank(LookUp(colPresun, stary = aktivita_kod))
+                          || !IsBlank(LookUp(colPresun, stary = dilci_proces_kod))
+                      )
+                  ) & " zařazení. Před zápisem se pořídí záloha rejstříku."
+              )
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =1000
+            X: =40
+            Y: =660
+      - btn_ProvestP:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            # Zápis jde odklepnout jedině tehdy, když náhled proběhl PRÁVĚ NAD
+            # TÍMHLE cílem. Změna agendy nebo procesu náhled zneplatní, jinak
+            # by se zapisovalo podle čísel, která platila pro jiný cíl.
+            DisplayMode: |-
+              =If(
+                  varPresunBezi
+                  || IsBlank(varPresunHotovo)
+                  || varPresunHotovo <> varPresunKod & "→" & varPresunNovyPrefix,
+                  DisplayMode.Disabled,
+                  DisplayMode.Edit
+              )
+            Fill: =stylPozor
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: =Set(varPresunPotvrdit, true)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =11 + varFs
+            Text: ="Provést přesun"
+            Tooltip: '="Provede kaskádu: pořídí zálohu, založí nové kódy, přenese zařazení, uzavře staré kódy v historii a staré záznamy smaže. Trvá to desítky sekund - je to řádově dvě stě zápisů. Zpět to jde jen obnovou ze zálohy, která se pořídí na začátku."'
+            Width: =240
+            X: =1086
+            Y: =660
+      - lbl_BeziP:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =stylPozor
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =36
+            Size: =11 + varFs
+            Text: |-
+              =If(varPresunBezi, "Přesouvám — nezavírej aplikaci…", "")
+            VerticalAlign: =VerticalAlign.Middle
+            Width: =380
+            X: =690
+            Y: =704
+      - rec_ModalStinP:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.35)
+            Height: =Parent.Height
+            OnSelect: =Set(varPresunPotvrdit, false)
+            Visible: =varPresunPotvrdit
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - rec_ModalKartaP:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =240
+            Visible: =varPresunPotvrdit
+            Width: =520
+            X: =Parent.Width / 2 - 260
+            Y: =380
+      - lbl_ModalTextP:
+          Control: Label@2.5.1
+          Properties:
+            Font: =Font.'Open Sans'
+            Height: =120
+            Size: =11 + varFs
+            Text: |-
+              ="Uzavře se " & CountRows(colPresun) & " kódů a tolikéž vznikne pod " &
+              varPresunNovyPrefix & ". Nejdřív se pořídí záloha rejstříku, pak se zapisuje. " &
+              "Zpět to jde jen obnovou z té zálohy."
+            Visible: =varPresunPotvrdit
+            Width: =472
+            X: =Parent.Width / 2 - 236
+            Y: =404
+      - btn_ModalZpetP:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =stylKarta
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylAkce
+            HoverFill: =stylRadekHover
+            OnSelect: =Set(varPresunPotvrdit, false)
+            PressedColor: =stylAkceStisk
+            PressedFill: =stylRadekVybrany
+            Size: =11 + varFs
+            Text: ="Zpět"
+            Visible: =varPresunPotvrdit
+            Width: =140
+            X: =Parent.Width / 2 - 236
+            Y: =544
+      - btn_ModalProvestP:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylPozor
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =stylPozor
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            # POŘADÍ JE PODSTATNÉ a je zvolené tak, aby přerušení uprostřed
+            # nechalo duplicitu, ne ztrátu: nejdřív záloha, pak VZNIK nových
+            # záznamů a vazeb, pak zápis do historie, a teprve nakonec ZÁNIK.
+            # V opačném pořadí by výpadek sítě uprostřed smazal větev, která
+            # ještě nikde jinde neexistuje.
+            # Viz poznámka u btn_SpocitatP — v balíku 93 sem volání flow ještě
+            # nesmí, modál se k slovu stejně nedostane (Provést je zhasnuté).
+            OnSelect: |-
+              =Set(varPresunPotvrdit, false);
+              Notify(
+                  "Tok pro přesun ještě není v aplikaci zaregistrovaný.",
+                  NotificationType.Warning,
+                  varNotifyMs
+              )
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =11 + varFs
+            Text: ="Ano, přesunout"
+            Visible: =varPresunPotvrdit
+            Width: =240
+            X: =Parent.Width / 2 - 4
+            Y: =544

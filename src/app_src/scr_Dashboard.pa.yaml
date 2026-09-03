@@ -999,6 +999,7 @@ Screens:
                           Filter(
                               colStrom,
                               !vedlejsi,
+                              Left(kod, 2) <> "00",
                               varDashStav = ""
                               || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
                           ),

@@ -1,7 +1,10 @@
 # AUDIT — Procesní mapa MPSV
 
-Poslední audit: 25.08.2026 · kolo: 4, druhé kolo (re-audit balíku `deploy/procesnimapa_1_0_0_60.zip`)
-Předchozí: 25.08.2026 · powerplatform-auditor · kolo 4, první kolo (balík 1.0.0.59)
+Poslední audit: 03.09.2026 22:10 · auditor: powerplatform-auditor · kolo: 5 (balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3+C4)
+Verdikt kolo 5: NÁLEZY (0 blokujících / 1 opravit / 0 eskalací) — balík je bezpečný k importu do PPF DEV,
+  nic v něm neshodí prostředí ani nepřepíše hodnoty; jediný nález je funkční mezera bez dopadu na import
+Předchozí: 25.08.2026 · kolo: 4, druhé kolo (re-audit balíku `deploy/procesnimapa_1_0_0_60.zip`)
+Před tím: 25.08.2026 · powerplatform-auditor · kolo 4, první kolo (balík 1.0.0.59)
 Před tím: 23.08.2026 · powerplatform-auditor · kolo 3 (canvas app — mazání, editace, vazby, flow)
 Verdikt kolo 4 (druhé kolo): NÁLEZY (0 blokujících / 0 vážných / 2 střední / 1 eskalace)
   — **vyřízeno v 1.0.0.61**, smyčka uzavřena na stropu dvou kol: obě námitky
@@ -20,6 +23,169 @@ V tomto projektu **neplatí** kritéria vázaná na publisher `ppf`/prefix `ppf_
 tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze změny).
 Testovací tenant je skutečně `ppfbanka.sharepoint.com` a jeho výskyt v balíku
 proto sám o sobě není nález.
+
+## Kolo 5 (03.09.2026, balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3 + C4)
+
+Zadání: sirotčí aktivity v přehledu (chip „nezařazené") a jejich přiřazení
+v detailu (C4), skrytí technické trojice `00`/`00-00`/`00-00-000` odevšad,
+`$filter` v `MapaPublishFlow`. Rozsah diffu proti 1.0.0.91 (`git diff 1f08d5d 3cadfa0`):
+`src/app_src/App.pa.yaml`, `scr_Ciselnik.pa.yaml`, `scr_Dashboard.pa.yaml`,
+`scr_Detail.pa.yaml`, `src/build_mapa_flow.py`, `src/check_app.py`,
+`src/check_mapa_flow.py`.
+
+Postup: `deploy/procesnimapa_1_0_0_92.zip` rozbalen do scratchpadu (`unzip -t`
+bez chyby na solution i vnořeném `.msapp`), `CanvasApps/*.msapp` rozbalen zvlášť,
+nálezy ověřeny přímo nad `Src/*.pa.yaml` a `Workflows/*.json` v balíku, ne nad
+`STATUS.md`. Brány spuštěny přímo (ne převzaty): `check_app.py`, `check_solution.py
+--vstup runs/vstup_92.zip --vystup deploy/procesnimapa_1_0_0_92.zip`,
+`check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_92.zip --base
+input/procesnimapa_1_0_0_86.zip`, `check_flow.py`, `mutace_parametry.py --vstup
+runs/vstup_92.zip --vystup deploy/procesnimapa_1_0_0_92.zip`.
+
+### Integrita balíku, verze, env proměnné — v pořádku
+
+| co | výsledek |
+|---|---|
+| `unzip -t` solution zip i vnořený `.msapp` | bez chyby |
+| `solution.xml` `<Version>` | `1.0.0.92`, `<Managed>0</Managed>` |
+| `environmentvariablevalues.json` v balíku | **není** (greppováno přes celý rozbalený zip) |
+| `<defaultvalue>` v definicích env proměnných | **žádná** ze 9 definic ho nemá |
+| `<?xml … ?>` deklarace v definicích env proměnných | **žádná** |
+| `definition.parameters` v 8 flow | u všech listových/site proměnných `schemaName` sedí na proměnnou, `defaultValue` chybí (žádoucí tvar dle skillu — „deklarace bez defaultValue pro výrazové použití stačí") |
+| `mutace_parametry.py` nad `runs/vstup_92.zip`/`deploy/procesnimapa_1_0_0_92.zip` | **4/4** chyceno (ověřeno auditorem samostatně, ne převzato) |
+| `Properties.json` v `.msapp` | `DefaultConnectedDataSourceMaxGetRowsCount: 2000` |
+| `packed.json` | `LoadFromYaml: true` |
+| `check_app.py` | OK — 5 obrazovek, 245 prvků, 2758 vzorců (sedí na `STATUS.md`) |
+| `check_solution.py --vstup runs/vstup_92.zip --vystup deploy/procesnimapa_1_0_0_92.zip` | 582 kontrol, 0 chyb |
+| `check_mapa_flow.py --base input/procesnimapa_1_0_0_86.zip` | 144 kontrol, OK |
+| `check_flow.py` | 26 kontrol, 0 chyb |
+| `MapaPublishFlow` vs `MapaPublishScheduled` — `$filter` u všech pěti `GetItems` | přítomný a **shodný** v obou (`Title ne '00'` / `'00-00'` / `'00-00-000'` / `dilci_proces_kod ne '00-00-000'` ×2) |
+| `MapaPublishFlow` vs `MapaPublishScheduled` — akce bajtově | `json.dumps(actions, sort_keys=True)` **shoduje se přesně** (dvojče je skutečně dvojče) |
+
+### Logika C4 (`btn_Ulozit.OnSelect` ve `scr_Detail.pa.yaml`) — pořadí i vazby prošly bez nálezu
+
+Ověřeno ručním trasováním nad skutečným zdrojem (ne popisem):
+`Patch(Aktivity, …, {Title: varNovyKod, …, puvodni_kod: …})` → `If(varPresun,
+ForAll(Filter('Vazba aktivita–dílčí proces', aktivita_kod = varStaryKod) As v,
+Patch(…, {Title: …, aktivita_kod: varNovyKod})))` → stávající blok
+`RemoveIf(…, dilci_proces_kod = varStaryDp); RemoveIf(…, dilci_proces_kod =
+vybraný); Patch(nová primární vazba)`.
+
+- Pořadí (Patch aktivity → přejmenování VŠECH vazeb sirotka → srovnání primární
+  vazby) je nutné a dodržené: kdyby `RemoveIf`/`Patch` běžel před `ForAll`,
+  hledal by `aktivita_kod = varNovyKod`, který v tabulce ještě neexistuje.
+- Sirotek s víc než jednou vazbou (např. „Spravovat…" přidal sirotkovi druhé,
+  neprimární zařazení ještě před formálním přiřazením — `btn_Vazby.Visible =
+  !varNova` sirotka nevylučuje) — `ForAll` přejmenuje aktivita_kod u **všech**
+  vazeb sirotka, ne jen primární, takže druhé zařazení se dotáhne správně
+  a osiřelou vazbu ani duplicitní primární vazbu jsem reprodukovat nedokázal.
+- Uložení sirotka **beze změny** dílčího procesu (stejný `"00-00-000"`) →
+  `varPresun = false` → kód se nepřečísluje, vazby se nehýbou — sedí na „C4
+  nedodělek" i na test #12 v `STATUS.md`.
+- Zámek kaskády (`DisplayMode.View` u `drp_Agenda`/`drp_Proces`/`drp_Dilci`
+  pro `!varNova && !varSirotek`) neblokuje běžné uložení: `Selected.Value`
+  dropdownu vychází z `Default`, ne z interakce, takže `IsBlank(drp_Dilci
+  .Selected.Value)` zůstává `false` i v režimu jen ke čtení a validace na
+  začátku `OnSelect` neshodí uložení názvu/útvaru/stavu.
+- Hypotetická vazba „sirotek dostane sekundární zařazení na reálný dílčí
+  proces, pak se publikuje mapa dřív, než je formálně přiřazen" jsem prověřil
+  proti `mapa_template.html::buildTree()` — `aktByDp` se staví iterací přes
+  `d.aktivity` (kde sirotek chybí, protože `$filter` ho z Aktivity datasetu
+  vyřadil), takže „visící" vazba na neexistující aktivitu se v `linksByAkt`
+  nikdy nevyhledá a strom ji tiše ignoruje. Nejde o díru, jen o odloženou
+  viditelnost do formálního přiřazení.
+
+### P-05 · OPRAVIT · `src/app_src/scr_Dashboard.pa.yaml` — fulltextové hledání na přehledu technickou větev nefiltruje
+
+`gal_Strom.Items` má čtyři větve. Výchozí stromový režim (větev přidaná
+v tomto balíku) dostal `Left(kod, 2) <> "00"` a správně skrývá agendu `00`,
+proces `00-00`, dílčí proces `00-00-000` i sirotčí aktivity pod ním (jejich
+`kod` začíná stejným prefixem). Větev fulltextového hledání
+(`!IsBlank(txt_HledatD.Text)`, `Search(Filter(colStrom, !vedlejsi, …),
+txt_HledatD.Text, kod, nazev)`) žádný ekvivalentní filtr nemá:
+
+```
+scr_Dashboard.pa.yaml (balík 92, gal_Strom.Items):
+  !IsBlank(txt_HledatD.Text),
+  Sort(
+      Search(
+          Filter(
+              colStrom,
+              !vedlejsi,
+              varDashStav = "" || If(varDashStav = "schváleno", aktS > 0, aktC - aktS > 0)
+          ),
+          txt_HledatD.Text, kod, nazev
+      ),
+      kod, SortOrder.Ascending
+  ),
+```
+
+`colStrom` obsahuje technickou trojici neomezeně (`ClearCollect` nad
+`colAgendy`/`colProcesy`/`colDilci` bez filtru — ověřeno v `OnVisible`,
+řádky 37-39 a 52-96), jejich `nazev` je doslova **„Nezařazeno"**
+(`src/schema.json` → `seed.polozky`). Hledání „Nezařazeno" nebo „00" tedy
+vrátí technickou agendu/proces/dílčí proces jako běžné položky plochého
+seznamu — přesně to, co má být podle `STATUS.md` skryté „odevšad, kde se
+tvářila jako běžná agenda". Protože `gal_Strom.AllItems` je i zdroj exportu
+(řádek 857), aktivní hledání s tímto textem by technickou trojici protáhlo
+i do exportované tabulky.
+
+**Proč to neodhalila brána.** `kontrola_nezarazenych()` v `check_app.py`
+testuje jen, že řetězec `Left(kod, 2) <> "00"` je **kdekoli** v celém textu
+vlastnosti `gal_Strom.Items` — a je, jen v jiné větvi `If`. Test na to
+nedohlédne, protože porovnává jednu spojenou vlastnost jako celek, ne
+jednotlivé větve.
+
+Repro (mutační, nad kopií v scratchpadu, ne v projektu):
+1. Nad **nezměněným** `deploy/procesnimapa_1_0_0_92.zip` → `check_app.py`
+   → `OK` (bez chyby) — potvrzuje, že mezera je v balíku takhle, jak je,
+   a brána ji nechytá.
+2. Odebrání `Left(kod, 2) <> "00",` z výchozí (stromové) větve →
+   `check_app.py` → `CHYBA: gal_Strom.Items: stromový režim nevylučuje
+   technickou větev '00' …` — potvrzuje, že kontrola skutečně něco hlídá,
+   jen ne větev hledání.
+
+Dopad: kosmetický/funkční, ne bezpečnostní ani datový — nic se nezapíše
+špatně, technická položka se jen dá **najít a zobrazit** tam, kde podle
+zadání být neměla. Proto **OPRAVIT**, ne BLOKUJÍCÍ (H2: tiché zúžení tvrzení
+„odevšad" je nález i při jinak správném kódu, ale bez rizika pro import
+nebo data).
+Checklist: C1 (změna je v `Src/*.pa.yaml`, ověřeno že to je zdroj pravdy pro
+`LoadFromYaml=true`), H2 (zadání „odevšad" vs. skutečnost).
+Doporučená oprava (neprovedeno, jen návrh): přidat `Left(kod, 2) <> "00"`
+i do `Filter(...)` uvnitř větve hledání; `kontrola_nezarazenych` rozšířit
+tak, aby ověřovala přítomnost filtru v **každé** větvi `Items`, ne v celém
+textu najednou.
+Stav: otevřeno
+
+## Ověřeno spuštěním — kolo 5
+
+| příkaz / mutace | výsledek |
+|---|---|
+| `unzip -t deploy/procesnimapa_1_0_0_92.zip` (solution + `.msapp`) | bez chyby |
+| `check_app.py` | OK — 5 obrazovek, 245 prvků, 2758 vzorců |
+| `check_solution.py --vstup runs/vstup_92.zip --vystup deploy/procesnimapa_1_0_0_92.zip` | 582/0 |
+| `check_mapa_flow.py --solution deploy/procesnimapa_1_0_0_92.zip --base input/procesnimapa_1_0_0_86.zip` | 144/144 |
+| `check_flow.py --solution deploy/procesnimapa_1_0_0_92.zip` | 26/26 |
+| `mutace_parametry.py --vstup runs/vstup_92.zip --vystup deploy/procesnimapa_1_0_0_92.zip` | 4/4 chyceno |
+| P-05 repro krok 1: `check_app.py` nad nezměněným balíkem | `OK` (potvrzuje mezeru) |
+| P-05 repro krok 2: mutace — odebrání filtru ze stromové větve | `check_app.py` → `NEPROŠLO` (potvrzuje, že brána na jinou věc reaguje) |
+| mutace: odebrání `puvodni_kod` z `btn_Ulozit.OnSelect` (C4) | `check_app.py` → `CHYBA: … nemá zapsaný 'puvodni_kod'` — `kontrola_prirazeni_sirotka` funguje |
+| `puvodni_kod` jako reálný sloupec schématu | `grep puvodni_kod src/schema.json` → 3 výskyty (existuje na listu Aktivity) |
+| `$filter` MapaPublishFlow vs MapaPublishScheduled | shodné (5×5), akce `json.dumps(sort_keys=True)` bajtově shodné |
+
+## Neověřeno — kolo 5
+
+### N-07 · reálný běh zkušebního seznamu balíku 92 na PPF DEV
+`STATUS.md` má 14bodový zkušební seznam (import, mikro-změna, karty, chip
+nezařazených, přiřazení sirotka, zámek kaskády, publikace mapy) — nic z toho
+neproběhlo na živém prostředí, balík byl podle `STATUS.md` k 03.09.2026 večer
+ještě needzkoušený. Statická kontrola (brány, mutace, trasování vzorců) nález
+nedala kromě P-05; totéž riziko jako historické N-01/N-06 (`LoadFromYaml`
+u `Controls/*.json`, které je v tomhle balíku beze změny od `LastSavedDateTimeUTC
+09/01/2026 12:13` — novější screeny/vzorce z F13 tedy čekají na první
+Studiem-materializovanou mikro-změnu stejně jako `varVerze` v kole 4).
+Potřeba k doověření: reálný import + zkušební seznam z `STATUS.md`.
 
 ## Re-audit — kolo 4, druhé kolo (25.08.2026, balík `deploy/procesnimapa_1_0_0_60.zip`)
 

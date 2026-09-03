@@ -256,6 +256,47 @@ def vyhodnot(uzel, kontext):
         if hodnoty[0] not in kontext["akce"]:
             raise Chyba(f"odkaz na akci {hodnoty[0]}, kterou interpret nezná")
         return kontext["akce"][hodnoty[0]]
+    # --- funkce doplněné pro kaskádu přesunu (check_presun_flow) ---
+    # Interpret je společný; kdyby si každá brána držela vlastní, rozešly by
+    # se v tom, co která funkce dělá, a shoda s Logic Apps by se ověřovala
+    # dvakrát. Vytažení do vlastního modulu je na příště.
+    if jmeno == "substring":
+        text = _text(hodnoty[0])
+        return text[hodnoty[1]:] if len(hodnoty) == 2 else text[hodnoty[1]:hodnoty[1] + hodnoty[2]]
+    if jmeno == "length":
+        return len(hodnoty[0])
+    if jmeno == "startsWith":
+        return _text(hodnoty[0]).startswith(_text(hodnoty[1]))
+    if jmeno == "last":
+        return hodnoty[0][-1] if hodnoty[0] else None
+    if jmeno == "first":
+        return hodnoty[0][0] if hodnoty[0] else None
+    if jmeno == "take":
+        return hodnoty[0][:hodnoty[1]]
+    if jmeno == "empty":
+        return not hodnoty[0]
+    if jmeno == "add":
+        return hodnoty[0] + hodnoty[1]
+    if jmeno == "greater":
+        return hodnoty[0] > hodnoty[1]
+    if jmeno == "max":
+        polozky = hodnoty[0] if len(hodnoty) == 1 and isinstance(hodnoty[0], list) else hodnoty
+        if not polozky:
+            raise Chyba("max nad prázdným polem — chybí createArray(0)")
+        return max(polozky)
+    if jmeno == "createArray":
+        return list(hodnoty)
+    if jmeno == "union":
+        spojene = []
+        for pole in hodnoty:
+            for prvek in pole:
+                if prvek not in spojene:
+                    spojene.append(prvek)
+        return spojene
+    if jmeno == "formatNumber":
+        mist = int(_text(hodnoty[1])[1:])
+        return str(hodnoty[0]).rjust(mist, "0")
+
     if jmeno == "parameters":
         # Proměnná prostředí. Za běhu ji dosadí platforma; tady dosadíme web,
         # na který je připojená appka, aby se složená adresa dala ověřit.

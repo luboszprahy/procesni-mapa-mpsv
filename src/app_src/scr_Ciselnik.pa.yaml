@@ -826,6 +826,37 @@ Screens:
             # Koš je až za překryvem, jinak by ho překryv zakryl a klik spolkl.
             # Nemaže hned — jen si zapamatuje, čeho se dotaz týká; smaže se až
             # po potvrzení v dialogu, protože řádek galerie se dá trefit omylem.
+            # Přesun pod jiného rodiče. Jen u procesu a dílčího procesu —
+            # agenda nemá kam a aktivita se přesouvá ve svém detailu.
+            - ico_PresunC:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =stylTextSlaby
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =32
+                  HoverColor: =stylAkce
+                  HoverFill: =stylRadekVybrany
+                  Icon: =Icon.Redo
+                  OnSelect: |-
+                    =Set(varPresunKod, ThisItem.kod);
+                    Set(varPresunNazev, ThisItem.nazevPlny);
+                    Set(
+                        varPresunUroven,
+                        If(ThisItem.uroven = "proces", "proces", "dilci_proces")
+                    );
+                    Navigate(scr_Presun, ScreenTransition.Cover)
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                  PressedColor: =stylAkceStisk
+                  Tooltip: |-
+                    ="Přesune " & ThisItem.kod &
+                    " pod jiného rodiče. Kód se přitom uzavře a vznikne nový - a totéž se stane všemu, co je pod tím, protože se mění prefix. Nejdřív uvidíš náhled, teprve pak se zapisuje."
+                  Visible: =ThisItem.uroven = "proces" || ThisItem.uroven = "dilci"
+                  Width: =32
+                  X: =Parent.TemplateWidth - 84
+                  Y: =(Parent.TemplateHeight - 1) / 2 - 16
             - ico_SmazatC:
                 Control: Classic/Icon@2.5.0
                 Properties:

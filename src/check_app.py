@@ -808,10 +808,48 @@ def kontrola_nezarazenych(vzorce):
             f"gal_Strom.Items: chybí větev varDashNezarazene s filtrem "
             f"rodic = \"{prefix}\" — chip by se dal zapnout, ale strom by "
             "ukazoval dál totéž co předtím")
-    if f'Left(kod, 2) <> "{agenda}"' not in items_stromu:
+
+    # Kontrola po JEDNOTLIVÝCH větvích If, ne nad celým textem vlastnosti.
+    # Nález P-05 (audit 03.09.2026): filtr technické větve byl ve stromovém
+    # režimu, ale ne v hledání — a protože se ty položky jmenují doslova
+    # „Nezařazeno", hledání toho slova je vrátilo jako běžné položky a přes
+    # gal_Strom.AllItems i do exportu. Kontrola nad celým textem to nechytla,
+    # protože vzorec v textu BYL, jen v jiné větvi.
+    vylouceni = f'Left(kod, 2) <> "{agenda}"'
+    try:
+        vetve = rozdel_argumenty(
+            argumenty_volani(items_stromu, items_stromu.index("(")))
+    except (ValueError, IndexError):
+        chyby.append("gal_Strom.Items: nejde rozebrat na větve If — kontrola "
+                     "technické větve by tiše neproběhla")
+        return
+    podminky = {vetve[i].strip(): vetve[i + 1]
+                for i in range(0, len(vetve) - 1, 2)}
+    vychozi = vetve[-1]
+
+    hledani = next((v for p, v in podminky.items() if "txt_HledatD" in p), "")
+    if not hledani:
+        chyby.append("gal_Strom.Items: nenašel jsem větev fulltextového hledání")
+    elif vylouceni not in hledani:
+        chyby.append(
+            f"gal_Strom.Items: větev hledání nevylučuje technickou větev "
+            f"'{agenda}' — položky se jmenují Nezařazeno, takže hledání "
+            "toho slova je vrátí a projdou i do exportu")
+    if vylouceni not in vychozi:
         chyby.append(
             f"gal_Strom.Items: stromový režim nevylučuje technickou větev "
             f"'{agenda}' — 'Nezařazeno' se v přehledu tváří jako běžná agenda")
+
+    # Do větve nezařazených ten filtr naopak PATŘIT NESMÍ: sirotčí aktivity
+    # mají kód 00-00-000-XXXX, takže by je vyhodil všechny a chip by ukazoval
+    # prázdný seznam. Kontrola je tu proto, aby to nikdo „nesjednotil".
+    nezarazene = next((v for p, v in podminky.items()
+                       if "varDashNezarazene" in p), "")
+    if nezarazene and vylouceni in nezarazene:
+        chyby.append(
+            f"gal_Strom.Items: větev nezařazených obsahuje {vylouceni} — "
+            "vyhodí to i sirotky, jejichž kód tím prefixem začíná, a chip "
+            "bude ukazovat prázdno")
 
     for kolekce, technicka in (("colAgendy", agenda),
                                ("colProcesy", "-".join(prefix.split("-")[:2])),

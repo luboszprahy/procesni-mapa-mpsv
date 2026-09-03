@@ -1,6 +1,116 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-03 21:30**. Balík **1.0.0.92**.
+Aktualizováno: **2026-09-03 23:05**. Balík **1.0.0.93**.
+**Kaskádový přesun (F10/4) je hotový jako `PresunFlow`** — flow, brána
+(111 kontrol) i mutace (13/13) jsou zelené, obrazovka `scr_Presun` je v appce.
+Chybí poslední krok: zaregistrovat flow ve Studiu, aby ho appka mohla zavolat.
+Do té doby má obrazovka tlačítka bez funkce a říká to.
+
+## CO JE NA TOBĚ ZÍTRA — v tomhle pořadí
+
+1. **Import `deploy/procesnimapa_1_0_0_93.zip`** jako upgrade.
+2. **Zapnout `PresunFlow`** v Power Automate (po importu bývá vypnuté).
+3. **Vyzkoušet flow samostatně, bez appky** — Power Automate → PresunFlow →
+   Test → Manually, do pole `pozadavek` vložit
+   `{"kod":"07-08","uroven":"proces","cil":"03","duvod":"zkouška","rezim":"nahled"}`
+   (kód a cíl podle skutečných dat). V režimu `nahled` se **nic nezapisuje**.
+   Běh musí skončit zeleně a krok `Odpoved_nahled` musí nést `prehled`
+   se seznamem dvojic starý → nový kód.
+4. **Studio → Add data → PresunFlow**, mikro-změna, Save, Publish, export
+   solution (unmanaged) a poslat zip.
+5. Doplním volání flow a pošlu balík **94**, kterým obrazovka ožije.
+
+Vzorce pro krok 5 jsou hotové v `deploy/flow_Presun.md` — zítra je to jen
+vložit, ne vymýšlet.
+
+Zbývá taky odzkoušet **balík 92** (14bodový seznam níž) — na prostředí ještě
+neběžel.
+
+## Co se udělalo 03.09.2026 večer — balík 1.0.0.93 (F10/4)
+
+**Přesun dělá flow, ne appka.** Původní plán počítal s Power Fx kaskádou
+v appce a byla už napsaná; po tvé nabídce udělat kolo se Studiem jsem ji
+zahodil a přepsal na `PresunFlow`. Důvody, které rozhodly:
+
+- kaskáda je ~240 zápisů; v appce běží v prohlížeči a zavření okna nebo
+  výpadek sítě uprostřed nechá rejstřík rozpůlený, kdežto `Foreach`
+  v Logic Apps doběhne na serveru,
+- když to spadne, je vidět **na které akci** — appka řekne jen `FirstError`,
+- protokol o přesunu, který metodika vyžaduje, umí flow uložit jako soubor.
+
+**Jeden můj argument pro flow ale neplatil** a je fér to říct: sliboval jsem
+`$batch` po stovkách místo jednotlivých volání. Projekt `$batch` **vědomě
+nepoužívá** — `RestoreFlow` u toho má poznámku, že multipart changeset se
+v Logic Apps skládá ručně a chyba se pozná až za běhu. `PresunFlow` proto
+zapisuje po jednom stejně jako obnova; `Foreach` běží paralelně, takže je to
+otázka sekund.
+
+**Pravidlo přečíslování.** Přečísluje se jen přesouvaná úroveň; potomci dědí
+nový prefix a nechají si pořadové číslo (`07-08-001-0006` → `03-05-001-0006`).
+Volná čísla pro potomky se pod novým rodičem hledat nemusí — číslují se v jeho
+rámci a ten je nový. Celá kaskáda je tím jediná náhrada prefixu a vejde se do
+jednoho výrazu platného pro všechny tři úrovně.
+
+**Nové číslo přes živý list I historii** — tady se poprvé uplatnilo pravidlo
+F10/1 a je to hlavní věc, kterou brána hlídá: vzorový rejstřík má v agendě 03
+živé procesy do `03-04` a v historii uzavřený `03-05`, takže správná odpověď
+je `03-06`. Kdyby se historie nezapočítala, vyjde `03-05` — recyklovaný kód.
+
+**Pořadí zápisu je závazné:** vznik → historie → zánik. V opačném pořadí by
+výpadek uprostřed smazal větev, která ještě nikde jinde neexistuje. Takhle je
+nejhorší možný výsledek duplicita, ne ztráta.
+
+**Obrazovka `scr_Presun`** má tvar `scr_Nahled` (vyber → spočítej nanečisto →
+podívej se → teprve pak zapiš): co se stěhuje, kam, povinný důvod, tabulka
+starý → nový kód přes celý podstrom, souhrn, potvrzovací modál. Vstup je
+ikona v řádku číselníku u procesu a dílčího procesu.
+
+### Co brána chytila dřív, než to stihlo uškodit
+
+- **`select()` a `filter()` jsou v Logic Apps AKCE, ne funkce výrazu.**
+  Použil jsem je ve výrazu `Prehled` a ve `foreach` — za běhu by to spadlo.
+  Nahrazeno samostatnými kroky `Prehled_radky` a `Mapa_dilci`.
+- **Dvě mutace prošly a odhalily slabinu testu, ne kódu.** Uzavřený dílčí
+  proces ve vzorku měl nízké poslední číslo, takže chybějící filtr na úroveň
+  nebyl na výsledku vidět — vzorek dostal `03-05-099`. A mutace „děti přes
+  prefix" byla neškodná (nad reálnými kódy dává `startsWith` totéž co
+  `equals`), nahrazena mutací „děti se nefiltrují vůbec".
+- **Brána `check_solution` brala zmínku o `.Run()` v komentáři jako volání.**
+  Teď komentáře odstraňuje; ověřeno, že skutečné volání dál chytá.
+
+### Auditní nález P-05 z balíku 92 — opraveno
+
+Fulltextové hledání na přehledu technickou větev nefiltrovalo, a protože se ty
+položky jmenují doslova „Nezařazeno", hledání toho slova je vracelo jako běžné
+položky — a přes `gal_Strom.AllItems` i do exportu. Hledací větev dostala týž
+filtr jako stromová. Brána `kontrola_nezarazenych` teď kontroluje **každou
+větev `If` zvlášť**, ne text vlastnosti jako celek; ověřeno i opačně, že do
+větve nezařazených ten filtr patřit nesmí (vyhodil by sirotky).
+
+### Brány na 93
+
+`check_solution` **663** (bylo 582) · `check_restore_flow` 571 ·
+`check_zaloha_flow` 184 · `check_import_flow` 175 · `check_sablona` 185 ·
+`check_mapa_flow` 144 · `check_export_flow` 129 · **`check_presun_flow` 111
+(nová)** · `check_flow`, `check_env`, `check_schema` zeleně.
+`check_app`: **6 obrazovek, 285 prvků**.
+Mutačně: **`mutace_presun` 13/13 (nová)**, `mutace_import` 25/25,
+`mutace_restore` 17/17, `mutace_zaloha` 16/16, `mutace_export_mapa` 7/7,
+`mutace_parametry` 4/4, `mutace_napojeni` 5/5.
+
+Sestavení:
+
+```
+copy deploy\procesnimapa_1_0_0_92.zip runs\vstup_93.zip
+python src/build_presun_flow.py --solution runs/vstup_93.zip
+python src/build_app.py --solution runs/vstup_93.zip --verze 1.0.0.93
+```
+
+Balík 93 **nemění MapaPublishFlow**, takže dvojče se přegenerovávat nemusí.
+
+---
+
+Předchozí stav (balík 1.0.0.92):
 **F13 je celá hotová kromě B3** — sirotčí aktivity jdou po importu najít
 (chip na přehledu) i přiřadit ke skutečnému dílčímu procesu (detail aktivity).
 Technická větev „Nezařazeno" zmizela odevšad, kde se tvářila jako běžná
@@ -28,15 +138,13 @@ zelené; na prostředí zatím neběžel — to je první krok zítřka.
 (nový kód pod novým rodičem, přepis vazeb, `puvodni_kod`). F10/2 z něj vychází
 a přidává to, co u sirotka schválně chybí — uzavření starého kódu v historii.
 
-## CO JE NA TOBĚ
+## Ještě otevřené z dřívějška
 
 1. **Nahraj do Site Assets novou šablonu** `deploy/sablona_import_aktivit.xlsx`.
    Ta v prostředí je ještě bez varování o citlivostním štítku a bez rozbalovátek.
 
-2. **Naimportuj balík `deploy/procesnimapa_1_0_0_92.zip`** do PPF DEV jako
-   upgrade a projdi zkušební seznam níž.
-
-3. **Nic dalšího** — vše ostatní je odzkoušené na datech (viz tabulka níž).
+2. **Zkušební seznam k balíku 92** (níž) — balík 93 ho obsahuje celý, takže
+   se dá projít rovnou na něm.
 
 ## Co se udělalo 03.09.2026 — balík 1.0.0.92 (F13/C3 + C4)
 

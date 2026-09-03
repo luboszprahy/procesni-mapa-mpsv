@@ -1541,12 +1541,109 @@ celý návrh na reálných datech dřív, než se pustíme do kaskády nad proce
    risk: `StartsWith` je delegovatelný, `Sort` nad filtrovaným listem taky —
      ale dvojnásobek dotazů na každém založení. Měřit, ne odhadovat.
 
-4. [Přesun dílčího procesu a procesu — kaskáda] — co: nové flow
-     `PresunFlow` + obrazovka náhledu v appce
-   Kaskáda je nad možnosti Power Fx (musela by rekurzivně přepsat stovky
-   řádků v jedné transakci) → dělá to flow. Appka pošle: co se přesouvá,
-   kam, a důvod. Flow vrátí NEJDŘÍV náhled („uzavře se 49 kódů, vzniknou
-   tyhle") a teprve po potvrzení zapíše.
+4. [Přesun dílčího procesu a procesu — kaskáda] — HOTOVO 03.09.2026 (1.0.0.93)
+     jako `PresunFlow` — co: src/build_presun_flow.py, src/check_presun_flow.py,
+     src/mutace_presun.py, src/app_src/scr_Presun.pa.yaml, deploy/flow_Presun.md
+
+   DVĚ OTOČKY BĚHEM JEDNOHO VEČERA, obě zapsané, ať se nezapomene proč:
+
+   (a) Nejdřív jsem to chtěl udělat CELÉ V APPCE. Argument: kaskáda není
+       rekurzivní (hierarchie má pevné tři úrovně, stačí tři průchody)
+       a nové flow by znamenalo dvoukolový postup se Studiem. Appka přitom
+       má všechny listy připojené včetně `Historie kódů` — ověřeno
+       v `References/DataSources.json` balíku 92, devět zdrojů. (Poznámka
+       v `env_promenne.py`, že HistorieKodu appka připojenou nemá, je
+       zastaralá; napojení dodělal `napoj_appku_na_promenne`.)
+
+   (b) Uživatel nabídl, že kolo se Studiem udělá — a tím padl jediný důvod
+       pro appku. Rozhodlo: kaskáda je ~240 zápisů, v appce běží v prohlížeči
+       a zavření okna ji přeruší uprostřed, kdežto `Foreach` v Logic Apps
+       doběhne na serveru a je vidět v run history.
+
+   POZOR na argument, který NEPLATÍ: sliboval jsem `$batch` po stovkách.
+   Projekt `$batch` vědomě nepoužívá (`RestoreFlow` má u toho poznámku, že
+   multipart changeset se v Logic Apps skládá ručně a chyba se pozná až za
+   běhu). PresunFlow zapisuje po jednom stejně jako obnova.
+
+   PRAVIDLO PŘEČÍSLOVÁNÍ: nové číslo dostane JEN ta úroveň, která se stěhuje.
+   Potomci dědí nový prefix a ponechají si své pořadové číslo:
+     proces 07-08 → 03-05  (první volné BB v cílové agendě)
+       dílčí proces 07-08-001 → 03-05-001   (CCC beze změny)
+         aktivita  07-08-001-0006 → 03-05-001-0006  (DDDD beze změny)
+   Hledat pod novým rodičem volná CCC/DDDD není potřeba: číslují se v rámci
+   svého rodiče, a ten je nový, takže jsou volná všechna. Tím je jediné nové
+   číslo v celé kaskádě to jedno na přesouvané úrovni; zbytek je náhrada
+   prefixu. (Totéž o úroveň níž: dílčí proces dostane nové CCC pod cílovým
+   procesem, jeho aktivity si nechají DDDD.)
+
+```
+4a. [Obrazovka scr_Presun] — co: src/app_src/scr_Presun.pa.yaml,
+    src/build_app.py (seznam OBRAZOVKY), vstup z scr_Ciselnik
+    Tvar shodný s scr_Nahled, protože je to táž úloha: vyber → spočítej
+    nanečisto → podívej se, co z toho vyjde → teprve pak zapiš.
+    Nahoře co se stěhuje (kód + název + počty pod ním), pak výběr cíle
+    (agenda u procesu; agenda + proces u dílčího procesu), povinný důvod,
+    tlačítko Spočítat náhled, galerie starý kód → nový kód přes celý
+    podstrom, souhrn, a Provést přesun s potvrzovacím modálem.
+    verify: `check_app.py` projde (nová obrazovka v seznamu, 6 obrazovek).
+      Ruční: otevřít z číselníku u procesu, ověřit, že hlavička sedí.
+    edge cases: vstup na obrazovku bez vybrané položky (varPresunKod prázdné)
+      → všechno zhasnuté a výzva vrátit se do číselníku, ne prázdná obrazovka.
+    risk: pruh nabídek na přehledu byl plný na pixel; tady ať se rovnou
+      počítá s tím, že obrazovka je samostatná a nic se do ní nemá vejít.
+
+4b. [Výpočet náhledu] — co: btn_SpocitatP.OnSelect
+    Nový prefix = kód cíle & "-" & první volné číslo na přesouvané úrovni,
+    braný jako maximum přes ŽIVÝ list i `HistorieKodu` (pravidlo 1) — tady
+    se to dělá poprvé a je to zároveň referenční tvar pro krok 3.
+    colPresun = jeden řádek na každý dotčený kód: { stary, novy, uroven,
+    nazev }. Tři průchody: přesouvaná položka, její děti, jejich aktivity.
+    Potomci: novy = novyPrefix & "-" & Right(stary, N), kde N je délka
+    zbytku kódu za prefixem (3 u dílčího procesu, 8 u aktivity pod procesem,
+    4 u aktivity pod dílčím procesem).
+    verify: `check_app.py` — nová kontrola, že přidělení sahá na Procesy
+      i 'Historie kódů' (u přesunu dílčího procesu na 'Dílčí procesy'
+      i historii). Mutace: uber historii → spadne.
+      Ruční test na datech: přesuň proces se 3 dílčími procesy a 7 aktivitami,
+      porovnej náhled znak po znaku s ručně spočítaným seznamem.
+    edge cases: cílová agenda je táž jako současná → tlačítko zhasnuté,
+      přesun na místo nedává smysl; cílová agenda má 99 procesů → odmítnout
+      s hláškou, ne přetéct na tříciferné BB; přesouvaná položka je technická
+      větev 00 → do nabídky se nedostane (číselník ji nezobrazuje).
+    risk: `Right(stary, 8)` mlčky vrátí nesmysl, kdyby kód neměl očekávanou
+      délku. Náhled to ukáže člověku dřív, než se zapíše — proto je náhled
+      povinný krok a ne volitelný.
+
+4c. [Zápis kaskády] — co: btn_ModalProvestP.OnSelect
+    POŘADÍ JE PODSTATNÉ a je zvolené tak, aby přerušení uprostřed nechalo
+    duplicitu, ne ztrátu:
+      1. záloha rejstříku (`ZalohaFlow.Run()`) — je to zároveň protokol,
+         který metodika u kaskády vyžaduje, i cesta zpátky;
+      2. VZNIK: nové záznamy s novým kódem a `puvodni_kod` (proces, dílčí
+         procesy, aktivity);
+      3. VAZBY: nové vazby na nové kódy — přepisuje se aktivita_kod
+         i dilci_proces_kod, každý zvlášť podle toho, jestli je v colPresun.
+         Vedlejší vazba MIMO přesouvaný podstrom se tím přenese taky;
+      4. HISTORIE: starý kód do `HistorieKodu` s `nastupce_kod`, důvodem,
+         datem a `kdo`;
+      5. ZÁNIK: staré vazby a staré záznamy pryč.
+    verify: `check_app.py` — kontrola, že zápis do živých listů předchází
+      mazání a že každý řádek colPresun jde do HistorieKodu. Mutace:
+      prohoď vznik a zánik → spadne; vynech historii → spadne.
+      Ruční test na PPF DEV: přesuň proces, ověř všech pět listů, mapu
+      a to, že se aktivita ve stromu objeví jednou a pod novým kódem.
+    edge cases: aktivita zařazená vedlejší vazbou ven z podstromu (kód se
+      mění, cizí dílčí proces ne) a naopak cizí aktivita zařazená dovnitř
+      (kód se nemění, dílčí proces ano) — obě větve musí projít;
+      dvojí kliknutí na Provést (tlačítko se hned zhasne);
+      přesun zpět tam, odkud přišel, musí vyrobit TŘETÍ kód (pravidlo 1).
+    risk: největší je počet operací — proces s 8 dílčími procesy a 40
+      aktivitami znamená ~240 zápisů. Není to transakce (SharePoint ji
+      neumí ani přes flow), proto ta záloha v kroku 1. Druhé riziko je
+      delegace: všechno se počítá nad KOLEKCEMI, ne nad zdrojem; colVazby
+      se proto plní v OnVisible téhle obrazovky, ne až na přehledu.
+```
+
    verify: `check_presun_flow.py` — mini-interpret nad výrazy vytaženými
      ZE ZIPU (ne z kopie logiky v Pythonu), vzorová větev 1 proces /
      3 dílčí procesy / 7 aktivit → očekávaný seznam dvojic starý→nový kód

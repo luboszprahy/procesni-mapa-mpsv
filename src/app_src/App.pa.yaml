@@ -74,6 +74,15 @@ App:
       Set(varSirotek, false);
       Set(varPresun, false);
       Set(varStaryKod, "");
+      // Přesun procesu / dílčího procesu (F10/4). Co se stěhuje, nastaví
+      // číselník. Výpočet i zápis dělá PresunFlow.
+      Set(varPresunKod, "");
+      Set(varPresunUroven, "proces");
+      Set(varPresunNazev, "");
+      Set(varPresunNovyPrefix, "");
+      Set(varPresunHotovo, "");
+      Set(varPresunBezi, false);
+      Set(varPresunPotvrdit, false);
       Set(varZobrazitKod, true);
       Set(varDetailZpet, "seznam");
       Set(varUrovenTyp, "agenda");
