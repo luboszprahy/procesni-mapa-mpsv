@@ -39,11 +39,21 @@ své pořadové číslo:
 Díky tomu je celá kaskáda jediná náhrada prefixu a jde vyjádřit jedním
 výrazem, který platí pro všechny tři úrovně naráz:
 
-    novy = concat(novyPrefix, substring(stary, length(kod)))
+    novy = concat(novyPrefix, zbytek(stary))
 
-U přesouvané položky dá `substring` prázdno, u potomků zbytek kódu. Hledat
-pod novým rodičem volná čísla pro potomky není potřeba — číslují se v rámci
-svého rodiče a ten je nový, takže jsou volná všechna.
+U potomků je zbytek konec kódu za přesouvaným prefixem, u přesouvané položky
+samotné je prázdný. `substring(stary, length(kod))` se na to použít NEDÁ:
+Logic Apps vyžadují start index MENŠÍ než délka řetězce, takže na položce,
+jejíž kód JE přesouvaný kód, spadne celý běh na
+
+    'substring' parameter is out of range: 'start index' must be non-negative
+    integer and should be less than the length of the string
+
+(zjištěno 04.09.2026 na prvním ostrém běhu, akce `Mapa`). Proto se zbytek
+bere jen tehdy, když nějaký je — viz `zbytek()`.
+
+Hledat pod novým rodičem volná čísla pro potomky není potřeba — číslují se
+v rámci svého rodiče a ten je nový, takže jsou volná všechna.
 
 Nové číslo pro přesouvanou úroveň se hledá jako maximum přes ŽIVÝ list
 I PŘES HISTORII (pravidlo F10/1: uzavřený kód se nikdy nerecykluje). Bez
@@ -131,10 +141,31 @@ def je_proces():
     return f"equals({v('uroven')}, {lit('proces')})"
 
 
+def zbytek(stary_vyraz):
+    """Konec kódu za přesouvaným prefixem; u samotné přesouvané položky prázdno.
+
+    Holé `substring(stary, length(kod))` tu selže: Logic Apps chtějí start
+    index menší než délka řetězce, takže na položce, jejíž kód JE přesouvaný
+    kód, spadne celý běh (`start index ... should be less than the length`).
+    Netýká se to jen `Mapa` — stejná past je u dílčího procesu v
+    `Zaloz_aktivity` a u vazby, jejíž `dilci_proces_kod` se rovná
+    přesouvanému kódu.
+
+    Mezera v `concat` je tam kvůli meznímu případu: bez ní by u přesouvané
+    položky vyšel start index roven délce, což je právě to zakázané. S ní je
+    text o znak delší, délka výřezu je nula a výsledek prázdný řetězec.
+    """
+    # Podmínkou to ošetřit NEJDE: Logic Apps vyhodnocují VŠECHNY argumenty
+    # funkce `if()`, tedy i větev, která se nepoužije — `substring` by tak
+    # spadl bez ohledu na test délky. Řeší se to délkou: `sub()` dá u
+    # přesouvané položky nulu, takže se substring drží v mezích.
+    return (f"substring(concat({stary_vyraz}, ' '), length({v('kod')}),"
+            f" sub(length({stary_vyraz}), length({v('kod')})))")
+
+
 def novy_kod(stary_vyraz):
     """Náhrada prefixu — jediný vzorec pro všechny tři úrovně kaskády."""
-    return (f"concat(outputs('Novy_prefix'), substring({stary_vyraz},"
-            f" length({v('kod')})))")
+    return f"concat(outputs('Novy_prefix'), {zbytek(stary_vyraz)})"
 
 
 def nacitani():
@@ -406,16 +437,13 @@ def zapis(po):
                  "parameters/uri": rest_adresa(I_AKTIVITY),
                  "parameters/headers": HLAVICKY_ZAPIS,
                  "parameters/body": {
-                     "Title": ("@concat(outputs('Novy_prefix'),"
-                               " substring(items('Zaloz_aktivity')?['Title'],"
-                               f" length({v('kod')})))"),
+                     "Title": "@" + novy_kod(
+                         "items('Zaloz_aktivity')?['Title']"),
                      "nazev": "@coalesce(items('Zaloz_aktivity')?['nazev'], '')",
                      "nazev_kratky": ("@coalesce(items('Zaloz_aktivity')?"
                                       "['nazev_kratky'], '')"),
-                     "dilci_proces_kod": ("@concat(outputs('Novy_prefix'),"
-                                          " substring(items('Zaloz_aktivity')?"
-                                          "['dilci_proces_kod'],"
-                                          f" length({v('kod')})))"),
+                     "dilci_proces_kod": "@" + novy_kod(
+                         "items('Zaloz_aktivity')?['dilci_proces_kod']"),
                      "vykonava": "@coalesce(items('Zaloz_aktivity')?['vykonava'], '')",
                      "spolupracuje": ("@coalesce(items('Zaloz_aktivity')?"
                                       "['spolupracuje'], '')"),
@@ -438,17 +466,13 @@ def zapis(po):
     # vedlejší vazby ven i dovnitř.
     novy_akt = ("if(startsWith(coalesce(items('Zaloz_vazby')?['aktivita_kod'], ''),"
                 f" concat({v('kod')}, '-')),"
-                " concat(outputs('Novy_prefix'),"
-                " substring(items('Zaloz_vazby')?['aktivita_kod'],"
-                f" length({v('kod')}))),"
+                " " + novy_kod("items('Zaloz_vazby')?['aktivita_kod']") + ","
                 " items('Zaloz_vazby')?['aktivita_kod'])")
     novy_dp = ("if(or(equals(coalesce(items('Zaloz_vazby')?['dilci_proces_kod'], ''),"
                f" {v('kod')}),"
                " startsWith(coalesce(items('Zaloz_vazby')?['dilci_proces_kod'], ''),"
                f" concat({v('kod')}, '-'))),"
-               " concat(outputs('Novy_prefix'),"
-               " substring(items('Zaloz_vazby')?['dilci_proces_kod'],"
-               f" length({v('kod')}))),"
+               " " + novy_kod("items('Zaloz_vazby')?['dilci_proces_kod']") + ","
                " items('Zaloz_vazby')?['dilci_proces_kod'])")
     kroky["Zaloz_vazby"] = {
         "type": "Foreach",

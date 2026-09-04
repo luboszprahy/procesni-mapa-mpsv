@@ -624,142 +624,40 @@ Screens:
             Width: =214
             X: =40
             Y: =116
-      - lbl_StavPopis:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylTextSlaby
-            Font: =Font.'Open Sans'
-            Height: =28
-            Size: =10
-            Text: ="Stav:"
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =40
-            X: =528
-            Y: =116
-      - btn_StavVse:
+      # Stav, osiřelé a nezařazené byly do 1.0.0.95 samostatné chipy — pět
+      # tlačítek vedle sebe zabralo půlku pruhu a nešlo v nich rychle přečíst,
+      # co je vlastně zapnuté. Teď je to jedna nabídka a její popisek nese
+      # celý stav filtru, včetně obou příznaků.
+      - btn_StavMenu:
           Control: Classic/Button@2.2.0
           Properties:
-            BorderColor: =stylOkraj
+            BorderColor: =If(varDashStav <> "" || varDashOsirele || varDashNezarazene, stylAkce, stylOkraj)
             BorderThickness: =1
-            Color: =If(varDashStav = "", RGBA(255, 255, 255, 1), stylAkce)
-            Fill: =If(varDashStav = "", stylAkce, stylKarta)
+            Color: =If(varMenuStav, RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varMenuStav, stylAkce, stylKarta)
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
             Height: =28
-            HoverColor: =If(varDashStav = "", RGBA(255, 255, 255, 1), stylAkce)
-            HoverFill: =If(varDashStav = "", stylAkceHover, stylRadekHover)
-            OnSelect: =Set(varDashStav, "")
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylAkceStisk
-            Size: =10
-            Text: ="vše"
-            Tooltip: '="Bez filtru stavu - ve stromu jsou všechny aktivity i větve nad nimi."'
-            Width: =54
-            X: =572
-            Y: =116
-      - btn_StavSchvaleno:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =stylOkraj
-            BorderThickness: =1
-            Color: =If(varDashStav = "schváleno", RGBA(255, 255, 255, 1), stylAkce)
-            Fill: =If(varDashStav = "schváleno", stylAkce, stylKarta)
-            FocusedBorderColor: =stylAkce
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =28
-            HoverColor: =If(varDashStav = "schváleno", RGBA(255, 255, 255, 1), stylAkce)
-            HoverFill: =If(varDashStav = "schváleno", stylAkceHover, stylRadekHover)
-            OnSelect: =Set(varDashStav, "schváleno")
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylAkceStisk
-            Size: =10
-            Text: ="schváleno"
-            Tooltip: '="Nechá jen schválené aktivity a nad nimi jen ty agendy, procesy a dílčí procesy, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet schválených aktivit v dané větvi."'
-            Width: =92
-            X: =630
-            Y: =116
-      - btn_StavPracovni:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =stylOkraj
-            BorderThickness: =1
-            Color: =If(varDashStav = "pracovní", RGBA(255, 255, 255, 1), stylAkce)
-            Fill: =If(varDashStav = "pracovní", stylAkce, stylKarta)
-            FocusedBorderColor: =stylAkce
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =28
-            HoverColor: =If(varDashStav = "pracovní", RGBA(255, 255, 255, 1), stylAkce)
-            HoverFill: =If(varDashStav = "pracovní", stylAkceHover, stylRadekHover)
-            OnSelect: =Set(varDashStav, "pracovní")
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylAkceStisk
-            Size: =10
-            Text: ="pracovní"
-            Tooltip: '="Nechá jen pracovní aktivity, tedy rozpracované záznamy, a nad nimi jen větve, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet pracovních aktivit v dané větvi."'
-            Width: =84
-            X: =726
-            Y: =116
-      # Osiřelá položka nemá ve stromu kam patřit, takže se v něm vůbec
-      # neukáže - chip je jediné místo, kde je z přehledu vidět.
-      - btn_OsireleD:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =If(varDashOsirele, stylPozor, stylOkraj)
-            BorderThickness: =1
-            Color: =If(varDashOsirele, RGBA(255, 255, 255, 1), stylPozor)
-            Fill: =If(varDashOsirele, stylPozor, stylKarta)
-            FocusedBorderColor: =stylPozor
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =28
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =stylPozor
+            HoverColor: =If(varMenuStav, RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varMenuStav, stylAkceHover, stylRadekHover)
             OnSelect: |-
-              =Set(varDashOsirele, !varDashOsirele);
-              Set(varDashNezarazene, false)
+              =Set(varMenuStav, !varMenuStav);
+              Set(varMenuRozbalit, false);
+              Set(varMenuMapa, false);
+              Set(varMenuData, false)
             PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylPozor
-            Size: =10
-            Text: ="osiřelé"
-            Tooltip: '="Vypíše položky, jejichž nadřazená úroveň v číselníku není: proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího procesu. U agendy, která nadřazenou úroveň nemá, to znamená agendu bez jediného procesu. Ve stromu je jinak nenajdeš - strom ukazuje jen to, co visí pod otevřeným předkem, a sirotek žádného předka nemá. Uklidit je jde na obrazovce Editace nebo rovnou košem v řádku."'
-            Width: =84
-            X: =814
-            Y: =116
-      # Nezařazená aktivita rodiče MÁ (technický dílčí proces 00-00-000), takže
-      # mezi osiřelé nespadne a ve stromu ji nic neukáže - větev 00 je z něj
-      # schválně skrytá. Tenhle chip je jediná cesta, jak se k sirotkům dostat,
-      # a číslo v něm je zároveň to, co po importu holých aktivit zbývá dodělat.
-      # Vidět zůstane i s nulou, dokud je režim zapnutý - jinak by po přiřazení
-      # posledního sirotka zmizel a strom by zůstal prázdný bez cesty zpátky.
-      - btn_NezarazeneD:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =If(varDashNezarazene, stylPozor, stylOkraj)
-            BorderThickness: =1
-            Color: =If(varDashNezarazene, RGBA(255, 255, 255, 1), stylPozor)
-            Fill: =If(varDashNezarazene, stylPozor, stylKarta)
-            FocusedBorderColor: =stylPozor
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =28
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =stylPozor
-            OnSelect: |-
-              =Set(varDashNezarazene, !varDashNezarazene);
-              Set(varDashOsirele, false)
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylPozor
+            PressedFill: =stylAkceStisk
             Size: =10
             Text: |-
-              ="nezařazené (" & CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) & ")"
-            Tooltip: '="Aktivity nahrané hromadným importem bez zařazení. Mají zatím technický kód pod 00-00-000 a čekají, až jim správce určí dílčí proces - teprve tím dostanou platný kód. Ve stromu je nenajdeš, větev Nezařazeno je z něj skrytá. Přiřazení se dělá v detailu aktivity výběrem dílčího procesu."'
-            Visible: |-
-              =varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0
-            Width: =110
-            X: =902
+              ="Stav: "
+              & If(varDashStav = "", "vše", varDashStav)
+              & If(varDashOsirele, " · osiřelé", "")
+              & If(varDashNezarazene, " · nezařazené", "")
+              & "  ▾"
+            Tooltip: '="Filtr toho, co je ve stromu vidět: stav aktivit (vše, schválené, pracovní) a dvě zvláštní skupiny - osiřelé položky bez nadřazené úrovně a aktivity nahrané bez zařazení. Obojí je ve stromu jinak neviditelné, protože strom ukazuje jen to, co visí pod otevřeným předkem."'
+            Width: =240
+            X: =460
             Y: =116
       - btn_RozbalitMenu:
           Control: Classic/Button@2.2.0
@@ -777,7 +675,8 @@ Screens:
             OnSelect: |-
               =Set(varMenuRozbalit, !varMenuRozbalit);
               Set(varMenuMapa, false);
-              Set(varMenuData, false)
+              Set(varMenuData, false);
+              Set(varMenuStav, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
@@ -811,14 +710,15 @@ Screens:
             OnSelect: |-
               =Set(varMenuMapa, !varMenuMapa);
               Set(varMenuRozbalit, false);
-              Set(varMenuData, false)
+              Set(varMenuData, false);
+              Set(varMenuStav, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =10
             Text: ="HTML mapa  ▾"
             Tooltip: '="Publikovaná HTML mapa: otevření a obnovení. Mapa data nečte živě - ukazuje stav k okamžiku poslední publikace."'
             Width: =110
-            X: =1022
+            X: =708
             Y: =116
       # Nabídka práce se souborem: export, vzorová tabulka pro import, záloha.
       # Sjednoceno 01.09.2026 — tři samostatná tlačítka v pruhu už se nevešla
@@ -845,6 +745,7 @@ Screens:
               =Set(varMenuData, !varMenuData);
               Set(varMenuMapa, false);
               Set(varMenuRozbalit, false);
+              Set(varMenuStav, false);
               Set(
                   varExportNadpis,
                   If(varDashStav = "", "vše", "jen " & varDashStav)
@@ -870,29 +771,7 @@ Screens:
             Text: ="Data  ▾"
             Tooltip: '="Práce se souborem: export toho, co je právě vidět ve stromu, prázdná tabulka pro hromadný import a záloha celého rejstříku. Export bere momentální pohled - po filtru stavu, hledání i chipech osiřelých a nezařazených - ne celý rejstřík."'
             Width: =100
-            X: =1136
-            Y: =116
-      - btn_KodD:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderColor: =If(varZobrazitKod, stylAkce, stylOkraj)
-            BorderThickness: =1
-            Color: =If(varZobrazitKod, RGBA(255, 255, 255, 1), stylTextSlaby)
-            Fill: =If(varZobrazitKod, stylAkce, stylKarta)
-            FocusedBorderColor: =stylAkce
-            FocusedBorderThickness: =2
-            Font: =Font.'Open Sans'
-            Height: =28
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =If(varZobrazitKod, stylAkceHover, stylAkce)
-            OnSelect: =Set(varZobrazitKod, !varZobrazitKod)
-            PressedColor: =RGBA(255, 255, 255, 1)
-            PressedFill: =stylAkceStisk
-            Size: =10
-            Text: ="kód"
-            Tooltip: '="Skryje sloupec s identifikačními kódy a názvy se posunou doleva. Hledat podle kódu jde dál - hledání pracuje s daty, ne s tím, co je vidět."'
-            Width: =60
-            X: =460
+            X: =826
             Y: =116
       # Sedí v hlavičce stromu, ne v pruhu filtrů: patří k tabulce pod ním
       # a v pruhu zabíral místo, které od 1.0.0.92 potřebuje chip nezařazených.
@@ -1389,8 +1268,9 @@ Screens:
             OnSelect: |-
               =Set(varMenuRozbalit, false);
               Set(varMenuMapa, false);
-              Set(varMenuData, false)
-            Visible: =varMenuRozbalit || varMenuMapa || varMenuData
+              Set(varMenuData, false);
+              Set(varMenuStav, false)
+            Visible: =varMenuRozbalit || varMenuMapa || varMenuData || varMenuStav
             Width: =Parent.Width
             X: =0
             Y: =0
@@ -1518,6 +1398,190 @@ Screens:
             Width: =232
             X: =266
             Y: =256
+      # Nabídka stavu: pět voleb pod tlačítkem btn_StavMenu.
+      - rec_MenuStavPanel:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Fill: =stylKarta
+            # Poslední volba se skrývá, když žádná nezařazená aktivita není —
+            # panel se o ni musí zkrátit, jinak zůstane prázdný pruh.
+            Height: |-
+              =If(
+                  varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0,
+                  220,
+                  184
+              )
+            Visible: =varMenuStav
+            Width: =240
+            X: =460
+            Y: =144
+      - btn_StavVse:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varDashStav = "", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varDashStav = "", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =If(varDashStav = "", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varDashStav = "", stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varMenuStav, false);
+              Set(varDashStav, "")
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="vše"
+            Tooltip: '="Bez filtru stavu - ve stromu jsou všechny aktivity i větve nad nimi."'
+            Visible: =varMenuStav
+            Width: =232
+            X: =464
+            Y: =148
+      - btn_StavSchvaleno:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varDashStav = "schváleno", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varDashStav = "schváleno", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =If(varDashStav = "schváleno", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varDashStav = "schváleno", stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varMenuStav, false);
+              Set(varDashStav, "schváleno")
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="schváleno"
+            Tooltip: '="Nechá jen schválené aktivity a nad nimi jen ty agendy, procesy a dílčí procesy, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet schválených aktivit v dané větvi."'
+            Visible: =varMenuStav
+            Width: =232
+            X: =464
+            Y: =184
+      - btn_StavPracovni:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =If(varDashStav = "pracovní", RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varDashStav = "pracovní", stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =If(varDashStav = "pracovní", RGBA(255, 255, 255, 1), stylAkce)
+            HoverFill: =If(varDashStav = "pracovní", stylAkceHover, stylRadekHover)
+            OnSelect: |-
+              =Set(varMenuStav, false);
+              Set(varDashStav, "pracovní")
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="pracovní"
+            Tooltip: '="Nechá jen pracovní aktivity, tedy rozpracované záznamy, a nad nimi jen větve, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet pracovních aktivit v dané větvi."'
+            Visible: =varMenuStav
+            Width: =232
+            X: =464
+            Y: =220
+      # Osiřelá položka nemá ve stromu kam patřit, takže se v něm vůbec
+      # neukáže - chip je jediné místo, kde je z přehledu vidět.
+      - btn_OsireleD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varDashOsirele, stylPozor, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varDashOsirele, RGBA(255, 255, 255, 1), stylPozor)
+            Fill: =If(varDashOsirele, stylPozor, stylKarta)
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: |-
+              =Set(varMenuStav, false);
+              Set(varDashOsirele, !varDashOsirele);
+              Set(varDashNezarazene, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =10
+            Text: ="osiřelé"
+            Tooltip: '="Vypíše položky, jejichž nadřazená úroveň v číselníku není: proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího procesu. U agendy, která nadřazenou úroveň nemá, to znamená agendu bez jediného procesu. Ve stromu je jinak nenajdeš - strom ukazuje jen to, co visí pod otevřeným předkem, a sirotek žádného předka nemá. Uklidit je jde na obrazovce Editace nebo rovnou košem v řádku."'
+            Visible: =varMenuStav
+            Width: =232
+            X: =464
+            Y: =256
+      # Nezařazená aktivita rodiče MÁ (technický dílčí proces 00-00-000), takže
+      # mezi osiřelé nespadne a ve stromu ji nic neukáže - větev 00 je z něj
+      # schválně skrytá. Tenhle chip je jediná cesta, jak se k sirotkům dostat,
+      # a číslo v něm je zároveň to, co po importu holých aktivit zbývá dodělat.
+      # Vidět zůstane i s nulou, dokud je režim zapnutý - jinak by po přiřazení
+      # posledního sirotka zmizel a strom by zůstal prázdný bez cesty zpátky.
+      - btn_NezarazeneD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varDashNezarazene, stylPozor, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varDashNezarazene, RGBA(255, 255, 255, 1), stylPozor)
+            Fill: =If(varDashNezarazene, stylPozor, stylKarta)
+            FocusedBorderColor: =stylPozor
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylPozor
+            OnSelect: |-
+              =Set(varMenuStav, false);
+              Set(varDashNezarazene, !varDashNezarazene);
+              Set(varDashOsirele, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylPozor
+            Size: =10
+            Text: |-
+              ="nezařazené (" & CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) & ")"
+            Tooltip: '="Aktivity nahrané hromadným importem bez zařazení. Mají zatím technický kód pod 00-00-000 a čekají, až jim správce určí dílčí proces - teprve tím dostanou platný kód. Ve stromu je nenajdeš, větev Nezařazeno je z něj skrytá. Přiřazení se dělá v detailu aktivity výběrem dílčího procesu."'
+            Visible: |-
+              =varMenuStav && (varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0)
+            Width: =232
+            X: =464
+            Y: =292
+      # Zobrazení kódu není filtr, ale patří k témuž pohledu na strom —
+      # v pruhu bylo samostatné tlačítko a nikdo v něm netušil, co dělá.
+      - btn_KodD:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =If(varZobrazitKod, stylAkce, stylOkraj)
+            BorderThickness: =1
+            Color: =If(varZobrazitKod, RGBA(255, 255, 255, 1), stylAkce)
+            Fill: =If(varZobrazitKod, stylAkce, stylKarta)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =If(varZobrazitKod, stylAkceHover, stylAkce)
+            OnSelect: |-
+              =Set(varMenuStav, false);
+              Set(varZobrazitKod, !varZobrazitKod)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =10
+            Text: ="zobrazit kód"
+            Tooltip: '="Skryje nebo vrátí sloupec s identifikačními kódy; bez něj se názvy posunou doleva. Hledat podle kódu jde dál - hledání pracuje s daty, ne s tím, co je vidět."'
+            Visible: =varMenuStav
+            Width: =232
+            X: =464
+            Y: |-
+              =If(varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0, 328, 292)
       - rec_MenuMapaPanel:
           Control: Rectangle@2.3.0
           Properties:
@@ -1527,7 +1591,7 @@ Screens:
             Height: =84
             Visible: =varMenuMapa
             Width: =220
-            X: =912
+            X: =708
             Y: =144
       - btn_MapaHtml:
           Control: Classic/Button@2.2.0
@@ -1565,7 +1629,7 @@ Screens:
             Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami bez ohledu na jejich počet. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
             Visible: =varMenuMapa
             Width: =212
-            X: =916
+            X: =712
             Y: =148
       # Přejmenováno z „Obnovit mapu" na „Obnovit HTML" (23.08.2026): mapa
       # se v appce nemění, mění se ta publikovaná HTML stránka.
@@ -1601,7 +1665,7 @@ Screens:
             Tooltip: '="Přegeneruje publikovanou HTML stránku z dnešního obsahu rejstříku. Stránka data nečte živě - ukazuje stav k okamžiku poslední publikace, takže po každé dávce úprav ji je potřeba obnovit. Běh trvá několik sekund a probíhá na pozadí; hlášení potvrzuje spuštění, ne dokončení. Kromě toho se stránka obnovuje sama každý den v 7:00."'
             Visible: =varMenuMapa
             Width: =212
-            X: =916
+            X: =712
             Y: =184
       # ---------- potvrzení smazání ----------
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
@@ -1619,7 +1683,7 @@ Screens:
             Height: =220
             Visible: =varMenuData
             Width: =220
-            X: =1016
+            X: =826
             Y: =144
       - btn_ExportWord:
           Control: Classic/Button@2.2.0
@@ -1669,7 +1733,7 @@ Screens:
             Tooltip: '="Uloží momentální pohled jako dokument, který Word otevře a umí uložit jako .docx. Úrovně jsou odsazené jako ve stromu. Aktivity jdou do dokumentu celým zněním, ne zkráceným popiskem z řádku."'
             Visible: =varMenuData
             Width: =212
-            X: =1020
+            X: =830
             Y: =148
       - btn_ExportExcel:
           Control: Classic/Button@2.2.0
@@ -1719,7 +1783,7 @@ Screens:
             Tooltip: '="Uloží momentální pohled jako tabulku se sloupci úroveň, kód, název, vlastník a stav. Kódy zůstávají textem - v .csv je Excel převáděl na data (01-01 na 01.I). Formát .xls místo .xlsx schválně: .xlsx by vyžadoval placený konektor, který v tomhle prostředí není povolený, takže je to HTML tabulka s excelovým formátováním. Excel při otevření jednou upozorní, že přípona neodpovídá obsahu - potvrď Ano."'
             Visible: =varMenuData
             Width: =212
-            X: =1020
+            X: =830
             Y: =184
       # Vzorová tabulka pro hromadný import. Stahuje se hotový .xlsx z knihovny
       # Site Assets — sestavit ho ve flow nejde, .xlsx je zip a Logic Apps
@@ -1762,7 +1826,7 @@ Screens:
             Tooltip: '="Stáhne prázdný sešit se sloupci, které import očekává. Vyplň v něm jeden řádek na aktivitu a nahraj ho zpět - kód nevyplňuj, přiděluje ho aplikace. Sloupce ani list nepřejmenovávej, import je čte podle názvů. Pokyny k jednotlivým sloupcům jsou na druhém listu sešitu."'
             Visible: =varMenuData
             Width: =212
-            X: =1020
+            X: =830
             Y: =220
       # Záloha byla do 1.0.0.80 samostatné tlačítko v pruhu. Přesunuto sem
       # 01.09.2026: v pruhu už nebylo místo a popisek s počtem řádků ležel
@@ -1799,7 +1863,7 @@ Screens:
             Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00 a nechává se posledních 20. Hlášení potvrzuje spuštění, ne dokončení."'
             Visible: =varMenuData
             Width: =212
-            X: =1020
+            X: =830
             Y: =292
       # Import a obnova vedou na TÝŽ obrazovku — obě mají stejný tvar
       # (vyber soubor, zkontroluj nanečisto, teprve pak zapiš) a lišit se
@@ -1830,7 +1894,7 @@ Screens:
             Tooltip: '="Hromadné založení aktivit z vyplněného sešitu, který jsi nahrál do knihovny Import. Nejdřív ukáže, co by vzniklo, co je duplicita a kde je chyba; zapisuje se až po potvrzení."'
             Visible: =varMenuData
             Width: =212
-            X: =1020
+            X: =830
             Y: =256
       - btn_ObnovaMenu:
           Control: Classic/Button@2.2.0
@@ -1858,7 +1922,7 @@ Screens:
             Tooltip: '="Vrátí rejstřík do stavu, ve kterém byl v okamžiku pořízení vybraného snímku. Nejdřív ukáže, kolik položek se vrátí; zapisuje se až po potvrzení. Obnova nikdy nemaže — řádek, který dnes je a ve snímku není, jen ohlásí."'
             Visible: =varMenuData
             Width: =212
-            X: =1020
+            X: =830
             Y: =328
       - rec_ModalStinD:
           Control: Rectangle@2.3.0

@@ -1,13 +1,16 @@
-# Testovací scénář — balík 1.0.0.95
+# Testovací scénář — balík 1.0.0.96
 
 Prochází se shora dolů. Bloky **A–E** testují sirotčí aktivity (přišly
 s balíkem 92), **F–H** kaskádový přesun (93) a jeho napojení na aplikaci,
-**I–J** plný přesun z aplikace — ten jde projít od balíku **95**, kde je
-`PresunFlow` zaregistrované a volané.
+**I–J** plný přesun z aplikace.
 
-**Balík 94 se nezkouší** — appka v něm měla chybný vzorec (`Patch` nad
-zdrojem, který zrovna prochází `ForAll`), Studio ji označilo červeně a
-uložení aktivity by spadlo. Opravuje ho 95; blok **D** je právě ten test.
+**Zkouší se balík 96** — starší se přeskočí. V 94 měla appka chybný vzorec
+(`Patch` nad zdrojem, který zrovna prochází `ForAll`) a Studio ji označilo
+červeně; v 95 padal první ostrý běh `PresunFlow` na `substring` (viz blok F).
+96 opravuje obojí: blok **D** je test prvního, blok **F** druhého.
+
+**Pruh filtrů se změnil.** Stav, osiřelé, nezařazené i přepínač kódu jsou
+v jedné rolovací nabídce **Stav: … ▾**; pruh má nově čtyři prvky místo devíti.
 
 Každý krok má **co udělat** a **co musí nastat**. Kde je uvedeno „NESMÍ",
 je to past, kvůli které ten krok existuje — projít bez povšimnutí se nedá.
@@ -95,20 +98,26 @@ aktivity — v rejstříku se ale tvářit jako běžná agenda nesmějí.
       a dej **Zkontrolovat**. → Náhled hlásí **1 k založení**, z toho
       **1 bez zařazení**, 0 chyb.
 - [ ] **C.2** Dej **Provést import**. → Hlášení o úspěchu.
-- [ ] **C.3** Vrať se na přehled. → V pruhu filtrů svítí oranžový chip
-      **„nezařazené (1)"**.
+- [ ] **C.3** Vrať se na přehled a rozbal nabídku **Stav ▾**. → Je v ní
+      volba **„nezařazené (1)"**.
 
-> Chip je jediná cesta, jak se k nezařazeným aktivitám dostat: mají rodiče
-> `00-00-000`, takže **nejsou osiřelé** a chip „osiřelé" je neukáže — a ve
+> Ta volba je jediná cesta, jak se k nezařazeným aktivitám dostat: mají rodiče
+> `00-00-000`, takže **nejsou osiřelé** a volba „osiřelé" je neukáže — a ve
 > stromu nejsou, protože větev `00` je schovaná (blok B).
 
-- [ ] **C.4** Klikni na chip. → Strom se přepne na **plochý seznam**
-      a je v něm ta jedna aktivita s kódem `00-00-000-0001`.
-- [ ] **C.5** Vpravo v hlavičce tabulky stojí **„1 nezařazených · plochý seznam"**.
-- [ ] **C.6** Klikni na chip **„osiřelé"**. → Chip nezařazených **zhasne**
+- [ ] **C.4** Vyber ji. → Nabídka se **zavře**, strom se přepne na **plochý
+      seznam** a je v něm ta jedna aktivita s kódem `00-00-000-0001`.
+- [ ] **C.5** Popisek tlačítka nabídky nese **„· nezařazené"**, takže je
+      z pruhu poznat, že filtr běží. Vpravo v hlavičce tabulky stojí
+      **„1 nezařazených · plochý seznam"**.
+- [ ] **C.6** Nabídka → **„osiřelé"**. → Nezařazené se **vypnou**
       (režimy se vylučují) a seznam se změní na osiřelé položky.
-- [ ] **C.7** Klikni znovu na **„nezařazené"**. → Osiřelé zhasnou, nezařazené
-      svítí. Vypni chip úplně → strom se vrátí do normálu.
+- [ ] **C.7** Nabídka → **„nezařazené"** znovu, pak ještě jednou (vypnutí).
+      → Strom se vrátí do normálu a popisek je zase jen **„Stav: vše"**.
+- [ ] **C.8** Nabídka → **„zobrazit kód"**. → Sloupec s kódy zmizí a názvy
+      se posunou doleva; hledání podle kódu funguje dál. Vrať ho zpátky.
+- [ ] **C.9** Klikni vedle otevřené nabídky (kamkoli do plochy). → Nabídka
+      se zavře, aniž by se cokoli přepnulo.
 
 ---
 
@@ -183,6 +192,11 @@ Kontrola historie (list `HistorieKodu`):
 ---
 
 ## F. PresunFlow samostatně — bez aplikace
+
+> Tady spadl první ostrý běh (04.09.2026): `substring` na položce, jejíž kód
+> JE přesouvaný kód, protože Logic Apps chtějí start index **menší** než
+> délka řetězce. Balík 96 to počítá bez `substring` přes okraj, takže krok
+> F musí projít zeleně až do konce.
 
 Tenhle blok se dá projít hned, ještě než je flow zaregistrované v appce.
 Otestuje se tím výpočet kaskády na skutečných datech dřív, než k ní pustíš

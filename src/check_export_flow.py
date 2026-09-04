@@ -262,7 +262,27 @@ def vyhodnot(uzel, kontext):
     # dvakrát. Vytažení do vlastního modulu je na příště.
     if jmeno == "substring":
         text = _text(hodnoty[0])
-        return text[hodnoty[1]:] if len(hodnoty) == 2 else text[hodnoty[1]:hodnoty[1] + hodnoty[2]]
+        start = hodnoty[1]
+        if len(hodnoty) == 2:
+            # Logic Apps chtějí start index MENŠÍ než délka řetězce; Python
+            # naproti tomu vrátí text[len(text):] jako prázdno a chybu skryje.
+            # Tímhle rozdílem prošla brána nad vadným PresunFlow (04.09.2026):
+            # výraz `Mapa` počítal `substring(kod, length(presouvanyKod))`
+            # a na položce, jejíž kód JE ten přesouvaný, spadl ostrý běh na
+            # 'start index ... should be less than the length of the string'.
+            # Trojargumentová varianta zůstává na původní kontrole — u ní
+            # se hranice start == délka v provozu nepotvrdila a přísnější
+            # pravidlo by shodilo výrazy, které běží (build_flow.py).
+            if start < 0 or start >= len(text):
+                raise Chyba(
+                    f"substring({text!r}, {start}) je mimo rozsah — Logic Apps "
+                    "vyžadují start index menší než délka řetězce a běh na tom "
+                    "spadne; ošetři to podmínkou (viz zbytek() v "
+                    "build_presun_flow.py)")
+            return text[start:]
+        if start < 0 or hodnoty[2] < 0 or start + hodnoty[2] > len(text):
+            raise Chyba(f"substring({text!r}, {start}, {hodnoty[2]}) je mimo rozsah")
+        return text[start:start + hodnoty[2]]
     if jmeno == "length":
         return len(hodnoty[0])
     if jmeno == "startsWith":

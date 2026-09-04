@@ -1,22 +1,76 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-04 12:15**. Balík **1.0.0.95**.
-**Přesun (F10/4) je napojený na aplikaci.** `PresunFlow` je zaregistrované
-jako datový zdroj (export 94 ze Studia), takže obrazovka `scr_Presun` volá
-flow doopravdy — náhled i zápis. Zároveň je opravená chyba, kvůli které
-byla appka v balíku 94 ve Studiu červená.
+Aktualizováno: **2026-09-04 13:05**. Balík **1.0.0.96**.
+První ostrý běh `PresunFlow` spadl na `substring`; opraveno i s bránou, která
+to teď chytá. Vedle toho pruh filtrů na přehledu: pět chipů a přepínač kódu
+jsou v jedné rolovací nabídce.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Import `deploy/procesnimapa_1_0_0_95.zip`** jako upgrade.
-2. Otevřít appku ve Studiu → **App checker musí být bez chyb** (v 94 tam byla
-   jedna: `btn_Ulozit.OnSelect`). Mikro-změna → Save → Publish.
-3. **Projít `deploy/TESTOVACI_SCENAR.md`** — je přepsaný na balík 95.
-   Bloky A–E (sirotci), F–H (přesun, nezapisuje), I–J (plný přesun, mění data).
-   Blok **D** je zároveň test dnešní opravy, blok **H** ověří, že appka
-   opravdu volá flow.
-4. Co spadne, pošli i s hláškou z **run history** (u flow) nebo z App checkeru
-   (u appky) — z appky je vidět jen `502 BadGateway`, což příčinu neřekne.
+1. **Import `deploy/procesnimapa_1_0_0_96.zip`** jako upgrade.
+2. Otevřít appku ve Studiu → App checker bez chyb → mikro-změna, Save, Publish.
+3. **Projít `deploy/TESTOVACI_SCENAR.md`** (je přepsaný na 96). Blok **F**
+   je ten, co dnes spadl — musí dojít zeleně až do konce. Blok **C** ověří
+   novou nabídku, blok **D** opravu z 95.
+4. Co spadne, pošli i s hláškou z run history (u flow) nebo z App checkeru.
+
+## Co se udělalo 04.09.2026 odpoledne — balík 1.0.0.96
+
+**Pád ostrého běhu: `substring` přes okraj.** Kaskáda skládá nový kód jako
+`novyPrefix + zbytek za přesouvaným prefixem`. Zbytek se bral
+`substring(kod, length(presouvanyKod))` — jenže u **samotné přesouvané
+položky** je start index roven délce řetězce a Logic Apps vyžadují index
+**menší** než délka. Běh spadl na akci `Mapa` hláškou *„'start index' must be
+non-negative integer and should be less than the length of the string"*.
+Táž past číhala ještě na dvou místech: `dilci_proces_kod` v `Zaloz_aktivity`
+(při přesunu dílčího procesu) a vazba, jejíž `dilci_proces_kod` se rovná
+přesouvanému kódu.
+
+**První oprava byla špatně a je z ní poučení.** Podmínka
+`if(greater(length(...)), substring(...), '')` vypadá jako správné ošetření,
+ale **Logic Apps vyhodnocují všechny argumenty `if()`**, tedy i větev, která
+se nepoužije — `substring` by spadl dál. Platný tvar počítá s délkou:
+`substring(concat(kod, ' '), length(presouvany), sub(length(kod),
+length(presouvany)))`; mezera navíc posune horní mez, výřez nulové délky dá
+prázdný řetězec. Obě varianty jsou teď v `mutace_presun.py` jako mutace,
+takže se ta mylná nemůže vrátit.
+
+**Proč to brána nechytila, ačkoli výrazy opravdu POČÍTÁ.** `check_presun_flow`
+pouští výrazy mini-interpretem nad vzorovým rejstříkem — ten ale `substring`
+počítal pythonovsky, kde `text[len(text):]` tiše vrátí prázdno. Interpret
+(v `check_export_flow.py`, sdílený) teď u dvouargumentové varianty modeluje
+i **chybu** Logic Apps. Zpětně spuštěná brána nad balíkem 95 hlásí přesně to,
+co spadlo v provozu: `substring('07-08', 5) je mimo rozsah`. Trojargumentová
+varianta zůstala na původní kontrole — přísnější pravidlo tam není doložené
+a shodilo by výrazy, které běží.
+
+**Pruh filtrů na přehledu.** `Stav: vše | schváleno | pracovní`, chipy
+`osiřelé` a `nezařazené (N)` a přepínač `kód` byly samostatná tlačítka —
+devět prvků v jednom pruhu. Teď je to nabídka **Stav: … ▾**, jejíž popisek
+nese celý stav filtru (`Stav: schváleno · nezařazené`), a v ní šest voleb
+včetně **zobrazit kód**. Panel se krátí, když žádná nezařazená aktivita není.
+Nabídky *HTML mapa* a *Data* se posunuly doleva, aby v pruhu nezůstala díra.
+
+### Brány na 96
+
+`check_solution` **664** · `check_restore_flow` 571 · `check_sablona` 185 ·
+`check_zaloha_flow` 184 · `check_import_flow` 175 · `check_mapa_flow` 144 ·
+`check_export_flow` 129 · `check_presun_flow` 111 · `check_flow` 26 ·
+`check_env`, `check_schema` zeleně · `check_app`: 6 obrazovek, 285 prvků.
+Mutačně: `mutace_import` 25/25, `mutace_sablona` 19/19, `mutace_restore`
+17/17, `mutace_zaloha` 16/16, **`mutace_presun` 15/15 (+2 nové)**,
+`mutace_export_mapa` 7/7, `mutace_napojeni` 5/5, `mutace_parametry` 4/4,
+`mutace_app` 2/2.
+
+Sestavení:
+
+```
+copy deploy\procesnimapa_1_0_0_95.zip runs\vstup_96.zip
+python src/build_presun_flow.py --solution runs/vstup_96.zip
+python src/build_app.py --solution runs/vstup_96.zip --verze 1.0.0.96
+```
+
+---
 
 ## Co se udělalo 04.09.2026 — balík 1.0.0.95
 

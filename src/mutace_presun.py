@@ -135,12 +135,43 @@ def odpoved_navic(akce):
     akce["Odpoved"]["inputs"]["body"]["pocet"] = "@length(body('Mapa'))"
 
 
+def zbytek_bez_rezervy(akce):
+    """Zbytek kódu se bere holým substring(kod, length(presouvanyKod)).
+
+    Vypadá to jako totéž, ale u samotné přesouvané položky je start index
+    roven délce řetězce a Logic Apps na tom ostrý běh shodí
+    ('start index ... should be less than the length of the string').
+    Přesně tohle spadlo 04.09.2026 na prvním ostrém spuštění.
+    """
+    akce["Mapa"]["inputs"]["select"]["novy"] = (
+        "@concat(outputs('Novy_prefix'),"
+        " substring(coalesce(item()?['Title'], ''),"
+        " length(outputs('Vstup')?['kod'])))")
+
+
+def zbytek_pres_if(akce):
+    """Ošetření podmínkou — a ta nestačí.
+
+    `if()` v Logic Apps vyhodnotí VŠECHNY argumenty, tedy i větev, která se
+    nepoužije; substring proto spadne bez ohledu na test délky. Mutace je tu
+    proto, že tohle byl první (mylný) pokus o opravu.
+    """
+    akce["Mapa"]["inputs"]["select"]["novy"] = (
+        "@concat(outputs('Novy_prefix'),"
+        " if(greater(length(coalesce(item()?['Title'], '')),"
+        " length(outputs('Vstup')?['kod'])),"
+        " substring(coalesce(item()?['Title'], ''),"
+        " length(outputs('Vstup')?['kod'])), ''))")
+
+
 MUTACE = [
     ("maximum se hledá bez historie", bez_historie),
     ("filtr historie nerozlišuje úroveň", historie_bez_urovne),
     ("děti se nefiltrují vůbec", deti_bez_filtru),
     ("vnuci se hledají jen rovností", vnuci_jen_rovnost),
     ("nový kód se skládá bez zbytku po prefixu", novy_kod_bez_zbytku),
+    ("zbytek kódu bez rezervy pro mezní případ", zbytek_bez_rezervy),
+    ("zbytek kódu ošetřený podmínkou if()", zbytek_pres_if),
     ("dotčené vazby jen podle aktivity", vazby_jen_aktivita),
     ("dotčené vazby jsou všechny", vazby_prilis_siroce),
     ("zánik běží před vznikem", zanik_pred_vznikem),

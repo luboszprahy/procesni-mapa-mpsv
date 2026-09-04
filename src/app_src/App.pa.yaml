@@ -102,6 +102,7 @@ App:
       Set(varDashOsirele, false);
       Set(varDashNezarazene, false);
       Set(varMenuRozbalit, false);
+      Set(varMenuStav, false);
       Set(varMenuMapa, false);
       Set(varMenuData, false);
       Set(varExportBezi, false);
