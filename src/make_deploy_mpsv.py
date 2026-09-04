@@ -6,12 +6,17 @@ nebo appky obsahovala starou verzi a nikdo by to nepoznal, protože soubory
 uvnitř vypadají pořád stejně.
 
 Obsah:
-  README.md              postup krok za krokem
-  01_zaloz_listy.js      provisioning listů a sloupců (do konzole prohlížeče)
-  02_import_dat.js       import OSTRÝCH dat z runs/normalize
-  03_vypis_guidy.js      vypíše GUIDy listů pro src/build_flow.py
-  sharepoint_schema.md   dokumentace schématu
-  procesnimapa_*.zip     poslední solution balík
+  README.md                    postup krok za krokem
+  01_zaloz_listy.js            provisioning listů, sloupců a knihoven
+  02_import_dat.js             import OSTRÝCH dat z runs/normalize
+  03_vypis_guidy.js            vypíše GUIDy listů (nepovinné, jen kontrola)
+  procesnimapa_*.zip           poslední solution balík
+  site_assets/                 soubory k nahrání do knihovny Site Assets
+  sharepoint_schema.md         dokumentace schématu
+  navod_sprava.md              jak appku používat (pro správce rejstříku)
+  navod_publikace_mapy.md      HTML mapa a její publikace
+  TESTOVACI_SCENAR.md          přejímka po nasazení, bod po bodu
+  flow_*.md                    kontrakty jednotlivých flow
 
 Spouštět z kořene projektu:
     python src/make_deploy_mpsv.py
@@ -22,6 +27,7 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, "src")
@@ -77,17 +83,43 @@ def posledni_balik():
     return baliky[-1]
 
 
-def readme(pocty, balik, listy):
+# co flow dělá a čím se spouští — do tabulky v README
+FLOW = {
+    "MapaPublishFlow": ("publikace HTML mapy se zapečenými daty", "z appky"),
+    "MapaPublishScheduled": ("táž publikace", "denně 7:00"),
+    "ExportFlow": ("export přehledu do Wordu a Excelu, adresy souborů", "z appky"),
+    "AktualizaceKratkehoNazvu": ("zkrácený název aktivity", "změna v listu"),
+    "ZalohaFlow": ("snímek rejstříku do knihovny Zalohy", "z appky"),
+    "ZalohaScheduled": ("týž snímek", "denně 5:00"),
+    "RestoreFlow": ("obnova rejstříku ze snímku", "z appky"),
+    "ImportFlow": ("hromadné pořízení aktivit z Excelu", "z appky"),
+    "PresunFlow": ("kaskádový přesun procesu a dílčího procesu", "z appky"),
+}
+
+# flow, které appka volá přes Flow.Run() — musí se zaregistrovat ve Studiu
+VOLANA_Z_APPKY = ["MapaPublishFlow", "ExportFlow", "ZalohaFlow", "ImportFlow",
+                  "RestoreFlow", "PresunFlow"]
+
+
+def readme(pocty, balik, listy, flow, obrazovky):
     prehled = "\n".join(f"| `{n}` | {p} |" for n, p in pocty)
     promenne = "\n".join(
-        f"| `{schema}` | {nazev} | {'web' if klic == 'dataset' else 'list'} |"
+        f"| `{schema}` | {nazev} | {'adresa webu' if klic == 'dataset' else 'list z rozbalovátka'} |"
         for schema, nazev, _, klic, _ in ep.DEFINICE)
+    tabulka_flow = "\n".join(
+        f"| `{f}` | {FLOW.get(f, ('—', '—'))[0]} | {FLOW.get(f, ('—', '—'))[1]} |"
+        for f in flow)
+    registrace = ", ".join(f"`{f}`" for f in VOLANA_Z_APPKY)
     return f"""# Nasazení na tenant MPSV — postup
 
 Tahle složka se **generuje** skriptem `src/make_deploy_mpsv.py`. Neupravuj
 soubory v ní ručně — po příští změně schématu nebo appky se přepíšou.
 
-Balík appky: **`{balik.name}`**
+Balík appky: **`{balik.name}`** · {len(flow)} flow · {obrazovky} obrazovek ·
+{len(ep.DEFINICE)} proměnných prostředí
+
+Postup má osm kroků a **pořadí je závazné**. Každý krok má vlastní ověření;
+další začni, až předchozí projde.
 
 ## Co se bude importovat
 
@@ -97,12 +129,15 @@ Ostrá data z `runs/normalize/` (ne anonymizovaná):
 |---|---|
 {prehled}
 
+> **`02_import_dat.js` nese neanonymizovaná data** — jména útvarů, vnitřní
+> předpisy a znění činností. Do cizího vývojového tenantu nepatří.
+
 ## Jak se balík napojuje na SharePoint
 
-Od verze 1.0.0.62 **nemají flow adresu webu ani GUIDy listů natvrdo** — berou
-je z proměnných prostředí, které vyplníš v průvodci importem. Do 1.0.0.61 tam
-byly natvrdo a import na MPSV právě na tom padl: web PPF tam neexistuje, akce
-jsou neplatné, flow nejde zapnout a designer list ani nenabídne k přepnutí.
+Flow **nemají adresu webu ani GUIDy listů natvrdo** — berou je z proměnných
+prostředí, které vyplníš v průvodci importem. Do 1.0.0.61 tam byly natvrdo
+a nasazení na MPSV právě na tom padlo: web PPF v cílovém tenantu neexistuje,
+akce jsou neplatné a flow nejde zapnout.
 
 | proměnná | zobrazí se jako | vybírá se |
 |---|---|---|
@@ -110,127 +145,163 @@ jsou neplatné, flow nejde zapnout a designer list ani nenabídne k přepnutí.
 
 Definice **nemají výchozí hodnotu** schválně. Kdyby ji měly, průvodce by je
 předvyplnil adresou vývojového webu a import by tiše prošel se špatným
-napojením. Takhle se musí vyplnit vědomě. Prostředí si hodnoty po prvním
-vyplnění drží — další import už se neptá.
+napojením — flow by pak celé týdny běhalo zeleně nad cizími daty.
 
-## Postup
+---
 
-Kroky **1–2** se dělají v prohlížeči na cílovém webu MPSV, zbytek v Power Apps
-a lokálně.
-
-### 1. Založit listy a sloupce
+## 1. Založit listy, sloupce a knihovny
 
 Otevři cílový web MPSV, dej **F12 → Console**, vlož celý obsah
-`01_zaloz_listy.js` a spusť.
+`01_zaloz_listy.js` a spusť. Skript si web odvodí z adresy stránky, na které
+běží — žádnou URL v sobě nemá.
 
-Skript je **idempotentní** — co existuje, nezakládá znovu; co chybí, doplní;
-sloupce, které nejsou ve výchozím zobrazení, do něj přidá. Na konci vypíše
-tabulku se stavem každého sloupce.
+Založí listy rejstříku a knihovny **`Zalohy`**, **`Exporty`** a **`Import`**.
+Je **idempotentní**: co existuje, nezakládá znovu; co chybí, doplní; sloupce
+mimo výchozí zobrazení do něj přidá.
 
-**Ověření:** poslední řádek výpisu musí říct, že chybných sloupců je 0.
-Struktura listů je popsaná v `sharepoint_schema.md`.
+**Krok 1 musí být před importem solution.** Průvodce importem nabízí u každé
+listové proměnné rozbalovátko listů cílového webu — když list ještě
+neexistuje, není co vybrat, proměnná zůstane prázdná a to shodí napojení
+**celé** SharePoint connection, tedy i listů, které s ní nesouvisejí. Projeví
+se to jako `We didn't find any datasets` při startu appky a vypadá to jako
+vada balíku.
 
-### 2. Naimportovat ostrá data
+**Ověření:** poslední řádek výpisu říká, že chybných sloupců je **0**;
+v *Site contents* jsou vidět knihovny `Zálohy`, `Exporty`, `Import` a list
+`Historie kódů`. Struktura je popsaná v `sharepoint_schema.md`.
 
-Tamtéž vlož `02_import_dat.js`.
+## 2. Naimportovat ostrá data
 
-Skript je také idempotentní — položku pozná podle identifikačního kódu
-(sloupec `Title`), takže opakované spuštění nezaloží duplicity.
+Tamtéž vlož `02_import_dat.js`. Skript je idempotentní — položku pozná podle
+identifikačního kódu (sloupec `Title`), takže opakované spuštění nezaloží
+duplicity.
 
-**Ověření:** počty na konci výpisu musí sedět s tabulkou výše.
+**Ověření:** počty na konci výpisu sedí s tabulkou výše.
 
-> **Pozor:** tenhle soubor obsahuje **neanonymizovaná** data — jména útvarů,
-> vnitřní předpisy a znění činností. Do cizího vývojového tenantu nepatří.
+`03_vypis_guidy.js` je nepovinný — vypíše GUID každého listu. Build ho
+nepotřebuje (listy se vybírají v průvodci), hodí se jen ke kontrole.
 
-`03_vypis_guidy.js` je nepovinný — vypíše GUID každého listu. Od 1.0.0.62 ho
-build nepotřebuje (listy se vybírají v průvodci), hodí se jen ke kontrole,
-že listy vznikly.
-
-### 3. Naimportovat solution a VYPLNIT PROMĚNNÉ
+## 3. Naimportovat solution a VYPLNIT VŠECH {len(ep.DEFINICE)} PROMĚNNÝCH
 
 Power Apps → **Solutions → Import solution** → `{balik.name}`
-(unmanaged, jako upgrade).
-
-Průvodce se postupně zeptá na:
+(unmanaged). Průvodce se zeptá na:
 
 1. **připojení** (connection reference na SharePoint) — vyber nebo založ
    připojení v tenantu MPSV,
-2. **šest proměnných** z tabulky výše. U `{ep.WEB}` zadej adresu webu MPSV;
-   ostatních pět se pak vybírá **z rozbalovátka listů toho webu**.
+2. **{len(ep.DEFINICE)} proměnných** z tabulky výše. U `{ep.WEB}` zadej adresu webu MPSV,
+   ostatní se pak vybírají z rozbalovátka listů toho webu.
 
-> **Průvodce neproklikávej.** Proměnná bez hodnoty se neprojeví při importu,
-> ale až tím, že flow nejde zapnout — a vypadá to jako chyba balíku.
+> **Průvodce neproklikávej.** Prázdná proměnná se při importu neprojeví —
+> projeví se až tím, že flow nejde zapnout, a vypadá to jako vada balíku.
 
-### 4. Zapnout všechna čtyři flow
+## 4. Zapnout všechna flow
 
-Import **stav zapnutí nemění**, takže po každém importu:
+**Import stav zapnutí nemění.** Flow, které se jednou nepodařilo zapnout,
+zůstane vypnuté i po importu opravené verze.
 
-- `MapaPublishFlow` — publikace HTML mapy z tlačítka,
-- `MapaPublishScheduled` — táž publikace denně v 7:00,
-- `ExportFlow` — export přehledu do Wordu a Excelu,
-- `AktualizaceKratkehoNazvu` — zkrácený název aktivity.
+| flow | co dělá | trigger |
+|---|---|---|
+{tabulka_flow}
 
-Vypnuté flow se projeví jako chyba appky, ne flow.
+Vypnuté flow se projeví jako chyba **appky**, ne flow: canvas app vidí jen
+`502 BadGateway / NoResponse` a příčinu z toho poznat nejde — ta je v run
+history.
 
-### 5. Přepojit appku a zaregistrovat flow
+**Ověření:** všech {len(flow)} má stav *On*.
 
-Flow už jsou hotová, ale **canvas app se na proměnné zatím nepřevedla** — drží
-web a GUIDy listů ve svém napojení. Otevři ji v **Power Apps Studiu**:
+## 5. Nahrát soubory do Site Assets
+
+Ze složky `site_assets/` přetáhni do knihovny **Site Assets** cílového webu:
+
+| soubor | k čemu |
+|---|---|
+| `mapa_template.html` | šablona s kotvami, ze které flow skládá stránku |
+| `procesni_mapa.html` | hotová mapa, aby bylo co otevřít, než flow poprvé proběhne |
+| `sablona_import_aktivit.xlsx` | prázdný sešit pro hromadný import |
+
+Sešit se **musí jmenovat přesně takhle** — `ExportFlow` skládá jeho adresu
+z názvu, ne vyhledáním souboru.
+
+Účet, pod kterým flow běží, potřebuje **Contribute** na `Site Assets`,
+`Zalohy`, `Exporty` a `Import`.
+
+**Ověření:** `MapaPublishFlow` doběhne zeleně a `procesni_mapa.html` se
+přepíše aktuálním časem.
+
+## 6. Přepojit appku a zaregistrovat flow (kolo 1)
+
+Flow jsou přenositelná, ale **canvas app se na proměnné nepřevádí** — drží
+napojení na konkrétní listy a volání flow na jejich `FlowNameId`, které
+přiděluje až cílové prostředí. Lokálně to dogenerovat nejde. Ve **Studiu**:
 
 1. datové zdroje přepni na listy na webu MPSV,
-2. **Add data → ExportFlow** — bez toho se `ExportFlow.Run()` nemá na co
-   navázat; `FlowNameId` přiděluje až cílové prostředí a lokálně se
-   dogenerovat nedá,
+2. **Add data** → {registrace},
 3. **mikro-změna** (posunout prvek o pixel a vrátit) → **Save** → **Publish**,
-4. **Export solution** (unmanaged) a ulož si zip.
+4. **Export solution** (unmanaged) a ten zip si ulož.
 
-### 6. Adresa mapy, sestavení a kontrola
+Bez kroku 3 vidí ostatní pořád předchozí verzi appky, i když import proběhl;
+navíc se appka zabalená z YAML validuje až tady (App checker musí být čistý).
+
+## 7. Adresa mapy a přestavení balíku (kolo 2)
 
 `varMapaUrl` je jediné ručně psané místo s adresou — canvas app umí číst jen
 datasetové proměnné prostředí, textové ne.
 
 1. v `src/app_src/App.pa.yaml` přepiš `varMapaUrl` na adresu publikované mapy
    na webu MPSV,
-2. sestav a zkontroluj:
+2. sestav a zkontroluj (z kořene projektu):
 
 ```powershell
 $py = ".venv/Scripts/python.exe"
-& $py src/build_app.py --solution <exportovany_zip> --verze <nova_verze>
-& $py src/check_solution.py --vstup <exportovany_zip> --vystup deploy/procesnimapa_<verze>.zip
-& $py src/check_env.py
+& $py src/build_app.py --solution <zip_z_kroku_6> --verze <nova_verze>
+& $py src/check_solution.py --vstup <zip_z_kroku_6> --vystup deploy/procesnimapa_<verze>.zip
 & $py src/check_app.py
-& $py src/check_export_flow.py --solution deploy/procesnimapa_<verze>.zip
-& $py src/check_mapa_flow.py   --solution deploy/procesnimapa_<verze>.zip
-& $py src/check_flow.py        --solution deploy/procesnimapa_<verze>.zip
+& $py src/check_env.py
 ```
-
-Flow se **znovu negenerují** — jsou přenositelná. Build skripty se pouští jen
-tehdy, když se mění jejich logika.
-
-`check_solution.py` **selže**, jakmile se do některého flow vrátí adresa webu
-nebo GUID listu — je to hlavní pojistka proti opakování dnešní chyby.
 
 3. výsledný balík naimportuj, flow zapni a ve Studiu znovu **mikro-změna →
    Save → Publish**.
 
-### 7. Ověření, že to běží
+Flow se **znovu negenerují** — build skripty se pouštějí jen tehdy, když se
+mění jejich logika. `check_solution.py` selže, jakmile by se do některého flow
+vrátila adresa webu nebo GUID listu.
 
-- najeď myší na název **Procesní mapa MPSV** v modrém pruhu — nápověda musí
-  ukázat verzi, kterou jsi právě naimportoval. Když se neukáže vůbec nebo
-  číslo nesedí, neproběhl krok Save + Publish,
-- na Přehledu musí karty ukazovat počty z tabulky výše,
-- **Export → Do Wordu** a **Do Excelu** musí vyrobit soubor v Site Assets,
-- **HTML mapa → Obnovit HTML** musí doběhnout a **Zobrazit v HTML** otevřít
-  mapu s reálnými daty,
-- uprav název aktivity a zkontroluj, že se zkrácený název srovnal — tím je
-  ověřené i čtvrté flow.
+## 8. První záloha a přejímka
+
+`ZalohaScheduled` poběží sám až v 5:00; první snímek si vynuť z appky:
+**Data ▾ → Záloha rejstříku**.
+
+**Ověření, na kterém záleží:** v knihovně `Zalohy` přibude
+`rejstrik_<RRRR-MM-DD_HHMM>.json` a v něm má `listy.DilciProcesy`
+**250 položek**, ne 100. Sto by znamenalo, že se nepropsalo stránkování —
+běh je v tom případě zelený a snímek přesto oříznutý. Je to jediná vada
+zálohy, která se jinak pozná až při obnově.
+
+Pak projdi **`TESTOVACI_SCENAR.md`** — je to přejímka bod po bodu, včetně
+toho, co se nesmí stát. Bloky, které mění data, jsou v něm označené.
+
+---
+
+## Když se něco nepovede
+
+| příznak | kde je příčina |
+|---|---|
+| `We didn't find any datasets` při startu appky | nevyplněná Current Value některé proměnné (krok 3) |
+| `Flow.Run failed: 502 BadGateway / NoResponse` | vypnuté flow (krok 4) nebo prázdná proměnná; pravdu řekne run history, ne hláška v appce |
+| flow nejde zapnout | prázdná proměnná, nebo sirotek po starší solution v Default Solution (Turn off → Delete → Publish all customizations) |
+| flow spadne na neexistující složce | neproběhl krok 1 — chybí knihovna `Zalohy`, `Exporty` nebo `Import` |
+| import z Excelu: `403 OpenWorkbookAccessDenied` | sešit má citlivostní štítek, který ho šifruje. Štítek *Interní* projde, přísnější ne — přeštítkuj sešit. Není to chyba importu |
+| Vzorová tabulka: stáhne se stránka s chybou místo sešitu | soubor není v Site Assets, nebo se jmenuje jinak (krok 5) |
+| snímek má u `DilciProcesy` přesně 100 položek | nepropsalo se stránkování — nahlas to, je to vada balíku |
+| appka ukazuje starou verzi | chybí mikro-změna → Save → Publish (krok 6) |
+| v knihovně `Zálohy` ubývají staré snímky | tak to má být, nechává se posledních 20; snímek, který chceš udržet, přejmenuj |
 
 ## Co v téhle složce záměrně není
 
-- **Anonymizovaná data** — ta jsou v `runs/anonym/` a patří do vývojového
+- **Anonymizovaná data** — jsou v `runs/anonym/` a patří do cizího vývojového
   tenantu, ne sem.
-- **Šablona mapy** `mapa_template.html` — nahrává se do knihovny Site Assets
-  webu MPSV; postup je v `deploy/navod_publikace_mapy.md`.
+- **Zdrojové kódy a build skripty** — sada je pro nasazení, ne pro vývoj;
+  ty jsou v repozitáři projektu.
 """
 
 
@@ -256,19 +327,41 @@ def main():
         VYPIS_GUIDU % (json.dumps(nazvy, ensure_ascii=False), len(nazvy), len(nazvy)),
         encoding="utf-8")
 
-    shutil.copy("deploy/sharepoint_schema.md", CIL / "sharepoint_schema.md")
     balik = posledni_balik()
     for stary in CIL.glob("procesnimapa_*.zip"):
         stary.unlink()
     shutil.copy(balik, CIL / balik.name)
 
+    # dokumentace, kterou nasazující potřebuje u sebe, ne v repozitáři
+    for jmeno in ("sharepoint_schema.md", "navod_sprava.md",
+                  "navod_publikace_mapy.md", "TESTOVACI_SCENAR.md"):
+        shutil.copy(f"deploy/{jmeno}", CIL / jmeno)
+    for kontrakt in sorted(Path("deploy").glob("flow_*.md")):
+        shutil.copy(kontrakt, CIL / kontrakt.name)
+
+    # soubory do knihovny Site Assets — bez nich mapa ani import nefungují
+    assets = CIL / "site_assets"
+    shutil.rmtree(assets, ignore_errors=True)
+    assets.mkdir()
+    for jmeno in ("mapa_template.html", "procesni_mapa.html",
+                  "sablona_import_aktivit.xlsx"):
+        shutil.copy(f"deploy/{jmeno}", assets / jmeno)
+
+    with zipfile.ZipFile(balik) as zip_balik:
+        flow = sorted(n.split("/")[1].rsplit("-", 5)[0]
+                      for n in zip_balik.namelist() if n.startswith("Workflows/"))
+    obrazovky = len(list(Path("src/app_src").glob("scr_*.pa.yaml")))
+
     model = json.loads((DATA / "model.json").read_text(encoding="utf-8"))
     pocty = [(k, len(v)) for k, v in model.items() if isinstance(v, list)]
-    (CIL / "README.md").write_text(readme(pocty, balik, nazvy), encoding="utf-8")
+    (CIL / "README.md").write_text(
+        readme(pocty, balik, nazvy, flow, obrazovky), encoding="utf-8")
 
     print(f"\nHOTOVO: {CIL}")
-    for cesta in sorted(CIL.iterdir()):
-        print(f"  {cesta.name:28} {cesta.stat().st_size:>9} B")
+    for cesta in sorted(CIL.rglob("*")):
+        if cesta.is_file():
+            popis = str(cesta.relative_to(CIL)).replace("\\", "/")
+            print(f"  {popis:34} {cesta.stat().st_size:>9} B")
     print(f"\nbalík appky: {balik.name}")
     print("POZOR: 02_import_dat.js nese NEANONYMIZOVANÁ data — jen na tenant MPSV")
     return 0

@@ -12,13 +12,13 @@
 
   const data = await api("web/lists?$select=Title,Id,ItemCount&$filter=Hidden eq false");
   const radky = data.value
-    .filter((l) => ["Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces", "Útvary"].includes(l.Title))
+    .filter((l) => ["Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces", "Útvary", "Historie kódů"].includes(l.Title))
     .map((l) => ({ list: l.Title, GUID: l.Id, polozek: l.ItemCount }));
   console.log("web: " + web);
   console.table(radky);
   console.log(
-    radky.length === 6
+    radky.length === 7
       ? "OK - nalezeny vsechny listy rejstriku"
-      : "POZOR - ceka se " + 6 + " listu, nalezeno " + radky.length
+      : "POZOR - ceka se " + 7 + " listu, nalezeno " + radky.length
   );
 })();

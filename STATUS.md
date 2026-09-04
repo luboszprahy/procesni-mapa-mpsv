@@ -14,6 +14,39 @@ jsou v jedné rolovací nabídce.
    novou nabídku, blok **D** opravu z 95.
 4. Co spadne, pošli i s hláškou z run history (u flow) nebo z App checkeru.
 
+## Nasazovací sada pro MPSV — hotová (04.09.2026 15:00)
+
+`deploy/mpsv/` je přegenerovaná z balíku **1.0.0.96** a je to kompletní sada
+k nasazení do tenantu MPSV. Generuje ji `python src/make_deploy_mpsv.py`.
+
+| část | co v ní je |
+|---|---|
+| `README.md` | osm kroků, každý s ověřením; tabulka devíti flow, devíti proměnných, řešení potíží |
+| `01_zaloz_listy.js` | provisioning listů, sloupců a knihoven (F12 konzole) |
+| `02_import_dat.js` | **ostrá** data: 7 agend, 46 procesů, 250 dílčích, 46 aktivit, 46 vazeb |
+| `03_vypis_guidy.js` | nepovinná kontrola GUIDů |
+| `procesnimapa_1_0_0_96.zip` | solution balík |
+| `site_assets/` | `mapa_template.html`, `procesni_mapa.html`, `sablona_import_aktivit.xlsx` |
+| dokumentace | `sharepoint_schema.md`, `navod_sprava.md`, `navod_publikace_mapy.md`, `TESTOVACI_SCENAR.md`, sedm kontraktů `flow_*.md` |
+
+**README se generuje z balíku, ne z paměti** — seznam flow i počet obrazovek
+čte přímo ze zipu a z `src/app_src`, takže příště nemůže tvrdit něco jiného,
+než balík obsahuje. Předtím mluvilo o čtyřech flow a šesti proměnných, zatímco
+balík má devět a devět.
+
+**`navod_sprava.md` byl přepsaný na 1.0.0.96.** Byl u verze 51: neznal
+nezařazené aktivity, hromadný import, zálohu, obnovu ani přesun, popisoval
+chipy místo nabídky filtrů — a v „Mezích" tvrdil, že přesun se dělá ručním
+založením a smazáním, což od F10/4 neplatí. Přibyly sekce **§7 Data**
+a **§8 Přesun**, zbytek se přečísloval.
+
+**Co ještě není hotové a je na cizí straně:** přístup do tenantu MPSV.
+Sada je připravená, ale nasazení proběhne, až bude přístup — kroky 6 a 7
+README (registrace flow ve Studiu a adresa mapy) se dělají v cílovém
+prostředí a vyžadují dvě kola.
+
+---
+
 ## Co se udělalo 04.09.2026 odpoledne — balík 1.0.0.96
 
 **Pád ostrého běhu: `substring` přes okraj.** Kaskáda skládá nový kód jako

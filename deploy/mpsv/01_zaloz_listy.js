@@ -17,6 +17,29 @@ const SCHEMA = {
  "poznamka": "Jediny zdroj pravdy o strukture SharePoint listu. Cte ho check_schema.py (validace dat + generovani deploy/sharepoint_schema.md), make_setup.py (provisioning) a make_import.py (import dat). Nikde jinde strukturu nedeklaruj.",
  "prefix": "mpsv_",
  "publisher": "mpsv",
+ "seed": {
+  "poznamka": "Technicke polozky, ktere zaklada provisioning, ne import dat. Aktivita nahrana bez zarazeni dostane kod pod 00-00-000 a ceka, az ji spravce v appce priradi ke skutecnemu dilcimu procesu. Kod aktivity se odvozuje od kodu rodice, takze bez rodice by sirotek nemel pod cim vzniknout - Title je povinny.",
+  "prefix_nezarazeno": "00-00-000",
+  "polozky": [
+   {
+    "list": "Agendy",
+    "Title": "00",
+    "nazev": "Nezařazeno"
+   },
+   {
+    "list": "Procesy",
+    "Title": "00-00",
+    "nazev": "Nezařazeno",
+    "agenda_kod": "00"
+   },
+   {
+    "list": "DilciProcesy",
+    "Title": "00-00-000",
+    "nazev": "Nezařazeno",
+    "proces_kod": "00-00"
+   }
+  ]
+ },
  "lists": [
   {
    "name": "Agendy",
@@ -120,6 +143,14 @@ const SCHEMA = {
       "rejstrik",
       "karta"
      ]
+    },
+    {
+     "name": "puvodni_kod",
+     "display": "Vzniklo z kódu",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod."
     }
    ],
    "display": "Procesy"
@@ -190,6 +221,14 @@ const SCHEMA = {
       "rejstrik",
       "karta"
      ]
+    },
+    {
+     "name": "puvodni_kod",
+     "display": "Vzniklo z kódu",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod."
     }
    ],
    "display": "Dílčí procesy"
@@ -305,6 +344,14 @@ const SCHEMA = {
      "type": "DateTime",
      "csv": null,
      "popis": "V evidencni karte neexistuje - pri importu se plni datem importu, dal ji udrzuje porizovaci appka."
+    },
+    {
+     "name": "puvodni_kod",
+     "display": "Vzniklo z kódu",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Kod predchudce, ktery se pri presunu pod jineho rodice uzavrel. Prazdne u polozek, ktere vznikly rovnou. Protejsek: HistorieKodu.nastupce_kod."
     }
    ],
    "display": "Aktivity"
@@ -409,6 +456,91 @@ const SCHEMA = {
      "popis": "Kod nadrizeneho utvaru; u sekce prazdne."
     }
    ]
+  },
+  {
+   "name": "HistorieKodu",
+   "csv": null,
+   "popis": "Uzavrene identifikacni kody vsech ctyr urovni. Zaznam vznika pri presunu polozky pod jineho rodice (zanik + vznik) nebo pri zruseni bez nahrady. Nemaze se a kod se nikdy nerecykluje - pridelovaci vzorec bere maximum pres zivy list I pres tuto historii.",
+   "columns": [
+    {
+     "name": "Title",
+     "display": "Uzavřený kód",
+     "type": "Text",
+     "maxlen": 20,
+     "required": true,
+     "indexed": true,
+     "csv": null,
+     "popis": "Uzavreny identifikacni kod. Prirozeny klic - kazdy kod se uzavira prave jednou."
+    },
+    {
+     "name": "uroven",
+     "display": "Úroveň",
+     "type": "Choice",
+     "indexed": true,
+     "csv": null,
+     "choices": [
+      "agenda",
+      "proces",
+      "dilci_proces",
+      "aktivita"
+     ],
+     "popis": "Uroven, na ktere kod stal. Odvoditelna z poctu segmentu, ale uklada se kvuli filtrovani ve view."
+    },
+    {
+     "name": "nazev",
+     "display": "Název",
+     "type": "Text",
+     "maxlen": 255,
+     "required": true,
+     "csv": null,
+     "popis": "Nazev polozky v okamziku uzavreni - doklad, ktery se uz nemeni."
+    },
+    {
+     "name": "nastupce_kod",
+     "display": "Nástupce (kód)",
+     "type": "Text",
+     "maxlen": 20,
+     "csv": null,
+     "popis": "Novy kod, pod kterym polozka zije dal. Prazdne = zruseno bez nahrady."
+    },
+    {
+     "name": "duvod",
+     "display": "Důvod",
+     "type": "Note",
+     "csv": null
+    },
+    {
+     "name": "datum",
+     "display": "Datum uzavření",
+     "type": "DateTime",
+     "csv": null
+    },
+    {
+     "name": "kdo",
+     "display": "Uzavřel",
+     "type": "Text",
+     "maxlen": 255,
+     "csv": null
+    }
+   ],
+   "display": "Historie kódů"
+  }
+ ],
+ "libraries": [
+  {
+   "name": "Zalohy",
+   "display": "Zálohy",
+   "popis": "Snimky rejstriku (JSON) z flow ZalohaFlow. Nazev souboru nese razitko, verzovani proto neni potreba."
+  },
+  {
+   "name": "Exporty",
+   "display": "Exporty",
+   "popis": "Vyexportovane dokumenty z prehledu (.doc/.xls) z flow ExportFlow. Do 1.0.0.81 padaly do Site Assets a misily se s publikovanou mapou."
+  },
+  {
+   "name": "Import",
+   "display": "Import",
+   "popis": "Vyplnene sesity pro hromadny import aktivit. Spravce sem nahrava .xlsx podle sablony; cte je ImportFlow."
   }
  ]
 };
@@ -512,6 +644,30 @@ function fieldXml(c) {
   throw new Error("neznamy typ sloupce: " + c.type);
 }
 
+// ---------- knihovny ----------
+
+async function najdiKnihovnu(nazev) {
+  // Knihovna sedi v korenu webu (/Zalohy), ne pod /Lists/ - proto vlastni
+  // hledani. BaseTemplate 101 odlisi knihovnu od stejnojmenneho listu.
+  const j = await get("web/lists?$select=Id,Title,BaseTemplate,RootFolder/ServerRelativeUrl" +
+                      "&$expand=RootFolder&$top=500");
+  const konec = "/" + nazev.toLowerCase();
+  return (j.value || []).find(
+    (l) => l.BaseTemplate === 101 && l.RootFolder &&
+           l.RootFolder.ServerRelativeUrl.toLowerCase().endsWith(konec)) || null;
+}
+
+async function zalozKnihovnu(kn) {
+  // Title pri zalozeni = interni nazev -> cista URL /<Name>, stejne jako u listu.
+  await post("web/lists", {
+    __metadata: { type: "SP.List" },
+    BaseTemplate: 101,
+    Title: kn.name,
+    Description: kn.popis || "",
+  });
+  return najdiKnihovnu(kn.name);
+}
+
 // ---------- listy ----------
 
 async function najdiList(nazev) {
@@ -585,6 +741,26 @@ async function nastavRazeni(id, lst) {
   }, true);
 }
 
+// ---------- technicke polozky (seed) ----------
+
+// Aktivita nahrana bez zarazeni dostane kod pod 00-00-000. Kod se odvozuje od
+// kodu rodice a Title je povinny, takze bez teto trojice by sirotek nemel pod
+// cim vzniknout. Zaklada je provisioning, aby existovala i na prazdnem webu.
+async function najdiPolozku(idListu, kod) {
+  const j = await get("web/lists(guid'" + idListu + "')/items" +
+                      "?$select=Id,Title&$filter=Title eq '" +
+                      kod.replace(/'/g, "''") + "'&$top=1");
+  return (j.value || [])[0] || null;
+}
+
+async function zalozSeed(idListu, nazevListu, polozka) {
+  const telo = { __metadata: { type: "SP.Data." + nazevListu + "ListItem" } };
+  for (const klic of Object.keys(polozka)) {
+    if (klic !== "list") telo[klic] = polozka[klic];
+  }
+  await post("web/lists(guid'" + idListu + "')/items", telo);
+}
+
 // ---------- hlavni beh ----------
 
 WEB = await urciWeb();
@@ -592,6 +768,26 @@ DIGEST = await digest();
 
 const zprava = [];
 const radky = [];
+
+for (const kn of (SCHEMA.libraries || [])) {
+  let knihovna = await najdiKnihovnu(kn.name);
+  const zalozena = !knihovna;
+  if (!knihovna) knihovna = await zalozKnihovnu(kn);
+  if (!knihovna) throw new Error("knihovnu " + kn.name + " se nepodarilo zalozit ani najit");
+  const zobraz = kn.display || kn.name;
+  if (knihovna.Title !== zobraz) {
+    await post("web/lists(guid'" + knihovna.Id + "')", {
+      __metadata: { type: "SP.List" },
+      Title: zobraz,
+    }, true);
+  }
+  zprava.push(kn.name + " (knihovna): " + (zalozena ? "zalozena" : "existovala") +
+              " (" + knihovna.Id + ")");
+  radky.push({
+    list: kn.name, sloupec: "(knihovna)", stav: zalozena ? "zalozena" : "existovala",
+    typ: "DocumentLibrary", ve_zobrazeni: "-", skryty: "ne", zobrazovany_nazev: zobraz,
+  });
+}
 
 for (const lst of SCHEMA.lists) {
   let list = await najdiList(lst.name);
@@ -681,6 +877,20 @@ for (const lst of SCHEMA.lists) {
       typ: f.TypeAsString, ve_zobrazeni: "-", skryty: f.Hidden ? "ano" : "ne",
       zobrazovany_nazev: f.Title,
     });
+  }
+}
+
+// ---------- technicke polozky ----------
+
+for (const polozka of ((SCHEMA.seed || {}).polozky || [])) {
+  const list = await najdiList(polozka.list);
+  if (!list) { zprava.push("SEED " + polozka.Title + ": list " + polozka.list + " chybi"); continue; }
+  const mam = await najdiPolozku(list.Id, polozka.Title);
+  if (mam) {
+    zprava.push("seed " + polozka.Title + " (" + polozka.list + "): existoval");
+  } else {
+    await zalozSeed(list.Id, polozka.list, polozka);
+    zprava.push("seed " + polozka.Title + " (" + polozka.list + "): zalozen");
   }
 }
 
