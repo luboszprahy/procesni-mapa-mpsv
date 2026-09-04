@@ -100,119 +100,31 @@ situace, na které se zapomíná:
 
 ---
 
-## CO JE POTŘEBA UDĚLAT — registrace flow (kolo 1 → 2)
+## Registrace flow — HOTOVO (04.09.2026)
 
-Appka volání `PresunFlow.Run()` zatím **neobsahuje**. Nejde ho napsat dřív,
-než je flow zaregistrované jako datový zdroj appky: záznam v
-`References/DataSources.json` nese vedle `WorkflowEntityId` (to známe)
-i `FlowNameId`, které přiděluje **až prostředí při importu**. Bez něj se
-`.Run()` nemá na co navázat a appka by se neotevřela vůbec.
+`PresunFlow` je od balíku 1.0.0.94 zaregistrované jako datový zdroj appky
+(`FlowNameId` 4d71c7b1-…), takže obrazovka `scr_Presun` volá flow doopravdy.
+Volání je v `btn_SpocitatP.OnSelect` (režim `nahled`) a v
+`btn_ModalProvestP.OnSelect` (záloha + režim `zapis`); přechodný popisek
+`lbl_CekaNaTokP` je pryč.
 
-Postup:
+Postup, kterým se tam registrace dostala — pro případ přenosu na jiné
+prostředí, kde se musí zopakovat (nové prostředí přidělí vlastní `FlowNameId`):
 
-1. Naimportovat `deploy/procesnimapa_1_0_0_93.zip` jako upgrade.
+1. Naimportovat balík jako upgrade.
 2. V Power Automate **zapnout `PresunFlow`** (po importu bývá vypnuté).
 3. Vyzkoušet ho **samostatně**, bez appky: Power Automate → PresunFlow → Test →
    Manually → do pole `pozadavek` vložit
-   `{"kod":"07-08","uroven":"proces","cil":"03","duvod":"zkouška","rezim":"nahled"}`
-   (kód a cíl podle skutečných dat). Běh musí skončit zeleně a v posledním
-   kroku `Odpoved_nahled` musí být `prehled` se seznamem dvojic.
-   **V režimu `nahled` se nic nezapisuje**, takže je to bezpečné.
+   `{"kod":"07-08","uroven":"proces","cil":"03","duvod":"zkouška","rezim":"nahled"}`.
+   V režimu `nahled` se nic nezapisuje.
 4. Otevřít appku ve Studiu → **Add data → PresunFlow**.
-5. Udělat mikro-změnu (posunout prvek o pixel zpět), **Save** a **Publish**.
-6. Export solution (unmanaged) a poslat zip.
+5. Mikro-změna, **Save**, **Publish**, export solution (unmanaged).
+6. Do exportu doplnit volání flow a poslat zpátky jako další balík.
 
-Do balíku 94 se pak doplní volání flow — vzorce jsou hotové níž.
-
----
-
-## Vzorce k doplnění do appky (balík 94)
-
-`btn_SpocitatP.OnSelect` — místo dnešní notifikace:
-
-```
-=Set(varPresunBezi, true);
-Set(varPresunHotovo, "");
-Clear(colPresun);
-IfError(
-    Set(
-        varPresunVysledek,
-        PresunFlow.Run(
-            "{""kod"":""" & varPresunKod &
-            """,""uroven"":""" & varPresunUroven &
-            """,""cil"":""" & If(
-                varPresunUroven = "proces",
-                Left(drp_CilAgendaP.Selected.Value, 2),
-                Left(drp_CilProcesP.Selected.Value, 5)
-            ) &
-            """,""duvod"":""" & txt_DuvodP.Text &
-            """,""rezim"":""nahled""}"
-        )
-    );
-    Set(varPresunNovyPrefix, varPresunVysledek.porizeno);
-    If(
-        varPresunVysledek.stav = "plno",
-        Notify(varPresunVysledek.hlaseni, NotificationType.Error, varNotifyChybaMs),
-        ClearCollect(
-            colPresun,
-            ForAll(
-                Split(varPresunVysledek.prehled, "|#|") As r,
-                {
-                    stary: First(Split(r.Value, "|~|")).Value,
-                    novy: Last(FirstN(Split(r.Value, "|~|"), 2)).Value,
-                    uroven: Last(FirstN(Split(r.Value, "|~|"), 3)).Value,
-                    nazev: Last(Split(r.Value, "|~|")).Value
-                }
-            )
-        );
-        Set(varPresunHotovo, varPresunKod & "→" & varPresunNovyPrefix)
-    ),
-    Notify("Náhled se nepodařilo spočítat: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
-);
-Set(varPresunBezi, false)
-```
-
-`btn_ModalProvestP.OnSelect`:
-
-```
-=Set(varPresunPotvrdit, false);
-Set(varPresunBezi, true);
-IfError(
-    ZalohaFlow.Run();
-    Set(
-        varPresunZapis,
-        PresunFlow.Run(
-            "{""kod"":""" & varPresunKod &
-            """,""uroven"":""" & varPresunUroven &
-            """,""cil"":""" & If(
-                varPresunUroven = "proces",
-                Left(drp_CilAgendaP.Selected.Value, 2),
-                Left(drp_CilProcesP.Selected.Value, 5)
-            ) &
-            """,""duvod"":""" & txt_DuvodP.Text &
-            """,""rezim"":""zapis""}"
-        )
-    );
-    Notify("Přesun hotov: " & varPresunKod & " je teď " & varPresunZapis.porizeno & ".", NotificationType.Success, varNotifyMs),
-    Notify("Přesun selhal: " & FirstError.Message & " Zkontroluj rejstřík a případně ho obnov ze zálohy pořízené na začátku.", NotificationType.Error, varNotifyChybaMs)
-);
-Set(varPresunBezi, false);
-Set(varAktStale, true);
-Set(varPresunHotovo, "");
-Clear(colPresun);
-Set(varUrovenTyp, If(varPresunUroven = "proces", "proces", "dilci"));
-Set(varCiselnikNova, true);
-Set(varCiselnikKod, "");
-Set(varRodicC, "");
-Navigate(scr_Ciselnik, ScreenTransition.UnCover)
-```
-
-Zároveň se odstraní popisek `lbl_CekaNaTokP` (celý prvek) a do
-`App.OnStart` přibudou `varPresunVysledek` a `varPresunZapis`.
-
-**Záloha před zápisem je součást zadání**, ne opatrnost navíc: kaskáda není
-transakce (SharePoint ji neumí ani přes flow) a metodika u změny kódu
-vyžaduje doložitelnost.
+`varPresunVysledek` a `varPresunZapis` se v `App.OnStart` **neinicializují** —
+stejně jako `varNahledVysledek` u importu. Prázdný řetězec v OnStart by jim dal
+typ textu a záznam z `Flow.Run()` by se do nich pak nevešel; brána
+`kontrola_promennych` hlídá jen proměnné, které v OnStart jsou.
 
 ---
 

@@ -746,10 +746,19 @@ Screens:
                                   datum_aktualizace: Now()
                               }
                           );
+                          // Vazby se nejdřív odloží do kolekce a teprve pak
+                          // přepisují. Power Fx nedovolí zapisovat do zdroje,
+                          // který zrovna prochází ForAll ("This function cannot
+                          // operate on the same data source that is used in
+                          // ForAll") — na tom stálo uložení sirotka v 1.0.0.94.
                           If(
                               varPresun,
+                              ClearCollect(
+                                  colVazbySirotka,
+                                  Filter('Vazba aktivita–dílčí proces', aktivita_kod = varStaryKod)
+                              );
                               ForAll(
-                                  Filter('Vazba aktivita–dílčí proces', aktivita_kod = varStaryKod) As v,
+                                  colVazbySirotka As v,
                                   Patch(
                                       'Vazba aktivita–dílčí proces',
                                       v,

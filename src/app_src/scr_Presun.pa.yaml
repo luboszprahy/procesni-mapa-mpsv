@@ -23,12 +23,12 @@
 # OnVisible téhle obrazovky, ne přehled: sem se dá přijít i po delší práci
 # v jiné části appky a data z přehledu můžou být stará.
 #
-# PROČ TO NEDĚLÁ FLOW. Původní plán počítal s `PresunFlow`, protože kaskáda
-# vypadala na rekurzi. Není rekurzivní — hierarchie má pevné tři úrovně, takže
-# stačí tři průchody. A nové flow by znamenalo kolo se Studiem (`Flow.Run` jde
-# napsat teprve po registraci flow jako datového zdroje, `FlowNameId` přiděluje
-# až prostředí při importu), zatímco všechny potřebné listy včetně
-# `Historie kódů` už appka připojené má.
+# POČÍTÁ I ZAPISUJE `PresunFlow`, ne appka. Kaskáda je ~240 zápisů: v appce
+# běží v prohlížeči a zavřené okno nebo výpadek sítě uprostřed nechá rejstřík
+# rozpůlený, kdežto Foreach v Logic Apps doběhne na serveru a při pádu je
+# vidět, na které akci. Obrazovka tedy jen skládá požadavek, kreslí náhled
+# z odpovědi a hlídá, aby se nezapisovalo podle náhledu spočítaného pro jiný
+# cíl. Kolekce níž slouží nabídkám a popiskům, ne výpočtu.
 Screens:
   scr_Presun:
     Properties:
@@ -326,18 +326,49 @@ Screens:
             # uzavřený kód se nikdy nerecykluje (pravidlo F10/1). Bez historie
             # by přesun zpátky tam, odkud položka přišla, oživil kód, který
             # už jednou něco znamenal.
-            # BALÍK 93 — PŘECHODNÝ STAV. Výpočet i zápis dělá PresunFlow,
-            # ale `PresunFlow.Run()` sem jde napsat teprve tehdy, až bude
-            # flow zaregistrované jako datový zdroj appky (Studio → Add data).
-            # `FlowNameId` přiděluje až prostředí při importu, lokálně se
-            # dogenerovat nedá — appka by se s neznámým názvem neotevřela
-            # vůbec. Hotové vzorce k doplnění jsou v deploy/flow_Presun.md.
+            # Náhled je povinný krok, ne pohodlí: tlačítko Provést je zhasnuté,
+            # dokud výpočet neproběhl právě nad tímhle cílem. Jinak by se
+            # zapisovalo podle čísel, která platila pro jiného rodiče.
             OnSelect: |-
-              =Notify(
-                  "Tok pro přesun ještě není v aplikaci zaregistrovaný. Postup je v návodu deploy/flow_Presun.md.",
-                  NotificationType.Warning,
-                  varNotifyMs
-              )
+              =Set(varPresunBezi, true);
+              Set(varPresunHotovo, "");
+              Clear(colPresun);
+              IfError(
+                  Set(
+                      varPresunVysledek,
+                      PresunFlow.Run(
+                          "{""kod"":""" & varPresunKod &
+                          """,""uroven"":""" & varPresunUroven &
+                          """,""cil"":""" & If(
+                              varPresunUroven = "proces",
+                              Left(drp_CilAgendaP.Selected.Value, 2),
+                              Left(drp_CilProcesP.Selected.Value, 5)
+                          ) &
+                          """,""duvod"":""" & txt_DuvodP.Text &
+                          """,""rezim"":""nahled""}"
+                      )
+                  );
+                  Set(varPresunNovyPrefix, varPresunVysledek.porizeno);
+                  If(
+                      varPresunVysledek.stav = "plno",
+                      Notify(varPresunVysledek.hlaseni, NotificationType.Error, varNotifyChybaMs),
+                      ClearCollect(
+                          colPresun,
+                          ForAll(
+                              Split(varPresunVysledek.prehled, "|#|") As r,
+                              {
+                                  stary: First(Split(r.Value, "|~|")).Value,
+                                  novy: Last(FirstN(Split(r.Value, "|~|"), 2)).Value,
+                                  uroven: Last(FirstN(Split(r.Value, "|~|"), 3)).Value,
+                                  nazev: Last(Split(r.Value, "|~|")).Value
+                              }
+                          )
+                      );
+                      Set(varPresunHotovo, varPresunKod & "→" & varPresunNovyPrefix)
+                  ),
+                  Notify("Náhled se nepodařilo spočítat: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+              );
+              Set(varPresunBezi, false)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =11 + varFs
@@ -360,23 +391,6 @@ Screens:
             Width: =230
             X: =1096
             Y: =284
-      - lbl_CekaNaTokP:
-          Control: Label@2.5.1
-          Properties:
-            Color: =stylPozor
-            Font: =Font.'Open Sans'
-            FontWeight: =FontWeight.Semibold
-            Height: =28
-            Size: =11 + varFs
-            # BALÍK 93 — přechodný stav. V balíku 94, kdy bude PresunFlow
-            # zaregistrované, se tenhle popisek odstraní celý.
-            Text: |-
-              ="Tok pro přesun se ještě registruje — obrazovka se zapne po dalším importu."
-            VerticalAlign: =VerticalAlign.Middle
-            Visible: =true
-            Width: =640
-            X: =40
-            Y: =704
       - lbl_h_PresunStaryP:
           Control: Label@2.5.1
           Properties:
@@ -668,15 +682,48 @@ Screens:
             # záznamů a vazeb, pak zápis do historie, a teprve nakonec ZÁNIK.
             # V opačném pořadí by výpadek sítě uprostřed smazal větev, která
             # ještě nikde jinde neexistuje.
-            # Viz poznámka u btn_SpocitatP — v balíku 93 sem volání flow ještě
-            # nesmí, modál se k slovu stejně nedostane (Provést je zhasnuté).
+            # Záloha PŘED zápisem je součást zadání, ne opatrnost navíc:
+            # kaskáda není transakce (SharePoint ji neumí ani přes flow)
+            # a metodika u změny kódu vyžaduje doložitelnost.
             OnSelect: |-
               =Set(varPresunPotvrdit, false);
-              Notify(
-                  "Tok pro přesun ještě není v aplikaci zaregistrovaný.",
-                  NotificationType.Warning,
-                  varNotifyMs
-              )
+              Set(varPresunBezi, true);
+              IfError(
+                  ZalohaFlow.Run();
+                  Set(
+                      varPresunZapis,
+                      PresunFlow.Run(
+                          "{""kod"":""" & varPresunKod &
+                          """,""uroven"":""" & varPresunUroven &
+                          """,""cil"":""" & If(
+                              varPresunUroven = "proces",
+                              Left(drp_CilAgendaP.Selected.Value, 2),
+                              Left(drp_CilProcesP.Selected.Value, 5)
+                          ) &
+                          """,""duvod"":""" & txt_DuvodP.Text &
+                          """,""rezim"":""zapis""}"
+                      )
+                  );
+                  Notify(
+                      "Přesun hotov: " & varPresunKod & " je teď " & varPresunZapis.porizeno & ".",
+                      NotificationType.Success,
+                      varNotifyMs
+                  ),
+                  Notify(
+                      "Přesun selhal: " & FirstError.Message & " Zkontroluj rejstřík a případně ho obnov ze zálohy pořízené na začátku.",
+                      NotificationType.Error,
+                      varNotifyChybaMs
+                  )
+              );
+              Set(varPresunBezi, false);
+              Set(varAktStale, true);
+              Set(varPresunHotovo, "");
+              Clear(colPresun);
+              Set(varUrovenTyp, If(varPresunUroven = "proces", "proces", "dilci"));
+              Set(varCiselnikNova, true);
+              Set(varCiselnikKod, "");
+              Set(varRodicC, "");
+              Navigate(scr_Ciselnik, ScreenTransition.UnCover)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylPozor
             Size: =11 + varFs

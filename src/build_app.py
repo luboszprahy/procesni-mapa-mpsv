@@ -45,6 +45,12 @@ def najdi_pac(zadana):
     if os.environ.get("PAC_EXE"):
         return Path(os.environ["PAC_EXE"])
 
+    # stroj bez VS Code: pac rozbalený z nupkg (nuget.org, balíček
+    # Microsoft.PowerApps.CLI) — .NET SDK není potřeba, stačí Framework 4.8
+    lokalni = Path(os.environ.get("LOCALAPPDATA", "")) / "PowerAppsCLI" / "tools" / "pac.exe"
+    if lokalni.exists():
+        return lokalni
+
     # rozšíření VS Code dodává pac jako nupkg; rozbalený bývá vedle něj
     koren = Path.home() / ".vscode" / "extensions"
     for kandidat in sorted(koren.glob("microsoft-isvexptools.powerplatform-vscode-*/dist/pac/tools/pac.exe")):

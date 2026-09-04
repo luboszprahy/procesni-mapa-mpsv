@@ -1542,8 +1542,20 @@ celý návrh na reálných datech dřív, než se pustíme do kaskády nad proce
      ale dvojnásobek dotazů na každém založení. Měřit, ne odhadovat.
 
 4. [Přesun dílčího procesu a procesu — kaskáda] — HOTOVO 03.09.2026 (1.0.0.93)
-     jako `PresunFlow` — co: src/build_presun_flow.py, src/check_presun_flow.py,
-     src/mutace_presun.py, src/app_src/scr_Presun.pa.yaml, deploy/flow_Presun.md
+     jako `PresunFlow`, NAPOJENO NA APPKU 04.09.2026 (1.0.0.95) — co:
+     src/build_presun_flow.py, src/check_presun_flow.py, src/mutace_presun.py,
+     src/app_src/scr_Presun.pa.yaml, deploy/flow_Presun.md
+
+   Registrace flow proběhla podle dvoukolového postupu: balík 93 → import →
+   zapnout flow → Studio Add data → export 94 → do něj doplněné `Flow.Run()`
+   → balík 95. Zbývá vyzkoušet na datech (deploy/TESTOVACI_SCENAR.md).
+
+   PŘI TOM SE NAŠLA CHYBA Z BALÍKU 92: `btn_Ulozit.OnSelect` přepisoval vazby
+   sirotka `Patch`em nad zdrojem, který zrovna procházel `ForAll` — Power Fx
+   to odmítá ("This function cannot operate on the same data source that is
+   used in ForAll") a appka byla ve Studiu červená. Opraveno kolekcí
+   (`ClearCollect` → `ForAll` nad ní), bránu doplnila `kontrola_zapisu_v_forall`
+   v check_app.py a mutační test src/mutace_app.py (2/2).
 
    DVĚ OTOČKY BĚHEM JEDNOHO VEČERA, obě zapsané, ať se nezapomene proč:
 

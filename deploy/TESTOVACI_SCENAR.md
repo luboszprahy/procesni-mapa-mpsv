@@ -1,8 +1,13 @@
-# Testovací scénář — balíky 1.0.0.92 a 1.0.0.93
+# Testovací scénář — balík 1.0.0.95
 
-Prochází se shora dolů. Bloky **A–E** testují balík 92 (sirotčí aktivity),
-**F–H** balík 93 (kaskádový přesun). Blok **I** se dá projít teprve po
-registraci flow, tedy až s balíkem 94.
+Prochází se shora dolů. Bloky **A–E** testují sirotčí aktivity (přišly
+s balíkem 92), **F–H** kaskádový přesun (93) a jeho napojení na aplikaci,
+**I–J** plný přesun z aplikace — ten jde projít od balíku **95**, kde je
+`PresunFlow` zaregistrované a volané.
+
+**Balík 94 se nezkouší** — appka v něm měla chybný vzorec (`Patch` nad
+zdrojem, který zrovna prochází `ForAll`), Studio ji označilo červeně a
+uložení aktivity by spadlo. Opravuje ho 95; blok **D** je právě ten test.
 
 Každý krok má **co udělat** a **co musí nastat**. Kde je uvedeno „NESMÍ",
 je to past, kvůli které ten krok existuje — projít bez povšimnutí se nedá.
@@ -108,6 +113,11 @@ aktivity — v rejstříku se ale tvářit jako běžná agenda nesmějí.
 ---
 
 ## D. Přiřazení sirotka  *(mění data)*
+
+> Tohle je zároveň test opravy z balíku 95: uložení přepisuje vazby aktivity
+> a v 94 na tom Studio hlásilo *„This function cannot operate on the same data
+> source that is used in ForAll"*. Když uložení projde a vazby sedí, je oprava
+> potvrzená.
 
 - [ ] **D.1** Zapni chip nezařazených a klikni na aktivitu `00-00-000-0001`.
       → Otevře se detail.
@@ -221,10 +231,9 @@ Nepovinné, ale doporučené — zkouška úrovně níž:
 
 ---
 
-## G. Obrazovka přesunu před registrací flow
+## G. Obrazovka přesunu — vstup, nabídky, zámek náhledu
 
-V balíku 93 obrazovka existuje, ale tlačítka ještě nic nespustí — appka
-volání flow obsahovat nemůže, dokud není zaregistrované jako datový zdroj.
+Nic nezapisuje: končí u zhasnutého tlačítka *Provést přesun*.
 
 - [ ] **G.1** Editace (číselník) → úroveň **Procesy**. → V každém řádku je
       vedle koše **ikona přesunu**.
@@ -233,29 +242,35 @@ volání flow obsahovat nemůže, dokud není zaregistrované jako datový zdroj
 - [ ] **G.3** Klikni na ikonu u nějakého procesu. → Otevře se obrazovka
       **„Přesun procesu pod jinou agendu"** a nahoře je kód a název toho
       procesu, vpravo počty dílčích procesů a aktivit pod ním.
-- [ ] **G.4** Dole svítí upozornění **„Tok pro přesun se ještě registruje"**.
+- [ ] **G.4** Dole **NENÍ** žádné upozornění o registraci toku — v balíku 95
+      obrazovka funguje naostro. (V 93 tam bylo, teď by lhalo.)
 - [ ] **G.5** Rozbal nabídku **Cílová agenda**. → Jsou v ní agendy
       **kromě** `00 Nezařazeno`.
 - [ ] **G.6** Tlačítko **Provést přesun** je **šedé** (náhled neproběhl).
-- [ ] **G.7** Vyplň cíl i důvod a dej **Spočítat náhled**. → Objeví se
-      upozornění, že tok ještě není zaregistrovaný. **To je správně** —
-      v tomhle balíku to jinak být nemá.
+- [ ] **G.7** Vyplň cíl, **důvod nech prázdný**. → *Spočítat náhled* zůstane
+      šedé; důvod je povinný, protože se zapíše ke každému uzavřenému kódu.
 - [ ] **G.8** Šipkou zpět se vrať. → Jsi v číselníku, nic se nezměnilo.
 
 ---
 
-## H. Registrace flow → balík 94
+## H. Aplikace volá flow  *(nezapisuje)*
 
-- [ ] **H.1** Otevři appku ve **Studiu**.
-- [ ] **H.2** **Add data → PresunFlow** (v seznamu pod Power Automate).
-- [ ] **H.3** Mikro-změna → **Save** → **Publish**.
-- [ ] **H.4** Export solution jako **unmanaged** a pošli zip.
-- [ ] **H.5** Dostaneš balík **1.0.0.94** s doplněným voláním flow.
-      Naimportuj ho, otevři ve Studiu, mikro-změna, Save, Publish.
+- [ ] **H.1** Znovu otevři přesun u procesu, vyplň **cíl i důvod**
+      a dej **Spočítat náhled**.
+- [ ] **H.2** → Během pár sekund se objeví tabulka **UZAVŘE SE / VZNIKNE**
+      přes celý podstrom a vpravo nahoře **nový kód**. Žádná hláška
+      o neregistrovaném toku.
+- [ ] **H.3** Zkontroluj v Power Automate historii běhů `PresunFlow`. →
+      Poslední běh je **zelený** a v jeho vstupu je `"rezim":"nahled"`.
+- [ ] **H.4** Ověř, že se **nic nezapsalo**: karty na přehledu mají tytéž
+      počty jako v kroku 0.2.
+- [ ] **H.5** Změň **cílovou agendu** na jinou. → Tabulka náhledu zmizí
+      a *Provést přesun* zešedne. To je ta pojistka proti zápisu podle
+      čísel spočítaných pro jiného rodiče.
 
 ---
 
-## I. Plný přesun z aplikace  *(až s balíkem 94; mění data)*
+## I. Plný přesun z aplikace  *(mění data)*
 
 - [ ] **I.1** Před začátkem si zapiš stav cílové agendy: kolik má procesů
       a jaký je nejvyšší kód: ______

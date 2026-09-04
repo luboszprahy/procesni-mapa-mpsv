@@ -27,7 +27,7 @@ VSTUP = Path(_a.vstup)
 VYSTUP = Path(_a.vystup)
 
 OCEKAVANE_OBRAZOVKY = {"scr_Dashboard", "scr_Detail", "scr_Vazby", "scr_Ciselnik",
-                       "scr_Nahled"}
+                       "scr_Nahled", "scr_Presun"}
 UVODNI_OBRAZOVKA = "scr_Dashboard"
 OCEKAVANE_LISTY = {"Agendy", "Procesy", "Dílčí procesy", "Aktivity", "Vazba aktivita–dílčí proces",
                    "Útvary"}

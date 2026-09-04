@@ -1,37 +1,79 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-03 23:05**. Balík **1.0.0.93**.
-**Kaskádový přesun (F10/4) je hotový jako `PresunFlow`** — flow, brána
-(111 kontrol) i mutace (13/13) jsou zelené, obrazovka `scr_Presun` je v appce.
-Chybí poslední krok: zaregistrovat flow ve Studiu, aby ho appka mohla zavolat.
-Do té doby má obrazovka tlačítka bez funkce a říká to.
+Aktualizováno: **2026-09-04 12:15**. Balík **1.0.0.95**.
+**Přesun (F10/4) je napojený na aplikaci.** `PresunFlow` je zaregistrované
+jako datový zdroj (export 94 ze Studia), takže obrazovka `scr_Presun` volá
+flow doopravdy — náhled i zápis. Zároveň je opravená chyba, kvůli které
+byla appka v balíku 94 ve Studiu červená.
 
-## CO JE NA TOBĚ ZÍTRA — v tomhle pořadí
+## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Import `deploy/procesnimapa_1_0_0_93.zip`** jako upgrade.
-2. **Zapnout `PresunFlow`** v Power Automate (po importu bývá vypnuté).
-3. **Vyzkoušet flow samostatně, bez appky** — Power Automate → PresunFlow →
-   Test → Manually, do pole `pozadavek` vložit
-   `{"kod":"07-08","uroven":"proces","cil":"03","duvod":"zkouška","rezim":"nahled"}`
-   (kód a cíl podle skutečných dat). V režimu `nahled` se **nic nezapisuje**.
-   Běh musí skončit zeleně a krok `Odpoved_nahled` musí nést `prehled`
-   se seznamem dvojic starý → nový kód.
-4. **Studio → Add data → PresunFlow**, mikro-změna, Save, Publish, export
-   solution (unmanaged) a poslat zip.
-5. Doplním volání flow a pošlu balík **94**, kterým obrazovka ožije.
+1. **Import `deploy/procesnimapa_1_0_0_95.zip`** jako upgrade.
+2. Otevřít appku ve Studiu → **App checker musí být bez chyb** (v 94 tam byla
+   jedna: `btn_Ulozit.OnSelect`). Mikro-změna → Save → Publish.
+3. **Projít `deploy/TESTOVACI_SCENAR.md`** — je přepsaný na balík 95.
+   Bloky A–E (sirotci), F–H (přesun, nezapisuje), I–J (plný přesun, mění data).
+   Blok **D** je zároveň test dnešní opravy, blok **H** ověří, že appka
+   opravdu volá flow.
+4. Co spadne, pošli i s hláškou z **run history** (u flow) nebo z App checkeru
+   (u appky) — z appky je vidět jen `502 BadGateway`, což příčinu neřekne.
 
-Vzorce pro krok 5 jsou hotové v `deploy/flow_Presun.md` — zítra je to jen
-vložit, ne vymýšlet.
+## Co se udělalo 04.09.2026 — balík 1.0.0.95
 
-**Testovací scénář ke všemu novému je v `deploy/TESTOVACI_SCENAR.md`** —
-bodově, s očekávaným výsledkem u každého kroku. Bloky A–E pokrývají balík 92
-(sirotčí aktivity), F–H balík 93 (přesun), I–J plný přesun po registraci
-flow. Blok **F jde projít hned** — otestuje výpočet kaskády na skutečných
-datech přes Power Automate, ještě než se k ní pustí aplikace, a v režimu
-`nahled` nic nezapisuje.
+**Chyba z 94: `Patch` nad zdrojem, který prochází `ForAll`.** App checker ji
+hlásil jako *„This function cannot operate on the same data source that is
+used in ForAll"* u `btn_Ulozit.OnSelect` na `scr_Detail`. Přišla s balíkem
+**92** (přiřazení sirotka, F13/C4), ne s 93 — 92 do té doby na prostředí
+neběžel, takže se ukázala až teď. Vzorec filtroval vazby sirotka a v témž
+průchodu je přepisoval; Power Fx to nedovolí. Léčba: řádky se odloží do
+`colVazbySirotka` a `ForAll` běží nad kolekcí, zdroj se jen zapisuje.
 
-Zbývá taky odzkoušet **balík 92** (14bodový seznam níž) — na prostředí ještě
-neběžel.
+**Brána to nechytila, protože takovou kontrolu neměla.** Přibyla
+`kontrola_zapisu_v_forall` v `check_app.py` a mutační test
+`src/mutace_app.py` (2/2: `Patch` a `RemoveIf` nad procházeným zdrojem).
+Mutace je tu důležitější než kontrola sama — zelená brána bez ní nedokazuje,
+že hlídá to, co si myslím.
+
+**Napojení na flow.** `btn_SpocitatP` volá `PresunFlow` v režimu `nahled`,
+`btn_ModalProvestP` udělá zálohu (`ZalohaFlow`) a pak `zapis`; přechodný
+popisek `lbl_CekaNaTokP` je pryč, hlavička `scr_Presun.pa.yaml` už netvrdí,
+že přesun dělá appka. `varPresunVysledek` a `varPresunZapis` se v
+`App.OnStart` **neinicializují** — prázdný řetězec by jim dal typ textu
+a záznam z `Flow.Run()` by se do nich nevešel (stejně to má `varNahledVysledek`).
+
+**Dvě brány byly rozbité a nikdo o tom nevěděl:**
+- `check_solution` neznala `scr_Presun` — obrazovka jí vycházela jako
+  „duch po zrušené obrazovce". V 93 to neprasklo, protože Controls/*.json
+  pro ni ještě neexistoval; vznikl až tím, že appku uložilo Studio.
+- `check_mapa_flow` měla `--base` na `input/procesnimapa_1_0_0_66.zip`,
+  který úklid přesunul do `input/archiv/`.
+
+**Build na pracovním stroji (5CG5210MB2) jde taky.** VS Code s Power Platform
+Tools tu není a .NET SDK taky ne, ale `pac` z nugetu (balíček
+`Microsoft.PowerApps.CLI`) běží na .NET Frameworku 4.8. Rozbalený je
+v `%LOCALAPPDATA%\PowerAppsCLI` a `build_app.py` se tam teď dívá sám.
+Ověřeno: `.msapp` má `DocVersion 1.349` jako vstup a `FlowNameId` všech šesti
+flow zůstalo zachované.
+
+### Brány na 95
+
+`check_solution` **663** · `check_restore_flow` 571 · `check_zaloha_flow` 184 ·
+`check_import_flow` 175 · `check_sablona` 185 · `check_mapa_flow` 144 ·
+`check_export_flow` 129 · `check_presun_flow` 111 · `check_flow` 26 ·
+`check_env`, `check_schema` zeleně · `check_app`: 6 obrazovek, 284 prvků.
+Node: `check_setup.js`, `check_import.js` OK.
+Mutačně: **`mutace_app` 2/2 (nová)**, `mutace_import` 25/25,
+`mutace_sablona` 19/19, `mutace_restore` 17/17, `mutace_zaloha` 16/16,
+`mutace_presun` 13/13, `mutace_export_mapa` 7/7, `mutace_napojeni` 5/5,
+`mutace_parametry` 4/4.
+
+Sestavení:
+
+```
+python src/build_app.py --solution input/procesnimapa_1_0_0_94.zip --verze 1.0.0.95
+```
+
+---
 
 ## Co se udělalo 03.09.2026 večer — balík 1.0.0.93 (F10/4)
 

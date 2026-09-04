@@ -1025,6 +1025,50 @@ def kontrola_zneplatneni_stromu(vzorce):
             )
 
 
+def zminuje_zdroj(text, nazev):
+    """Datový zdroj se ve vzorci píše holý, nebo v apostrofech, má-li mezeru."""
+    if f"'{nazev}'" in text:
+        return True
+    return re.search(rf"(?<!['\w]){re.escape(nazev)}(?!['\w])", text) is not None
+
+
+def kontrola_zapisu_v_forall(vzorce):
+    """Uvnitř ForAll se nesmí zapisovat do zdroje, který ForAll zrovna prochází.
+
+    Power Fx to odmítne hláškou "This function cannot operate on the same data
+    source that is used in ForAll", takže je appka ve Studiu červená. Léčba je
+    odložit řádky do kolekce a teprve nad ní ForAll — zdroj se pak jen zapisuje.
+
+    Chytlo by to 1.0.0.94: přiřazení sirotka filtrovalo vazby a v témž průchodu
+    je přepisovalo. Brána do té doby kontrolovala syntaxi a sloupce, ne tohle,
+    takže se chyba ukázala až po importu do prostředí.
+    """
+    zapisove = ("Patch", "Remove", "RemoveIf", "Collect", "ClearCollect", "Update", "UpdateIf")
+    for cesta, prop, text in vzorce:
+        cisty = bez_retezcu(text)
+        for shoda in re.finditer(r"\bForAll\s*\(", cisty):
+            zavorka = cisty.index("(", shoda.start())
+            casti = rozdel_argumenty(argumenty_volani(cisty, zavorka))
+            if len(casti) < 2:
+                continue
+            prochazi, telo = casti[0], ",".join(casti[1:])
+            for zdroj in DATASOURCE_TO_LIST:
+                if not zminuje_zdroj(prochazi, zdroj):
+                    continue
+                for funkce in zapisove:
+                    for zapis in re.finditer(rf"\b{funkce}\s*\(", telo):
+                        cil = rozdel_argumenty(
+                            argumenty_volani(telo, telo.index("(", zapis.start())))[0]
+                        if zminuje_zdroj(cil, zdroj):
+                            chyby.append(
+                                f"{Path(cesta).stem}: '{prop}' volá {funkce}() nad "
+                                f"'{zdroj}' uvnitř ForAll, který týž zdroj prochází — "
+                                "Power Fx to odmítne (\"cannot operate on the same "
+                                "data source that is used in ForAll\"). Odlož řádky "
+                                "do kolekce (ClearCollect) a ForAll veď nad ní"
+                            )
+
+
 def kontrola_adresy_mapy(vzorce):
     """varMapaUrl nesmí být přímý odkaz na soubor v knihovně.
 
@@ -1653,6 +1697,7 @@ def main():
     kontrola_prekryvu(soubory, vylucne_nabidky(vzorce))
     kontrola_nezarazenych(vzorce)
     kontrola_prirazeni_sirotka(vzorce)
+    kontrola_zapisu_v_forall(vzorce)
     kontrola_adresy_mapy(vzorce)
     kontrola_notify(vzorce, soubory)
     kontrola_potvrzeni_mazani(soubory)
