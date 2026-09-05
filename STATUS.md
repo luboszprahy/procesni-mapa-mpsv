@@ -1,18 +1,63 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-04 13:05**. Balík **1.0.0.96**.
-První ostrý běh `PresunFlow` spadl na `substring`; opraveno i s bránou, která
-to teď chytá. Vedle toho pruh filtrů na přehledu: pět chipů a přepínač kódu
-jsou v jedné rolovací nabídce.
+Aktualizováno: **2026-09-05 20:05**. Balík pro MPSV **1.0.0.97**.
+Flow `AktualizaceKratkehoNazvu` na MPSV nešlo zapnout — vydaný 1.0.0.96 nesl
+GUID listu Aktivity **z PPF DEV**. Opraveno balíkem 97 a bránou, která balík
+pro cizí tenant do `deploy/mpsv/` už nepustí.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Import `deploy/procesnimapa_1_0_0_96.zip`** jako upgrade.
-2. Otevřít appku ve Studiu → App checker bez chyb → mikro-změna, Save, Publish.
-3. **Projít `deploy/TESTOVACI_SCENAR.md`** (je přepsaný na 96). Blok **F**
-   je ten, co dnes spadl — musí dojít zeleně až do konce. Blok **C** ověří
-   novou nabídku, blok **D** opravu z 95.
-4. Co spadne, pošli i s hláškou z run history (u flow) nebo z App checkeru.
+1. **Import `deploy/mpsv/procesnimapa_1_0_0_97.zip`** jako upgrade (obsahem
+   je to 96 s opraveným GUIDem listu Aktivity, nic jiného se nezměnilo).
+2. **Zapni `AktualizaceKratkehoNazvu`** — ostatních osm flow běží.
+3. Ověř zkrácení názvu: uprav název aktivity, do minuty se dopíše zkrácený tvar.
+4. Kdyby zapnutí spadlo znovu na `GetTable … List not found`, pošli výstup
+   `deploy/mpsv/03_vypis_guidy.js` z konzole na webu MPSV — znamenalo by to,
+   že se list Aktivity mezitím zakládal znovu a má jiný GUID než
+   `b1daaa38-53df-4c7b-b9f8-03b36d46bc60`.
+
+## 05.09.2026 — cizí GUID listu Aktivity v balíku pro MPSV
+
+Zapnutí flow na MPSV skončilo na:
+
+```
+InvalidOpenApiFlow … DynamicOperationRequestClientFailure
+The dynamic operation request to API 'sharepointonline' operation 'GetTable'
+failed with status code 'NotFound' … "List not found"
+```
+
+**Jiná chyba než 28.08.** Tehdy `PatchItem` postrádal celé tělo `item`; teď
+konektor nenašel list, protože ve vydaném `1.0.0.96` byl v tom jediném flow
+GUID PPF DEV `9dfbb5a1-…` místo MPSV `b1daaa38-…`. Ostatních osm flow bere
+list z proměnných prostředí, proto se zapnula.
+
+Příčina není v buildu balíku, ale v **nasazovací sadě**:
+`make_deploy_mpsv.py` bral přes `posledni_balik()` prostě nejvyšší verzi
+z `deploy/` — a ta bývá ta pro PPF DEV, protože se na ní vyvíjí. Sada pro MPSV
+tak dostala balík pro cizí tenant a README u něj tvrdilo, že flow žádné GUIDy
+natvrdo nemají (u tohohle jednoho to od 1.0.0.65 neplatí).
+
+**Oprava má dvě části:**
+
+| část | co |
+|---|---|
+| `deploy/procesnimapa_1_0_0_97.zip` | 96 přegenerované `build_flow.py --list-aktivity b1daaa38-…`, pak `build_app.py --bez-pac --verze 1.0.0.97` |
+| `overuj_list_aktivity()` v `make_deploy_mpsv.py` | sada se nepostaví, když balík nese v `AktualizaceKratkehoNazvu` jiný GUID než MPSV; hláška rovnou vypíše oba build příkazy |
+
+Brána ověřená mutačně: nad 96 zastaví a vypíše cizí GUID, nad 97 projde.
+Ostatní brány nad 97 zelené — `check_flow` 26, `check_solution` 664,
+`check_export_flow` 129, `check_import_flow` 175, `check_mapa_flow` 144,
+`check_presun_flow` 111, `check_restore_flow` 571, `check_zaloha_flow` 184,
+`check_env`, `check_app`. V `Workflows/` je GUID MPSV 3× a PPF ani jednou.
+
+**Otevřená otázka: dá se ten GUID dostat do proměnné jako ostatní?** Přímo ne
+— `PatchItem` s rozloženým tělem `item/<sloupec>` si schéma stahuje z konkrétního
+listu a runtime výraz nesnese (to je ta chyba z 28.08.). Obchvat existuje:
+zápis nahradit akcí `Send an HTTP request to SharePoint` (MERGE na
+`_api/web/lists(guid'…')/items(<ID>)`), kde je list součástí URL jako text,
+takže proměnnou snese. Tím by odpadl dvoubalíkový režim úplně. Není to zdarma:
+akci je podle skillu potřeba nejdřív ověřit ručně v designeru a přepsat
+`check_flow`. **Nerozhodnuto.**
 
 ## Nasazovací sada pro MPSV — hotová (04.09.2026 15:00)
 

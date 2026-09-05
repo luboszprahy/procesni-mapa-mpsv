@@ -32,6 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
+from build_flow import LIST_AKTIVITY_MPSV  # noqa: E402
 
 KOREN = Path(".")
 CIL = Path("deploy/mpsv")
@@ -81,6 +82,29 @@ def posledni_balik():
     if not baliky:
         raise SystemExit("CHYBA: v deploy/ není žádný solution balík")
     return baliky[-1]
+
+
+def overuj_list_aktivity(balik):
+    """Balík pro PPF DEV se do MPSV sady dostat nesmí.
+
+    `AktualizaceKratkehoNazvu` má GUID listu Aktivity natvrdo (PatchItem
+    runtime výraz nesnese) a `posledni_balik()` bere prostě nejvyšší verzi —
+    poslední bývá ta pro PPF. Na MPSV pak flow nejde zapnout: GetTable vrátí
+    404 "List not found" (05.09.2026, balík 1.0.0.96; totéž 28.08.).
+    """
+    with zipfile.ZipFile(balik) as zip_balik:
+        jmeno = next(n for n in zip_balik.namelist()
+                     if n.replace("\\", "/").startswith("Workflows/AktualizaceKratkehoNazvu"))
+        definice = zip_balik.read(jmeno).decode("utf-8-sig")
+    cizi = {g for g in re.findall(r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}", definice)
+            if g != LIST_AKTIVITY_MPSV}
+    if cizi:
+        raise SystemExit(
+            f"CHYBA: {balik.name} nese v AktualizaceKratkehoNazvu cizi GUID listu "
+            f"({', '.join(sorted(cizi))}), ne MPSV {LIST_AKTIVITY_MPSV}.\n"
+            f"Postav balik pro MPSV:\n"
+            f"  build_flow.py --solution <kopie> --list-aktivity {LIST_AKTIVITY_MPSV}\n"
+            f"  build_app.py --solution <kopie> --verze <nova> --bez-pac")
 
 
 # co flow dělá a čím se spouští — do tabulky v README
@@ -328,6 +352,7 @@ def main():
         encoding="utf-8")
 
     balik = posledni_balik()
+    overuj_list_aktivity(balik)
     for stary in CIL.glob("procesnimapa_*.zip"):
         stary.unlink()
     shutil.copy(balik, CIL / balik.name)
