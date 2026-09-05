@@ -50,14 +50,15 @@ Ostatní brány nad 97 zelené — `check_flow` 26, `check_solution` 664,
 `check_presun_flow` 111, `check_restore_flow` 571, `check_zaloha_flow` 184,
 `check_env`, `check_app`. V `Workflows/` je GUID MPSV 3× a PPF ani jednou.
 
-**Otevřená otázka: dá se ten GUID dostat do proměnné jako ostatní?** Přímo ne
-— `PatchItem` s rozloženým tělem `item/<sloupec>` si schéma stahuje z konkrétního
-listu a runtime výraz nesnese (to je ta chyba z 28.08.). Obchvat existuje:
-zápis nahradit akcí `Send an HTTP request to SharePoint` (MERGE na
-`_api/web/lists(guid'…')/items(<ID>)`), kde je list součástí URL jako text,
-takže proměnnou snese. Tím by odpadl dvoubalíkový režim úplně. Není to zdarma:
-akci je podle skillu potřeba nejdřív ověřit ručně v designeru a přepsat
-`check_flow`. **Nerozhodnuto.**
+**GUID do proměnné přímo nejde**, `PatchItem` s rozloženým tělem
+`item/<sloupec>` si schéma stahuje z konkrétního listu a runtime výraz nesnese
+(to je ta chyba z 28.08.). Obchvat je zápis přes akci `Send an HTTP request to
+SharePoint` (MERGE na `_api/web/lists(guid'…')/items(<ID>)`) — v URL je list
+obyčejný text, takže proměnnou snese a dvoubalíkový režim odpadne.
+
+**Rozhodnuto 05.09.2026: uděláme to, v týdnu od 08.09.** Rozepsané jako
+**F14** v `PLAN.md` — pět kroků, začíná ručním ověřením akce v designeru
+(skill to u `SendHTTPRequest` požaduje, než se začne generovat).
 
 ## Nasazovací sada pro MPSV — hotová (04.09.2026 15:00)
 

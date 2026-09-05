@@ -2508,6 +2508,64 @@ může to být totéž flow, které publikuje mapu.
 
 ---
 
+## F14 — Zápis krátkého názvu přes REST, konec dvoubalíkového režimu (zadáno 05.09.2026)
+
+Zrušit poslední místo v balíku, kde je GUID listu natvrdo. `PatchItem`
+s rozloženým tělem `item/<sloupec>` runtime výraz nesnese, takže se pro každý
+tenant staví vlastní balík — a třikrát se stalo, že do MPSV šel balík s GUIDem
+PPF DEV a flow tam nešlo zapnout (naposledy 1.0.0.96, 05.09.2026). V URL REST
+volání je list obyčejný text, takže proměnnou snese.
+
+Termín: týden od 08.09.2026 (rozhodl uživatel 05.09.2026).
+
+1. **Ověření akce v designeru** — co: uživatel přidá do kopie flow akci
+   `Send an HTTP request to SharePoint`, metoda POST, uri
+   `_api/web/lists(guid'<GUID>')/items(<ID>)`, hlavičky `X-HTTP-Method: MERGE`,
+   `IF-MATCH: *`, `Accept` a `Content-Type` `application/json;odata=nometadata`,
+   tělo `{"nazev_kratky":"…"}`.
+   verify: akce je ve vyhledávání, flow jde uložit, ruční běh doběhne zeleně
+   a v listu je zapsaná hodnota. Bez tohohle kroku se negeneruje nic — skill
+   to u `SendHTTPRequest` výslovně požaduje.
+   edge cases: diakritika v názvu (UTF-8 v těle), název delší než 150 znaků,
+   položka smazaná mezi triggerem a zápisem (404).
+   risk: DLP politika MPSV akci nepustí. Pak F14 padá a zůstává dvoubalíkový
+   režim i s bránou `overuj_list_aktivity()`.
+
+2. **Přepis generátoru** — co: `src/build_flow.py`, akce `Zapsat_kratky_nazev`
+   z `PatchItem` na `HttpRequest`; `dataset` i list z proměnných
+   (`mpsv_procesnimapaSite`, `mpsv_listAktivity`), oba deklarované
+   v `definition.parameters`. Zrušit `LIST_AKTIVITY_MPSV` i `--list-aktivity`.
+   verify: `check_solution.py` brána `promenne_ve_flow` projde bez výjimky pro
+   tohle flow, v `Workflows/` není žádný GUID.
+   edge cases: `Nacti_aktivitu` (`GetItem`) a trigger zůstávají na konektoru —
+   čtení proměnnou snese, měnit je není potřeba.
+   risk: `IF-MATCH: *` přepíše souběžnou editaci. Dnešní chování je stejné
+   (zapisuje se stav z `Nacti_aktivitu`), takže regrese to není.
+
+3. **Přepis brány** — co: `src/check_flow.py`, 26 kontrol míří na `PatchItem`
+   a rozložené klíče; přepsat na kontrolu URI, metody, hlaviček a JSON těla.
+   Výrazy zkracování (`zkratit()`) se nemění, ty se ověřují dál stejně.
+   verify: `check_flow.py` nad novým balíkem zelený; mutačně — vynechaná
+   hlavička `X-HTTP-Method`, GUID natvrdo v URI, prohozené `nazev`/`nazev_kratky`.
+   edge cases: žádné.
+   risk: brána se přepíše tak, že nová podoba projde, ale nic nehlídá. Proto
+   mutace, ne jen zelený běh.
+
+4. **Úklid** — co: zrušit `overuj_list_aktivity()` v `src/make_deploy_mpsv.py`
+   (nemá co hlídat), vyhodit dvoubalíkový režim z `HANDOVER.md` a `STATUS.md`.
+   verify: `make_deploy_mpsv.py` doběhne, `deploy/mpsv/README.md` už nemluví
+   o GUIDu natvrdo.
+   edge cases: —
+   risk: úklid dřív, než je krok 1 ověřený na MPSV. Dělat až po nasazení.
+
+5. **Nasazení** — co: balík na MPSV, flow zapnout, ověřit zkrácení názvu.
+   verify: úprava názvu aktivity → do minuty zkrácený tvar; run history akce
+   vrátí 204.
+   edge cases: flow zůstane vypnuté po importu — zapnout ručně.
+   risk: —
+
+---
+
 ## F5 — Generování textu OŘ (fáze 2)
 
 Ze schválených aktivit (`stav = schváleno`) sestavit text organizačního řádu
