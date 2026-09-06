@@ -118,7 +118,7 @@ Screens:
                     =LookUp(colDilci, Title = ThisItem.dilci_proces_kod).nazev
                   Width: =Parent.TemplateWidth - 240
                   X: =16
-                  Y: =28 + varFs
+                  Y: =30 + varFs
             - lbl_VazbaPrimarni:
                 Control: Label@2.5.1
                 Properties:
@@ -240,7 +240,7 @@ Screens:
                   Text: =ThisItem.nazev
                   Width: =Parent.TemplateWidth - 120
                   X: =16
-                  Y: =28 + varFs
+                  Y: =30 + varFs
             - ico_Pridat:
                 Control: Classic/Icon@2.5.0
                 Properties:

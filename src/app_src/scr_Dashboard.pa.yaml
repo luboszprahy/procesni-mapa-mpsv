@@ -1552,7 +1552,7 @@ Screens:
             Visible: |-
               =varMenuStav && (varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0)
             Width: =232
-            X: =464
+            X: =514
             Y: =292
       # Zobrazení kódu není filtr, ale patří k témuž pohledu na strom —
       # v pruhu bylo samostatné tlačítko a nikdo v něm netušil, co dělá.

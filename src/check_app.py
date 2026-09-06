@@ -622,7 +622,10 @@ SIRKA_PLOCHY = 1366
 VYSKA_PLOCHY = 768
 
 
-def souradnice_v_px(vyraz, rozmer):
+VYCHOZI_FS = -2   # Set(varFs, -2) v App.OnStart
+
+
+def souradnice_v_px(vyraz, rozmer, plocha=None):
     """Pixelová hodnota souřadnice, nebo None, když ji spočítat nejde.
 
     Vzniklo z btn_Zaloha (01.09.2026): popisek `lbl_RozpadPocet` má
@@ -630,18 +633,70 @@ def souradnice_v_px(vyraz, rozmer):
     tlačítka Záloha. Protože byl v souboru později, kreslil se NAD ním a
     klikání do většiny tlačítka spolkl — tlačítko „nic nedělalo" a ukazovalo
     cizí tooltip. Brána to přeskakovala právě proto, že souřadnice byla výraz.
+
+    `Parent.TemplateWidth` a `TemplateHeight` přibyly 06.09.2026: prvky uvnitř
+    galerie je používají skoro všechny, takže se dopočítat nedaly a kontrola
+    překryvů **uvnitř galerií neběžela vůbec**. Ukázalo se to na `btn_PresunC`,
+    který ležel 16 px přes štítek úklidu a brána mlčela. Rozměry šablony řádku
+    dodá volající z rodičovské galerie.
     """
     text = str(vyraz).lstrip("=").strip()
     if text.isdigit():
         return int(text)
-    plocha = {"Width": SIRKA_PLOCHY, "Height": VYSKA_PLOCHY}
-    shoda = re.fullmatch(r"Parent\.(Width|Height)(?:\s*([-+])\s*(\d+))?", text)
-    if not shoda:
+    if plocha is None:
+        plocha = {"Width": SIRKA_PLOCHY, "Height": VYSKA_PLOCHY}
+    hodnoty = {("Parent." + k): v for k, v in plocha.items() if v is not None}
+    # Stupeň písma je proměnná, ale layout se má počítat pro nějaký konkrétní
+    # stav — bere se výchozí z App.OnStart. Bez toho zůstane celá šablona
+    # řádku galerie nedopočitatelná, protože Y prvků z varFs vychází.
+    hodnoty["varFs"] = VYCHOZI_FS
+    return vyhodnot_vyraz(text, hodnoty)
+
+
+def vyhodnot_vyraz(text, hodnoty):
+    """Aritmetika nad známými jmény: `Parent.TemplateHeight / 2 - 16`.
+
+    Vyhodnocuje se stromem, ne `eval` — a jen sčítání, odčítání, násobení,
+    dělení a unární mínus. Cokoli jiného (funkce, porovnání, neznámé jméno)
+    vrátí None a prvek se z kontroly vynechá, jako dosud.
+    """
+    import ast
+
+    nahrada = {jmeno: f"_p{index}" for index, jmeno in enumerate(hodnoty)}
+    prepsany = text
+    for jmeno in sorted(nahrada, key=len, reverse=True):
+        prepsany = prepsany.replace(jmeno, nahrada[jmeno])
+    promenne = {nahrada[jmeno]: hodnota for jmeno, hodnota in hodnoty.items()}
+
+    def spocitej(uzel):
+        if isinstance(uzel, ast.Constant) and isinstance(uzel.value, (int, float)):
+            return uzel.value
+        if isinstance(uzel, ast.Name):
+            return promenne.get(uzel.id)
+        if isinstance(uzel, ast.UnaryOp) and isinstance(uzel.op, (ast.UAdd, ast.USub)):
+            vnitrek = spocitej(uzel.operand)
+            return None if vnitrek is None else (
+                vnitrek if isinstance(uzel.op, ast.UAdd) else -vnitrek)
+        if isinstance(uzel, ast.BinOp):
+            vlevo, vpravo = spocitej(uzel.left), spocitej(uzel.right)
+            if vlevo is None or vpravo is None:
+                return None
+            if isinstance(uzel.op, ast.Add):
+                return vlevo + vpravo
+            if isinstance(uzel.op, ast.Sub):
+                return vlevo - vpravo
+            if isinstance(uzel.op, ast.Mult):
+                return vlevo * vpravo
+            if isinstance(uzel.op, ast.Div):
+                return vlevo / vpravo if vpravo else None
         return None
-    zaklad = plocha[shoda.group(1)]
-    if shoda.group(2) is None:
-        return zaklad
-    return zaklad - int(shoda.group(3)) if shoda.group(2) == "-" else zaklad + int(shoda.group(3))
+
+    try:
+        strom = ast.parse(prepsany, mode="eval")
+    except SyntaxError:
+        return None
+    vysledek = spocitej(strom.body)
+    return None if vysledek is None else int(vysledek)
 
 
 def kontrola_prekryvu(soubory, vylucne):
@@ -657,18 +712,31 @@ def kontrola_prekryvu(soubory, vylucne):
     """
     obsahove = ("lbl_", "txt_", "drp_", "btn_", "cmb_", "ico_")
 
-    def sourozenci(uzel):
-        """Skupiny prvků se společným rodičem. Souřadnice prvku uvnitř galerie
-        jsou relativní k šabloně řádku, takže srovnávat je s prvky obrazovky
-        nedává smysl."""
+    def sourozenci(uzel, plocha):
+        """Skupiny prvků se společným rodičem, každá se svými rozměry plochy.
+
+        Souřadnice prvku uvnitř galerie jsou relativní k šabloně řádku, takže
+        srovnávat je s prvky obrazovky nedává smysl — a `Parent.TemplateWidth`
+        v nich znamená šířku galerie, ne obrazovky.
+        """
         skupina = []
         for polozka in uzel or []:
             for jmeno, definice in polozka.items():
                 skupina.append((jmeno, definice))
                 if definice.get("Children"):
-                    yield from sourozenci(definice["Children"])
+                    yield from sourozenci(definice["Children"],
+                                          plocha_deti(definice, plocha))
         if skupina:
-            yield skupina
+            yield skupina, plocha
+
+    def plocha_deti(definice, plocha):
+        """Rozměry, ke kterým se vztahují souřadnice dětí daného prvku."""
+        vlastnosti = definice.get("Properties") or {}
+        sirka = souradnice_v_px(vlastnosti.get("Width", ""), "Width", plocha)
+        vyska = souradnice_v_px(vlastnosti.get("Height", ""), "Height", plocha)
+        radek = souradnice_v_px(vlastnosti.get("TemplateSize", ""), "Height", plocha)
+        return {"Width": sirka, "Height": vyska,
+                "TemplateWidth": sirka, "TemplateHeight": radek}
 
     for cesta in soubory:
         dokument = nacti_yaml(cesta)
@@ -676,7 +744,9 @@ def kontrola_prekryvu(soubory, vylucne):
             if koren != "Screens":
                 continue
             for jmeno_obrazovky, telo in obsah.items():
-                for skupina in sourozenci(telo.get("Children")):
+                zakladni = {"Width": SIRKA_PLOCHY, "Height": VYSKA_PLOCHY,
+                            "TemplateWidth": None, "TemplateHeight": None}
+                for skupina, plocha in sourozenci(telo.get("Children"), zakladni):
                     obdelniky = []
                     for jmeno, definice in skupina:
                         if not jmeno.startswith(obsahove) or jmeno in PREKRYV_POVOLEN:
@@ -686,7 +756,8 @@ def kontrola_prekryvu(soubory, vylucne):
                         for klic, rozmer in (("X", "Width"), ("Y", "Height"),
                                              ("Width", "Width"), ("Height", "Height")):
                             souradnice.append(
-                                souradnice_v_px(vlastnosti.get(klic, ""), rozmer))
+                                souradnice_v_px(vlastnosti.get(klic, ""), rozmer,
+                                                plocha))
                         if any(s is None for s in souradnice):
                             continue
                         # Prvky skryté za stejné podmínky se nepřekrývají za běhu.
@@ -920,6 +991,11 @@ def porovnej(jmeno_obrazovky, obdelniky, vylucne):
             if vylucuji_se(va, vb):
                 continue
             if je_nabidka(va) != je_nabidka(vb):
+                continue
+            # Modál je definičně vrstva NAD obsahem — leží přes formulář
+            # schválně a má vlastní podklad. Porovnávat ho s tím, co překrývá,
+            # nemá smysl; mezi sebou se modální prvky kontrolují dál.
+            if ("Modal" in jmeno_a) != ("Modal" in jmeno_b):
                 continue
             if je_nabidka(va):
                 dvojice = tuple(sorted((nabidkova_promenna(va),

@@ -9,7 +9,7 @@
       nasbira se a vypise na konci, aby bylo videt, co presne selhalo.
 
    SADA DAT: runs/normalize
-   POCTY:    Agendy=7, Procesy=46, DilciProcesy=250, Aktivity=46, AktivitaDilciProces=46, Utvary=8
+   POCTY:    Agendy=7, Procesy=46, DilciProcesy=250, Aktivity=46, AktivitaDilciProces=46, Utvary=44
 */
 (async () => {
 "use strict";
@@ -3624,52 +3624,268 @@ const DATA = [
   "list": "Utvary",
   "rows": [
    {
-    "Title": "1",
-    "nazev": "Útvar 1 (sekce)",
-    "uroven": "sekce",
+    "Title": "0",
+    "nazev": "Ministr",
+    "uroven": "ministr",
     "nadrizeny_kod": ""
+   },
+   {
+    "Title": "12",
+    "nazev": "O12",
+    "uroven": "odbor",
+    "nadrizeny_kod": "0"
+   },
+   {
+    "Title": "121",
+    "nazev": "O121",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "12"
+   },
+   {
+    "Title": "122",
+    "nazev": "O122",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "12"
    },
    {
     "Title": "3",
-    "nazev": "Útvar 3 (sekce)",
+    "nazev": "Sekce 3",
     "uroven": "sekce",
-    "nadrizeny_kod": ""
+    "nadrizeny_kod": "0"
    },
    {
     "Title": "11",
-    "nazev": "Útvar 11 (odbor)",
-    "uroven": "odbor",
-    "nadrizeny_kod": "1"
-   },
-   {
-    "Title": "33",
-    "nazev": "Útvar 33 (odbor)",
+    "nazev": "O11",
     "uroven": "odbor",
     "nadrizeny_kod": "3"
    },
    {
     "Title": "111",
-    "nazev": "Útvar 111 (oddělení)",
+    "nazev": "O111",
     "uroven": "oddělení",
     "nadrizeny_kod": "11"
    },
    {
     "Title": "113",
-    "nazev": "Útvar 113 (oddělení)",
+    "nazev": "O113",
     "uroven": "oddělení",
     "nadrizeny_kod": "11"
    },
    {
+    "Title": "33",
+    "nazev": "O33",
+    "uroven": "odbor",
+    "nadrizeny_kod": ""
+   },
+   {
     "Title": "331",
-    "nazev": "Útvar 331 (oddělení)",
+    "nazev": "O331",
     "uroven": "oddělení",
     "nadrizeny_kod": "33"
    },
    {
     "Title": "332",
-    "nazev": "Útvar 332 (oddělení)",
+    "nazev": "O332",
     "uroven": "oddělení",
     "nadrizeny_kod": "33"
+   },
+   {
+    "Title": "4",
+    "nazev": "Sekce 4",
+    "uroven": "sekce",
+    "nadrizeny_kod": "0"
+   },
+   {
+    "Title": "401",
+    "nazev": "O401",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "4"
+   },
+   {
+    "Title": "42",
+    "nazev": "O42",
+    "uroven": "odbor",
+    "nadrizeny_kod": "4"
+   },
+   {
+    "Title": "422",
+    "nazev": "O422",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "42"
+   },
+   {
+    "Title": "424",
+    "nazev": "O424",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "42"
+   },
+   {
+    "Title": "425",
+    "nazev": "O425",
+    "uroven": "odbor",
+    "nadrizeny_kod": "42"
+   },
+   {
+    "Title": "44",
+    "nazev": "O44",
+    "uroven": "odbor",
+    "nadrizeny_kod": "4"
+   },
+   {
+    "Title": "443",
+    "nazev": "O443",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "44"
+   },
+   {
+    "Title": "445",
+    "nazev": "O445",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "44"
+   },
+   {
+    "Title": "45",
+    "nazev": "O45",
+    "uroven": "odbor",
+    "nadrizeny_kod": "4"
+   },
+   {
+    "Title": "451",
+    "nazev": "O451",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "45"
+   },
+   {
+    "Title": "452",
+    "nazev": "O452",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "45"
+   },
+   {
+    "Title": "453",
+    "nazev": "O453",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "45"
+   },
+   {
+    "Title": "6",
+    "nazev": "Sekce 6",
+    "uroven": "sekce",
+    "nadrizeny_kod": "0"
+   },
+   {
+    "Title": "601",
+    "nazev": "O601",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "6"
+   },
+   {
+    "Title": "32",
+    "nazev": "O32",
+    "uroven": "odbor",
+    "nadrizeny_kod": "6"
+   },
+   {
+    "Title": "322",
+    "nazev": "O322",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "32"
+   },
+   {
+    "Title": "323",
+    "nazev": "O323",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "32"
+   },
+   {
+    "Title": "325",
+    "nazev": "O325",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "32"
+   },
+   {
+    "Title": "34",
+    "nazev": "O34",
+    "uroven": "odbor",
+    "nadrizeny_kod": "6"
+   },
+   {
+    "Title": "341",
+    "nazev": "O341",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "34"
+   },
+   {
+    "Title": "342",
+    "nazev": "O342",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "34"
+   },
+   {
+    "Title": "35",
+    "nazev": "O35",
+    "uroven": "odbor",
+    "nadrizeny_kod": "6"
+   },
+   {
+    "Title": "351",
+    "nazev": "O351",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "35"
+   },
+   {
+    "Title": "356",
+    "nazev": "O356",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "35"
+   },
+   {
+    "Title": "357",
+    "nazev": "O357",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "35"
+   },
+   {
+    "Title": "61",
+    "nazev": "O61",
+    "uroven": "odbor",
+    "nadrizeny_kod": "6"
+   },
+   {
+    "Title": "611",
+    "nazev": "O611",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "61"
+   },
+   {
+    "Title": "612",
+    "nazev": "O612",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "61"
+   },
+   {
+    "Title": "62",
+    "nazev": "O62",
+    "uroven": "odbor",
+    "nadrizeny_kod": "6"
+   },
+   {
+    "Title": "621",
+    "nazev": "O621",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "62"
+   },
+   {
+    "Title": "622",
+    "nazev": "O622",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "62"
+   },
+   {
+    "Title": "623",
+    "nazev": "O623",
+    "uroven": "oddělení",
+    "nadrizeny_kod": "62"
    }
   ]
  }

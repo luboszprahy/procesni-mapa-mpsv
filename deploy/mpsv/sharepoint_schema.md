@@ -145,9 +145,9 @@ Zdroj dat: `aktivita_dilciproces.csv` (46 řádků). Verzování: zapnuto.
 
 ### `Utvary`
 
-Ciselnik utvaru (sekce/odbor/oddeleni). Utvary v podkladech vlastni ciselnik nemaji - kody se odvozuji z cisel v aktivitach, nazvy jsou zastupne a doplni je zadavatelka.
+Ciselnik utvaru (ministr/sekce/odbor/oddeleni). Zdrojem je MPSV list Organizacni utvary; kod je hole cislo utvaru, nazev je oznaceni z MPSV (O11, Sekce 3). Ministr ma kod 0.
 
-Zdroj dat: `utvary.csv` (8 řádků). Verzování: zapnuto. Výchozí řazení: `Title`.
+Zdroj dat: `utvary.csv` (44 řádků). Verzování: zapnuto. Výchozí řazení: `Title`.
 
 | Interní název | Zobrazovaný název | Typ | Povinný | Indexovaný | Zdroj v CSV |
 |---|---|---|---|---|---|
@@ -156,9 +156,9 @@ Zdroj dat: `utvary.csv` (8 řádků). Verzování: zapnuto. Výchozí řazení: 
 | `uroven` | Úroveň | Volba | ne | ano | uroven |
 | `nadrizeny_kod` | Nadřízený útvar (kód) | Jeden řádek textu | ne | ano | nadrizeny_kod |
 
-- `uroven` — hodnoty: `sekce`, `odbor`, `oddělení`
-- `Title` — Cislo utvaru. 1 cislice = sekce, 2 = odbor, 3 = oddeleni.
-- `nadrizeny_kod` — Kod nadrizeneho utvaru; u sekce prazdne.
+- `uroven` — hodnoty: `ministr`, `sekce`, `odbor`, `oddělení`
+- `Title` — Cislo utvaru tak, jak ho nesou aktivity a rejstrik. Delka cisla NEURCUJE uroven ani nadrizeneho - O32 je odbor pod Sekci 6. Ministr ma 0.
+- `nadrizeny_kod` — Kod nadrizeneho utvaru z MPSV listu; u ministra prazdne. Z cisla se odvodit neda.
 
 ### `HistorieKodu`
 

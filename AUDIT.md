@@ -1,10 +1,17 @@
 # AUDIT — Procesní mapa MPSV
 
-Poslední audit: 06.09.2026 19:15 · auditor: powerplatform-auditor · kolo: 6 (balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
+Poslední audit: 06.09.2026 20:15 · auditor: powerplatform-auditor · kolo: 7 (balík `deploy/procesnimapa_1_0_0_99.zip`, F16/1 víc vlastníků + tlačítko Přesun + F17 pruh voleb + F15 číselník útvarů)
+Verdikt kolo 7: NÁLEZY (2 blokující / 2 opravit / 0 eskalací) — integrita balíku (verze, `Managed`,
+  žádný GUID natvrdo, žádné `<defaultvalue>`/`environmentvariablevalues.json`) je v pořádku a
+  G-01 z kola 6 je vyřízeno (balík 98 i F14 jsou komitnuté), ale appka samotná v novém
+  formuláři „víc vlastníků" na dvou místech tiše zapíše nebo smaže jiná data, než appka
+  a `STATUS.md` tvrdí — viz P-01/P-02 níže
+Předchozí: 06.09.2026 19:15 · kolo: 6 (balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
 Verdikt kolo 6: NÁLEZY (1 blokující / 1 opravit / 0 eskalací) — balík samotný je technicky v pořádku
   (žádný GUID natvrdo, ostatních 8 flow beze změny proti 97, REST zápis tvarově správný a ověřený
   proti produkčně běžícím dvojčatům), ale **implementace F14 a balík 98 nejsou v gitu** — viz G-01
-Předchozí: 03.09.2026 22:10 · kolo: 5 (balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3+C4),
+  (kolo 7: **vyřízeno**, viz níže)
+Před tím: 03.09.2026 22:10 · kolo: 5 (balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3+C4),
   NÁLEZY (0 blokujících / 1 opravit / 0 eskalací)
 Před tím: 25.08.2026 · kolo: 4, druhé kolo (re-audit balíku `deploy/procesnimapa_1_0_0_60.zip`)
 Před tím: 25.08.2026 · powerplatform-auditor · kolo 4, první kolo (balík 1.0.0.59)
@@ -26,6 +33,350 @@ V tomto projektu **neplatí** kritéria vázaná na publisher `ppf`/prefix `ppf_
 tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze změny).
 Testovací tenant je skutečně `ppfbanka.sharepoint.com` a jeho výskyt v balíku
 proto sám o sobě není nález.
+
+## Kolo 7 (06.09.2026, balík `deploy/procesnimapa_1_0_0_99.zip`, F16/1 + tlačítko Přesun + F17 + F15)
+
+> **VYŘÍZENO 06.09.2026 19:50, balík `1.0.0.100`.** Všechny čtyři nálezy
+> opraveny, žádný zamítnut. Nálezy byly věcné — dva blokující byly obojí
+> opomenutí při zavádění víc vlastníků.
+>
+> | nález | jak vyřízeno |
+> |---|---|
+> | **P-01** | trojice `Reset(drp_VlastnikC); Set(varVlastniciC,""); Reset(txt_VlastniciC)` doplněna na obě chybějící místa — `btn_NovaC` a větev „Založit" v `btn_UlozitC`. `Reset(txt_VlastniciC)` je teď na 10 místech. |
+> | **P-02** | tooltip `btn_UlozitC` přepsán: prázdné pole vlastníky **smaže**, což kód dělal už předtím. Slib „zůstane ten původní" pocházel z doby jednoho rozbalovátka a přežil změnu — přesně ten druh nesouladu, kvůli kterému se audit dělá. |
+> | **P-03** | `lbl_RadekUklidC` na `-224`, `lbl_RadekVlastnikC` na `-302`, `lbl_RadekNazevC` na `TemplateWidth - 482`; mezi sloupci je všude 8 px. |
+> | **P-04** | `btn_NezarazeneD` posunuto z `X=464` na `514`. |
+>
+> **Podstatnější než ty čtyři opravy je příčina P-03: brána překryvy uvnitř
+> galerií nekontrolovala vůbec.** `souradnice_v_px()` neuměla
+> `Parent.TemplateWidth/TemplateHeight`, takže se každý prvek v šabloně řádku
+> přeskočil. Doplněno vyhodnocování aritmetiky nad `Parent.*` a `varFs`
+> (stromem přes `ast`, ne `eval`, jen `+ - * /`).
+>
+> Rozšířená kontrola pak našla i **dva pre-existující překryvy** na
+> `scr_Vazby` (`lbl_VazbaKod` × `lbl_VazbaNazev`, `lbl_DpKod` × `lbl_DpNazev`,
+> 2 px svisle) — popisek názvu začínal dřív, než končil popisek kódu. Srovnáno
+> na `Y = 30 + varFs`. Vizuálně to vidět nebylo (text je centrovaný), ale rámce
+> se překrývaly.
+>
+> Modální prvky dostaly výjimku — leží nad obsahem záměrně. Výjimka platí
+> jen pro dvojici modál + obsah pod ním; dva modály přes sebe se hlásí dál.
+>
+> Nový mutační test `src/mutace_prekryv.py` **4/4**: tlačítko Přesun na štítku
+> úklidu, přetékající popisek názvu, koš na tlačítku Přesun a dva modální
+> prvky přes sebe (ten hlídá, že výjimka pro modály není příliš široká).
+>
+> Brány nad `1.0.0.100`: `check_solution` 679, `check_restore_flow` 571,
+> `check_import_flow` **243**, `check_zaloha_flow` 184, `check_mapa_flow` 144,
+> `check_export_flow` 129, `check_presun_flow` 111, `check_flow` 30,
+> `check_app`, `check_env`, `check_schema` zeleně. Mutačně: `mutace_import`
+> **32/32**, `mutace_sablona` 19/19, `mutace_restore` 17/17, `mutace_zaloha`
+> 16/16, `mutace_presun` 15/15, `mutace_kratky_nazev` 14/14,
+> `mutace_export_mapa` 7/7, `mutace_napojeni` 5/5, `mutace_prekryv` **4/4**,
+> `mutace_parametry` 4/4, `mutace_app` 2/2.
+
+Zadání: F16/1 (víc vlastníků u agendy, procesu a dílčího procesu — trojice
+rozbalovátko/„+"/textové pole v `scr_Ciselnik.pa.yaml`), tlačítko Přesun
+místo ikony ve stejné obrazovce, F17 (sjednocený pruh voleb na
+`scr_Dashboard.pa.yaml`), F15 (číselník útvarů 7 → 44 položek). Rozsah podle
+zadání: appka (`src/app_src/*.pa.yaml` a `.msapp` uvnitř balíku), ne flows —
+ty prošly auditem v kole 6 a v tomto kole beze změny.
+
+Postup: `deploy/procesnimapa_1_0_0_99.zip` rozbalen do scratchpadu (`unzip -t`
+bez chyby na solution zipu i vnořeném `.msapp`), `CanvasApps/*.msapp`
+rozbalen zvlášť, nálezy ověřeny přímo nad `Src/*.pa.yaml` v rozbaleném
+balíku, ne nad `STATUS.md`. Doplňkově: `diff` mezi rozbaleným `Src/*.pa.yaml`
+a `src/app_src/*.pa.yaml` v repu vyšel **prázdný** (bajtově identické) — build
+je reprodukovatelný a zdroj v gitu odpovídá vydanému balíku, takže nálezy
+níže citují i cestu/řádek v `src/app_src/`. Pro srovnání „před" rozbalen i
+`deploy/procesnimapa_1_0_0_98.zip` (poslední auditovaný balík z kola 6).
+Brány spuštěny přímo, ne převzaty: `check_app.py`, `mutace_app.py`,
+`check_solution.py --vstup 98 --vystup 99`. `git status`/`git log`
+zkontrolovány pro ověření G-01 z kola 6.
+
+### Integrita balíku, verze, env proměnné, git — v pořádku
+
+| co | výsledek |
+|---|---|
+| `unzip -t` solution zip i vnořený `.msapp` | bez chyby |
+| `solution.xml` `<Version>` / `<Managed>` | `1.0.0.99` (> `1.0.0.98`), `<Managed>0</Managed>` |
+| GUID (regex `[0-9a-f]{8}-…`) ve `Workflows/` | **0 výskytů** (beze změny proti 98) |
+| `<defaultvalue>` v definicích env proměnných | **žádná** |
+| `environmentvariablevalues.json` v balíku | **není** |
+| `Src/*.pa.yaml` v `.msapp` vs `src/app_src/*.pa.yaml` v repu | **bajtově identické** (`diff` prázdný) |
+| `check_app.py --solution deploy/procesnimapa_1_0_0_99.zip` | OK — 7 souborů, 6 obrazovek, 287 prvků, 3206 vzorců, jen 4 preexistující VAROVÁNÍ (3× Sort v Items, 1× výjimka mazání v `scr_Vazby`) |
+| `mutace_app.py` | 2/2 chyceno (kryje jen starší past `ForAll`+zápis, netýká se F16/1 — cílená kontrola pro `txt_VlastniciC`/`btn_PridatVlastnikaC` v `check_app.py` **není žádná**, jak upozorňuje zadání) |
+| `check_solution.py --vstup 98 --vystup 99` | 668 kontrol, 0 chyb |
+| **G-01 (kolo 6)** — implementace F14/balík 98 v gitu | **vyřízeno**: `git status --short` je čistý na souborech appky, `git log` ukazuje komity `317e0c1` (F14/98), `12a2fd6` (F15+F17+Přesun) a `0067065` (F16/1, balík 99); pracovní strom má jen necommitnuté změny v `src/make_sablona.py`/`src/build_import_flow.py`/`src/check_import_flow.py`/`src/mutace_import.py`/`deploy/sablona_import_aktivit.xlsx` — podle zadání souběžná práce na F16/2, mimo rozsah tohoto auditu, nebrat jako nález |
+
+### P-01 · BLOKUJÍCÍ · `src/app_src/scr_Ciselnik.pa.yaml` — dvě ze devíti míst, která formulář číselníku plní nebo čistí, nevyprázdní pole vlastníků; appka pak zapíše cizí vlastníky do nesouvisející položky
+
+`STATUS.md` (06.09.2026 večer, F16/1) tvrdí: „`varVlastniciC` se plní při
+načtení položky do formuláře a čistí se při přepnutí úrovně / nové položce
+(**šest míst**, kde bylo `Reset(drp_VlastnikC)`)." Skutečnost: `Reset(drp_VlastnikC)`
+se v balíku **98** (před F16/1) vyskytoval na **devíti** místech (řádky 140,
+283, 314, 345, 380, 783, 1449, 1541, 1755 — ověřeno greppem), a všech devět
+jsou reálná místa, kde se formulář číselníku plní nebo čistí (OnVisible, čtyři
+tlačítka přepnutí úrovně, načtení položky do formuláře, úspěšné založení nové
+položky, tlačítko „Nová položka", potvrzené smazání zobrazené položky). V
+balíku **99** má **sedm** z nich kompletní trojici `Reset(drp_VlastnikC);
+Set(varVlastniciC, "" nebo Switch(...)); Reset(txt_VlastniciC)` — ale **dvě
+zůstala jen s původním jediným řádkem**:
+
+**1. Tlačítko „Nová položka" (`btn_NovaC.OnSelect`, řádek 1612-1627):**
+```
+scr_Ciselnik.pa.yaml (balík 99):
+  =Set(varCiselnikNova, true);
+  Set(varCiselnikKod, "");
+  Set(varChybaC, "");
+  Reset(drp_AgendaC);
+  Reset(drp_ProcesC);
+  Reset(txt_NazevC);
+  Reset(drp_VlastnikC);
+  If(varUrovenTyp = "aktivita", …)
+```
+
+**2. Úspěšné založení nové položky (`btn_UlozitC.OnSelect`, řádek 1524-1527,
+větev „Založit"):**
+```
+scr_Ciselnik.pa.yaml (balík 99):
+  Set(varAktStale, true);
+  Notify("Založeno jako " & varNovyKodC & ".", NotificationType.Success, varNotifyMs);
+  Reset(txt_NazevC);
+  Reset(drp_VlastnikC),
+```
+
+V obou chybí `Set(varVlastniciC, "")` a `Reset(txt_VlastniciC)`.
+
+**Reprodukce (sekvence kroků, deterministická — Power Fx `Default`/`Reset`
+sémantika je zdokumentovaná, appka nemusí běžet, aby se dala vysledovat z
+kódu):**
+1. Uživatel na úrovni „Procesy" klikne existující proces s víc vlastníky
+   (`lbl_RadekPrekryvC.OnSelect`, řádek 794-804 — tohle místo triádu má) →
+   `varVlastniciC` se nastaví např. na `"11; 33"`, `Reset(txt_VlastniciC)`
+   promítne hodnotu do pole.
+2. `btn_NovaC` je pro zobrazenou existující položku aktivní
+   (`DisplayMode = If(varUrovenTyp <> "aktivita" && varCiselnikNova,
+   DisplayMode.Disabled, DisplayMode.Edit)`, `varCiselnikNova` je zde
+   `false`) — uživatel klikne „Nová položka".
+3. `OnSelect` vyprázdní agendu, název i rozbalovátko vlastníka, ale
+   `txt_VlastniciC` **zůstává** `"11; 33"` — `Reset()` se na něj nezavolal,
+   takže si drží starou zobrazenou hodnotu (Default se přepočítá jen při
+   Reset/mountu, ne samovolně).
+4. Uživatel vyplní jen název a klikne „Založit". `btn_UlozitC.OnSelect` čte
+   `varVlastnikC` z `txt_VlastniciC.Text` (řádek 1341-1351,
+   `Concat(Filter(Split(...)))`), ne z `varVlastniciC` — zapíše se tedy
+   `vlastnik: "11; 33"` do **nově založeného, obsahově nesouvisejícího**
+   procesu/agendy/dílčího procesu, aniž by si toho uživatel všiml (pole
+   vypadalo prázdné jen u agendy/názvu, ne u vlastníka).
+
+Druhé místo (bod 2 výše) otevírá stejnou past i bez kroku 1-2: po úspěšném
+založení první nové položky s vlastníkem zůstane `txt_VlastniciC` nevyprázdněné
+(jen `txt_NazevC` a `drp_VlastnikC` se resetují), takže **druhá** položka
+založená hned po první (bez přechodu jinam) zdědí vlastníka té první, i když
+ji uživatel nikdy nevybral.
+
+Brány to nechytí: `check_app.py` nad balíkem 99 vypíše `OK` beze zmínky (viz
+tabulka výše) a `mutace_app.py` tuhle funkci vůbec netestuje (jediné dvě
+mutace se týkají staré pasti `ForAll`+zápis, viz `src/mutace_app.py`).
+Checklist: C5 (past authoringu — nekompletní reset stavu formuláře), H1/H2
+(`STATUS.md` tvrdí „šest míst" a „čistí se … při nové položce", skutečnost
+neodpovídá ani v počtu, ani v úplnosti).
+Doporučená oprava (neprovedeno, jen návrh): na obou místech doplnit
+`Set(varVlastniciC, ""); Reset(txt_VlastniciC)` za `Reset(drp_VlastnikC)`
+(stejný pattern jako na sedmi fungujících místech). Do `check_app.py`
+přidat kontrolu, že každý výskyt `Reset(drp_VlastnikC)` je bezprostředně
+následovaný `Set(varVlastniciC,` a `Reset(txt_VlastniciC)` — mutačně
+ověřitelné odebráním kterékoli z obou přípon.
+Stav: otevřeno
+
+### P-02 · BLOKUJÍCÍ · `src/app_src/scr_Ciselnik.pa.yaml:1531-1564` a tooltip na řádku 1588 — uložení existující položky s prázdným polem vlastníků vlastníka nenávratně smaže, tooltip appky tvrdí opak
+
+`STATUS.md` (06.09.2026) k F16/1 výslovně píše: „Popisek pole už neslibuje
+‚prázdné = ponechat stávajícího' — seznam je zdroj pravdy, takže prázdný
+seznam znamená žádný vlastník." Skutečný tooltip tlačítka „Uložit změny" v
+balíku 99 ale **pořád slibuje přesně to, co STATUS.md tvrdí, že už neslibuje**:
+
+```
+scr_Ciselnik.pa.yaml (balík 99, btn_UlozitC.Tooltip, řádek 1588):
+  "Uloží změnu názvu a vlastníka. Kód, úroveň ani zařazení se nemění -
+   vazby v rejstříku i v mapě na kódu stojí. Když necháš vlastníka
+   nevyplněného, zůstane ten původní; je to pojistka pro položky, které
+   mají vlastníků víc a v nabídce jednoho útvaru se proto nenajdou."
+```
+
+A skutečné chování `btn_UlozitC.OnSelect` (větev editace existující
+položky, ne založení nové) ho vyvrací — `varVlastnikC` se spočítá z
+`txt_VlastniciC.Text` bez ohledu na to, jestli je pole prázdné:
+
+```
+Set(
+    varVlastnikC,
+    Concat(Filter(Split(Substitute(txt_VlastniciC.Text, " ", ""), ";"),
+                  !IsBlank(Value)), Value, "; ")
+);
+…
+Patch(Agendy, LookUp(Agendy, Title = varCiselnikKod),
+      { nazev: txt_NazevC.Text, vlastnik: varVlastnikC })
+```
+
+Pro prázdné `txt_VlastniciC.Text`: `Substitute("", " ", "") = ""`,
+`Split("", ";")` vrátí jednořádkovou tabulku s `Value = ""`, `Filter(!IsBlank(Value))`
+tenhle prázdný řádek odfiltruje (Power Fx `IsBlank("")` je `true`), `Concat`
+nad prázdnou tabulkou vrátí `""` — `varVlastnikC` je tedy `""` a `Patch`
+zapíše `vlastnik: ""` **bez výjimky**, žádná větev kód neošetřuje jinak.
+Jde o **stejnou dvojici řádků**, kterou používá i P-01 (`Concat/Split` v
+`btn_UlozitC.OnSelect`), takže je to tatáž mechanika, jiný spouštěč.
+
+**Reprodukce:** existující proces se dvěma vlastníky (`"11; 33"`), z nichž
+jeden v nabídce dropdownu chybí (přesně scénář, na který tooltip cílí —
+„položky, které mají vlastníků víc a v nabídce jednoho útvaru se proto
+nenajdou"). Uživatel podle tooltipu **záměrně smaže obsah** `txt_VlastniciC`
+(protože si podle popisku myslí, že tím ponechá původní hodnotu), upraví jen
+název a uloží. `btn_UlozitC.OnSelect` zapíše `vlastnik: ""` — oba vlastníci
+jsou nenávratně pryč (list `Agendy`/`Procesy`/`Dílčí procesy` nemá historii
+pole mimo SharePoint verzování, které appka neobsluhuje).
+
+Nejde o okrajový detail popisku — je to přesně opačné doporučení, než jaké
+appka provede, a týká se přímo hlavního scénáře, kvůli kterému F16/1 vznikla
+(položky s víc vlastníky, kde jeden není v nabídce). Brány to nechytí ze
+stejného důvodu jako P-01 — `check_app.py` nemá kontrolu obsahu tooltipů
+proti skutečnému chování a `mutace_app.py` se F16/1 netýká.
+Checklist: H1/H2 (appka dělá opak toho, co sama tvrdí a co `STATUS.md`
+popisuje jako opravené), C5.
+Doporučená oprava (neprovedeno, jen návrh): buď (a) tooltip přepsat na
+skutečné chování („prázdné pole = žádný vlastník, přepíše i existující"),
+nebo (b) pokud má platit původní slib, ve větvi editace existující položky
+při `IsBlank(txt_VlastniciC.Text)` zapsat vlastníka beze změny (hodnotu, se
+kterou se formulář naplnil), ne prázdný řetězec — a teprve explicitní akci
+(např. tlačítko „vymazat vlastníky") použít pro skutečné smazání. Cokoli z
+toho stačí, hlavní je, aby tooltip a kód říkaly totéž.
+Stav: otevřeno
+
+### P-03 · OPRAVIT · `src/app_src/scr_Ciselnik.pa.yaml` (šablona řádku galerie `gal_CiselnikC`) — `btn_PresunC` se překrývá s `lbl_RadekUklidC` o 16 px; `check_app.py` překryvy uvnitř šablony galerie nevidí
+
+Galerie `gal_CiselnikC` má pevnou `Width: =620` (`Parent.TemplateWidth`
+uvnitř šablony řádku je tedy 620). Dosazením do souřadnic v balíku 99:
+
+```
+lbl_RadekUklidC:  X = Parent.TemplateWidth - 200 = 420, Width = 76  → [420, 496]
+btn_PresunC:      X = Parent.TemplateWidth - 140 = 480, Width = 84  → [480, 564]
+```
+
+Průnik `[480, 496]` = **16 px přes celou výšku řádku** (obě mají
+`Height = Parent.TemplateHeight - 1`). U procesů/dílčích procesů, které jsou
+zároveň „osiřelé" (`lbl_RadekUklidC` zobrazí text „osiřelý"), se tenhle text
+a levý okraj tlačítka „Přesun" (má průhledný `Fill`, takže podklad prosvítá)
+vizuálně sráží ve stejném 16px pruhu — obě `Visible` podmínky se nevylučují,
+takže se to skutečně vykreslí naráz.
+
+**Proč to `check_app.py` nechytí.** `kontrola_prekryvu()` počítá souřadnice
+přes `souradnice_v_px()`, která umí jen `Parent.Width`/`Parent.Height` proti
+konstantám `SIRKA_PLOCHY`/`VYSKA_PLOCHY` (obrazovka) — regex
+`Parent\.(Width|Height)(?:\s*[-+]\s*\d+)?` na `Parent.TemplateWidth` (galerie)
+nesedne, protože za `Parent.` následuje `TemplateWidth`, ne `Width`/`Height`.
+`souradnice_v_px()` proto pro `Parent.TemplateWidth - N` vrátí `None` a
+`kontrola_prekryvu()` s `if any(s is None for s in souradnice): continue`
+dvojici přeskočí — **prakticky každý prvek uvnitř libovolné šablony galerie**
+(všechny používají `Parent.TemplateWidth`/`Parent.TemplateHeight`), takže
+brána efektivně nekontroluje překryvy uvnitř galerií vůbec, i když skill
+dokumentace (`canvas-json-editing.md` §Layout) tenhle typ chyby explicitně
+jmenuje jako to, co „nehlásí nikdo". Ověřeno spuštěním: `check_app.py` nad
+nezměněným balíkem 99 vypisuje `OK`, žádná zmínka o `btn_PresunC`/
+`lbl_RadekUklidC`.
+
+Nejde o novou závadu ve smyslu klikatelnosti — `btn_PresunC` je v souboru
+deklarované AŽ ZA `lbl_RadekPrekryvC` (transparentní overlay), takže leží
+nad ním a klik funguje na celou svou šířku 84 px; jde o vizuální kolizi
+textu. Stará verze (98, `ico_PresunC`, `Icon.Redo` W 32 na `X = TemplateWidth-84`)
+měla se stejným `lbl_RadekUklidC` kolizi ještě větší (32 px), takže problém
+není touhle změnou nově vzniklý — ale změna ho neopravila, a task kola 7
+výslovně žádal ověřit, že se prvky v řádku nepřekrývají.
+Checklist: C5, F3 (kontrola nedokazuje to, co má).
+Doporučená oprava (neprovedeno, jen návrh): (1) posunout `btn_PresunC` nebo
+zúžit/posunout `lbl_RadekUklidC`, ať mezi nimi zůstane mezera jako u
+ostatních dvojic v řádku (8 px); (2) do `souradnice_v_px()` doplnit i
+`Parent\.(TemplateWidth|TemplateHeight)` proti rozměrům šablony galerie
+(šířka z `Width` galerie, výška z `TemplateSize`/`Height` podle Layout) —
+bez toho je `kontrola_prekryvu()` u galerií kosmetická.
+Stav: otevřeno
+
+### P-04 · OPRAVIT · `src/app_src/scr_Dashboard.pa.yaml:1529` (`btn_NezarazeneD`) — tlačítko v panelu „Stav" zůstalo na staré souřadnici, čouhá 46 px mimo panel
+
+F17 posunula panel `rec_MenuStavPanel` z `X = 460` (balík 98) na `X = 510`
+(balík 99, +50 px, sedí na nový krok 248 mezi tlačítky pruhu) a čtyři z pěti
+tlačítek uvnitř panelu (`btn_StavVse`, `btn_StavSchvaleno`, `btn_StavPracovni`,
+`btn_KodD`) posunula spolu s ním z `X = 464` na `X = 514`. Páté,
+`btn_NezarazeneD`, zůstalo na **starém** `X = 464`:
+
+```
+balík 98: btn_StavVse, btn_StavSchvaleno, btn_StavPracovni, btn_NezarazeneD,
+          btn_KodD — všech pět na X=464 (panel na X=460)
+balík 99: btn_StavVse/Schvaleno/Pracovni/KodD → X=514 (posunuto s panelem),
+          btn_NezarazeneD → X=464 (NEposunuto; panel je teď na X=510)
+```
+
+Dosazením: panel `[510, 750]`, `btn_NezarazeneD` (`Width = 232`)
+`[464, 696]` — tlačítko začíná **46 px nalevo od levého okraje panelu**, bez
+podkladové karty (`rec_MenuStavPanel.Fill`) pod sebou; při zobrazené hlášce
+„nezařazené (N)" (`Visible = varMenuStav && (varDashNezarazene ||
+CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0)`, tedy vždy,
+když v rejstříku existuje aspoň jedna nezařazená aktivita) by tlačítko
+viditelně vyčnívalo z panelu doleva nad čistou plochu obrazovky.
+
+Kontrola `kontrola_prekryvu()` tohle nechytí ze stejného principiálního
+důvodu jako v P-03, jen opačným směrem — porovnává jen prvky s obsahem
+(`lbl_/txt_/drp_/btn_/cmb_/ico_`) navzájem, **výslovně vynechává `rec_`
+podklady** (skill: „jen prvky s obsahem, nikdy podklady — ty pod popisky
+ležet musí"), takže to, jestli tlačítko leží uvnitř svého vlastního panelu,
+neověřuje vůbec — to je jiná otázka než překryv dvou popisků a žádná
+existující brána ji nepokrývá.
+Checklist: C5, H1/H2 (F17 měla podle `STATUS.md` sjednotit celý pruh a jeho
+panely — u jednoho tlačítka se sjednocení nedotáhlo).
+Doporučená oprava (neprovedeno, jen návrh): v `btn_NezarazeneD` změnit
+`X: =464` na `X: =514` (stejně jako čtyři sourozenci ve stejném panelu).
+Do `check_app.py` přidat kontrolu, že každý prvek s `Visible` svázaným na
+`varMenu…` proměnnou leží (X/Y/Width/Height) uvnitř svého panelu `rec_Menu…Panel`
+se stejnou `varMenu…` podmínkou.
+Stav: otevřeno
+
+### Ověřeno spuštěním — kolo 7
+
+| příkaz / mutace | výsledek |
+|---|---|
+| `unzip -t deploy/procesnimapa_1_0_0_99.zip` (solution + `.msapp`) | bez chyby |
+| `solution.xml` verze/`Managed` | `1.0.0.99` > `1.0.0.98`, `<Managed>0</Managed>` |
+| GUID (regex) ve `Workflows/` | 0 výskytů |
+| `<defaultvalue>` v definicích env proměnných | žádná |
+| `environmentvariablevalues.json` v balíku | není |
+| `diff` `Src/*.pa.yaml` (balík 99) vs `src/app_src/*.pa.yaml` (repo) | prázdný — bajtově identické |
+| `check_app.py --solution deploy/procesnimapa_1_0_0_99.zip` | OK — 6 obrazovek, 287 prvků, 3206 vzorců, 4 preexistující VAROVÁNÍ |
+| `mutace_app.py` | 2/2 chyceno (netýká se F16/1) |
+| `check_solution.py --vstup 98 --vystup 99` | 668/0 |
+| Počet `Reset(drp_VlastnikC)` v 98 vs 99 | 9 vs 10 (nové 10. místo je `btn_PridatVlastnikaC`, intentional partial, ne bug) |
+| P-01 repro: diff obou neúplných míst proti sedmi kompletním trojicím | chybí `Set(varVlastniciC,"")`+`Reset(txt_VlastniciC)` na obou, potvrzeno greppem v 98 i 99 |
+| P-02 repro: ruční trasování `Split(Substitute("", " ", ""), ";")` → `Filter(!IsBlank)` → `Concat` | vrací `""`, `Patch(..., {vlastnik: ""})` bez výjimky pro blank |
+| P-03 výpočet: `TemplateWidth=620`, `lbl_RadekUklidC` `[420,496]` vs `btn_PresunC` `[480,564]` | průnik 16 px, `check_app.py` na to nereaguje |
+| P-04 výpočet: `rec_MenuStavPanel` `[510,750]` vs `btn_NezarazeneD` `[464,696]` | tlačítko 46 px mimo panel, `check_app.py` na to nereaguje |
+| `souradnice_v_px()` na `"Parent.TemplateWidth - 140"` (ruční test regexu) | vrací `None` (nesedne na `TemplateWidth`) — potvrzuje mechanismus mezery z P-03 |
+| `git status --short` / `git log -3` | appka a balík 99 komitnuté (`0067065`), G-01 z kola 6 vyřízeno |
+
+### Zamítnuté nálezy — kolo 7
+
+*(žádné)*
+
+## Neověřeno — kolo 7
+
+### N-09 · reálné nasazení balíku 99 na PPF DEV
+`STATUS.md` „CO JE NA TOBĚ" popisuje import 99 jako upgrade, mikro-změnu,
+Save/Publish a ruční průchod novinkami (Přesun, pruh voleb, víc vlastníků) —
+nic z toho k 06.09.2026 20:15 ještě neproběhlo. Statická kontrola (brány,
+trasování vzorců, výpočet souřadnic) nález nedala kromě P-01 až P-04.
+Potřeba k doověření: reálný import + otevření ve Studiu + scénář z P-01/P-02
+(načíst existující víc-vlastníkovou položku, kliknout „Nová položka" /
+vymazat pole vlastníků u existující položky a uložit) a vizuální kontrola
+panelu Stav a řádku Přesun na snímku obrazovky.
+
 
 ## Kolo 6 (06.09.2026, balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
 

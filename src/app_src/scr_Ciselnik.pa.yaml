@@ -722,7 +722,7 @@ Screens:
                   Tooltip: =ThisItem.nazev
                   VerticalAlign: |-
                     =If(varUrovenTyp = "aktivita", VerticalAlign.Top, VerticalAlign.Middle)
-                  Width: =Parent.TemplateWidth - 450
+                  Width: =Parent.TemplateWidth - 482
                   X: =172
                   Y: =0
             - lbl_RadekVlastnikC:
@@ -736,7 +736,7 @@ Screens:
                   Text: =ThisItem.vlastnik
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =70
-                  X: =Parent.TemplateWidth - 278
+                  X: =Parent.TemplateWidth - 302
                   Y: =0
             # Štítek je jediné místo, kde je na řádku vidět, proč ho chip
             # úklidu vybral — bez něj by se ve výpisu „vše" nedalo poznat,
@@ -761,7 +761,7 @@ Screens:
                     )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =76
-                  X: =Parent.TemplateWidth - 200
+                  X: =Parent.TemplateWidth - 224
                   Y: =0
             - rec_LinkaC:
                 Control: Rectangle@2.3.0
@@ -1524,7 +1524,9 @@ Screens:
                               Set(varAktStale, true);
                               Notify("Založeno jako " & varNovyKodC & ".", NotificationType.Success, varNotifyMs);
                               Reset(txt_NazevC);
-                              Reset(drp_VlastnikC),
+                              Reset(drp_VlastnikC);
+                              Set(varVlastniciC, "");
+                              Reset(txt_VlastniciC),
                               Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
                           )
                       ),
@@ -1585,7 +1587,7 @@ Screens:
               =If(
                   varCiselnikNova,
                   "Založí položku v příslušném SharePoint seznamu a přidělí jí kód. Zapíše se stav mapování nezmapováno a zdroj karta; u dílčího procesu navíc stav v rejstříku využitý, protože ho právě zakládá správce. Když mezitím stejný kód zabere někdo jiný, uložení se neprovede a dostaneš hlášku - stačí uložit znovu.",
-                  "Uloží změnu názvu a vlastníka. Kód, úroveň ani zařazení se nemění - vazby v rejstříku i v mapě na kódu stojí. Když necháš vlastníka nevyplněného, zůstane ten původní; je to pojistka pro položky, které mají vlastníků víc a v nabídce jednoho útvaru se proto nenajdou."
+                  "Uloží změnu názvu a vlastníků. Kód, úroveň ani zařazení se nemění - vazby v rejstříku i v mapě na kódu stojí. Seznam vlastníků se zapisuje tak, jak je v poli: prázdné pole vlastníky SMAŽE. Položka s víc vlastníky je proto při načtení vypsaná celá a útvar, který v nabídce není, jde do pole dopsat ručně."
               ) & " Nová hodnota se rovnou objeví v seznamu vlevo i v nabídkách a po návratu na přehled ve stromu - appka se kvůli tomu nemusí restartovat."
             Width: =200
             X: =724
@@ -1617,6 +1619,8 @@ Screens:
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
               Reset(drp_VlastnikC);
+              Set(varVlastniciC, "");
+              Reset(txt_VlastniciC);
               If(
                   varUrovenTyp = "aktivita",
                   Set(varDetailZpet, "ciselnik");
