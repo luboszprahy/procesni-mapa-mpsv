@@ -39,7 +39,10 @@ from build_import_flow import (FLOW, FLOW_GUID, HOST_XLS, KNIHOVNA,  # noqa: E40
                                ODD_POLE, ODD_RADKU, POCTY,
                                REZIM_SEZNAM, REZIM_ZAPIS, SPOJKA_VAZBY,
                                STRANKOVANI, TABULKA,
-                               VYCHOZI_STAV, nacti_schema, sloupce_sablony)
+                               VYCHOZI_STAV, UROVNE_VLASTNIKU,
+                               NEZARAZENY_PREFIX,
+                               nacti_schema, sloupce_sablony,
+                               sloupce_vlastniku)
 
 chyby = []
 kontrol = 0
@@ -164,10 +167,14 @@ def zkontroluj_ctení_sesitu(akce, sloupce):
     overit(str(vyber.get("radek", "")).startswith("@add(item(), 2"),
            f"číslo řádku není index+2 (hlavička je první řádek): {vyber.get('radek')!r}")
 
-    overit(set(vyber) == {"radek"} | {c["name"] for c in sloupce},
+    # Sloupce vlastníků nadřazených úrovní nejsou ve schématu listu Aktivity,
+    # ale ze sešitu se číst MUSÍ — jinak by import mlčky nezapsal nic.
+    ocekavane = ({"radek"} | {c["name"] for c in sloupce}
+                 | {c["name"] for c in sloupce_vlastniku()})
+    overit(set(vyber) == ocekavane,
            f"mapování sešitu nesedí na sloupce šablony: "
-           f"navíc {sorted(set(vyber) - {'radek'} - {c['name'] for c in sloupce})}, "
-           f"chybí {sorted({c['name'] for c in sloupce} - set(vyber))}")
+           f"navíc {sorted(set(vyber) - ocekavane)}, "
+           f"chybí {sorted(ocekavane - set(vyber))}")
     for sloupec in sloupce:
         hodnota = str(vyber.get(sloupec["name"], ""))
         overit(f"'{sloupec['display']}'" in hodnota,
@@ -362,6 +369,101 @@ def zkontroluj_telo(vnitrek, sloupce):
                f"{jmeno} má v adrese GUID vázaný na jeden tenant")
 
 
+def zkontroluj_vlastniky(akce):
+    """Vlastníci nadřazených úrovní: rozpor se hlásí, zápis je MERGE.
+
+    Nejdražší past téhle funkce je tichost: kdyby se rozpor jen odfiltroval,
+    import by doběhl zeleně a v rejstříku by nic nepřibylo. Proto se kontroluje
+    obojí — že se rozporné kódy nezapisují A že se objeví mezi chybami.
+    """
+    popisy_v_chybach = text((akce.get("Chybne_radky") or {}).get("inputs"))
+    # Zápisové smyčky leží uvnitř větve `Zapis`, na nejvyšší úrovni nejsou.
+    ploche = {jmeno.split("/")[-1]: uzel for jmeno, uzel in vsechny_akce(akce)}
+
+    for uroven in UROVNE_VLASTNIKU:
+        k = uroven["klic"]
+
+        vybrane = akce.get(f"S_vlastnikem_{k}")
+        overit(vybrane is not None, f"chybí krok S_vlastnikem_{k}")
+        if vybrane:
+            kde = text(vybrane["inputs"].get("where"))
+            overit(f"item()?['{uroven['sloupec']}']" in kde,
+                   f"S_vlastnikem_{k} nefiltruje podle sloupce "
+                   f"{uroven['sloupec']} (je tam {kde!r})")
+            # Nezařazené aktivity visí pod technickým rodičem 00-00-000;
+            # vlastník se k němu připsat nesmí, není to skutečná agenda.
+            overit(NEZARAZENY_PREFIX in kde,
+                   f"S_vlastnikem_{k} nevylučuje nezařazené aktivity — vlastník "
+                   f"by se zapsal technické agendě {NEZARAZENY_PREFIX}")
+
+        klice = akce.get(f"Klice_{k}")
+        overit(klice is not None, f"chybí krok Klice_{k}")
+        if klice:
+            vyraz = text(klice["inputs"].get("select"))
+            overit(f"0, {uroven['delka']})" in vyraz.replace("  ", " "),
+                   f"Klice_{k} neodvozuje kód rodiče prvními {uroven['delka']} "
+                   f"znaky kódu dílčího procesu: {vyraz!r}")
+
+        unikatni = akce.get(f"Unikatni_{k}")
+        overit(unikatni is not None and "union(" in text(unikatni.get("inputs")),
+               f"Unikatni_{k} nezahazuje duplicity přes union — každý řádek "
+               f"sešitu by se počítal jako další vlastník a rozpor by hlásil "
+               f"i shodně vyplněná agenda")
+
+        rozpor = akce.get(f"Rozpor_{k}")
+        k_zapisu = akce.get(f"K_zapisu_{k}")
+        overit(rozpor is not None, f"chybí krok Rozpor_{k}")
+        overit(k_zapisu is not None, f"chybí krok K_zapisu_{k}")
+        if rozpor and k_zapisu:
+            overit("greater(" in text(rozpor["inputs"].get("where")),
+                   f"Rozpor_{k} nehledá kódy s víc než jedním vlastníkem")
+            overit("equals(" in text(k_zapisu["inputs"].get("where")),
+                   f"K_zapisu_{k} nezapisuje jen kódy s právě jedním vlastníkem "
+                   f"— rozporné by se zapsaly podle pořadí řádků")
+
+        overit(f"Popis_rozpor_{k}" in popisy_v_chybach,
+               f"rozpory úrovně '{uroven['popis']}' se nedostanou do seznamu "
+               f"chyb — import by je mlčky přeskočil")
+
+        popis = akce.get(f"Popis_rozpor_{k}")
+        if popis:
+            overit(uroven["popis"] in text(popis["inputs"].get("select")),
+                   f"Popis_rozpor_{k} neříká, které úrovně se rozpor týká")
+
+        # zápis
+        smycka = ploche.get(f"Zapis_vlastniku_{k}")
+        overit(smycka is not None, f"chybí zápisová smyčka Zapis_vlastniku_{k}")
+        if smycka:
+            overit(f"K_zapisu_{k}" in text(smycka.get("foreach")),
+                   f"Zapis_vlastniku_{k} nejde přes K_zapisu_{k} — zapsaly by "
+                   f"se i rozporné kódy")
+            vnitrek = smycka.get("actions") or {}
+            uloz = vnitrek.get(f"Pokud_existuje_{k}", {}).get(
+                "actions", {}).get(f"Uloz_vlastnika_{k}")
+            overit(uloz is not None,
+                   f"chybí akce Uloz_vlastnika_{k} uvnitř podmínky na existenci")
+            if uloz:
+                parametry = uloz["inputs"]["parameters"]
+                hlavicky = parametry.get("parameters/headers") or {}
+                overit(uloz["inputs"]["host"]["operationId"] == "HttpRequest",
+                       f"Uloz_vlastnika_{k} nezapisuje přes REST")
+                overit(str(hlavicky.get("X-HTTP-Method", "")).upper() == "MERGE",
+                       f"Uloz_vlastnika_{k} nemá MERGE — POST by k agendě "
+                       f"založil další řádek místo změny vlastníka")
+                telo = parametry.get("parameters/body")
+                overit(isinstance(telo, dict) and set(telo) == {"vlastnik"},
+                       f"Uloz_vlastnika_{k} mění víc než sloupec vlastnik: "
+                       f"{sorted(telo) if isinstance(telo, dict) else telo!r}")
+                overit(f"/Lists/{uroven['list']}" in text(
+                           parametry.get("parameters/uri")),
+                       f"Uloz_vlastnika_{k} nemíří na list {uroven['list']}")
+
+        nacti = akce.get(f"Nacti_{uroven['list']}")
+        overit(nacti is not None,
+               f"chybí Nacti_{uroven['list']} — bez načteného listu se nedá "
+               f"dohledat ID položky, ke které se vlastník zapisuje")
+
+
 def zkontroluj_prenositelnost(flow):
     cely = text(flow)
     adresy = sorted(set(re.findall(r"[A-Za-z0-9-]+\.sharepoint\.com", cely)))
@@ -467,6 +569,7 @@ def main():
     zkontroluj_kostru(definice, flow["properties"].get("connectionReferences") or {})
     zkontroluj_excel(akce)
     zkontroluj_ctení_sesitu(akce, sloupce)
+    zkontroluj_vlastniky(akce)
     zkontroluj_rozklad(akce, sloupce)
     zkontroluj_zapis(akce, sloupce)
     zkontroluj_seznam(akce)

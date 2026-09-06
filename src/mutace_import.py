@@ -203,7 +203,67 @@ def nezarazene_podle_jineho_kodu(definice):
     uzel["inputs"]["where"] = ("@equals(item()?['dilci_proces_kod'], '01-01-001')")
 
 
+def _zapisova_smycka(definice, klic):
+    """Smyčka zápisu vlastníků leží uvnitř větve `Zapis`."""
+    return definice["actions"]["Zapis"]["actions"][f"Zapis_vlastniku_{klic}"]
+
+
+def vlastnik_bez_merge(definice):
+    """Zápis vlastníka bez MERGE. POST na /items(ID) by k agendě nezměnil
+    vlastníka, ale pokusil se založit další řádek."""
+    uloz = _zapisova_smycka(definice, "agendy")["actions"][
+        "Pokud_existuje_agendy"]["actions"]["Uloz_vlastnika_agendy"]
+    uloz["inputs"]["parameters"]["parameters/headers"].pop("X-HTTP-Method", None)
+
+
+def vlastnik_zapisuje_rozporne(definice):
+    """Zápis jde přes všechny unikátní dvojice, ne jen přes ty bez rozporu —
+    vlastník by pak závisel na pořadí řádků v sešitu."""
+    _zapisova_smycka(definice, "procesu")["foreach"] = "@outputs('Unikatni_procesu')"
+
+
+def rozpor_se_nehlasi(definice):
+    """Rozpory se odfiltrují, ale nedostanou se mezi chyby. Import doběhne
+    zeleně a správce se nedozví, že se vlastník nezapsal."""
+    definice["actions"]["Chybne_radky"]["inputs"] = (
+        "@join(union(body('Popis_chybne'), body('Popis_neznamy')), '|#|')")
+
+
+def vlastnik_i_nezarazenym(definice):
+    """Filtr přestane vylučovat nezařazené aktivity, takže se vlastník zapíše
+    technické agendě 00."""
+    uzel = definice["actions"]["S_vlastnikem_agendy"]
+    uzel["inputs"]["where"] = "@not(empty(item()?['_vlastnik_agendy']))"
+
+
+def klic_ze_spatne_delky(definice):
+    """Kód agendy se odvodí z pěti znaků místo dvou — vlastník agendy by se
+    zapisoval k procesu, který pod tím kódem neexistuje."""
+    uzel = definice["actions"]["Klice_agendy"]
+    uzel["inputs"]["select"] = uzel["inputs"]["select"].replace(", 0, 2)", ", 0, 5)")
+
+
+def vlastnik_bez_union(definice):
+    """Duplicity se nezahazují, takže shodně vyplněná agenda na deseti řádcích
+    vypadá jako deset různých vlastníků a hlásí se rozpor."""
+    definice["actions"]["Unikatni_dilcich"]["inputs"] = "@body('Klice_dilcich')"
+
+
+def vlastnik_meni_i_nazev(definice):
+    """Tělo MERGE nese víc než sloupec vlastnik — přepsalo by název agendy."""
+    uloz = _zapisova_smycka(definice, "dilcich")["actions"][
+        "Pokud_existuje_dilcich"]["actions"]["Uloz_vlastnika_dilcich"]
+    uloz["inputs"]["parameters"]["parameters/body"]["nazev"] = "@items('Zapis_vlastniku_dilcich')"
+
+
 MUTACE = [
+    ("vlastník se zapisuje bez MERGE", vlastnik_bez_merge),
+    ("zapisují se i rozporné dvojice", vlastnik_zapisuje_rozporne),
+    ("rozpor se odfiltruje, ale nehlásí", rozpor_se_nehlasi),
+    ("vlastník se zapisuje i nezařazeným", vlastnik_i_nezarazenym),
+    ("kód rodiče se bere ze špatné délky", klic_ze_spatne_delky),
+    ("duplicity se nezahazují přes union", vlastnik_bez_union),
+    ("MERGE mění i název, nejen vlastníka", vlastnik_meni_i_nazev),
     ("souběžná smyčka přidělování kódů", soubezna_smycka),
     ("zakládají se všechny řádky, ne jen ověřené", zaklada_vsechno),
     ("max() bez pojistky na prázdné pole", kod_bez_pojistky),

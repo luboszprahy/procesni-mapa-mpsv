@@ -55,12 +55,32 @@ nenašel nic.
 **Mapa zásah nepotřebuje** — vlastníka jen přenáší z dat do JSON a nikde ho
 nevykresluje.
 
-### F16/2 — import z Excelu (zbývá)
+### F16/2 — import z Excelu (hotovo, čeká na balík)
 
-Rozhodnuto 06.09.2026 (uživatel): do listu Aktivity přibudou **tři sloupce**
-— vlastník agendy, procesu a dílčího procesu. Vyplňují se u každého řádku,
-takže si mohou odporovat: dvě aktivity téže agendy s různým vlastníkem musí
-import ohlásit jako rozpor, ne tiše přepsat.
+Rozhodnuto 06.09.2026 (uživatel): do listu Aktivity přibyly **tři sloupce** —
+`Vlastník agendy`, `Vlastník procesu`, `Vlastník dílčího procesu`. Šablona má
+tedy 12 sloupců místo 9; kód rodiče si import odvodí z kódu dílčího procesu
+na témž řádku (`01-01-001` → agenda `01`, proces `01-01`).
+
+**Rozpor se hlásí, netiší.** Hodnota se opakuje u každého řádku téže agendy,
+takže si dva řádky mohou odporovat. Import takový kód **nezapíše** a vypíše ho
+mezi chybami — tiché „poslední vyhrává" by znamenalo, že vlastník závisí na
+pořadí řádků v sešitu. Ostatní úrovně a všechny aktivity projdou normálně.
+
+Jak se rozpor pozná bez smyček: dvojice `kód|~|vlastník` projdou `union` samy
+se sebou (zahodí duplicity), takže kód, který v seznamu zbude víc než jednou,
+má víc různých vlastníků. Počet výskytů se měří přes `split` obaleného kódu.
+
+Zápis je REST **MERGE** na `vlastnik` — mění jediný sloupec, takže se nedotkne
+názvu ani zařazení. Běží až **za** založením aktivit: kdyby import spadl
+uprostřed, je lepší mít aktivity bez vlastníka než vlastníka bez aktivit.
+Nezařazené aktivity (technický rodič `00-00-000`) jsou z toho vyloučené —
+není to skutečná agenda.
+
+`check_import_flow` **243 kontrol** (bylo 175), `mutace_import` **32/32**
+(sedm nových: zápis bez MERGE, zápis rozporných dvojic, odfiltrovaný ale
+nehlášený rozpor, vlastník nezařazeným, špatná délka kódu rodiče, chybějící
+`union`, MERGE měnící i název). `check_sablona` 206 (bylo 185).
 
 ### F15 — skutečný číselník útvarů (kroky 1–5 hotové)
 

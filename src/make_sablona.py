@@ -55,6 +55,23 @@ POMOCNY_PROCES = {
     "pomocny": True,
 }
 
+# Vlastníci nadřazených úrovní. Do listu Aktivity nepatří (ten je o aktivitě),
+# ale importovat je potřeba — sekce je vyplňuje spolu s aktivitami a nemá jinou
+# cestu než appku. Import je zapíše k příslušné agendě, procesu a dílčímu
+# procesu, které si odvodí z kódu dílčího procesu na témž řádku.
+#
+# Cena té volby (rozhodl uživatel 06.09.2026): hodnota se opakuje na každém
+# řádku téže agendy, takže si dva řádky mohou odporovat. Import to musí
+# OHLÁSIT, ne tiše přepsat — viz `Rozpory_vlastniku` v build_import_flow.py.
+VLASTNICI_NADRAZENYCH = [
+    {"name": "_vlastnik_agendy", "display": "Vlastník agendy",
+     "type": "Text", "pomocny": True, "uroven": "agenda", "delka_kodu": 2},
+    {"name": "_vlastnik_procesu", "display": "Vlastník procesu",
+     "type": "Text", "pomocny": True, "uroven": "proces", "delka_kodu": 5},
+    {"name": "_vlastnik_dilciho", "display": "Vlastník dílčího procesu",
+     "type": "Text", "pomocny": True, "uroven": "dilci_proces", "delka_kodu": 9},
+]
+
 # Kolik řádků číselníkových tabulek se založí. Rozsah validace musí být stálý,
 # proto se nepočítá z dat, ale drží se na stropu — dokud se do něj číselník
 # vejde, může ho refresh přepisovat bez zásahu do šablony.
@@ -88,6 +105,16 @@ NAPOVEDA = {
     "sekce": "Číslo sekce, pod kterou činnost spadá.",
     "stav": "Nevyplněno = pracovní. 'schváleno' použijte jen u činností, "
             "které už prošly schválením.",
+    "_vlastnik_agendy": "Vlastník AGENDY, ne aktivity — kód sekce. Více "
+                        "oddělte '; '. Prázdné = vlastník se nemění. Vyplňujete "
+                        "ho u každého řádku téže agendy, takže musí být všude "
+                        "stejný; jinak import ohlásí rozpor a nic nezapíše.",
+    "_vlastnik_procesu": "Vlastník PROCESU — kód odboru. Více oddělte '; '. "
+                         "Prázdné = nemění se. Platí totéž o shodě napříč řádky "
+                         "téhož procesu.",
+    "_vlastnik_dilciho": "Vlastník DÍLČÍHO PROCESU — kód odboru. Více oddělte "
+                         "'; '. Prázdné = nemění se. Platí totéž o shodě napříč "
+                         "řádky téhož dílčího procesu.",
 }
 
 # Kolik prazdnych radku ma Tabulka mit hned pri zalozeni.
@@ -131,7 +158,10 @@ def sloupce_sesitu(schema):
         if sloupec["name"] == "dilci_proces_kod":
             vysledek.append(POMOCNY_PROCES)
         vysledek.append(sloupec)
-    return vysledek
+    # Vlastníci nadřazených úrovní až na konci: patří k jiné úrovni než zbytek
+    # řádku a uprostřed by mátli. Kdo je nevyplní, nechá je prázdné a import
+    # se jich nedotkne.
+    return vysledek + VLASTNICI_NADRAZENYCH
 
 
 def jmeno_rozsahu(kod_procesu):
@@ -173,6 +203,8 @@ def sirka(sloupec):
 
 def omezeni(sloupec):
     """Strojově odvoditelná omezení sloupce — text do listu Pokyny."""
+    if sloupec.get("uroven"):
+        return "kód útvaru, víc oddělených středníkem; prázdné = nemění se"
     if sloupec.get("pomocny"):
         return "výběr z nabídky, neimportuje se"
     if sloupec["type"] == "Choice":

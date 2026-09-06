@@ -56,6 +56,29 @@ TABULKA = "Aktivity"         # jméno Tabulky v šabloně; generuje ji make_sabl
 LIST_AKTIVITY = "Aktivity"
 LIST_DILCI = "DilciProcesy"
 LIST_VAZBY = "AktivitaDilciProces"
+LIST_AGENDY = "Agendy"
+LIST_PROCESY = "Procesy"
+
+# Vlastníci nadřazených úrovní: sešit je nese u KAŽDÉ aktivity, protože jinou
+# cestu než appku sekce nemá. Kód rodiče se odvodí z kódu dílčího procesu na
+# témž řádku — `01-01-001` dá agendu `01` a proces `01-01`.
+#
+# Cena té volby: hodnota se opakuje na každém řádku téže agendy, takže si dva
+# řádky mohou odporovat. Rozpor se OHLÁSÍ a vlastníci té úrovně se nezapíšou;
+# aktivity se založí normálně. Tiché „poslední vyhrává" by znamenalo, že
+# vlastník závisí na pořadí řádků v sešitu.
+UROVNE_VLASTNIKU = [
+    {"klic": "agendy", "sloupec": "_vlastnik_agendy", "list": LIST_AGENDY,
+     "delka": 2, "popis": "agendy"},
+    {"klic": "procesu", "sloupec": "_vlastnik_procesu", "list": LIST_PROCESY,
+     "delka": 5, "popis": "procesu"},
+    {"klic": "dilcich", "sloupec": "_vlastnik_dilciho", "list": LIST_DILCI,
+     "delka": 9, "popis": "dílčího procesu"},
+]
+
+# Technický rodič nezařazených aktivit. Vlastník se k němu nepřipisuje —
+# není to skutečná agenda.
+NEZARAZENY_PREFIX = "00"
 
 HOST_SP = "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
 HOST_XLS = "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness"
@@ -123,6 +146,16 @@ def sloupce_sablony(schema):
     systemove = {"Title", "nazev_kratky", "datum_aktualizace", "puvodni_kod"}
     return [c for c in list_ze_schematu(schema, LIST_AKTIVITY)["columns"]
             if c["name"] not in systemove]
+
+
+def sloupce_vlastniku():
+    """Sloupce vlastníků tak, jak je do sešitu píše make_sablona.py.
+
+    Bere se odtamtud, ne z vlastní kopie: kdyby se hlavičky rozešly, flow by
+    četlo prázdno a import by tiše nezapsal nic.
+    """
+    from make_sablona import VLASTNICI_NADRAZENYCH
+    return VLASTNICI_NADRAZENYCH
 
 
 def sp_akce(operace, parametry, po):
@@ -283,7 +316,7 @@ def akce(schema):
     # dostat ČÍSLO ŘÁDKU v sešitě (+2 kvůli hlavičce), a bez něj by správce
     # chybný řádek hledal očima.
     vyber = {"radek": "@add(item(), 2)"}
-    for sloupec in sloupce:
+    for sloupec in sloupce + sloupce_vlastniku():
         vyber[sloupec["name"]] = "@" + bunka(sloupec)
     kroky["Ocistene"] = {
         "type": "Select",
@@ -295,7 +328,7 @@ def akce(schema):
     }
 
     predchozi = "Ocistene"
-    for jmeno in (LIST_DILCI, LIST_AKTIVITY):
+    for jmeno in (LIST_AGENDY, LIST_PROCESY, LIST_DILCI, LIST_AKTIVITY):
         lst = list_ze_schematu(schema, jmeno)
         akce_jmeno = f"Nacti_{jmeno}"
         kroky[akce_jmeno] = sp_akce(
@@ -336,7 +369,8 @@ def akce(schema):
     # Kdyby se skupiny překrývaly, sedělo by v náhledu něco jiného než ve
     # skutečnosti a správce by opravoval podle špatných čísel.
     vsechny_prazdne = " ".join(
-        f"empty(item()?['{c['name']}'])," for c in sloupce).rstrip(",")
+        f"empty(item()?['{c['name']}']),"
+        for c in sloupce + sloupce_vlastniku()).rstrip(",")
     kroky["Prazdne"] = {
         "type": "Query",
         "inputs": {"from": "@body('Ocistene')",
@@ -430,17 +464,87 @@ def akce(schema):
 
     # Kódy už přidělené v tomhle běhu musí být vidět při přidělování dalšího,
     # jinak by dvě aktivity pod týmž dílčím procesem dostaly stejný kód.
+    # ---------- vlastníci nadřazených úrovní ----------
+    predchozi_vl = "Nezarazene"
+    for uroven in UROVNE_VLASTNIKU:
+        k = uroven["klic"]
+        sloupec = uroven["sloupec"]
+        # Jen řádky, kde je vlastník vyplněný a rodič je skutečný. Nezařazené
+        # aktivity visí pod technickým 00-00-000 a tomu se vlastník nepřipisuje.
+        kroky[f"S_vlastnikem_{k}"] = {
+            "type": "Query",
+            "inputs": {
+                "from": "@body('Zarazene')",
+                "where": (f"@and(not(empty(item()?['{sloupec}'])),"
+                          f" not(startsWith(item()?['dilci_proces_kod'],"
+                          f" {lit(NEZARAZENY_PREFIX + '-')})))"),
+            },
+            "runAfter": {predchozi_vl: ["Succeeded"]},
+        }
+        # `<kód rodiče>|~|<vlastníci>`; union sám se sebou zahodí duplicity,
+        # takže co zbude víc než jednou pro týž kód, je rozpor.
+        kroky[f"Klice_{k}"] = {
+            "type": "Select",
+            "inputs": {
+                "from": f"@body('S_vlastnikem_{k}')",
+                "select": (f"@concat(substring(item()?['dilci_proces_kod'], 0,"
+                           f" {uroven['delka']}), {lit(ODD_POLE)},"
+                           f" item()?['{sloupec}'])"),
+            },
+            "runAfter": {f"S_vlastnikem_{k}": ["Succeeded"]},
+        }
+        kroky[f"Unikatni_{k}"] = {
+            "type": "Compose",
+            "inputs": f"@union(body('Klice_{k}'), body('Klice_{k}'))",
+            "runAfter": {f"Klice_{k}": ["Succeeded"]},
+        }
+        kroky[f"Kody_{k}"] = {
+            "type": "Select",
+            "inputs": {"from": f"@outputs('Unikatni_{k}')",
+                       "select": f"@split(item(), {lit(ODD_POLE)})[0]"},
+            "runAfter": {f"Unikatni_{k}": ["Succeeded"]},
+        }
+        # Počet výskytů kódu: `split(A, B)` vrátí o jeden díl víc, než kolikrát
+        # se B v A vyskytuje. Kód obalený oddělovači se v seznamu unikátních
+        # dvojic objeví právě tolikrát, kolik RŮZNÝCH vlastníků k němu sešit
+        # uvádí — víc než jednou tedy znamená rozpor.
+        vyskyty = (f"length(split(concat({lit(ODD_RADKU)},"
+                   f" join(body('Kody_{k}'), {lit(ODD_RADKU)}), {lit(ODD_RADKU)}),"
+                   f" concat({lit(ODD_RADKU)}, split(item(), {lit(ODD_POLE)})[0],"
+                   f" {lit(ODD_RADKU)})))")
+        kroky[f"Rozpor_{k}"] = {
+            "type": "Query",
+            "inputs": {"from": f"@outputs('Unikatni_{k}')",
+                       "where": f"@greater({vyskyty}, 2)"},
+            "runAfter": {f"Kody_{k}": ["Succeeded"]},
+        }
+        kroky[f"K_zapisu_{k}"] = {
+            "type": "Query",
+            "inputs": {"from": f"@outputs('Unikatni_{k}')",
+                       "where": f"@equals({vyskyty}, 2)"},
+            "runAfter": {f"Rozpor_{k}": ["Succeeded"]},
+        }
+        predchozi_vl = f"K_zapisu_{k}"
+
     kroky["Pouzite_kody"] = {
         "type": "InitializeVariable",
         "inputs": {"variables": [{"name": "pouziteKody", "type": "array",
                                   "value": "@body('Kody_aktivit')"}]},
-        "runAfter": {"Nezarazene": ["Succeeded"]},
+        "runAfter": {predchozi_vl: ["Succeeded"]},
     }
 
+    # Vlastníci se zapisují až ZA aktivitami: kdyby import spadl uprostřed,
+    # je lepší mít aktivity bez vlastníka než vlastníka bez aktivit.
+    vetev_zapisu = zapisove_akce(sloupce, podle_jmena)
+    posledni_zapis = "Zaloz"
+    for jmeno, definice in zapis_vlastniku().items():
+        definice["runAfter"] = {posledni_zapis: ["Succeeded"]}
+        vetev_zapisu[jmeno] = definice
+        posledni_zapis = jmeno
     kroky["Zapis"] = {
         "type": "If",
         "expression": {"equals": ["@outputs('Vstup')?['rezim']", REZIM_ZAPIS]},
-        "actions": zapisove_akce(sloupce, podle_jmena),
+        "actions": vetev_zapisu,
         "runAfter": {"Pouzite_kody": ["Succeeded"]},
     }
 
@@ -469,11 +573,35 @@ def akce(schema):
         },
         "runAfter": {"Popis_chybne": ["Succeeded"]},
     }
+    # Rozpor ve vlastnících musí být VIDĚT. Bez tohohle by import vlastníka
+    # té úrovně mlčky přeskočil a správce by se to dozvěděl až tím, že
+    # v rejstříku nic nepřibylo.
+    predchozi_popis = "Popis_neznamy"
+    for uroven in UROVNE_VLASTNIKU:
+        k = uroven["klic"]
+        kroky[f"Popis_rozpor_{k}"] = {
+            "type": "Select",
+            "inputs": {
+                "from": f"@body('Rozpor_{k}')",
+                "select": ("@concat('—', " + lit(ODD_POLE)
+                           + f", split(item(), {lit(ODD_POLE)})[0], " + lit(ODD_POLE)
+                           + f", 'vlastník {uroven['popis']} se v sešitu liší"
+                           f" řádek od řádku (jedna z hodnot: ',"
+                           f" split(item(), {lit(ODD_POLE)})[1],"
+                           " '); sjednoť je a spusť import znovu — vlastník"
+                           " se zatím nezapsal')"),
+            },
+            "runAfter": {predchozi_popis: ["Succeeded"]},
+        }
+        predchozi_popis = f"Popis_rozpor_{k}"
+
+    vsechny_popisy = ", ".join(
+        [f"body('Popis_rozpor_{u['klic']}')" for u in UROVNE_VLASTNIKU])
     kroky["Chybne_radky"] = {
         "type": "Compose",
-        "inputs": ("@join(union(body('Popis_chybne'), body('Popis_neznamy')), "
-                   + lit(ODD_RADKU) + ")"),
-        "runAfter": {"Popis_neznamy": ["Succeeded"]},
+        "inputs": ("@join(union(body('Popis_chybne'), body('Popis_neznamy'), "
+                   + vsechny_popisy + "), " + lit(ODD_RADKU) + ")"),
+        "runAfter": {predchozi_popis: ["Succeeded"]},
     }
 
     # Pořadí čísel je součástí kontraktu — appka je bere podle indexu.
@@ -507,6 +635,61 @@ def akce(schema):
         },
         "runAfter": {"Prehled": ["Succeeded"]},
     }
+    return kroky
+
+
+def zapis_vlastniku():
+    """MERGE vlastníka k agendě, procesu a dílčímu procesu.
+
+    Zapisuje se jen tam, kde se sešit sám se sebou neshodl — rozporné kódy
+    odfiltroval `K_zapisu_*`. MERGE mění jediný sloupec, takže se nedotkne
+    názvu ani zařazení; kdyby se použil `PostItem`, založil by nový řádek.
+    """
+    kroky = {}
+    for uroven in UROVNE_VLASTNIKU:
+        k = uroven["klic"]
+        smycka = f"Zapis_vlastniku_{k}"
+        polozka = f"items('{smycka}')"
+        kod = f"split({polozka}, {lit(ODD_POLE)})[0]"
+        vlastnik = f"split({polozka}, {lit(ODD_POLE)})[1]"
+        kroky[smycka] = {
+            "type": "Foreach",
+            "foreach": f"@body('K_zapisu_{k}')",
+            "actions": {
+                # ID se dohledává podle kódu v načteném listu. Kód, který
+                # v rejstříku není, se přeskočí - `first()` nad prázdným polem
+                # dá null a podmínka zápis nepustí.
+                f"Najdi_{k}": {
+                    "type": "Query",
+                    "inputs": {
+                        "from": f"@outputs('Nacti_{uroven['list']}')?['body/value']",
+                        "where": f"@equals(coalesce(item()?['Title'], ''), {kod})",
+                    },
+                    "runAfter": {},
+                },
+                f"Pokud_existuje_{k}": {
+                    "type": "If",
+                    "expression": {"not": {"equals": [f"@length(body('Najdi_{k}'))", 0]}},
+                    "actions": {
+                        f"Uloz_vlastnika_{k}": sp_akce(
+                            "HttpRequest",
+                            {"dataset": ep.web(),
+                             "parameters/method": "POST",
+                             "parameters/uri": rest_list(
+                                 uroven["list"],
+                                 f"(', string(first(body('Najdi_{k}'))?['ID']), ')"),
+                             "parameters/headers": dict(
+                                 HLAVICKY_ZAPIS,
+                                 **{"X-HTTP-Method": "MERGE", "IF-MATCH": "*"}),
+                             "parameters/body": {"vlastnik": f"@{vlastnik}"}},
+                            None),
+                    },
+                    "else": {"actions": {}},
+                    "runAfter": {f"Najdi_{k}": ["Succeeded"]},
+                },
+            },
+            "runAfter": {},
+        }
     return kroky
 
 
