@@ -1,20 +1,67 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-05 20:05**. Balík pro MPSV **1.0.0.97**.
-Flow `AktualizaceKratkehoNazvu` na MPSV nešlo zapnout — vydaný 1.0.0.96 nesl
-GUID listu Aktivity **z PPF DEV**. Opraveno balíkem 97 a bránou, která balík
-pro cizí tenant do `deploy/mpsv/` už nepustí.
+Aktualizováno: **2026-09-06 18:30**. Balík **1.0.0.98**.
+Hotová **F14**: krátký název se zapisuje přes REST MERGE, ne `PatchItem`.
+Tím z balíku zmizel poslední GUID listu natvrdo — **balík je od téhle verze
+pro každý tenant stejný** a dvoubalíkový režim končí.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Import `deploy/mpsv/procesnimapa_1_0_0_97.zip`** jako upgrade (obsahem
-   je to 96 s opraveným GUIDem listu Aktivity, nic jiného se nezměnilo).
-2. **Zapni `AktualizaceKratkehoNazvu`** — ostatních osm flow běží.
-3. Ověř zkrácení názvu: uprav název aktivity, do minuty se dopíše zkrácený tvar.
-4. Kdyby zapnutí spadlo znovu na `GetTable … List not found`, pošli výstup
-   `deploy/mpsv/03_vypis_guidy.js` z konzole na webu MPSV — znamenalo by to,
-   že se list Aktivity mezitím zakládal znovu a má jiný GUID než
-   `b1daaa38-53df-4c7b-b9f8-03b36d46bc60`.
+1. **Import `deploy/mpsv/procesnimapa_1_0_0_98.zip`** jako upgrade.
+   Nahrazuje 97, který ještě nemusel být nasazený — 98 obsahuje všechno z něj.
+2. **Zapni `AktualizaceKratkehoNazvu`.** Ostatních osm flow běží; import
+   stav zapnutí nemění, takže tohle jedno zůstane vypnuté.
+3. Ověř zkrácení názvu: uprav název aktivity delší než 150 znaků, do minuty
+   se dopíše zkrácený tvar do `nazev_kratky`.
+4. Kdyby zapnutí nebo běh spadly, pošli **z run history akce
+   `Zapsat_kratky_nazev` obsah INPUTS** (uri a headers) — z něj je vidět,
+   na jakou adresu se zapisovalo. Chyba `OpenApiOperationParameterValidation`
+   už nastat nemůže, tělo se neskládá po sloupcích.
+
+## 06.09.2026 — F14: konec GUIDu natvrdo (balík 1.0.0.98)
+
+Zápis krátkého názvu dělal `PatchItem` s rozloženým tělem `item/<sloupec>`.
+Ten si schéma těla odvozuje z konkrétního listu, takže `table` musel být GUID
+natvrdo — a pro každý tenant se stavěl vlastní balík. Třikrát kvůli tomu
+odešel do MPSV balík s GUIDem PPF DEV (naposledy 1.0.0.96).
+
+**Nově je zápis `Send an HTTP request to SharePoint`:**
+
+```
+POST  _api/web/GetList('<cesta webu>/Lists/Aktivity')/items(<ID>)
+      X-HTTP-Method: MERGE, IF-MATCH: *
+      {"nazev_kratky": "…"}
+```
+
+Adresa se skládá z proměnné `mpsv_procesnimapaSite` a z **interního** názvu
+listu — ten je na všech tenantech stejný, kdežto GUID ne. Týž tvar používají
+`ImportFlow`, `PresunFlow`, `RestoreFlow` a `ZalohaFlow`. Trigger
+i `Nacti_aktivitu` teď berou list z `mpsv_listAktivity`.
+
+**Krok 1 plánu (ruční ověření akce v designeru) odpadl a je to doložené, ne
+odhadnuté.** `RestoreFlow` a `PresunFlow` mají v témž balíku přesně tuhle
+akci včetně `MERGE` a `IF-MATCH: *`, a na MPSV jsou zapnuté — kdyby ji tam
+DLP nepouštěla, nešly by zapnout. Ruční test by ověřil totéž.
+
+**MERGE mění jen uvedený sloupec**, takže v těle nejsou povinná pole listu.
+Tím padly obě tiché chyby, mezi kterými se předtím balancovalo: bez povinných
+polí nešlo flow aktivovat, ze snímku triggeru přepisovalo novější editaci.
+
+### Brány nad 98
+
+`check_solution` **666** (bez výjimky pro tohle flow — GUID nesmí být v žádném)
+· `check_restore_flow` 571 · `check_zaloha_flow` 184 · `check_import_flow` 175
+· `check_mapa_flow` 144 · `check_export_flow` 129 · `check_presun_flow` 111
+· **`check_flow` 30** · `check_env`, `check_app` zeleně.
+Mutačně **`mutace_kratky_nazev` 14/14** (nový soubor).
+
+Brána vyhodnocuje REST adresu mini-interpretem, ne porovnáním textu —
+interpret umí `parameters`, `split`, `skip`, `join`, takže chytí i špatně
+zdvojený apostrof. Zpětně nad balíkem 97 vypíše **12 nálezů**.
+
+`make_deploy_mpsv.py`: `overuj_list_aktivity()` (porovnávala GUID proti MPSV)
+je nahrazená `overuj_bez_guidu()` — GUID nesmí být ve `Workflows/` žádný.
+V balíku 98 jich je **0**.
 
 ## 05.09.2026 — cizí GUID listu Aktivity v balíku pro MPSV
 

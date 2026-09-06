@@ -1,13 +1,15 @@
-# Testovací scénář — balík 1.0.0.96
+# Testovací scénář — balík 1.0.0.98
 
 Prochází se shora dolů. Bloky **A–E** testují sirotčí aktivity (přišly
 s balíkem 92), **F–H** kaskádový přesun (93) a jeho napojení na aplikaci,
 **I–J** plný přesun z aplikace.
 
-**Zkouší se balík 96** — starší se přeskočí. V 94 měla appka chybný vzorec
-(`Patch` nad zdrojem, který zrovna prochází `ForAll`) a Studio ji označilo
-červeně; v 95 padal první ostrý běh `PresunFlow` na `substring` (viz blok F).
-96 opravuje obojí: blok **D** je test prvního, blok **F** druhého.
+**Zkouší se balík 98** — starší se přeskočí, obsahuje všechno z nich. V 94
+měla appka chybný vzorec (`Patch` nad zdrojem, který zrovna prochází
+`ForAll`) a Studio ji označilo červeně; v 95 padal první ostrý běh
+`PresunFlow` na `substring` (viz blok F). 96 opravuje obojí: blok **D** je
+test prvního, blok **F** druhého. 98 navíc zapisuje krátký název přes REST
+MERGE (F14), takže balík už není vázaný na jeden tenant — blok **K**.
 
 **Pruh filtrů se změnil.** Stav, osiřelé, nezařazené i přepínač kódu jsou
 v jedné rolovací nabídce **Stav: … ▾**; pruh má nově čtyři prvky místo devíti.
@@ -38,9 +40,11 @@ je to past, kvůli které ten krok existuje — projít bez povšimnutí se ned�
 
 ## A. Import balíků a otevření aplikace
 
-- [ ] **A.1** Power Apps → Solutions → Import solution → `procesnimapa_1_0_0_92.zip`
+- [ ] **A.1** Power Apps → Solutions → Import solution → `procesnimapa_1_0_0_98.zip`
       jako **upgrade**. → Import doběhne bez chyby.
-- [ ] **A.2** Totéž s `procesnimapa_1_0_0_93.zip`. → Doběhne bez chyby.
+- [ ] **A.2** Zkontroluj **Current Value** u všech devíti proměnných prostředí.
+      → Každá má vyplněnou hodnotu cílového webu a listu. Balík je záměrně
+      nevozí; prázdná proměnná shodí napojení celé connection.
 
 > Pokud import skončí hláškou „one or more flows may not have turned on",
 > **flow ručně zapni** (blok F.1). Import stav zapnutí nemění.
@@ -55,7 +59,7 @@ je to past, kvůli které ten krok existuje — projít bez povšimnutí se ned�
 - [ ] **A.4** Udělej mikro-změnu (posuň libovolný prvek o pixel a zpět),
       **Save** a **Publish**.
 - [ ] **A.5** Spusť appku a najeď myší na název „Procesní mapa MPSV" v pruhu
-      nahoře. → Nápověda ukazuje **verzi 1.0.0.93**.
+      nahoře. → Nápověda ukazuje **verzi 1.0.0.98**.
 
 > Když ukazuje starší číslo nebo se neukáže vůbec, neproběhl krok A.4 a běží
 > pořád stará publikovaná verze — všechno ostatní by se testovalo naslepo.
@@ -361,13 +365,40 @@ Nepovinné, ale je to jediné místo, kde se dá ověřit smysl celé varianty C
 
 ---
 
+## K. Krátký název přes REST  *(nové v 98, F14)*
+
+Zápis krátkého názvu dělal do 97 `PatchItem`, který si schéma těla stahuje
+z konkrétního listu — proto musel být GUID listu v balíku natvrdo a pro každý
+tenant se stavěl vlastní balík. Od 98 zapisuje `Send an HTTP request to
+SharePoint` (MERGE) na adresu složenou z proměnných.
+
+- [ ] **K.1** Power Automate → flow `AktualizaceKratkehoNazvu` → **zapni ho**.
+      → Zapnutí projde. *(Do 97 tady padalo `GetTable … List not found`,
+      pokud balík nesl GUID z jiného tenantu.)*
+- [ ] **K.2** V listu `Aktivity` vyber aktivitu s názvem **delším než 150
+      znaků** (v ostrých datech `07-04-006-0001`, 220 znaků) a smaž ručně
+      obsah sloupce `nazev_kratky`.
+- [ ] **K.3** Počkej do minuty. → `nazev_kratky` je zase vyplněný, končí
+      výpustkou `…` (jeden znak, ne tři tečky) a není useknutý uprostřed slova.
+- [ ] **K.4** Otevři **run history** flow → akce `Zapsat_kratky_nazev` →
+      **INPUTS**. → `uri` má tvar
+      `_api/web/GetList('/sites/<web>/Lists/Aktivity')/items(<ID>)`,
+      hlavičky nesou `X-HTTP-Method: MERGE` a `IF-MATCH: *`, tělo je pouze
+      `{"nazev_kratky": "…"}`. → Odpověď **204**.
+- [ ] **K.5** V historii běhů je po zápisu **právě jeden** další běh a ten
+      skončí větví *If no*. → Flow necyklí.
+- [ ] **K.6** U aktivity s názvem **do 150 znaků** změň vykonávající útvar.
+      → `nazev_kratky` se **nezmění** a výpustka k němu nepřibude.
+
+---
+
 ## Když něco selže
 
 | co se stalo | kde hledat |
 |---|---|
 | appka se neotevře ve Studiu (`Error opening file`) | chyba v `pa.yaml`; pošli mi znění hlášky, `pac` ani import to nechytí |
 | appka hlásí `Flow.Run failed: 502 BadGateway / NoResponse` | není to chyba appky — otevři **run history** toho flow, tam je skutečná příčina |
-| flow hlásí `WorkflowTriggerIsNotEnabled` | flow je vypnuté, zapni ho (F.1) |
+| flow hlásí `WorkflowTriggerIsNotEnabled` | flow je vypnuté, zapni ho (F.1 nebo K.1) |
 | import sešitu hlásí `403 OpenWorkbookAccessDenied` | citlivostní štítek sešitu, ne oprávnění — přeštítkuj na „Interní" |
 | přesun spadl uprostřed | obnov ze zálohy z kroku I.15 (**Data ▾ → Obnova**) a pošli mi run history |
 | počty na kartách nesedí po přesunu | něco zůstalo viset — pošli mi obsah `HistorieKodu` a `AktivitaDilciProces` |

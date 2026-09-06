@@ -141,14 +141,12 @@ def promenne_ve_flow(vystupni, promenne_appky=frozenset()):
 
     for jmeno, soubor in _flow_soubory(vystupni):
         definice = json.loads(vystupni.read(jmeno).decode("utf-8-sig"))["properties"]["definition"]
-        # AktualizaceKratkehoNazvu je výjimka a musí jí zůstat: PatchItem si
-        # schéma těla odvozuje z konkrétního listu, takže s `table` z proměnné
-        # se rozložené klíče `item/<sloupec>` nerozbalí a flow nejde zapnout
-        # ("missing required property 'item'", MPSV 28.08.2026). Celé flow proto
-        # drží jeden GUID — trigger, čtení i zápis, ať nemíří každý jinam.
-        # `dataset` (web) proměnnou snese i tady; pro tělo nemá význam.
-        list_natvrdo = "AktualizaceKratkehoNazvu" in soubor
-        guidy = set()
+        # Od F14 (1.0.0.98) nemá výjimku ani AktualizaceKratkehoNazvu.
+        # Do té doby držela GUID listu natvrdo, protože PatchItem si schéma
+        # rozloženého těla `item/<sloupec>` odvozuje z konkrétního listu
+        # ("missing required property 'item'", MPSV 28.08.2026). Zapisuje se
+        # přes REST MERGE, kde je list část URL, takže proměnnou snese —
+        # a balík je tím pro každý tenant stejný.
         for akce, operace, parametry in _sharepointove_akce(definice):
             if "dataset" in parametry:
                 overit(parametry["dataset"] == ocekavany_web,
@@ -156,19 +154,19 @@ def promenne_ve_flow(vystupni, promenne_appky=frozenset()):
                        f"{ep.WEB}, ale {parametry['dataset']!r}")
                 pouzite.add(parametry["dataset"])
             if "table" in parametry:
-                if list_natvrdo:
-                    overit(re.fullmatch(GUID_LISTU, str(parametry["table"])) is not None,
-                           f"{soubor}/{akce} ({operace}): table musí být GUID "
-                           f"(PatchItem runtime výraz nesnese), ale je "
-                           f"{parametry['table']!r}")
-                    guidy.add(parametry["table"])
-                else:
-                    overit(parametry["table"] in listove,
-                           f"{soubor}/{akce} ({operace}): table není žádná z proměnných "
-                           f"listů, ale {parametry['table']!r}")
-                    pouzite.add(parametry["table"])
-        overit(len(guidy) <= 1,
-               f"{soubor}: trigger, čtení a zápis míří na různé listy: {sorted(guidy)}")
+                overit(parametry["table"] in listove,
+                       f"{soubor}/{akce} ({operace}): table není žádná z proměnných "
+                       f"listů, ale {parametry['table']!r}")
+                pouzite.add(parametry["table"])
+
+        # GUID kdekoli v definici flow — ani v REST adrese, ani v těle.
+        # Třikrát odešel do MPSV balík s GUIDem PPF DEV a flow tam nešlo
+        # zapnout (naposledy 1.0.0.96, "GetTable … List not found").
+        guidy = sorted(set(re.findall(GUID_LISTU,
+                                      json.dumps(definice, ensure_ascii=False))))
+        overit(not guidy,
+               f"{soubor}: GUID natvrdo v definici flow — na cizím tenantu "
+               f"ukazuje na neexistující list: {guidy[:2]}")
 
     slozky = {c.split("/")[1] for c in
               (n.replace("\\", "/") for n in vystupni.namelist())
@@ -450,10 +448,12 @@ def main():
             overit(prvni == UVODNI_OBRAZOVKA,
                    f"úvodní obrazovka je '{prvni}', čekal jsem '{UVODNI_OBRAZOVKA}'")
 
-            # Flow nad krátkým názvem musí povinné sloupce listu posílat
-        # (jinak ho v cílovém prostředí nejde aktivovat), ale nikdy ze snímku
-        # triggeru — ten je starý až o minutu a přepsal by novější editaci.
-        # Obojí splní jen čtení přes `Nacti_aktivitu` těsně před zápisem.
+        # Flow nad krátkým názvem zapisuje REST MERGE, ne PatchItem.
+        # MERGE mění jen uvedený sloupec, takže povinná pole listu v těle
+        # být nesmí (PatchItem je vyžadoval) a zápis nemá čím přepsat
+        # novější editaci. Porovnání proti čerstvému stavu drží
+        # `Nacti_aktivitu` — bez ní by se porovnávalo se snímkem triggeru,
+        # starým až o minutu.
         for jmeno in vystupni.namelist():
             if "AktualizaceKratkehoNazvu" not in jmeno.replace("\\", "/"):
                 continue
@@ -461,14 +461,20 @@ def main():
             definice = flow_json["properties"]["definition"]
             zapis = (definice["actions"].get("Lisi_se", {})
                      .get("actions", {}).get("Zapsat_kratky_nazev", {}))
-            parametry = zapis.get("inputs", {}).get("parameters", {})
-            for pole in ("item/Title", "item/nazev", "item/dilci_proces_kod"):
-                overit(parametry.get(pole) == "@body('Nacti_aktivitu')?['%s']"
-                       % pole.split("/", 1)[1],
-                       f"flow AktualizaceKratkehoNazvu neposílá do PatchItem '{pole}' "
-                       f"ze stavu čteného těsně před zápisem (je tam "
-                       f"'{parametry.get(pole)}') — bez povinných polí nejde flow "
-                       f"aktivovat, ze snímku triggeru by přepsalo novější hodnotu")
+            vstupy = zapis.get("inputs", {})
+            overit(vstupy.get("host", {}).get("operationId") == "HttpRequest",
+                   "flow AktualizaceKratkehoNazvu nezapisuje přes REST "
+                   "(Send an HTTP request to SharePoint) — s PatchItem by musel "
+                   "být list GUIDem natvrdo a balík by platil jen pro jeden tenant")
+            parametry = vstupy.get("parameters", {})
+            hlavicky = parametry.get("parameters/headers") or {}
+            overit(str(hlavicky.get("X-HTTP-Method", "")).upper() == "MERGE",
+                   "zápis krátkého názvu nemá X-HTTP-Method: MERGE — POST na "
+                   "/items(ID) by řádek nezměnil, ale založil další")
+            telo = parametry.get("parameters/body")
+            overit(isinstance(telo, dict) and set(telo) == {"nazev_kratky"},
+                   f"tělo zápisu krátkého názvu není právě {{nazev_kratky}}: "
+                   f"{sorted(telo) if isinstance(telo, dict) else telo!r}")
             overit("Nacti_aktivitu" in definice["actions"],
                    "flow AktualizaceKratkehoNazvu nemá akci Nacti_aktivitu")
 

@@ -274,47 +274,52 @@ def vymen_zdroje_bez_pac(cesta_msapp, verze):
     return len(OBRAZOVKY) + 1
 
 
-# Povinné sloupce listu, které zápisová akce flow MUSÍ posílat, jinak se flow
-# nedá aktivovat (OpenApiOperationParameterValidationFailed). Do 1.0.0.63 je
-# tenhle skript naopak odebíral, aby flow nepřepsalo novější název snímkem
-# z triggeru — jenže tím se čistý import na cizí tenant stal neaktivovatelným
-# (MPSV, 28.08.2026). Obojí řeší až `Nacti_aktivitu` v build_flow.py: pole se
-# posílají, ale načtená těsně před zápisem. Tady se proto jen KONTROLUJE, že
-# tam jsou a že nepocházejí z triggeru.
-FLOW_POLE_POVINNA = ["item/Title", "item/nazev", "item/dilci_proces_kod"]
+GUID_LISTU = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 
 
 def zkontroluj_flow_kratky_nazev(solution_dir):
-    """Zápis do listu musí nést povinná pole, a to ze stavu čteného před zápisem.
+    """Krátký název se zapisuje REST MERGE, ne PatchItem.
 
-    Dvě selhání, každé tiché jiným způsobem:
-    - pole chybí  -> flow se v cílovém prostředí nedá zapnout,
-    - pole z triggerBody -> flow vrátí novější editaci na starou hodnotu.
+    PatchItem si schéma rozloženého těla `item/<sloupec>` odvozuje
+    z konkrétního listu, takže `table` musel být GUID natvrdo — a balík tím
+    platil jen pro jeden tenant. Třikrát kvůli tomu odešel do MPSV balík
+    s GUIDem PPF DEV (naposledy 1.0.0.96) a flow tam nešlo zapnout.
     """
     nalezy = []
     for cesta in sorted((solution_dir / "Workflows").glob("*.json")):
         if "AktualizaceKratkehoNazvu" not in cesta.name:
             continue
         data = json.loads(cesta.read_text(encoding="utf-8-sig"))
-        for akce in _projdi_akce(data["properties"]["definition"]["actions"]):
-            vstupy = akce.get("inputs")
-            if not isinstance(vstupy, dict):
-                continue
-            host = vstupy.get("host", {})
-            if host.get("operationId") != "PatchItem":
-                continue
+        definice = data["properties"]["definition"]
+        operace = [a.get("inputs", {}).get("host", {}).get("operationId")
+                   for a in _projdi_akce(definice["actions"])
+                   if isinstance(a.get("inputs"), dict)]
+        if "PatchItem" in operace:
+            nalezy.append("zápis je PatchItem — vyžaduje GUID listu natvrdo")
+
+        zapis = (definice["actions"].get("Lisi_se", {})
+                 .get("actions", {}).get("Zapsat_kratky_nazev"))
+        if not zapis:
+            nalezy.append("chybí akce Zapsat_kratky_nazev")
+        else:
+            vstupy = zapis.get("inputs", {})
+            if vstupy.get("host", {}).get("operationId") != "HttpRequest":
+                nalezy.append("zápis není HttpRequest (REST)")
             parametry = vstupy.get("parameters", {})
-            chybi = [p for p in FLOW_POLE_POVINNA if p not in parametry]
-            if chybi:
-                nalezy.append(f"PatchItem nemá povinná pole: {', '.join(chybi)}")
-            z_triggeru = [p for p in FLOW_POLE_POVINNA
-                          if "triggerBody" in str(parametry.get(p, ""))]
-            if z_triggeru:
-                nalezy.append(
-                    f"PatchItem bere ze snímku triggeru: {', '.join(z_triggeru)}")
+            hlavicky = parametry.get("parameters/headers") or {}
+            if str(hlavicky.get("X-HTTP-Method", "")).upper() != "MERGE":
+                nalezy.append("zápis nemá X-HTTP-Method: MERGE — POST by "
+                              "založil další řádek")
+            telo = parametry.get("parameters/body")
+            if not isinstance(telo, dict) or set(telo) != {"nazev_kratky"}:
+                nalezy.append(f"tělo zápisu není právě {{nazev_kratky}}: {telo!r}")
+
+        guidy = re.findall(GUID_LISTU, json.dumps(definice, ensure_ascii=False))
+        if guidy:
+            nalezy.append(f"GUID natvrdo v definici flow: {sorted(set(guidy))[:2]}")
     if nalezy:
         raise SystemExit("CHYBA: " + "; ".join(nalezy))
-    return len(FLOW_POLE_POVINNA)
+    return 1
 
 
 def _projdi_akce(akce):
@@ -502,7 +507,7 @@ def dokonci(solution_dir, verze):
     print(f"deklarace parametrů ve flow: doplněno {len(doplnene)}"
           + (f" ({', '.join(doplnene)})" if doplnene else ""))
     pocet = zkontroluj_flow_kratky_nazev(solution_dir)
-    print(f"flow — povinná pole zápisu ověřena ({pocet}), žádné z triggeru")
+    print(f"flow — krátký název zapisuje REST MERGE, bez GUIDu ({pocet})")
 
     manifest = solution_dir / "solution.xml"
     text = manifest.read_text(encoding="utf-8-sig")

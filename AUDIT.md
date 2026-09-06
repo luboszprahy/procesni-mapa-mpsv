@@ -1,9 +1,12 @@
 # AUDIT — Procesní mapa MPSV
 
-Poslední audit: 03.09.2026 22:10 · auditor: powerplatform-auditor · kolo: 5 (balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3+C4)
-Verdikt kolo 5: NÁLEZY (0 blokujících / 1 opravit / 0 eskalací) — balík je bezpečný k importu do PPF DEV,
-  nic v něm neshodí prostředí ani nepřepíše hodnoty; jediný nález je funkční mezera bez dopadu na import
-Předchozí: 25.08.2026 · kolo: 4, druhé kolo (re-audit balíku `deploy/procesnimapa_1_0_0_60.zip`)
+Poslední audit: 06.09.2026 19:15 · auditor: powerplatform-auditor · kolo: 6 (balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
+Verdikt kolo 6: NÁLEZY (1 blokující / 1 opravit / 0 eskalací) — balík samotný je technicky v pořádku
+  (žádný GUID natvrdo, ostatních 8 flow beze změny proti 97, REST zápis tvarově správný a ověřený
+  proti produkčně běžícím dvojčatům), ale **implementace F14 a balík 98 nejsou v gitu** — viz G-01
+Předchozí: 03.09.2026 22:10 · kolo: 5 (balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3+C4),
+  NÁLEZY (0 blokujících / 1 opravit / 0 eskalací)
+Před tím: 25.08.2026 · kolo: 4, druhé kolo (re-audit balíku `deploy/procesnimapa_1_0_0_60.zip`)
 Před tím: 25.08.2026 · powerplatform-auditor · kolo 4, první kolo (balík 1.0.0.59)
 Před tím: 23.08.2026 · powerplatform-auditor · kolo 3 (canvas app — mazání, editace, vazby, flow)
 Verdikt kolo 4 (druhé kolo): NÁLEZY (0 blokujících / 0 vážných / 2 střední / 1 eskalace)
@@ -23,6 +26,242 @@ V tomto projektu **neplatí** kritéria vázaná na publisher `ppf`/prefix `ppf_
 tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze změny).
 Testovací tenant je skutečně `ppfbanka.sharepoint.com` a jeho výskyt v balíku
 proto sám o sobě není nález.
+
+## Kolo 6 (06.09.2026, balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
+
+Zadání: konec dvoubalíkového režimu — zápis krátkého názvu přes REST MERGE
+místo `PatchItem`, aby v balíku nezůstal žádný GUID listu natvrdo. Rozsah
+diffu: `src/build_flow.py`, `src/check_flow.py`, `src/check_solution.py`,
+`src/build_app.py`, `src/make_deploy_mpsv.py`, nový `src/mutace_kratky_nazev.py`,
+`HANDOVER.md`, `STATUS.md`, `PLAN.md`, `deploy/flow_AktualizaceKratkehoNazvu.md`.
+
+Postup: `deploy/procesnimapa_1_0_0_98.zip` i `deploy/procesnimapa_1_0_0_97.zip`
+rozbaleny do scratchpadu (`unzip -t` bez chyby na solution i vnořeném `.msapp`
+u obou), nálezy ověřeny přímo nad `Workflows/*.json` v balíku, ne nad
+`STATUS.md`. Brány spuštěny přímo, ne převzaty: `check_flow.py` (nad 98 i
+zpětně nad 97), `check_solution.py --vstup 97 --vystup 98`,
+`check_restore_flow.py`, `check_zaloha_flow.py`, `check_import_flow.py`,
+`check_mapa_flow.py`, `check_export_flow.py`, `check_presun_flow.py`,
+`check_env.py`, `check_app.py`, `mutace_kratky_nazev.py` (nad kopií mimo
+projekt), `make_deploy_mpsv.py`.
+
+### Body 1–5 ze zadání — technicky v pořádku
+
+**1. Žádný GUID natvrdo v 98, ostatní flow beze změny proti 97 — potvrzeno.**
+```
+grep -rEo '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' scratch/98/Workflows
+→ (prázdný výstup)
+grep -rEo týž vzor scratch/97/Workflows
+→ b1daaa38-53df-4c7b-b9f8-03b36d46bc60   (v AktualizaceKratkehoNazvu)
+```
+Porovnání obsahu `Workflows/*.json` mezi 97 a 98 po jménu flow (`cmp -s`):
+`ExportFlow`, `ImportFlow`, `MapaPublishFlow`, `MapaPublishScheduled`,
+`PresunFlow`, `RestoreFlow`, `ZalohaFlow`, `ZalohaScheduled` — všech osm
+bajtově shodných, jen `AktualizaceKratkehoNazvu` se liší. `FlowNameId`
+(GUID v názvu souboru) zůstal u něj stejný jako v 97 — je to upgrade téhož
+flow, ne nové. `customizations.xml` nese v `Aktivity.tableName` GUID PPF DEV
+(`9dfbb5a1-…`) i v 98, ale nezměněně proti 97 a s `tableNameOverride` na
+`mpsv_listAktivity` — to je zdokumentovaný, funkční vzor (`solution-structure.md`
+řádek 56, `canvas-json-editing.md` řádek 96-97), ne nález.
+
+**2. REST zápis je tvarově správný.** Vytažen přímo z balíku 98:
+```
+"parameters/uri": "@concat('_api/web/GetList(''', outputs('Cesta_webu'),
+  '/Lists/Aktivity', ''')/items(', string(triggerBody()?['ID']), ')')"
+```
+`check_flow.py` REST adresu **vyhodnotí** mini-interpretem (ne porovná
+textem) a dostane `_api/web/GetList('/sites/procesnimapa/Lists/Aktivity')
+/items(1)` — platná server-relativní REST URL, `''` je správně escapovaná
+jednoduchá uvozovka podle syntaxe Workflow Definition Language. `rest_adresa()`
+v `build_flow.py` je znakově identická s `rest_adresa()` v
+`build_restore_flow.py`, která skládá REST adresy pro `RestoreFlow` —
+a ten podle `STATUS.md` („STAV ZKOUŠEK") na MPSV už reálně zapisoval
+(„obnova na datech: OK", „import — zápis: OK"). Nejde tedy o nevyzkoušený
+vzorec, ale o týž kód, jaký už na cílovém tenantu prokazatelně píše do listů.
+Parametry mají prefix `parameters/` (`parameters/method`, `parameters/uri`,
+`parameters/headers`, `parameters/body`), `operationId` je `HttpRequest`,
+hlavičky `Accept`/`Content-Type: application/json;odata=nometadata`,
+`X-HTTP-Method: MERGE`, `IF-MATCH: *` — přesně podle zadání.
+
+**3. `definition.parameters` odpovídá použití, včetně `mpsv_listAktivity`.**
+V nasazeném `AktualizaceKratkehoNazvu-....json` (balík 98) jsou deklarovány
+právě dva netriviální parametry — `mpsv_procesnimapaSite` a `mpsv_listAktivity`
+— oba bez `defaultValue`. Mechanismus (`dorovnej_deklarace_parametru` v
+`build_app.py`) je obecný: projde `parameters('...')` napříč všemi flow a
+doplní deklaraci ke každému použití, takže se nemůže rozejít used↔declared.
+Definice proměnných (`environmentvariabledefinitions/*/environmentvariabledefinition.xml`,
+9 souborů) nemají `<defaultvalue>` (grep prázdný) a `environmentvariablevalues.json`
+v balíku není (`find` prázdný) — B2 a B3 čisté.
+
+**4. Mutační test `mutace_kratky_nazev.py` — 14/14 potvrzeno spuštěním, kryje
+podstatné.** Spuštěno auditorem samostatně nad kopií balíku (ne převzato):
+```
+python src/mutace_kratky_nazev.py --vystup <kopie 98>
+→ chycených mutací: 14/14
+```
+Mutace pokrývají obě vrstvy, na kterých REST zápis stojí — hlavičky
+(chybějící `MERGE`, `MERGE`→`PATCH`, chybějící `IF-MATCH`), adresu (GUID
+zpátky v REST adrese i v triggeru, adresa bez `/items(ID)`, `Cesta_webu` bez
+`skip` čili neserver-relativní), návrat k `PatchItem`, tělo (prohozené pole,
+povinná pole navíc, hodnota ze snímku triggeru), metodu (GET místo POST) a
+řídicí logiku (čtení z triggeru místo `Nacti_aktivitu`, zápis bez porovnání
+→ cyklení). Zpětně nad 97 vypíše `check_flow.py` **12 nálezů** (ověřeno
+spuštěním, sedí na `STATUS.md`) — potvrzuje, že brána skutečně rozlišuje
+starý a nový tvar, ne že je jen přepsaná na nic.
+
+**5. Dokumentace v `deploy/mpsv/` — z větší části sedí, dvě místa jsou stará
+čísla verze.** `README.md` (auto-generované) uvádí `procesnimapa_1_0_0_98.zip`,
+9 flow, 6 obrazovek, 9 proměnných — všechny čtyři počty ověřeny přímo
+(`check_app.py`: 6 obrazovek; výpis `Workflows/`: 9 souborů; výpis
+`environmentvariabledefinitions/`: 9 položek) a sedí. `flow_AktualizaceKratkehoNazvu.md`
+(v `deploy/mpsv/`, bajtově shodný s `deploy/` root) popisuje přesně tu podobu
+flow, která je v balíku 98 (akce, výrazy, REST tvar) — žádný rozpor. Nesedí
+verze v `navod_sprava.md` a stará čísla balíků v `TESTOVACI_SCENAR.md` —
+viz P-01 níže.
+
+### P-01 · OPRAVIT · `deploy/mpsv/navod_sprava.md` a `deploy/mpsv/TESTOVACI_SCENAR.md` — stará čísla verze/balíku
+
+`navod_sprava.md` řádek 7: *„Návod popisuje aplikaci Procesní mapa MPSV ve
+verzi **1.0.0.96**."* Nasazovaná sada je **1.0.0.98**. F14 neměnila appku
+(žádná obrazovka, žádný `pa.yaml`), takže obsah návodu funkčně sedí, ale
+věta samotná je nepravdivá — správce, který si podle ní ověří verzi appky,
+najde neshodu a nebude vědět, jestli je to varovný signál nebo ne.
+
+`TESTOVACI_SCENAR.md` (nadpis *„Testovací scénář — balík 1.0.0.96"*) jde
+dál — je to spustitelný postup, ne jen popisný text:
+```
+A.1  Power Apps → Solutions → Import solution → procesnimapa_1_0_0_92.zip
+A.2  Totéž s procesnimapa_1_0_0_93.zip
+A.5  … Nápověda ukazuje verzi 1.0.0.93
+```
+V `deploy/mpsv/` dnes leží jen `procesnimapa_1_0_0_98.zip` — soubory
+`_92.zip`/`_93.zip` z kroku A.1/A.2 tam nejsou k nalezení. Krok A.5 pak
+řekne testerovi, aby čekal tooltip `1.0.0.93`, zatímco po importu 98 uvidí
+`1.0.0.98` — přesně ten rozpor, o kterém dokument sám (blok 0, `varVerze`)
+tvrdí, že znamená „neproběhla mikro-změna".
+
+Obě jsou statické kopie z kořene (`deploy/navod_sprava.md`,
+`deploy/TESTOVACI_SCENAR.md`) — `make_deploy_mpsv.py` je jen `shutil.copy`,
+nepřepočítává v nich čísla. Ověřeno spuštěním:
+```
+python src/make_deploy_mpsv.py
+→ deploy/mpsv/TESTOVACI_SCENAR.md a navod_sprava.md se PŘEPÍŠOU (jsou v seznamu
+  kopírovaných souborů), ale obsahem zůstávají identické se starým `deploy/`
+  originálem — root soubory samy nikdo neaktualizoval na 98
+```
+Dopad: zmatek při přejímce na MPSV, ne vada balíku samotného — appka i flow
+fungují bez ohledu na to, co v návodu píše. Proto **OPRAVIT**, ne BLOKUJÍCÍ.
+Checklist: H3 (předávací návod), H2 (dokumentace vs. skutečnost).
+Doporučená oprava (neprovedeno, jen návrh): v `deploy/TESTOVACI_SCENAR.md`
+a `deploy/navod_sprava.md` v kořeni aktualizovat čísla balíku/verze na 98
+(nebo na obecné zástupné `<nejnovější balík>`, jako to dělá `README.md`,
+který si číslo čte z balíku, ne píše ho ručně).
+Stav: otevřeno
+
+### G-01 · BLOKUJÍCÍ · implementace F14 a balík `procesnimapa_1_0_0_98.zip` nejsou v gitu
+
+Celá věcná náplň téhle brány — zdrojový kód i vydaný balík — existuje jen
+v necommitnutém pracovním stromu na jednom stroji. Poslední skutečný commit
+(`c77a831`, „F14 zadana") přidal jen zápis plánu do `PLAN.md`/`STATUS.md`;
+samotnou implementaci nikdo nezacommitoval ani nepushnul.
+
+Repro (`git status --short` v kořeni projektu, po čerstvém `git pull --ff-only`
+na začátku téhle session, který nahlásil „Already up to date"):
+```
+ M HANDOVER.md
+ M PLAN.md
+ M STATUS.md
+ M deploy/flow_AktualizaceKratkehoNazvu.md
+ M deploy/mpsv/02_import_dat.js
+ M deploy/mpsv/README.md
+ M deploy/mpsv/flow_AktualizaceKratkehoNazvu.md
+ D deploy/mpsv/procesnimapa_1_0_0_97.zip
+ M src/build_app.py
+ M src/build_flow.py
+ M src/check_flow.py
+ M src/check_solution.py
+ M src/make_deploy_mpsv.py
+?? deploy/mpsv/procesnimapa_1_0_0_98.zip
+?? deploy/procesnimapa_1_0_0_98.zip
+?? src/mutace_kratky_nazev.py
+```
+```
+git diff --stat HEAD -- PLAN.md STATUS.md HANDOVER.md src/build_app.py \
+  src/build_flow.py src/check_flow.py src/check_solution.py src/make_deploy_mpsv.py
+→ 8 files changed, 344 insertions(+), 197 deletions(-)
+git ls-files deploy/*.zip
+→ deploy/procesnimapa_1_0_0_96.zip, deploy/procesnimapa_1_0_0_97.zip
+  (98 v seznamu chybí — nikdy nebyl "git add")
+```
+Soubory jsou na disku od 06.09.2026 18:24–18:34 (mtime), tedy z reálné
+dnešní práce, ne z náhodného zbytku staré session — `src/mutace_kratky_nazev.py`,
+který task zadání výslovně jmenuje jako nový soubor F14, je **untracked**,
+ne jen upravený.
+
+Proč to není jen formalita, ale skutečné riziko: projektový `CLAUDE.md` i
+globální pravidla auditora (#13, #13b) staví na tom, že práce se mezi stroji
+a paralelními sessions přenáší přes git a že commit+push je jeden krok, ne
+dva — přesně proto, aby se předešlo stavu, kdy „hotovo" v `STATUS.md`
+neodpovídá tomu, co je v repozitáři. Dokud `procesnimapa_1_0_0_98.zip` a
+zdroje, které ho stavějí, nejsou v gitu:
+- selhání disku nebo reset pracovního adresáře na tomhle stroji **ztratí
+  celou F14** bez záložní kopie,
+- jiný stroj/session, který si podle pravidla #13 stáhne `git pull`, dostane
+  `STATUS.md` tvrdící „Hotová F14, balík 1.0.0.98", ale v repozitáři najde
+  jen plán a poslední skutečně dostupný balík **1.0.0.97** — tedy přesně tu
+  verzi, která má GUID PPF DEV natvrdo a kvůli které F14 vznikla,
+- `deploy/mpsv/procesnimapa_1_0_0_98.zip`, balík určený k importu na MPSV,
+  není v historii repozitáře vůbec — nedá se z gitu znovu získat, jen z
+  disku tohoto stroje.
+
+Nejde o vadu kódu ani balíku samotného (ten je podle bodů 1–5 výše technicky
+v pořádku) — je to vada **stavu dodání**. Audituje se brána „předání balíku
+k nasazení", a to předání v tuhle chvíli fakticky neproběhlo způsobem, který
+projekt vyžaduje jako podmínku dalšího kroku.
+Checklist: mimo číslované body A–H (proces, ne obsah balíku); odpovídá duchu
+H1/H2 — „hotovo" v `STATUS.md` neodpovídá skutečnému stavu repozitáře.
+Doporučená oprava (neprovedeno, auditor nezasahuje do gitu): `git add` na
+vyjmenované soubory (kromě `deploy/mpsv/procesnimapa_1_0_0_97.zip`, který se
+maže záměrně) + `git commit` + `git push` podle pravidla #13b, než balík
+skutečně půjde na MPSV.
+Stav: otevřeno
+
+### Ověřeno spuštěním — kolo 6
+
+| příkaz / mutace | výsledek |
+|---|---|
+| `unzip -t deploy/procesnimapa_1_0_0_98.zip` (solution + `.msapp`) | bez chyby |
+| `unzip -t deploy/procesnimapa_1_0_0_97.zip` (solution) | bez chyby |
+| `solution.xml` verze/`Managed` (98) | `1.0.0.98` > `1.0.0.97`, `<Managed>0</Managed>` |
+| GUID (regex `[0-9a-f]{8}-…`) ve `Workflows/` (98) | **0 výskytů** |
+| totéž nad 97 | 1 výskyt (`b1daaa38-…` v `AktualizaceKratkehoNazvu`) |
+| `cmp -s` 8 flow (97 vs 98), mimo `AktualizaceKratkehoNazvu` | **bajtově shodné** ve všech osmi |
+| `check_flow.py --solution …98.zip` | 30 kontrol, 0 chyb, 104 vzorků |
+| `check_flow.py --solution …97.zip` (zpětně) | 29 kontrol, **12 chyb** (GUID, PatchItem, chybějící MERGE/IF-MATCH, špatné tělo, …) |
+| `check_solution.py --vstup 97 --vystup 98` | 666 kontrol, 0 chyb |
+| `check_restore_flow.py` / `check_zaloha_flow.py` / `check_import_flow.py` / `check_mapa_flow.py` / `check_export_flow.py` / `check_presun_flow.py` | 571 / 184 / 175 / 144 / 129 / 111 — vše 0 chyb |
+| `check_env.py` | OK |
+| `check_app.py` | OK — 6 obrazovek, 285 prvků, 3177 vzorců, jen 4 preexistující VAROVÁNÍ (beze změny) |
+| `mutace_kratky_nazev.py --vystup <kopie 98>` | **14/14** chyceno |
+| `make_deploy_mpsv.py` | doběhne, `deploy/mpsv/procesnimapa_1_0_0_98.zip` bajtově shodný (md5) s `deploy/procesnimapa_1_0_0_98.zip` |
+| `git status` po `git pull --ff-only` (bez změn) | 13 necommitnutých souborů — viz G-01 |
+
+### Zamítnuté nálezy — kolo 6
+
+*(žádné)*
+
+## Neověřeno — kolo 6
+
+### N-08 · reálné nasazení na MPSV
+`STATUS.md` „CO JE NA TOBĚ" popisuje import 98 na MPSV jako upgrade, zapnutí
+`AktualizaceKratkehoNazvu` a ruční ověření zkrácení názvu — nic z toho podle
+`STATUS.md` k 06.09.2026 18:30 ještě neproběhlo. Statická kontrola (brány,
+mutace, trasování REST výrazu, srovnání s produkčně běžícím `RestoreFlow`)
+nález nedala kromě P-01 a G-01. Potřeba k doověření: reálný import na MPSV,
+zapnutí flow, úprava názvu aktivity delší než 150 znaků a kontrola, že se do
+minuty zapíše zkrácený `nazev_kratky` (run history akce `Zapsat_kratky_nazev`
+vrátí 204).
+
 
 ## Kolo 5 (03.09.2026, balík `deploy/procesnimapa_1_0_0_92.zip`, F13/C3 + C4)
 

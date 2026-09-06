@@ -228,22 +228,35 @@ node src/check_setup.js
 node src/check_import.js
 ```
 
-### Flow AktualizaceKratkehoNazvu je vázané na konkrétní tenant
+### Flow AktualizaceKratkehoNazvu — od 1.0.0.98 už na tenantu nezávisí
 
-`PatchItem` si schéma těla odvozuje z konkrétního listu. S `table` z proměnné
-se schéma nerozbalí, rozložené klíče `item/<sloupec>` přestanou platit a flow
+Do 1.0.0.97 drželo GUID listu Aktivity natvrdo a pro každý tenant se stavěl
+vlastní balík. `PatchItem` si totiž schéma rozloženého těla `item/<sloupec>`
+odvozuje z konkrétního listu; s `table` z proměnné se schéma nerozbalí a flow
 **nejde zapnout** ("The API operation 'PatchItem' is missing required property
-'item'", MPSV 28.08.2026). Celé flow proto drží GUID listu Aktivity — trigger,
-čtení i zápis. `dataset` (web) proměnnou snese.
+'item'", MPSV 28.08.2026). Třikrát kvůli tomu odešel do MPSV balík s GUIDem
+PPF DEV (naposledy 1.0.0.96, kde zapnutí spadlo na `GetTable … List not found`).
 
-Při přenosu na další prostředí se musí přegenerovat s novým GUID:
+**F14 to zrušila:** zapisuje se přes `Send an HTTP request to SharePoint`
+(POST + `X-HTTP-Method: MERGE`, `IF-MATCH: *`) na adresu složenou z proměnné
+webu a interního názvu listu —
 
-```powershell
-& $py src/build_flow.py --solution $zaklad --list-aktivity <GUID listu Aktivity>
+```
+_api/web/GetList('<cesta webu>/Lists/Aktivity')/items(<ID>)
 ```
 
-GUID zjistí `deploy/mpsv/03_vypis_guidy.js` vložený do konzole na cílovém webu.
-Ostatní tři flow jsou celá na proměnných a přegenerovat se nemusí.
+— kde je list obyčejný text, takže proměnnou snese. Týž tvar mají ImportFlow,
+PresunFlow, RestoreFlow a ZalohaFlow. MERGE navíc mění jen uvedený sloupec,
+takže povinná pole listu se v těle posílat nemusí.
+
+Balík je tím pro každý tenant stejný a `build_flow.py` nemá žádný přepínač:
+
+```powershell
+& $py src/build_flow.py --solution $zaklad
+```
+
+`check_solution.py` i `check_flow.py` selžou, jakmile by se GUID do některého
+flow vrátil; mutačně to hlídá `src/mutace_kratky_nazev.py` (14 mutací).
 
 ### Sestavení balíku — POŘADÍ NENÍ LIBOVOLNÉ
 
@@ -251,13 +264,12 @@ Ostatní tři flow jsou celá na proměnných a přegenerovat se nemusí.
 prostředí a jako poslední krok ověřuje flow `AktualizaceKratkehoNazvu`
 (`zkontroluj_flow_kratky_nazev`).
 
-Do 1.0.0.63 tahle funkce pole `item/nazev` a `item/dilci_proces_kod`
-z `PatchItem` **odebírala**, protože se braly ze snímku triggeru starého až
-o minutu a přepisovaly novější editaci. Tím se ale balík stal
-neaktivovatelným na čistém prostředí (MPSV 28.08.2026): bez povinných polí
-flow nejde zapnout. Od 1.0.0.64 se pole posílají, ale plní se z akce
-`Nacti_aktivitu` (`GetItem` těsně před zápisem), takže platí obojí —
-a `build_app.py` už jen kontroluje, že to tak zůstalo.
+Od 1.0.0.98 kontroluje, že zápis jde přes REST MERGE, tělo nese právě
+`nazev_kratky` a v definici flow není žádný GUID. Předchozí podoba (PatchItem
+s povinnými poli `item/Title`, `item/nazev`, `item/dilci_proces_kod` z akce
+`Nacti_aktivitu`) byla kompromis mezi dvěma tichými selháními: bez povinných
+polí nešlo flow aktivovat, ze snímku triggeru přepisovalo novější editaci.
+S MERGE odpadá obojí — mění se jen uvedený sloupec.
 
 Flow buildery upravují zip **na místě**, takže se pracuje na kopii, ne na
 vydaném balíku. Pracovní kopie nesmí ležet v `runs/app_build/` — `build_app.py`

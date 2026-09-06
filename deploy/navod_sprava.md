@@ -4,7 +4,7 @@ Návod pro **správce procesního rámce** a **sekční správce**: jak v aplika
 pořizovat agendy, procesy, dílčí procesy a aktivity, jak se publikuje procesní
 mapa a co dělat, když něco nefunguje.
 
-Návod popisuje aplikaci **Procesní mapa MPSV** ve verzi 1.0.0.96. Doménové
+Návod popisuje aplikaci **Procesní mapa MPSV** ve verzi 1.0.0.98. Doménové
 pojmy (agenda, proces, dílčí proces, aktivita, vlastník) drží *Metodika pro
 práci s procesy v1.0* — tenhle text je nevykládá, jen říká, kam se co v aplikaci
 zapisuje.

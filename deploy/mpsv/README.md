@@ -3,7 +3,7 @@
 Tahle složka se **generuje** skriptem `src/make_deploy_mpsv.py`. Neupravuj
 soubory v ní ručně — po příští změně schématu nebo appky se přepíšou.
 
-Balík appky: **`procesnimapa_1_0_0_97.zip`** · 9 flow · 6 obrazovek ·
+Balík appky: **`procesnimapa_1_0_0_98.zip`** · 9 flow · 6 obrazovek ·
 9 proměnných prostředí
 
 Postup má osm kroků a **pořadí je závazné**. Každý krok má vlastní ověření;
@@ -83,7 +83,7 @@ nepotřebuje (listy se vybírají v průvodci), hodí se jen ke kontrole.
 
 ## 3. Naimportovat solution a VYPLNIT VŠECH 9 PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_97.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_98.zip`
 (unmanaged). Průvodce se zeptá na:
 
 1. **připojení** (connection reference na SharePoint) — vyber nebo založ

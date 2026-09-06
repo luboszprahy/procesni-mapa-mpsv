@@ -2,7 +2,7 @@
 """Kontrola flow AktualizaceKratkehoNazvu v hotovém solution zipu.
 
 Dvě vrstvy:
-1. struktura — trigger, GUID listu, řetěz runAfter, tvar zápisové akce,
+1. struktura — trigger, proměnné místo GUIDů, řetěz runAfter, tvar REST zápisu,
 2. význam — výrazy se **vytáhnou z balíku a vyhodnotí** mini-interpretem
    a porovnají s kanonickou zkratit() z check_schema.py. Testuje se tím to,
    co se opravdu nasazuje, ne kopie logiky v Pythonu.
@@ -28,6 +28,10 @@ import env_promenne as ep  # noqa: E402
 GUID = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 
 MAXLEN = 150
+
+# Adresa, kterou brána dosadí za proměnnou webu při vyhodnocení výrazů.
+TESTOVACI_WEB = "https://tenant.sharepoint.com/sites/procesnimapa"
+CESTA_WEBU = "/sites/procesnimapa"
 
 chyby = []
 kontrol = 0
@@ -119,6 +123,20 @@ def vyhodnot(uzel, vystupy, polozka):
         if a[0] != "Nacti_aktivitu":
             raise ValueError(f"body('{a[0]}') — neznámá akce")
         return polozka
+    if jmeno == "parameters":
+        # Testovací hodnota proměnné webu — konkrétní tenant je jedno,
+        # ověřuje se tvar složené adresy, ne adresa sama.
+        if a[0] != ep.klic(ep.WEB):
+            raise ValueError(f"parameters('{a[0]}') — čekal jsem proměnnou webu")
+        return TESTOVACI_WEB
+    if jmeno == "split":
+        return a[0].split(a[1])
+    if jmeno == "skip":
+        return a[0][a[1]:]
+    if jmeno == "join":
+        return a[1].join(a[0])
+    if jmeno == "string":
+        return str(a[0])
     if jmeno == "outputs":
         if a[0] not in vystupy:
             raise ValueError(f"outputs('{a[0]}') — takova akce pred nim neni")
@@ -242,64 +260,72 @@ def main():
     trigger = next(iter(definice["triggers"].values()))
     overit(trigger["inputs"]["host"]["operationId"] == "GetOnUpdatedItems",
            "trigger není 'when an item is created or modified'")
-    # Trigger drží GUID ze stejného důvodu jako zápis: celé flow míří na jeden
-    # konkrétní list a míchat proměnnou s GUIDem by znamenalo, že trigger hlídá
-    # jiný list, než do kterého se zapisuje.
-    overit(re.fullmatch(GUID, str(trigger["inputs"]["parameters"]["table"])) is not None,
-           f"trigger nemá list jako GUID (je tam "
+    # Trigger, čtení i zápis berou list z proměnné prostředí. Do 1.0.0.97
+    # tu byl GUID natvrdo kvůli PatchItem; od F14 zapisuje REST, který
+    # proměnnou snese, a balík je tím pro každý tenant stejný.
+    overit(trigger["inputs"]["parameters"]["table"] == ep.list_param("Aktivity"),
+           f"trigger nebere list z proměnné mpsv_listAktivity (je tam "
            f"'{trigger['inputs']['parameters']['table']}')")
     overit(trigger["inputs"]["parameters"]["dataset"] == ep.web(),
            "trigger nebere web z proměnné mpsv_procesnimapaSite")
     overit("shared_sharepointonline" in json.dumps(flow["properties"].get("connectionReferences", {})),
            "chybí connection reference na SharePoint")
 
+    # Žádný GUID v celém flow — přesně to F14 ruší. Balík s GUIDem cizího
+    # tenantu odešel do MPSV třikrát (naposledy 1.0.0.96) a flow tam nešlo
+    # zapnout: "GetTable … List not found".
+    guidy = sorted(set(re.findall(GUID, json.dumps(definice, ensure_ascii=False))))
+    overit(not guidy, f"v definici flow je GUID natvrdo: {guidy[:2]}")
+
     zapis = akce.get("Lisi_se", {}).get("actions", {}).get("Zapsat_kratky_nazev")
     overit(zapis is not None, "chybí zápisová akce Zapsat_kratky_nazev")
     if zapis:
         parametry = zapis["inputs"]["parameters"]
-        overit(zapis["inputs"]["host"]["operationId"] == "PatchItem",
-               "zápis není PatchItem (Update item)")
-        # `table` MUSÍ být GUID natvrdo. S runtime výrazem si PatchItem
-        # nerozbalí schéma těla, rozložené klíče `item/<sloupec>` přestanou
-        # platit a flow nejde zapnout: "The API operation 'PatchItem' is
-        # missing required property 'item'" (MPSV 28.08.2026, 1.0.0.64).
-        # `dataset` proměnnou snese — pro tělo nemá význam.
-        overit(re.fullmatch(GUID, str(parametry.get("table"))) is not None,
-               f"zápisová akce nemá list jako GUID (je tam '{parametry.get('table')}') "
-               f"— PatchItem runtime výraz nesnese")
+        # `Send an HTTP request to SharePoint`, ne PatchItem: ten si schéma
+        # rozloženého těla `item/<sloupec>` odvozuje z konkrétního listu,
+        # takže `table` musel být GUID natvrdo (MPSV 28.08.2026, 1.0.0.64).
+        overit(zapis["inputs"]["host"]["operationId"] == "HttpRequest",
+               f"zápis není HttpRequest, ale "
+               f"'{zapis['inputs']['host'].get('operationId')}'")
         overit(parametry.get("dataset") == ep.web(),
                "zápisová akce nebere web z proměnné mpsv_procesnimapaSite")
-        overit(parametry.get("item/nazev_kratky") == "@outputs('Cil')",
-               "zápis neplní nazev_kratky výstupem Cil")
-        # Povinné sloupce listu (Title, nazev, dilci_proces_kod) musí v těle
-        # BÝT — bez nich se flow nedá aktivovat (1.0.0.63 na MPSV, 28.08.2026:
-        # aktivace skončila "Nezpracováno" a designer hlásil Invalid parameters).
-        # Zároveň nesmí pocházet z triggeru: ten dává snímek starý až o minutu,
-        # takže opravu názvu uloženou krátce po prvním zápisu flow tiše vrátí
-        # zpátky (auditní nález A-07, 23.08.2026). Obojí platí jen tehdy, když
-        # se čtou z `Nacti_aktivitu`, tedy ze stavu těsně před zápisem.
-        polozky = {k: v for k, v in parametry.items() if k.startswith("item/")}
-        overit(set(polozky) == {"item/Title", "item/nazev", "item/dilci_proces_kod",
-                                "item/nazev_kratky"},
-               f"zápis nemá právě čtveřici povinná pole + nazev_kratky: {sorted(polozky)}")
-        for sloupec, hodnota in polozky.items():
-            if sloupec == "item/nazev_kratky":
-                continue
-            ocekavano = "@body('Nacti_aktivitu')?['%s']" % sloupec.split("/", 1)[1]
-            overit(hodnota == ocekavano,
-                   f"{sloupec} se nebere z Nacti_aktivitu (je tam '{hodnota}')")
-        overit(not any("triggerBody" in str(v) for v in polozky.values()),
+        overit(parametry.get("parameters/method") == "POST",
+               f"metoda zápisu není POST (je '{parametry.get('parameters/method')}')")
+
+        hlavicky = parametry.get("parameters/headers") or {}
+        # Bez X-HTTP-Method: MERGE by POST na /items(ID) nezměnil řádek,
+        # ale pokusil se založit další.
+        overit(str(hlavicky.get("X-HTTP-Method", "")).upper() == "MERGE",
+               f"chybí hlavička X-HTTP-Method: MERGE (je {hlavicky.get('X-HTTP-Method')!r})")
+        overit(hlavicky.get("IF-MATCH") == "*",
+               f"chybí hlavička IF-MATCH: * (je {hlavicky.get('IF-MATCH')!r})")
+        overit("nometadata" in str(hlavicky.get("Content-Type", "")),
+               "Content-Type není odata=nometadata — tělo by muselo nést __metadata.type")
+        overit("nometadata" in str(hlavicky.get("Accept", "")),
+               "Accept není odata=nometadata")
+
+        telo = parametry.get("parameters/body")
+        # MERGE mění jen uvedené sloupce. Povinná pole listu se posílat
+        # nesmí: PatchItem je vyžadoval, tady by jen zvyšovaly riziko, že
+        # zápis vrátí novější editaci na hodnotu čtenou před výpočtem.
+        overit(isinstance(telo, dict) and set(telo) == {"nazev_kratky"},
+               f"tělo zápisu není právě {{nazev_kratky}}, ale {sorted(telo) if isinstance(telo, dict) else telo!r}")
+        if isinstance(telo, dict):
+            overit(telo.get("nazev_kratky") == "@outputs('Cil')",
+                   f"zápis neplní nazev_kratky výstupem Cil (je "
+                   f"'{telo.get('nazev_kratky')}')")
+        overit(not any("triggerBody" in str(v) for v in (telo or {}).values()),
                "zápis bere hodnotu ze snímku triggeru — přepíše novější editaci")
 
-    # Čtení čerstvého stavu řádku. Bez něj by povinná pole musela přijít
-    # z triggeru a flow by přepisovalo novější data.
+    # Čtení čerstvého stavu řádku. Bez něj by se porovnávalo se snímkem
+    # triggeru, starým až o minutu.
     nacti = akce.get("Nacti_aktivitu")
     overit(nacti is not None, "chybí akce Nacti_aktivitu (čerstvý stav řádku)")
     if nacti:
         overit(nacti["inputs"]["host"]["operationId"] == "GetItem",
                "Nacti_aktivitu není GetItem")
-        overit(re.fullmatch(GUID, str(nacti["inputs"]["parameters"].get("table"))) is not None,
-               "Nacti_aktivitu nemá list jako GUID")
+        overit(nacti["inputs"]["parameters"].get("table") == ep.list_param("Aktivity"),
+               "Nacti_aktivitu nebere list z proměnné mpsv_listAktivity")
         overit(nacti["inputs"]["parameters"].get("dataset") == ep.web(),
                "Nacti_aktivitu nebere web z proměnné mpsv_procesnimapaSite")
         overit(nacti["inputs"]["parameters"].get("id") == "@triggerBody()?['ID']",
@@ -328,6 +354,24 @@ def main():
             continue
         if cil != zkratit(vzorek, MAXLEN):
             neshody.append((vzorek[:40], zkratit(vzorek, MAXLEN)[-40:], cil[-40:]))
+
+    # REST adresa zápisu se VYHODNOTÍ, ne jen porovná textem. Chytí to
+    # špatně zdvojený apostrof (Logic Apps escapují ''), zapomenuté /items
+    # i cestu skládanou z něčeho jiného než z proměnné webu.
+    _, vystupy = spocitej(akce, "Vede spisovou sluzbu.")
+    overit(vystupy.get("Cesta_webu") == CESTA_WEBU,
+           f"Cesta_webu nedává server-relativní cestu webu "
+           f"(je '{vystupy.get('Cesta_webu')}', čekám '{CESTA_WEBU}')")
+    if zapis:
+        uri_vyraz = str(zapis["inputs"]["parameters"].get("parameters/uri", ""))
+        ocekavana = f"_api/web/GetList('{CESTA_WEBU}/Lists/Aktivity')/items(1)"
+        try:
+            strom = Parser(tokenizuj(uri_vyraz[1:])).vyraz()
+            uri = vyhodnot(strom, vystupy, {"ID": 1})
+        except ValueError as chyba:
+            uri = f"<nevyhodnotitelné: {chyba}>"
+        overit(uri == ocekavana,
+               f"REST adresa zápisu je '{uri}', čekám '{ocekavana}'")
 
     overit(not pady, f"výraz spadl na {len(pady)} vzorcích: {pady[:2]}")
     overit(not neshody, f"výsledek se liší od zkratit() na {len(neshody)} vzorcích: {neshody[:2]}")

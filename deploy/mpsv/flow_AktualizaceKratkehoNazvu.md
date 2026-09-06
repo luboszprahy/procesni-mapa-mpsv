@@ -4,7 +4,7 @@ Hlídá, aby `nazev_kratky` v listu `Aktivity` vždy odpovídal sloupci `nazev`.
 Řeší zápisy, které neprošly pořizovací appkou — ruční editaci přímo v listu,
 hromadný import z Excelu, opravu přes datové zobrazení.
 
-**Stav: flow je hotové a je součástí `deploy/procesnimapa_1_0_0_10.zip`.**
+**Stav: flow je hotové a je součástí `deploy/procesnimapa_1_0_0_98.zip`.**
 Kostru (trigger + jedna akce Compose) vyrobil uživatel v designeru, zbytek
 doplnil skript `src/build_flow.py` do exportovaného balíku. Tenhle dokument
 proto popisuje, **co v tom flow je a proč** — ne postup na naklikání.
@@ -35,18 +35,20 @@ Závazná je funkce `zkratit()` v `src/check_schema.py`; touž používá import
 ## Akce ve flow
 
 Trigger: **`When an item is created or modified`** nad listem `Aktivity`
-(GUID `9dfbb5a1-…`), pak devět akcí.
+z proměnné `mpsv_listAktivity`, pak jedenáct akcí.
 
 | akce | výraz |
 |---|---|
-| `Nazev_syrovy` | `@coalesce(triggerBody()?['nazev'], '')` |
+| `Nacti_aktivitu` | `Get item` — `id` = `@triggerBody()?['ID']`, list z `mpsv_listAktivity` |
+| `Cesta_webu` | `@concat('/', join(skip(split(parameters('Procesni mapa - web (mpsv_procesnimapaSite)'), '/'), 3), '/'))` |
+| `Nazev_syrovy` | `@coalesce(body('Nacti_aktivitu')?['nazev'], '')` |
 | `Bez_bilych_znaku` | `@trim(replace(replace(replace(replace(replace(replace(outputs('Nazev_syrovy'), decodeUriComponent('%0D'), ' '), decodeUriComponent('%0A'), ' '), decodeUriComponent('%09'), ' '), '  ', ' '), '  ', ' '), '  ', ' '))` |
 | `Rez` | `@substring(outputs('Bez_bilych_znaku'), 0, min(149, length(outputs('Bez_bilych_znaku'))))` |
 | `Rez_na_slovo` | `@if(greater(lastIndexOf(outputs('Rez'), ' '), 75), substring(outputs('Rez'), 0, max(0, lastIndexOf(outputs('Rez'), ' '))), outputs('Rez'))` |
 | `Orez_1` … `Orez_3` | `@if(contains(' ,;.', substring(X, max(0, sub(length(X), 1)), min(1, length(X)))), substring(X, 0, max(0, sub(length(X), 1))), X)`, kde `X` = výstup předchozí akce |
 | `Cil` | `@if(lessOrEquals(length(outputs('Bez_bilych_znaku')), 150), outputs('Bez_bilych_znaku'), concat(outputs('Orez_3'), decodeUriComponent('%E2%80%A6')))` |
-| `Lisi_se` (If) | `not(equals(coalesce(triggerBody()?['nazev_kratky'], ''), outputs('Cil')))` |
-| `Zapsat_kratky_nazev` (v *If yes*) | `Update item` (`PatchItem`) — `id` z triggeru, povinné sloupce `Title`/`nazev`/`dilci_proces_kod` beze změny z triggeru, `item/nazev_kratky` = `@outputs('Cil')` |
+| `Lisi_se` (If) | `not(equals(coalesce(body('Nacti_aktivitu')?['nazev_kratky'], ''), outputs('Cil')))` |
+| `Zapsat_kratky_nazev` (v *If yes*) | `Send an HTTP request to SharePoint` — POST na `_api/web/GetList('<Cesta_webu>/Lists/Aktivity')/items(<ID>)`, hlavičky `X-HTTP-Method: MERGE`, `IF-MATCH: *`, `Accept`/`Content-Type` `application/json;odata=nometadata`, tělo `{"nazev_kratky": "@outputs('Cil')"}` |
 
 ### Proč všude `min` a `max`
 
@@ -59,14 +61,25 @@ Ověřeno mutací: bez `min` v akci `Rez` spadne výpočet na 87 vzorcích ze 10
 Tři průchody `'  '` → `' '` složí až osm mezer za sebou na jednu. Delší shluk
 v datech není a nic nerozbije — jen by zůstal.
 
-### Proč jsou v zápisu i sloupce, které se nemění
+### Proč se zapisuje přes REST, a ne akcí `Update item`
 
-`PatchItem` sice mění jen poslané sloupce, ale **povinné sloupce listu musí
-v těle být vždy**, jinak se flow nedá aktivovat. Import 1.0.0.9 to ukázal:
-*„The API operation 'PatchItem' is missing required property 'item/Title'."*
-Posílají se proto i `Title`, `nazev` a `dilci_proces_kod` — **beze změny
-z triggeru**, takže nic nepřepíšou. Že se opravdu vracejí nezměněné,
-hlídá `check_flow.py`; měnit se smí jedině `nazev_kratky`.
+`PatchItem` (`Update item`) posílá tělo rozložené na klíče `item/<sloupec>`
+a schéma si k tomu stahuje z **konkrétního** listu. S `table` z proměnné
+prostředí se schéma nerozbalí, klíče přestanou platit a flow **nejde zapnout**
+(*„The API operation 'PatchItem' is missing required property 'item'"*,
+MPSV 28.08.2026). List proto musel být GUID natvrdo a balík platil jen pro
+jeden tenant — třikrát kvůli tomu odešel do MPSV balík s GUIDem PPF DEV,
+naposledy 1.0.0.96, kde zapnutí spadlo na `GetTable … List not found`.
+
+Od 1.0.0.98 zapisuje `Send an HTTP request to SharePoint` (je součástí
+standardního SharePoint konektoru, ne premium HTTP). V REST adrese je list
+obyčejný text, takže snese proměnnou; skládá se z **interního** názvu listu,
+který je na všech tenantech stejný, kdežto GUID ne. `X-HTTP-Method: MERGE`
+mění jen uvedený sloupec — povinná pole listu se v těle posílat nemusí a zápis
+tím nemá čím přepsat novější editaci.
+
+`Nacti_aktivitu` zůstává: trigger dává snímek starý až o minutu, takže
+porovnávat s uloženou hodnotou se musí čerstvý stav řádku.
 
 ### Proč to necyklí
 
@@ -89,13 +102,18 @@ ty běhy skončí větví If no.
 Skript nečte tenhle dokument ani kopii logiky — **vytáhne výrazy z balíku,
 vyhodnotí je** mini-interpretem (hladově, jako Logic Apps) nad 104 vzorky
 (reálná i anonymizovaná data + 12 hraničních) a porovná s `zkratit()`.
-Kontroluje i strukturu: trigger, GUID listu natvrdo v zápisové akci,
-řetěz `runAfter`, že se zapisuje jen `nazev_kratky` a že podmínka porovnává
-uloženou hodnotu s vypočtenou.
+Kontroluje i strukturu: trigger a čtení berou list z proměnné, v definici
+není žádný GUID, zápis je REST POST s `MERGE` a `IF-MATCH`, tělo nese právě
+`nazev_kratky`, řetěz `runAfter` drží a podmínka porovnává uloženou hodnotu
+s vypočtenou. **REST adresu přitom vyhodnotí**, ne jen porovná textem — chytí
+tím i špatně zdvojený apostrof.
 
-Mutačně ověřeno — test shodí: vypuštěné `min`, posunutá hranice slova,
-podmínka bez `not`, list jako runtime výraz, rozbitý `runAfter`, zápis
-do dalšího sloupce.
+Mutačně ověřeno dvěma testy: `src/mutace_kratky_nazev.py` (14 mutací —
+chybějící `MERGE` nebo `IF-MATCH`, GUID zpátky v adrese či v triggeru, adresa
+bez `/items(ID)`, návrat k `PatchItem`, zapsaný `nazev` místo `nazev_kratky`,
+metoda GET, čtení z triggeru, zápis bez porovnání) a mutacemi nad výrazy
+zkracování (vypuštěné `min`, posunutá hranice slova, podmínka bez `not`,
+rozbitý `runAfter`).
 
 ### Ruční zkouška po importu
 
@@ -113,10 +131,10 @@ do dalšího sloupce.
 
 - **Po importu flow zapnout**, pokud import hlásil „one or more flows may not
   have turned on" — import stav zapnutí nemění.
-- **Zápisová akce má GUID listu natvrdo.** S proměnnou prostředí se flow
-  naimportuje, ale nejde zapnout (`PatchItem … missing required property
-  'item'`). Na tenantu MPSV proto vznikne nové flow se svým GUID, nepřenáší
-  se změnou hodnoty proměnné.
+- **V definici flow není žádný GUID** — web i list přicházejí z proměnných
+  prostředí, takže týž balík platí pro každý tenant. Podmínkou je vyplněná
+  *Current Value* u `mpsv_procesnimapaSite` a `mpsv_listAktivity`; balík
+  hodnoty záměrně nevozí, aby import nepřepsal cílové prostředí.
 - **Výpustka je jeden znak** `…`; tři tečky by hodnotu rozešly s importem
   a flow by ji přepisovalo pořád dokola.
 - Změna pravidel zkracování se dělá **na jednom místě** (`zkratit()`

@@ -1272,7 +1272,7 @@ Tři místa se liší mezi tenanty:
 |---|---|---|
 | napojení appky na 7 zdrojů | `<ConnectionReferences>` | ručně ve Studiu, 7× odebrat a přidat |
 | `varMapaUrl` | `App.OnStart` natvrdo | ruční změna v YAML |
-| GUID listu Aktivity | `PatchItem` ve flow | `build_flow.py --list-aktivity <GUID>` — hotovo |
+| GUID listu Aktivity | `PatchItem` ve flow | odpadl (F14, 1.0.0.98) — zapisuje REST MERGE z proměnných |
 
 ### Klíčové zjištění průzkumu: do `.msapp` se nesahá
 
@@ -2517,8 +2517,18 @@ PPF DEV a flow tam nešlo zapnout (naposledy 1.0.0.96, 05.09.2026). V URL REST
 volání je list obyčejný text, takže proměnnou snese.
 
 Termín: týden od 08.09.2026 (rozhodl uživatel 05.09.2026).
+**Stav 06.09.2026: kroky 1–4 hotové, balík `1.0.0.98`. Zbývá krok 5 —
+nasazení na MPSV.**
 
-1. **Ověření akce v designeru** — co: uživatel přidá do kopie flow akci
+1. ~~**Ověření akce v designeru**~~ — **odpadlo 06.09.2026, doloženo provozem.**
+   `Send an HTTP request to SharePoint` už používá pět flow v témže balíku
+   (`ImportFlow`, `PresunFlow`, `RestoreFlow`, `ZalohaFlow`) — a `RestoreFlow`
+   i `PresunFlow` právě v podobě POST + `X-HTTP-Method: MERGE` + `IF-MATCH: *`
+   (`build_restore_flow.py:502`). Těch osm flow je na MPSV zapnutých, takže
+   tam DLP akci pouští a validace při zapnutí projde. Ruční test v designeru
+   by ověřil totéž.
+
+   Původní znění: uživatel přidá do kopie flow akci
    `Send an HTTP request to SharePoint`, metoda POST, uri
    `_api/web/lists(guid'<GUID>')/items(<ID>)`, hlavičky `X-HTTP-Method: MERGE`,
    `IF-MATCH: *`, `Accept` a `Content-Type` `application/json;odata=nometadata`,
@@ -2541,6 +2551,11 @@ Termín: týden od 08.09.2026 (rozhodl uživatel 05.09.2026).
    čtení proměnnou snese, měnit je není potřeba.
    risk: `IF-MATCH: *` přepíše souběžnou editaci. Dnešní chování je stejné
    (zapisuje se stav z `Nacti_aktivitu`), takže regrese to není.
+   **Hotovo 06.09.2026.** Adresa se skládá přes `GetList` z interního názvu
+   listu (týž tvar jako RestoreFlow), ne přes `lists(guid'…')` — nezávisí to
+   na tom, co přesně nese proměnná typu `table`. Trigger i `Nacti_aktivitu`
+   berou list z `mpsv_listAktivity`. Ve `Workflows/` balíku 98 není GUID ani
+   jeden.
 
 3. **Přepis brány** — co: `src/check_flow.py`, 26 kontrol míří na `PatchItem`
    a rozložené klíče; přepsat na kontrolu URI, metody, hlaviček a JSON těla.
@@ -2550,6 +2565,10 @@ Termín: týden od 08.09.2026 (rozhodl uživatel 05.09.2026).
    edge cases: žádné.
    risk: brána se přepíše tak, že nová podoba projde, ale nic nehlídá. Proto
    mutace, ne jen zelený běh.
+   **Hotovo 06.09.2026.** `check_flow.py` má 30 kontrol; interpret navíc
+   umí `parameters`/`split`/`join`/`skip`, takže REST adresu **vyhodnotí**,
+   ne jen porovná textem. Mutačně `src/mutace_kratky_nazev.py` 14/14.
+   Zpětně nad balíkem 97 vypíše 12 nálezů.
 
 4. **Úklid** — co: zrušit `overuj_list_aktivity()` v `src/make_deploy_mpsv.py`
    (nemá co hlídat), vyhodit dvoubalíkový režim z `HANDOVER.md` a `STATUS.md`.
@@ -2557,12 +2576,168 @@ Termín: týden od 08.09.2026 (rozhodl uživatel 05.09.2026).
    o GUIDu natvrdo.
    edge cases: —
    risk: úklid dřív, než je krok 1 ověřený na MPSV. Dělat až po nasazení.
+   **Hotovo 06.09.2026.** `overuj_list_aktivity()` nahrazena
+   `overuj_bez_guidu()` — hlídá, že GUID nemá ve `Workflows/` žádné flow.
+   `HANDOVER.md` přepsán, `deploy/mpsv/` přegenerována z balíku 98.
 
 5. **Nasazení** — co: balík na MPSV, flow zapnout, ověřit zkrácení názvu.
    verify: úprava názvu aktivity → do minuty zkrácený tvar; run history akce
    vrátí 204.
    edge cases: flow zůstane vypnuté po importu — zapnout ručně.
    risk: —
+
+---
+
+## F15 — Skutečný číselník útvarů z MPSV listu (zadáno 06.09.2026)
+
+Dosavadní `Utvary` je **zástupný**: `make_utvary.py` ho skládá z čísel, která
+se objeví v aktivitách, názvy vymýšlí („Útvar 11 (odbor)") a **hierarchii hádá
+z délky čísla** (111 → 11 → 1). Uživatel dodal `query.iqy.xlsx` — export
+z MPSV listu *Organizační útvary* (`sites/MPSV-App-Mapovani-Procesu-OR`),
+47 řádků: Ministr, Sekce 3/4/6, jejich odbory a oddělení a tři speciální
+položky. Tím odvození z délky čísla padá: `O11` je pod `Sekce 3`, ne pod
+„sekcí 1", a `O32`/`O34`/`O35` jsou pod `Sekce 6`.
+
+**Rozhodnuto 06.09.2026 (uživatel):** `Title` zůstane holé číslo (`11`, `331`,
+`3`), do `nazev` jde označení z MPSV (`O11`, `O331`, `Sekce 3`). Data
+v aktivitách ani v rejstříku se nepřepisují. Ministr dostane kód `0`.
+
+### Nesrovnalosti ve zdroji — neopravovat tiše
+
+| řádek | co je tam | důsledek |
+|---|---|---|
+| `O33` | nadřízený `O33`, tedy sám sobě | cyklus; strom se nedá sestavit |
+| `O425` | `Odbor` pod odborem `O42` | jediný odbor pod odborem |
+| `O401` | `Oddělení` přímo pod `Sekce 4` | jediné oddělení bez odboru |
+| speciální 3 | nadřízený = ony samy | tytéž cykly |
+
+Import je **nesmí** spolknout ani opravit — vypíše je jako nález a uživatel
+rozhodne. `O425` a `O401` jsou legitimní (organizační výjimky), cyklus u `O33`
+ne.
+
+1. **Extraktor** — co: nový `src/import_utvary.py`, čte
+   `input/organizacni_utvary.xlsx` (kopie dodaného exportu) a píše
+   `runs/normalize/utvary.csv` ve stávajícím tvaru
+   (`kod;nazev;uroven;nadrizeny_kod`). Kód odvodí z označení: `O331` → `331`,
+   `Sekce 3` → `3`, `Ministr` → `0`. Úroveň mapuje `Ministr|Sekce|Odbor|Oddělení`
+   na dnešní `ministr|sekce|odbor|oddělení` (`uroven` je Choice — přibude
+   `ministr`, viz krok 3).
+   verify: `python src/import_utvary.py` vypíše 44 útvarů a 3 speciální položky
+   jako nález; `utvary.csv` má u `11` nadřízeného `3` (ne prázdno) a u `32`
+   nadřízeného `6` (ne `3`) — přesně to, co staré odvození pletlo.
+   edge cases: cyklus (`O33` → sám sobě) → nález, nadřízený se zahodí a útvar
+   zůstane bez rodiče; útvar, na který nikdo neukazuje; označení, ze kterého
+   nejde odvodit číslo; duplicitní kód po odvození.
+   risk: odvození kódu z označení je konvence, ne pravidlo v datech. Kdyby
+   MPSV zavedlo útvar `O11a`, extraktor to musí ohlásit, ne mlčky useknout.
+
+2. **Konec hádání hierarchie** — co: `src/make_utvary.py` přestane být zdrojem
+   číselníku; zůstane jen jako kontrola, že každé číslo použité v aktivitách
+   (`vykonava`, `spolupracuje`, vlastníci) v číselníku existuje.
+   verify: útvar použitý v datech a chybějící v číselníku je nález; dnešní data
+   projdou, nebo vypíšou konkrétní chybějící čísla.
+   edge cases: `spolupracuje` nese volný text („věcně příslušné útvary MPSV"),
+   ten se za útvar považovat nesmí.
+   risk: evidenční karty mohou nést útvar, který v MPSV listu není — pak je
+   nález správný a řeší ho zadavatelka, ne skript.
+
+3. **Schéma a číselník úrovní** — co: `src/schema.json`, `Utvary.uroven` dostane
+   volbu `ministr`; `check_schema.py` a `check_setup.js` to musí přijmout.
+   verify: `python src/check_schema.py` a `node src/check_setup.js` zeleně.
+   edge cases: existující list na MPSV volbu ještě nemá — provisioning je
+   idempotentní, ale **přidání volby do Choice sloupce ověřit**.
+   risk: `02_import_dat.js` by volbu, kterou list nezná, zapsal jako prázdno.
+
+4. **Anonymní sada** — co: `src/anonymize.py`, tabulka `UTVARY` dnes zná deset
+   čísel; nový číselník jich má 44. Doplnit celé mapování, ať anonymní sada
+   nenese skutečnou organizační strukturu MPSV.
+   verify: `python src/anonymize.py`; v `runs/anonym/utvary.csv` není žádné
+   číslo ani označení z MPSV listu; kontrola anonymity nehlásí nález.
+   edge cases: jednociferné kódy se nahrazují jen za slovem „sekce" (jinak by
+   trefily čísla v právních odkazech) — u čtyř sekcí to platí dál.
+   risk: **test poběží na PPF DEV**, takže neanonymizovaný číselník tam nesmí
+   odejít. Brána anonymity to musí zachytit dřív než build.
+
+5. **Šablona importu** — co: `src/make_sablona.py` bere útvary z `utvary.csv`,
+   takže se rozbalovátko naplní samo; ověřit strop `STROP_CISELNIKU["utvary"]`
+   (dnes 200, nově 47 — projde).
+   verify: `python src/make_sablona.py`, `python src/check_sablona.py`;
+   v rozbalovátku útvarů je `3 · Sekce 3` i `331 · O331`.
+   edge cases: —
+   risk: —
+
+---
+
+## F16 — Více vlastníků na agendě, procesu a dílčím procesu (zadáno 06.09.2026)
+
+Dnes je `vlastnik` u všech tří úrovní jeden textový sloupec a appka do něj
+nabízí **jeden** útvar. Data přitom víc vlastníků už nesou (`procesy.vlastnik`
+= `11; 33`) a nová evidenční karta s tím počítá taky. Aktivita víc útvarů
+umí (`spolupracuje`).
+
+**Oddělovač `; ` je už v datech zavedený** — nezavádí se nic nového a sloupec
+zůstává `Text`. Migrace dat tím odpadá, což je u schváleného rejstříku
+podstatné.
+
+1. **Appka — výběr více útvarů** — co: `src/app_src/scr_Ciselnik.pa.yaml`,
+   výběr vlastníka u agendy, procesu a dílčího procesu z jednoho výběru na
+   vícenásobný; uložení skládá `; `-oddělený řetězec, čtení ho rozpadá.
+   verify: `python src/check_app.py` zeleně; ručně — u procesu `01-01` jsou
+   po otevření zaškrtnuté `11` i `33`, přidání třetího a uložení dá `11; 33; 42`.
+   edge cases: prázdný vlastník; jeden vlastník (nesmí přibýt středník);
+   útvar, který v číselníku není (stará data) — musí zůstat čitelný;
+   pořadí voleb se nesmí při uložení přeházet.
+   risk: `Classic/ComboBox` je z `pa.yaml` nepoužitelný (vlastnost `hidden`,
+   viz `reference/pa-yaml-uskali.md`). Pokud vícenásobný výběr nepůjde složit
+   z YAML, řešením je galerie se zaškrtávátky nad `colUtvary`.
+
+2. **Import z Excelu** — co: `src/build_import_flow.py` a validace v šabloně —
+   buňka vlastníka smí nést víc útvarů oddělených `;`, každý se ověří proti
+   číselníku.
+   verify: `python src/check_import_flow.py`; import řádku s `11; 33` založí
+   proces s oběma, řádek s `11; 99` neprojde a vypíše, že `99` není útvar.
+   edge cases: mezery kolem středníku; středník na konci; opakovaný útvar;
+   prázdná buňka.
+   risk: dnešní validace bere buňku jako jeden kód — bez rozšíření by řádek
+   s `11; 33` propadl jako neplatný útvar.
+
+3. **Šablona** — co: `src/make_sablona.py`, rozbalovátko vlastníka dnes vnucuje
+   **právě jednu** hodnotu z číselníku. Buď se ověření uvolní na volný text
+   s kontrolou až při importu, nebo se doplní druhý a třetí sloupec vlastníka.
+   verify: `python src/check_sablona.py`; do buňky vlastníka jde zapsat
+   `11; 33` a Excel to nezamítne.
+   edge cases: —
+   risk: uvolněné ověření propustí překlep, který dnes rozbalovátko chytí.
+   Proto musí být kontrola v importu (krok 2) hotová dřív.
+
+4. **Mapa a přehled** — co: `src/build_mapa.py` a `scr_Dashboard` zobrazují
+   vlastníka jako jednu hodnotu; musí unést seznam.
+   verify: `python src/build_mapa.py`, v HTML mapě má proces `01-01` uvedené
+   oba vlastníky; `check_mapa_flow.py` zeleně.
+   edge cases: dlouhý seznam vlastníků nesmí rozbít šířku sloupce.
+   risk: —
+
+---
+
+## F17 — Sjednocení pruhu voleb na úvodní obrazovce (zadáno 06.09.2026)
+
+Nabídky v pruhu na `scr_Dashboard` mají každá jinou šířku (`Rozbalit` 190,
+`Stav` 240, `HTML mapa` 110, `Data` 100), takže pruh působí neuspořádaně.
+
+**Rozhodnuto 06.09.2026 (uživatel):** sjednotit **jen tyhle čtyři**. Přepínač
+písma `Aaa` (34/38/42 px) zůstává — velikost tam nese význam, je to náhled
+stupně písma.
+
+1. **Jedna šířka** — co: `src/app_src/scr_Dashboard.pa.yaml`, čtyři nabídky
+   dostanou stejnou šířku a rozestup; `X` se dopočítá z pořadí, ne natvrdo,
+   ať se při další změně nerozejdou.
+   verify: `python src/check_app.py` zeleně; ručně — pruh na úvodní obrazovce
+   má čtyři stejně široké nabídky a nic se nepřekrývá.
+   edge cases: popisek `Stav` nese celý stav filtru (`Stav: schváleno ·
+   nezařazené`) a je nejdelší — šířka musí vyjít z něj, jinak se text uřízne.
+   Panel se navíc krátí, když není žádná nezařazená aktivita.
+   risk: nabídky se rozbalují dolů a jejich obsah je širší než tlačítko —
+   ověřit, že se rozbalená nabídka nedostane mimo obrazovku.
 
 ---
 

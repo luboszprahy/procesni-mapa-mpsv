@@ -18,29 +18,32 @@ from pathlib import Path
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
 
-# Web i list bere flow z proměnných prostředí — včetně triggeru a zápisové
-# akce. Do 1.0.0.61 tu byl GUID vývojového listu natvrdo, protože skill tvrdí,
-# že zápisová akce runtime výraz nesnese. Rozbor produkčních balíků PPF
-# (Clearstream, Průvodní list, Správa notifikací) to vyvrátil: PatchItem,
-# PostItem i trigger nad listem s proměnnou běží. Podmínkou je typ proměnné —
-# datasetová (100000004), ne textová. Viz src/env_promenne.py.
+# Web i list bere flow z proměnných prostředí — trigger, čtení i zápis.
+# Do 1.0.0.97 tu byl GUID listu Aktivity natvrdo, protože zápis dělal
+# `PatchItem` a ten si schéma rozloženého těla `item/<sloupec>` odvozuje
+# z konkrétního listu; s runtime výrazem se flow naimportovalo, ale nešlo
+# zapnout ("missing required property 'item'", MPSV 28.08.2026). Kvůli tomu
+# se pro každý tenant stavěl vlastní balík a třikrát do MPSV odešel balík
+# s GUIDem PPF DEV (naposledy 1.0.0.96).
+#
+# Od F14 se zapisuje přes `Send an HTTP request to SharePoint` (MERGE) —
+# v URL je list obyčejný text, takže proměnnou snese. Týž tvar používají
+# ImportFlow, PresunFlow, RestoreFlow a ZalohaFlow; na MPSV běží.
 MAXLEN = 150
 AKTUALNI = "body('Nacti_aktivitu')"
 
-# GUID listu Aktivity v CÍLOVÉM prostředí. Jediné místo v celém balíku, kde je
-# identifikátor listu natvrdo — a je to nutné zlo:
-#
-#   PatchItem si schéma těla odvozuje z konkrétního listu. Když je `table`
-#   runtime výraz (proměnná prostředí), schéma se nerozbalí a rozložené klíče
-#   `item/<sloupec>` přestanou být platné. Flow se naimportuje, ale zapnout
-#   nejde — "The API operation 'PatchItem' is missing required property 'item'"
-#   (MPSV, 28.08.2026, balík 1.0.0.64; totéž FloorPlan 1.0.0.21).
-#
-# `dataset` (web) proměnnou snese, ta je pro tělo bez významu — přesně tuhle
-# kombinaci má i produkční FloorPlan. Ostatní tři flow zůstávají celá na
-# proměnných; tohle jediné se při přenosu na další tenant musí přegenerovat
-# s novým GUID (`--list-aktivity`).
-LIST_AKTIVITY_MPSV = "b1daaa38-53df-4c7b-b9f8-03b36d46bc60"
+# Interní název listu. Je stejný na všech tenantech, kdežto GUID ani
+# zobrazovaný název ne — proto se REST adresa skládá přes GetList z něj.
+LIST_AKTIVITY = "Aktivity"
+
+# `nometadata` znamená, že se do těla nemusí skládat `__metadata.type`.
+HLAVICKY_ZAPIS = {
+    "Accept": "application/json;odata=nometadata",
+    "Content-Type": "application/json;odata=nometadata",
+    "X-HTTP-Method": "MERGE",
+    "IF-MATCH": "*",
+}
+
 VYPUSTKA = "decodeUriComponent('%E2%80%A6')"
 
 
@@ -61,15 +64,24 @@ def orez(zdroj):
     return f"@if(contains(' ,;.', {posledni}), {bez_posledniho}, {x})"
 
 
-def akce(list_aktivity):
+def rest_adresa(vnitrek):
+    """REST adresa listu Aktivity — server-relativní cesta webu z proměnné
+    plus interní název listu. Týž tvar má RestoreFlow i PresunFlow."""
+    return (f"@concat('_api/web/GetList(''', outputs('Cesta_webu'),"
+            f" '/Lists/{LIST_AKTIVITY}', ''')/items{vnitrek}')")
+
+
+def akce():
     b = "outputs('Bez_bilych_znaku')"
     rez = "outputs('Rez')"
     mezera = f"lastIndexOf({rez}, ' ')"
+    list_aktivity = ep.list_param("Aktivity")
 
     kroky = {
         # Čerstvý stav řádku. Trigger dává snímek starý až o minutu (polling
-        # po 1 min), takže z něj smí přijít jen ID — jinak flow zapíše povinná
-        # pole v podobě, v jaké byla PŘED editací, a novější hodnotu přepíše.
+        # po 1 min), takže z něj smí přijít jen ID — jinak flow porovná stav,
+        # jaký byl PŘED editací, a zápis by se buď neprovedl, nebo přepsal
+        # novější hodnotu.
         "Nacti_aktivitu": {
             "type": "OpenApiConnection",
             "inputs": {
@@ -86,8 +98,12 @@ def akce(list_aktivity):
             },
             "runAfter": {},
         },
+        # Server-relativní cesta webu, ze které se skládá REST adresa zápisu.
+        "Cesta_webu": compose(
+            f"@concat('/', join(skip(split({ep.vyraz(ep.WEB)}, '/'), 3), '/'))",
+            "Nacti_aktivitu"),
         "Nazev_syrovy": compose(
-            f"@coalesce({AKTUALNI}?['nazev'], '')", "Nacti_aktivitu"),
+            f"@coalesce({AKTUALNI}?['nazev'], '')", "Cesta_webu"),
         "Bez_bilych_znaku": compose(
             "@trim(replace(replace(replace(replace(replace(replace("
             "outputs('Nazev_syrovy'), decodeUriComponent('%0D'), ' '), "
@@ -114,28 +130,23 @@ def akce(list_aktivity):
             "@outputs('Cil')",
         ]}}]},
         "actions": {
+            # MERGE mění jen uvedený sloupec, takže povinná pole listu se
+            # na rozdíl od PatchItem posílat nemusí — a tím padá i riziko,
+            # že by zápis vrátil novější editaci na starou hodnotu.
             "Zapsat_kratky_nazev": {
                 "type": "OpenApiConnection",
                 "inputs": {
                     "parameters": {
                         "dataset": ep.web(),
-                        "table": list_aktivity,
-                        "id": "@triggerBody()?['ID']",
-                        # Povinné sloupce listu musí v těle být, i když se nemění —
-                        # bez nich se flow nedá aktivovat (OpenApiOperation-
-                        # ParameterValidationFailed, "missing required property
-                        # 'item/Title'"; ověřeno importem 1.0.0.9 na PPF a znovu
-                        # 1.0.0.63 na MPSV). Berou se z Nacti_aktivitu, tedy ze stavu
-                        # z okamžiku zápisu — z triggeru by to byl snímek starý až
-                        # o minutu a novější editace by se tiše vrátila zpátky.
-                        "item/Title": f"@{AKTUALNI}?['Title']",
-                        "item/nazev": f"@{AKTUALNI}?['nazev']",
-                        "item/dilci_proces_kod": f"@{AKTUALNI}?['dilci_proces_kod']",
-                        "item/nazev_kratky": "@outputs('Cil')",
+                        "parameters/method": "POST",
+                        "parameters/uri": rest_adresa(
+                            "(', string(triggerBody()?['ID']), ')"),
+                        "parameters/headers": HLAVICKY_ZAPIS,
+                        "parameters/body": {"nazev_kratky": "@outputs('Cil')"},
                     },
                     "host": {
                         "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                        "operationId": "PatchItem",
+                        "operationId": "HttpRequest",
                         "connectionName": "shared_sharepointonline",
                     },
                 },
@@ -151,9 +162,6 @@ def akce(list_aktivity):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--solution", required=True, help="solution zip s exportovaným flow")
-    parser.add_argument("--list-aktivity", default=LIST_AKTIVITY_MPSV,
-                        help="GUID listu Aktivity v cílovém prostředí (PatchItem "
-                             "ho runtime výrazem nesnese, viz komentář u konstanty)")
     argumenty = parser.parse_args()
 
     cesta = Path(argumenty.solution)
@@ -183,11 +191,12 @@ def main():
     # Web a list v triggeru přepisujeme taky, jinak by flow po importu na cizí
     # tenant hlídalo list, který tam neexistuje. Který list kostra ze Studia
     # ukazovala, je od téhle chvíle jedno — vybírá se v průvodci importem.
+    # Trigger je čtecí, rozložené tělo nemá, takže proměnnou snese.
     puvodni = dict(trigger["inputs"]["parameters"])
     trigger["inputs"]["parameters"]["dataset"] = ep.web()
-    trigger["inputs"]["parameters"]["table"] = argumenty.list_aktivity
+    trigger["inputs"]["parameters"]["table"] = ep.list_param("Aktivity")
 
-    definice["actions"] = akce(argumenty.list_aktivity)
+    definice["actions"] = akce()
     definice["contentVersion"] = "1.0.0.0"
     polozky[klic] = json.dumps(flow, ensure_ascii=False, indent=1).encode("utf-8")
 
@@ -198,8 +207,8 @@ def main():
     print(f"flow doplněno: {klic.split('/')[-1]}")
     print(f"  akcí: {len(definice['actions'])}")
     print(f"  web z proměnné: {ep.web()}")
-    print(f"  list Aktivity natvrdo (PatchItem runtime výraz nesnese): "
-          f"{argumenty.list_aktivity}")
+    print(f"  list z proměnné: {ep.list_param('Aktivity')}")
+    print(f"  zápis: REST MERGE na GetList(.../Lists/{LIST_AKTIVITY})")
     print(f"  kostra ukazovala na: {puvodni.get('dataset')} / {puvodni.get('table')}")
     return 0
 
