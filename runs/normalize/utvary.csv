@@ -1,9 +1,45 @@
 ﻿kod;nazev;uroven;nadrizeny_kod
-1;Útvar 1 (sekce);sekce;
-3;Útvar 3 (sekce);sekce;
-11;Útvar 11 (odbor);odbor;1
-33;Útvar 33 (odbor);odbor;3
-111;Útvar 111 (oddělení);oddělení;11
-113;Útvar 113 (oddělení);oddělení;11
-331;Útvar 331 (oddělení);oddělení;33
-332;Útvar 332 (oddělení);oddělení;33
+0;Ministr;ministr;
+12;O12;odbor;0
+121;O121;oddělení;12
+122;O122;oddělení;12
+3;Sekce 3;sekce;0
+11;O11;odbor;3
+111;O111;oddělení;11
+113;O113;oddělení;11
+33;O33;odbor;
+331;O331;oddělení;33
+332;O332;oddělení;33
+4;Sekce 4;sekce;0
+401;O401;oddělení;4
+42;O42;odbor;4
+422;O422;oddělení;42
+424;O424;oddělení;42
+425;O425;odbor;42
+44;O44;odbor;4
+443;O443;oddělení;44
+445;O445;oddělení;44
+45;O45;odbor;4
+451;O451;oddělení;45
+452;O452;oddělení;45
+453;O453;oddělení;45
+6;Sekce 6;sekce;0
+601;O601;oddělení;6
+32;O32;odbor;6
+322;O322;oddělení;32
+323;O323;oddělení;32
+325;O325;oddělení;32
+34;O34;odbor;6
+341;O341;oddělení;34
+342;O342;oddělení;34
+35;O35;odbor;6
+351;O351;oddělení;35
+356;O356;oddělení;35
+357;O357;oddělení;35
+61;O61;odbor;6
+611;O611;oddělení;61
+612;O612;oddělení;61
+62;O62;odbor;6
+621;O621;oddělení;62
+622;O622;oddělení;62
+623;O623;oddělení;62

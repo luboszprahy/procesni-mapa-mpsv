@@ -35,14 +35,42 @@ async function beh(sp) {
   return zachyt;
 }
 
+function pocty_v_datech() {
+  // Datova sekce generovaneho skriptu je `const DATA = [ {list, rows}, ... ];`
+  const kod = fs.readFileSync("src/import_data.js", "utf8");
+  const zacatek = kod.indexOf("const DATA = [");
+  if (zacatek < 0) throw new Error("v import_data.js nenajdu blok const DATA");
+  const konec = kod.indexOf("\n];", zacatek);
+  const literal = kod.slice(zacatek + "const DATA = ".length, konec + 3);
+  const ctx = { DATA: null };
+  vm.createContext(ctx);
+  vm.runInContext("DATA = " + literal, ctx);
+  const pocty = {};
+  for (const tabulka of ctx.DATA) pocty[tabulka.list] = tabulka.rows.length;
+  return pocty;
+}
+
 function tvrd(podminka, popis) {
   if (!podminka) { console.log("SELHALO: " + popis); process.exitCode = 1; }
   else console.log("ok: " + popis);
 }
 
 (async () => {
-  const ocekavane = { Agendy: 7, Procesy: 46, DilciProcesy: 250, Aktivity: 46,
-                      AktivitaDilciProces: 46, Utvary: 7 };
+  // Pocty se ctou z import_data.js, ne z ruky. Napsane natvrdo se rozesly
+  // s daty pri prvni zmene ciselniku utvaru (7 -> 44, 06.09.2026) a test pak
+  // hlasil selhani idempotence, ackoli import byl v poradku.
+  const ocekavane = pocty_v_datech();
+  // Bez tohohle by prazdny vysledek prosel vsemi `every` triviálne - test by
+  // byl zeleny a nehlidal nic.
+  // Generator vynechava listy, ktere nemaji data - dnes jen HistorieKodu,
+  // ta se plni az prvnim presunem. Cokoli dalsiho chybejiciho je chyba.
+  const chybi = SCHEMA.lists.map((l) => l.name)
+    .filter((n) => !(n in ocekavane) && n !== "HistorieKodu");
+  tvrd(chybi.length === 0 && Object.keys(ocekavane).length > 0,
+       `pocty precteny ze vsech listu s daty (${Object.keys(ocekavane).length}` +
+       (chybi.length ? `, chybi: ${chybi.join(", ")}` : "") + ")");
+  tvrd(Object.values(ocekavane).every((n) => n > 0),
+       "zadny nacteny list neni prazdny");
 
   console.log("--- 1. beh (prazdne listy) ---");
   const sp = falesnySharePoint(SCHEMA.lists);
@@ -61,7 +89,7 @@ function tvrd(podminka, popis) {
                   sp.listy.get(nazev).items.length);
     }
   }
-  tvrd(pocty, "pocty polozek sedi: 7 / 46 / 250 / 46 / 46 / 7");
+  tvrd(pocty, "pocty polozek sedi: " + Object.values(ocekavane).join(" / "));
   tvrd(souhrn1.every((s) => s.zalozeno === ocekavane[s.list] && s.chyb === 0),
        "souhrnna tabulka hlasi vse zalozene a nula chyb");
 

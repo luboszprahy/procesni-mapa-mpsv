@@ -657,7 +657,7 @@ Screens:
               & "  ▾"
             Tooltip: '="Filtr toho, co je ve stromu vidět: stav aktivit (vše, schválené, pracovní) a dvě zvláštní skupiny - osiřelé položky bez nadřazené úrovně a aktivity nahrané bez zařazení. Obojí je ve stromu jinak neviditelné, protože strom ukazuje jen to, co visí pod otevřeným předkem."'
             Width: =240
-            X: =460
+            X: =510
             Y: =116
       - btn_RozbalitMenu:
           Control: Classic/Button@2.2.0
@@ -691,7 +691,7 @@ Screens:
                   "vlastní"
               ) & "  ▾"
             Tooltip: '="Kolik úrovní stromu je rozbalených. Nabídka rozbalí celou úroveň naráz; vlastní rozbalení znamená, že jsi větve otevíral po jedné klikáním do řádků."'
-            Width: =190
+            Width: =240
             X: =262
             Y: =116
       - btn_MapaMenu:
@@ -717,8 +717,8 @@ Screens:
             Size: =10
             Text: ="HTML mapa  ▾"
             Tooltip: '="Publikovaná HTML mapa: otevření a obnovení. Mapa data nečte živě - ukazuje stav k okamžiku poslední publikace."'
-            Width: =110
-            X: =708
+            Width: =240
+            X: =758
             Y: =116
       # Nabídka práce se souborem: export, vzorová tabulka pro import, záloha.
       # Sjednoceno 01.09.2026 — tři samostatná tlačítka v pruhu už se nevešla
@@ -770,8 +770,8 @@ Screens:
             Size: =10
             Text: ="Data  ▾"
             Tooltip: '="Práce se souborem: export toho, co je právě vidět ve stromu, prázdná tabulka pro hromadný import a záloha celého rejstříku. Export bere momentální pohled - po filtru stavu, hledání i chipech osiřelých a nezařazených - ne celý rejstřík."'
-            Width: =100
-            X: =826
+            Width: =240
+            X: =1006
             Y: =116
       # Sedí v hlavičce stromu, ne v pruhu filtrů: patří k tabulce pod ním
       # a v pruhu zabíral místo, které od 1.0.0.92 potřebuje chip nezařazených.
@@ -1415,7 +1415,7 @@ Screens:
               )
             Visible: =varMenuStav
             Width: =240
-            X: =460
+            X: =510
             Y: =144
       - btn_StavVse:
           Control: Classic/Button@2.2.0
@@ -1440,7 +1440,7 @@ Screens:
             Tooltip: '="Bez filtru stavu - ve stromu jsou všechny aktivity i větve nad nimi."'
             Visible: =varMenuStav
             Width: =232
-            X: =464
+            X: =514
             Y: =148
       - btn_StavSchvaleno:
           Control: Classic/Button@2.2.0
@@ -1465,7 +1465,7 @@ Screens:
             Tooltip: '="Nechá jen schválené aktivity a nad nimi jen ty agendy, procesy a dílčí procesy, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet schválených aktivit v dané větvi."'
             Visible: =varMenuStav
             Width: =232
-            X: =464
+            X: =514
             Y: =184
       - btn_StavPracovni:
           Control: Classic/Button@2.2.0
@@ -1490,7 +1490,7 @@ Screens:
             Tooltip: '="Nechá jen pracovní aktivity, tedy rozpracované záznamy, a nad nimi jen větve, které aspoň jednu takovou obsahují. Číslo vpravo se přepne na počet pracovních aktivit v dané větvi."'
             Visible: =varMenuStav
             Width: =232
-            X: =464
+            X: =514
             Y: =220
       # Osiřelá položka nemá ve stromu kam patřit, takže se v něm vůbec
       # neukáže - chip je jediné místo, kde je z přehledu vidět.
@@ -1518,7 +1518,7 @@ Screens:
             Tooltip: '="Vypíše položky, jejichž nadřazená úroveň v číselníku není: proces bez agendy, dílčí proces bez procesu, aktivita bez dílčího procesu. U agendy, která nadřazenou úroveň nemá, to znamená agendu bez jediného procesu. Ve stromu je jinak nenajdeš - strom ukazuje jen to, co visí pod otevřeným předkem, a sirotek žádného předka nemá. Uklidit je jde na obrazovce Editace nebo rovnou košem v řádku."'
             Visible: =varMenuStav
             Width: =232
-            X: =464
+            X: =514
             Y: =256
       # Nezařazená aktivita rodiče MÁ (technický dílčí proces 00-00-000), takže
       # mezi osiřelé nespadne a ve stromu ji nic neukáže - větev 00 je z něj
@@ -1579,7 +1579,7 @@ Screens:
             Tooltip: '="Skryje nebo vrátí sloupec s identifikačními kódy; bez něj se názvy posunou doleva. Hledat podle kódu jde dál - hledání pracuje s daty, ne s tím, co je vidět."'
             Visible: =varMenuStav
             Width: =232
-            X: =464
+            X: =514
             Y: |-
               =If(varDashNezarazene || CountRows(Filter(colAkt, dilci_proces_kod = "00-00-000")) > 0, 328, 292)
       - rec_MenuMapaPanel:
@@ -1590,8 +1590,8 @@ Screens:
             Fill: =stylKarta
             Height: =84
             Visible: =varMenuMapa
-            Width: =220
-            X: =708
+            Width: =240
+            X: =758
             Y: =144
       - btn_MapaHtml:
           Control: Classic/Button@2.2.0
@@ -1628,8 +1628,8 @@ Screens:
             Text: ="Zobrazit v HTML"
             Tooltip: '="Otevře publikovanou procesní mapu v novém okně prohlížeče. Mapa ukazuje celý rejstřík jako strom agenda - proces - dílčí proces - aktivita a umí fulltextové hledání napříč všemi aktivitami bez ohledu na jejich počet. Data v mapě jsou k okamžiku poslední publikace, ne živá."'
             Visible: =varMenuMapa
-            Width: =212
-            X: =712
+            Width: =232
+            X: =762
             Y: =148
       # Přejmenováno z „Obnovit mapu" na „Obnovit HTML" (23.08.2026): mapa
       # se v appce nemění, mění se ta publikovaná HTML stránka.
@@ -1664,8 +1664,8 @@ Screens:
             Text: ="Obnovit HTML"
             Tooltip: '="Přegeneruje publikovanou HTML stránku z dnešního obsahu rejstříku. Stránka data nečte živě - ukazuje stav k okamžiku poslední publikace, takže po každé dávce úprav ji je potřeba obnovit. Běh trvá několik sekund a probíhá na pozadí; hlášení potvrzuje spuštění, ne dokončení. Kromě toho se stránka obnovuje sama každý den v 7:00."'
             Visible: =varMenuMapa
-            Width: =212
-            X: =712
+            Width: =232
+            X: =762
             Y: =184
       # ---------- potvrzení smazání ----------
       # Power Apps nemá nativní confirm(), takže dialog je vrstva nad
@@ -1682,8 +1682,8 @@ Screens:
             Fill: =stylKarta
             Height: =220
             Visible: =varMenuData
-            Width: =220
-            X: =826
+            Width: =240
+            X: =1006
             Y: =144
       - btn_ExportWord:
           Control: Classic/Button@2.2.0
@@ -1732,8 +1732,8 @@ Screens:
             Text: ="Export do Wordu (.doc)"
             Tooltip: '="Uloží momentální pohled jako dokument, který Word otevře a umí uložit jako .docx. Úrovně jsou odsazené jako ve stromu. Aktivity jdou do dokumentu celým zněním, ne zkráceným popiskem z řádku."'
             Visible: =varMenuData
-            Width: =212
-            X: =830
+            Width: =232
+            X: =1010
             Y: =148
       - btn_ExportExcel:
           Control: Classic/Button@2.2.0
@@ -1782,8 +1782,8 @@ Screens:
             Text: ="Export do Excelu (.xls)"
             Tooltip: '="Uloží momentální pohled jako tabulku se sloupci úroveň, kód, název, vlastník a stav. Kódy zůstávají textem - v .csv je Excel převáděl na data (01-01 na 01.I). Formát .xls místo .xlsx schválně: .xlsx by vyžadoval placený konektor, který v tomhle prostředí není povolený, takže je to HTML tabulka s excelovým formátováním. Excel při otevření jednou upozorní, že přípona neodpovídá obsahu - potvrď Ano."'
             Visible: =varMenuData
-            Width: =212
-            X: =830
+            Width: =232
+            X: =1010
             Y: =184
       # Vzorová tabulka pro hromadný import. Stahuje se hotový .xlsx z knihovny
       # Site Assets — sestavit ho ve flow nejde, .xlsx je zip a Logic Apps
@@ -1825,8 +1825,8 @@ Screens:
             Text: ="Vzorová tabulka pro import"
             Tooltip: '="Stáhne prázdný sešit se sloupci, které import očekává. Vyplň v něm jeden řádek na aktivitu a nahraj ho zpět - kód nevyplňuj, přiděluje ho aplikace. Sloupce ani list nepřejmenovávej, import je čte podle názvů. Pokyny k jednotlivým sloupcům jsou na druhém listu sešitu."'
             Visible: =varMenuData
-            Width: =212
-            X: =830
+            Width: =232
+            X: =1010
             Y: =220
       # Záloha byla do 1.0.0.80 samostatné tlačítko v pruhu. Přesunuto sem
       # 01.09.2026: v pruhu už nebylo místo a popisek s počtem řádků ležel
@@ -1862,8 +1862,8 @@ Screens:
             Text: ="Záloha rejstříku"
             Tooltip: '="Uloží momentální obsah celého rejstříku jako snímek do knihovny Zálohy. Dělej to před každou hromadnou úpravou - verzování listů vrací jednotlivé položky, ale ne stav celého rejstříku k danému okamžiku. Kromě toho vzniká snímek sám každý den v 5:00 a nechává se posledních 20. Hlášení potvrzuje spuštění, ne dokončení."'
             Visible: =varMenuData
-            Width: =212
-            X: =830
+            Width: =232
+            X: =1010
             Y: =292
       # Import a obnova vedou na TÝŽ obrazovku — obě mají stejný tvar
       # (vyber soubor, zkontroluj nanečisto, teprve pak zapiš) a lišit se
@@ -1893,8 +1893,8 @@ Screens:
             Text: ="Import z tabulky"
             Tooltip: '="Hromadné založení aktivit z vyplněného sešitu, který jsi nahrál do knihovny Import. Nejdřív ukáže, co by vzniklo, co je duplicita a kde je chyba; zapisuje se až po potvrzení."'
             Visible: =varMenuData
-            Width: =212
-            X: =830
+            Width: =232
+            X: =1010
             Y: =256
       - btn_ObnovaMenu:
           Control: Classic/Button@2.2.0
@@ -1921,8 +1921,8 @@ Screens:
             Text: ="Obnova ze zálohy"
             Tooltip: '="Vrátí rejstřík do stavu, ve kterém byl v okamžiku pořízení vybraného snímku. Nejdřív ukáže, kolik položek se vrátí; zapisuje se až po potvrzení. Obnova nikdy nemaže — řádek, který dnes je a ve snímku není, jen ohlásí."'
             Visible: =varMenuData
-            Width: =212
-            X: =830
+            Width: =232
+            X: =1010
             Y: =328
       - rec_ModalStinD:
           Control: Rectangle@2.3.0

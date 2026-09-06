@@ -29,9 +29,80 @@ TOKENY = [
     (r"Ing\. Tomáš Kroutil", "Ing. Jan Novák"),
 ]
 
-# organizacni struktura: sekce 3 -> 7, odbory a oddeleni odvozene
-UTVARY = {"3": "7", "33": "71", "331": "711", "332": "712",
-          "11": "72", "111": "721", "113": "723", "12": "73", "6": "74", "4": "75"}
+# Organizacni struktura. Do 06.09.2026 tu bylo deset cisel napsanych rucne,
+# protoze ciselnik utvaru byl zastupny a mel jen ty, ktere se objevily v datech.
+# Od skutecneho MPSV listu jich je 44 a maji vlastni hierarchii, kterou z cisla
+# odvodit nejde - mapovani proto vznika z ciselniku, ne z ruky.
+#
+# Anonymni kod se prideluje po urovnich: ministr = 1, sekce 7, 8, 9, a kazde
+# dite dostane <kod rodice><poradi>. Deti jednoho rodice se cisluji spolecne
+# bez ohledu na uroven, aby oddeleni bez odboru (O401 pod Sekci 4) nekolidovalo
+# s odborem. Delka anonymniho cisla tak zustava vodítkem, ale zavazna je
+# hierarchie v nadrizeny_kod - stejne jako u skutecnych dat.
+# Anonymni prostor zacina devitkou, protoze zadny skutecny kod MPSV devitkou
+# nezacina. Bez toho se anonymni cislo trefilo do skutecneho (O12 dostalo 11,
+# coz je zaroven skutecny odbor O11) a pojistka v make_import.py takovou sadu
+# spravne odmitla jako neanonymizovanou - rozlisit je od sebe totiz nejde.
+UTVARY_CSV = "runs/normalize/utvary.csv"
+KOD_MINISTRA_ANON = "9"
+
+
+def nacti_ciselnik(cesta):
+    with io.open(cesta, encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f, delimiter=";"))
+
+
+def mapuj_utvary(radky):
+    """Skutecny kod -> anonymni. Prochazi strom shora, aby dite znalo rodice."""
+    deti = {}
+    for r in radky:
+        deti.setdefault(r["nadrizeny_kod"], []).append(r)
+
+    mapa = {}
+    koreny = [r for r in radky if r["uroven"] == "ministr"]
+    for r in koreny:
+        mapa[r["kod"]] = KOD_MINISTRA_ANON
+
+    def sestup(kod):
+        for i, dite in enumerate(deti.get(kod, []), start=1):
+            mapa[dite["kod"]] = mapa[kod] + str(i)
+            sestup(dite["kod"])
+
+    for r in koreny:
+        sestup(r["kod"])
+
+    # Utvary mimo strom (ve zdroji je O33 nadrizeny sam sobe, takze zustal bez
+    # rodice) se privesi za posledni dite ministra, at maji taky anonymni kod.
+    dalsi = len(deti.get(koreny[0]["kod"], [])) if koreny else 0
+    for r in radky:
+        if r["kod"] not in mapa:
+            dalsi += 1
+            mapa[r["kod"]] = KOD_MINISTRA_ANON + str(dalsi)
+            sestup(r["kod"])
+
+    obraceny = {}
+    for skutecny, anonymni in mapa.items():
+        if anonymni in obraceny:
+            raise SystemExit(
+                "CHYBA: anonymni kod %s by patril utvarum %s i %s"
+                % (anonymni, obraceny[anonymni], skutecny))
+        obraceny[anonymni] = skutecny
+    return mapa
+
+
+def anonymni_nazev(radek, mapa):
+    """Tvar 'Utvar 71 (odbor)', ne 'Sekce 7' ani 'O71'.
+
+    Dva duvody, oba overene: kontrola anonymity hlida vzor 'sekce <cislice>'
+    jako identifikujici udaj, takze 'Sekce 7' by ji spustil; a 'O71' je tvar,
+    kterym se oznacuji SKUTECNE utvary MPSV - anonymni 'O11' by se dal splest
+    s existujicim odborem, jen by znamenal neco jineho.
+    """
+    return "Utvar %s (%s)" % (mapa[radek["kod"]], radek["uroven"])
+
+
+CISELNIK = nacti_ciselnik(UTVARY_CSV) if Path(UTVARY_CSV).exists() else []
+UTVARY = mapuj_utvary(CISELNIK) if CISELNIK else {}
 
 # jednociferne kody se nahrazuji jen za slovem "sekce" — jinak by se trefily
 # do cisel v pravnich odkazech ("§ 364 odst. 4 - 6")
@@ -111,6 +182,16 @@ def main():
                "vnitrni_predpis", "sekce", "zdroj_radek"])
     write_csv(out / "aktivita_dilciproces.csv", out_model["vazby"],
               ["aktivita_kod", "dilci_proces_kod", "primarni"])
+    # Ciselnik utvaru se anonymizuje taky - nese skutecnou organizacni
+    # strukturu MPSV. Do 06.09.2026 ho pro anonymni sadu vyrabel
+    # make_utvary.py z cisel v datech; ten uz ciselnik nestavi.
+    write_csv(out / "utvary.csv",
+              [{"kod": UTVARY[r["kod"]],
+                "nazev": anonymni_nazev(r, UTVARY),
+                "uroven": r["uroven"],
+                "nadrizeny_kod": UTVARY.get(r["nadrizeny_kod"], "")}
+               for r in CISELNIK],
+              ["kod", "nazev", "uroven", "nadrizeny_kod"])
     (out / "model.json").write_text(json.dumps(out_model, ensure_ascii=False, indent=1),
                                     encoding="utf-8")
     (out / "mapovani.json").write_text(json.dumps(

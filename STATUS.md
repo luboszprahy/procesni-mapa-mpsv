@@ -1,22 +1,102 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-06 18:30**. Balík **1.0.0.98**.
-Hotová **F14**: krátký název se zapisuje přes REST MERGE, ne `PatchItem`.
-Tím z balíku zmizel poslední GUID listu natvrdo — **balík je od téhle verze
-pro každý tenant stejný** a dvoubalíkový režim končí.
+Aktualizováno: **2026-09-06 19:10**. Balík **1.0.0.98** (vydaný), rozpracovaná
+**F15 + F17** do příštího balíku.
+Hotová **F14**: krátký název se zapisuje přes REST MERGE, ne `PatchItem` —
+z balíku zmizel poslední GUID listu natvrdo a **balík je pro každý tenant
+stejný**. Dvoubalíkový režim končí.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Import `deploy/mpsv/procesnimapa_1_0_0_98.zip`** jako upgrade.
-   Nahrazuje 97, který ještě nemusel být nasazený — 98 obsahuje všechno z něj.
-2. **Zapni `AktualizaceKratkehoNazvu`.** Ostatních osm flow běží; import
-   stav zapnutí nemění, takže tohle jedno zůstane vypnuté.
-3. Ověř zkrácení názvu: uprav název aktivity delší než 150 znaků, do minuty
-   se dopíše zkrácený tvar do `nazev_kratky`.
-4. Kdyby zapnutí nebo běh spadly, pošli **z run history akce
-   `Zapsat_kratky_nazev` obsah INPUTS** (uri a headers) — z něj je vidět,
-   na jakou adresu se zapisovalo. Chyba `OpenApiOperationParameterValidation`
-   už nastat nemůže, tělo se neskládá po sloupcích.
+1. **Potvrď `O33`** — v dodaném exportu je nadřízený sám sobě (cyklus), takže
+   útvar zůstal bez rodiče. Podle `Pořadí` 3330 a barvy sekce patří pod
+   `Sekce 3`. Řekni „ano" a doplním; do té doby visí mimo strom.
+2. Test poběží na **PPF DEV** (na MPSV teď není přístup) — balík dostaneš, až
+   bude hotová F16 (více vlastníků). Do PPF jde **anonymizovaná** sada,
+   `runs/anonym`.
+3. Až bude přístup na MPSV: import `deploy/mpsv/procesnimapa_1_0_0_98.zip`
+   a zapnout `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
+
+## 06.09.2026 večer — číselník útvarů, pruh voleb, tlačítko Přesun
+
+### F15 — skutečný číselník útvarů (kroky 1–5 hotové)
+
+Dodaný `query.iqy.xlsx` je export z MPSV listu *Organizační útvary*
+(`sites/MPSV-App-Mapovani-Procesu-OR`), 47 řádků. Nahradil zástupný číselník,
+který `make_utvary.py` vyráběl z čísel v aktivitách a jehož **hierarchie byla
+odvozená z délky čísla** (111 → 11 → 1). To se ukázalo jako chybné: `O11` je
+pod `Sekce 3`, ne pod „sekcí 1", a `O32`/`O34`/`O35` jsou pod `Sekce 6`.
+
+**Kód zůstal holé číslo** (`11`, `331`, `3`), označení z MPSV (`O11`, `Sekce 3`)
+šlo do názvu — rozhodl uživatel, data v aktivitách ani v rejstříku se
+nepřepisují. Ministr dostal kód `0`.
+
+| co | kde |
+|---|---|
+| nový extraktor | `src/import_utvary.py` — čte `input/organizacni_utvary.xlsx`, píše `runs/normalize/utvary.csv` |
+| `make_utvary.py` | z generátoru na **kontrolu**: každý útvar použitý v datech musí být v číselníku |
+| `schema.json` | `Utvary.uroven` má navíc volbu `ministr`; popisy už netvrdí, že délka čísla určuje úroveň |
+| `anonymize.py` | mapování útvarů se **odvozuje z hierarchie**, ne z ruky (bylo tam deset čísel napsaných napevno) |
+
+**Nálezy ve zdroji — neopravené, rozhodne zadavatelka:**
+
+| útvar | co je tam | posouzení |
+|---|---|---|
+| `O33` | nadřízený sám sobě | chyba; útvar bez rodiče, čeká na potvrzení |
+| `O12` | odbor přímo pod ministrem | vypadá legitimně (kabinet) |
+| `O401`, `O601` | oddělení přímo pod sekcí | legitimní, bez mezistupně odboru |
+| `O425` | odbor pod odborem `O42` | legitimní, ale ojedinělé |
+| 3 speciální | `neobsazeno`, `věcně příslušné útvary MPSV`, `podřízené služební úřady` | do útvarů nepatří — jsou to hodnoty pro `spolupracuje` |
+
+**Dvě vady anonymizace, které odhalily až brány — obojí stojí za zapamatování:**
+
+1. Anonymní název `Sekce 7` by spustil vlastní kontrolu anonymity, která hlídá
+   vzor „sekce ‹číslice›" jako identifikující údaj. Tvar je proto
+   `Utvar 7 (sekce)` — přesně jak to měl zástupný číselník a proč.
+2. **Anonymní čísla se trefila do skutečných.** Odbor `O12` dostal anonymní kód
+   `11`, jenže `11` je zároveň skutečný kód MPSV (`O11`) — a od sebe se to
+   nedá odlišit. Pojistka v `make_import.py` sadu správně odmítla jako
+   neanonymizovanou. Anonymní prostor teď začíná devítkou (`9`, `91`, `911`,
+   `9211`), kterou žádný skutečný kód nemá.
+
+Druhá vada je poučnější: mapování vypadalo správně, sada se vygenerovala bez
+chyby a teprve **nezávislá pojistka** ukázala, že anonymní není. Kdyby ta
+kontrola nebyla, odešla by na PPF DEV organizační struktura MPSV.
+
+### F17 — sjednocený pruh voleb na úvodní obrazovce
+
+`Rozbalit` (190), `Stav` (240), `HTML mapa` (110) a `Data` (100) měly každá
+jinou šířku. Teď mají **240 px a krok 248**; šířku určuje `Stav`, jehož popisek
+nese celý stav filtru (`Stav: schváleno · nezařazené`). Přepínač písma `Aaa`
+(34/38/42 px) zůstal — velikost tam nese význam, je to náhled stupně písma.
+
+Rozbalené panely byly navázané natvrdo na staré `X`, takže šly s tlačítky;
+panely `HTML mapa` a `Data` byly navíc užší (220) než tlačítko a srovnaly se
+na 240. Poslední panel končí na 1246 px.
+
+### Přesun: ikona → tlačítko
+
+Přesun se spouští na obrazovce **Editace** (číselník), v řádku procesu nebo
+dílčího procesu. Byla to ikona `Icon.Redo` bez popisku a **nešla najít** —
+uživatel ji hledal na úvodní obrazovce. Teď je to tlačítko s textem
+**„Přesun"** (`btn_PresunC`, 84 px). Vlastník a štítek úklidu se v řádku
+posunuly o 88 px doleva, název dostal `Tooltip` s plným zněním, protože se
+o tolik zkrátil.
+
+U agendy a aktivity se tlačítko nezobrazuje: agenda nemá kam a aktivita se
+přesouvá ve svém detailu.
+
+### Brány
+
+`check_schema`, `check_setup.js`, `check_import.js`, `check_sablona` 185,
+`check_app` (6 obrazovek), `make_utvary` (obě sady) zeleně.
+
+`check_import.js` měl počty listů **napsané natvrdo** (`Utvary: 7`) a po změně
+číselníku hlásil selhání idempotence, ačkoli import byl v pořádku. Čte je teď
+z `import_data.js`. Aby prázdný výsledek neprošel všemi `every` triviálně,
+přibyla kontrola, že se počty načetly ze všech listů s daty.
+
+---
 
 ## 06.09.2026 — F14: konec GUIDu natvrdo (balík 1.0.0.98)
 

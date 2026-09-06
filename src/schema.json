@@ -395,7 +395,7 @@
     {
       "name": "Utvary",
       "csv": "utvary.csv",
-      "popis": "Ciselnik utvaru (sekce/odbor/oddeleni). Utvary v podkladech vlastni ciselnik nemaji - kody se odvozuji z cisel v aktivitach, nazvy jsou zastupne a doplni je zadavatelka.",
+      "popis": "Ciselnik utvaru (ministr/sekce/odbor/oddeleni). Zdrojem je MPSV list Organizacni utvary; kod je hole cislo utvaru, nazev je oznaceni z MPSV (O11, Sekce 3). Ministr ma kod 0.",
       "display": "Útvary",
       "default_sort": {
         "column": "Title",
@@ -410,7 +410,7 @@
           "required": true,
           "indexed": true,
           "csv": "kod",
-          "popis": "Cislo utvaru. 1 cislice = sekce, 2 = odbor, 3 = oddeleni."
+          "popis": "Cislo utvaru tak, jak ho nesou aktivity a rejstrik. Delka cisla NEURCUJE uroven ani nadrizeneho - O32 je odbor pod Sekci 6. Ministr ma 0."
         },
         {
           "name": "nazev",
@@ -427,6 +427,7 @@
           "indexed": true,
           "csv": "uroven",
           "choices": [
+            "ministr",
             "sekce",
             "odbor",
             "oddělení"
@@ -439,7 +440,7 @@
           "maxlen": 20,
           "indexed": true,
           "csv": "nadrizeny_kod",
-          "popis": "Kod nadrizeneho utvaru; u sekce prazdne."
+          "popis": "Kod nadrizeneho utvaru z MPSV listu; u ministra prazdne. Z cisla se odvodit neda."
         }
       ]
     },

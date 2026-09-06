@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
-"""Sestaví číselník útvarů z čísel, která se objevují v aktivitách.
+"""Kontrola: každý útvar použitý v datech je v číselníku.
 
-Útvary v podkladech vlastní číselník nemají — jsou jen jako čísla ve sloupcích
-`vykonava` a `spolupracuje` evidenčních karet. Hierarchie je ale v samotném
-čísle: 1 číslice = sekce, 2 = odbor, 3 = oddělení (7 -> 71 -> 711).
+Do 06.09.2026 tenhle skript číselník **vyráběl** — z čísel, která se objeví
+v aktivitách, s vymyšlenými názvy a s hierarchií odvozenou z délky čísla
+(111 -> 11 -> 1). Skutečný MPSV list to vyvrátil: `O11` je pod `Sekce 3`
+a `O32` pod `Sekce 6`, i když jejich čísla začínají jinak. Číselník proto
+staví `import_utvary.py` z dodaného exportu a tady zbyla jen kontrola.
 
-Skript z toho poskládá úplný číselník včetně nadřízených úrovní, které se samy
-v datech nevyskytují. **Názvy jsou zástupné** ("Oddělení 711") — skutečné
-názvy doplní zadavatelka; kódy a hierarchie jsou odvozené z dat, ne vymyšlené.
+Hlídá jediné: že se v datech neobjeví útvar, který v číselníku není. Takový
+nález řeší zadavatelka (doplní útvar do MPSV listu, nebo opraví kartu) —
+skript si ho nesmí domyslet, protože právě z domýšlení vznikla chybná
+hierarchie.
 
 Spouštět z kořene projektu:
     python src/make_utvary.py                       # runs/normalize + runs/anonym
@@ -17,10 +20,20 @@ Spouštět z kořene projektu:
 import argparse
 import csv
 import io
+import re
 import sys
 from pathlib import Path
 
-UROVNE = {1: "sekce", 2: "odbor", 3: "oddělení"}
+# Kód útvaru je 1-3 číslice. Volný text ve `spolupracuje` („věcně příslušné
+# útvary MPSV", „odbor 11") se za kód považovat nesmí — bere se jen buňka,
+# která je celá číslo, případně čísla oddělená ; , /.
+RE_KOD = re.compile(r"^\d{1,3}$")
+SLOUPCE = {
+    "aktivity.csv": ("vykonava", "spolupracuje"),
+    "agendy.csv": ("vlastnik",),
+    "procesy.csv": ("vlastnik",),
+    "dilci_procesy.csv": ("vlastnik",),
+}
 
 
 def cti(cesta):
@@ -28,70 +41,63 @@ def cti(cesta):
         return list(csv.DictReader(soubor, delimiter=";"))
 
 
-def cisla_utvaru(radky):
-    """Posbírá čísla útvarů z 'vykonava' i 'spolupracuje' (víc hodnot po ';')."""
-    nalezene = set()
-    for radek in radky:
-        for sloupec in ("vykonava", "spolupracuje"):
-            for cast in (radek.get(sloupec) or "").replace(",", ";").split(";"):
-                cast = cast.strip()
-                if cast.isdigit() and 1 <= len(cast) <= 3:
-                    nalezene.add(cast)
+def kody_v_datech(adresar):
+    """Čísla útvarů z aktivit i z vlastníků všech tří úrovní."""
+    nalezene = {}
+    for soubor, sloupce in SLOUPCE.items():
+        cesta = Path(adresar) / soubor
+        if not cesta.exists():
+            continue
+        for radek in cti(cesta):
+            for sloupec in sloupce:
+                hodnota = radek.get(sloupec) or ""
+                for cast in hodnota.replace(",", ";").replace("/", ";").split(";"):
+                    cast = cast.strip()
+                    if RE_KOD.match(cast):
+                        nalezene.setdefault(cast, set()).add(f"{soubor}:{sloupec}")
     return nalezene
 
 
-def doplnit_nadrizene(kody):
-    """Ke každému číslu přidá i jeho nadřízené úrovně (711 -> 71 -> 7)."""
-    uplne = set()
-    for kod in kody:
-        for delka in range(1, len(kod) + 1):
-            uplne.add(kod[:delka])
-    return uplne
-
-
-def ciselnik(kody):
-    radky = []
-    for kod in sorted(doplnit_nadrizene(kody), key=lambda k: (len(k), k)):
-        uroven = len(kod)
-        radky.append({
-            "kod": kod,
-            # Tvar "Útvar 7 (sekce)", ne "Sekce 7": kontrola anonymity hlídá vzor
-            # "sekce <číslice>" jako identifikující údaj a zástupný název by ji
-            # zbytečně spouštěl. Past tím zůstává funkční pro reálná data.
-            "nazev": f"Útvar {kod} ({UROVNE.get(uroven, 'útvar')})",
-            "uroven": UROVNE.get(uroven, "útvar"),
-            "nadrizeny_kod": kod[:-1] if uroven > 1 else "",
-        })
-    return radky
-
-
-def zapis(radky, cesta):
-    with io.open(cesta, "w", encoding="utf-8-sig", newline="") as soubor:
-        zapisovac = csv.DictWriter(soubor, fieldnames=["kod", "nazev", "uroven", "nadrizeny_kod"],
-                                   delimiter=";")
-        zapisovac.writeheader()
-        zapisovac.writerows(radky)
+def ciselnik(adresar):
+    cesta = Path(adresar) / "utvary.csv"
+    if not cesta.exists():
+        raise SystemExit(
+            f"CHYBA: {cesta} neexistuje — číselník staví src/import_utvary.py")
+    return {radek["kod"] for radek in cti(cesta)}
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", action="append", dest="adresare",
-                        help="adresář s aktivity.csv (lze uvést vícekrát)")
+                        help="adresář s daty (lze uvést vícekrát)")
     argumenty = parser.parse_args()
     adresare = argumenty.adresare or ["runs/normalize", "runs/anonym"]
 
+    chyby = 0
     for adresar in adresare:
-        zdroj = Path(adresar) / "aktivity.csv"
-        if not zdroj.exists():
-            print(f"PRESKOCENO: {zdroj} neexistuje")
+        if not (Path(adresar) / "aktivity.csv").exists():
+            print(f"PRESKOCENO: {adresar}/aktivity.csv neexistuje")
             continue
-        radky = ciselnik(cisla_utvaru(cti(zdroj)))
-        cil = Path(adresar) / "utvary.csv"
-        zapis(radky, cil)
-        podle_urovne = {}
-        for radek in radky:
-            podle_urovne[radek["uroven"]] = podle_urovne.get(radek["uroven"], 0) + 1
-        print(f"{cil}: {len(radky)} útvarů  {podle_urovne}")
+        znam = ciselnik(adresar)
+        pouzite = kody_v_datech(adresar)
+        chybejici = {k: v for k, v in pouzite.items() if k not in znam}
+        nepouzite = sorted(znam - set(pouzite), key=lambda k: (len(k), k))
+
+        print(f"{adresar}: {len(pouzite)} útvarů v datech, {len(znam)} v číselníku")
+        if chybejici:
+            chyby += len(chybejici)
+            print(f"  CHYBA: v číselníku chybí {len(chybejici)} útvarů:")
+            for kod in sorted(chybejici, key=lambda k: (len(k), k)):
+                print(f"    - {kod}  (z {', '.join(sorted(chybejici[kod]))})")
+        if nepouzite:
+            print(f"  v datech se nevyskytuje {len(nepouzite)} útvarů "
+                  f"z číselníku: {', '.join(nepouzite[:12])}"
+                  + (" …" if len(nepouzite) > 12 else ""))
+
+    if chyby:
+        print("\nNEPROŠLO — doplň útvary do MPSV listu, nebo oprav data")
+        return 1
+    print("\nOK — každý útvar použitý v datech je v číselníku")
     return 0
 
 

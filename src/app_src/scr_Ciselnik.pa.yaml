@@ -709,9 +709,10 @@ Screens:
                   Size: =11 + varFs
                   PaddingTop: =4
                   Text: =ThisItem.nazev
+                  Tooltip: =ThisItem.nazev
                   VerticalAlign: |-
                     =If(varUrovenTyp = "aktivita", VerticalAlign.Top, VerticalAlign.Middle)
-                  Width: =Parent.TemplateWidth - 362
+                  Width: =Parent.TemplateWidth - 450
                   X: =172
                   Y: =0
             - lbl_RadekVlastnikC:
@@ -725,7 +726,7 @@ Screens:
                   Text: =ThisItem.vlastnik
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =70
-                  X: =Parent.TemplateWidth - 190
+                  X: =Parent.TemplateWidth - 278
                   Y: =0
             # Štítek je jediné místo, kde je na řádku vidět, proč ho chip
             # úklidu vybral — bez něj by se ve výpisu „vše" nedalo poznat,
@@ -750,7 +751,7 @@ Screens:
                     )
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =76
-                  X: =Parent.TemplateWidth - 112
+                  X: =Parent.TemplateWidth - 200
                   Y: =0
             - rec_LinkaC:
                 Control: Rectangle@2.3.0
@@ -828,15 +829,20 @@ Screens:
             # po potvrzení v dialogu, protože řádek galerie se dá trefit omylem.
             # Přesun pod jiného rodiče. Jen u procesu a dílčího procesu —
             # agenda nemá kam a aktivita se přesouvá ve svém detailu.
-            - ico_PresunC:
-                Control: Classic/Icon@2.5.0
+            - btn_PresunC:
+                Control: Classic/Button@2.2.0
                 Properties:
-                  Color: =stylTextSlaby
+                  Align: =Align.Center
+                  BorderColor: =stylOkraj
+                  Color: =stylAkce
                   Fill: =RGBA(0, 0, 0, 0)
+                  Font: =Font.'Open Sans'
                   Height: =32
                   HoverColor: =stylAkce
                   HoverFill: =stylRadekVybrany
-                  Icon: =Icon.Redo
+                  PressedColor: =stylAkceStisk
+                  Size: =10 + varFs
+                  Text: ="Přesun"
                   OnSelect: |-
                     =Set(varPresunKod, ThisItem.kod);
                     Set(varPresunNazev, ThisItem.nazevPlny);
@@ -845,17 +851,12 @@ Screens:
                         If(ThisItem.uroven = "proces", "proces", "dilci_proces")
                     );
                     Navigate(scr_Presun, ScreenTransition.Cover)
-                  PaddingBottom: =8
-                  PaddingLeft: =8
-                  PaddingRight: =8
-                  PaddingTop: =8
-                  PressedColor: =stylAkceStisk
                   Tooltip: |-
                     ="Přesune " & ThisItem.kod &
                     " pod jiného rodiče. Kód se přitom uzavře a vznikne nový - a totéž se stane všemu, co je pod tím, protože se mění prefix. Nejdřív uvidíš náhled, teprve pak se zapisuje."
                   Visible: =ThisItem.uroven = "proces" || ThisItem.uroven = "dilci"
-                  Width: =32
-                  X: =Parent.TemplateWidth - 84
+                  Width: =84
+                  X: =Parent.TemplateWidth - 140
                   Y: =(Parent.TemplateHeight - 1) / 2 - 16
             - ico_SmazatC:
                 Control: Classic/Icon@2.5.0
