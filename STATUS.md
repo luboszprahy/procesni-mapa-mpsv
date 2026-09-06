@@ -1,7 +1,8 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-06 19:10**. Balík **1.0.0.98** (vydaný), rozpracovaná
-**F15 + F17** do příštího balíku.
+Aktualizováno: **2026-09-06 19:20**. Balík **1.0.0.99** — obsahuje F15
+(číselník útvarů), F17 (pruh voleb), tlačítko Přesun a **víc vlastníků
+v aplikaci** (F16/1). Zbývá F16/2 — víc vlastníků v importním Excelu.
 Hotová **F14**: krátký název se zapisuje přes REST MERGE, ne `PatchItem` —
 z balíku zmizel poslední GUID listu natvrdo a **balík je pro každý tenant
 stejný**. Dvoubalíkový režim končí.
@@ -11,13 +12,55 @@ stejný**. Dvoubalíkový režim končí.
 1. **Potvrď `O33`** — v dodaném exportu je nadřízený sám sobě (cyklus), takže
    útvar zůstal bez rodiče. Podle `Pořadí` 3330 a barvy sekce patří pod
    `Sekce 3`. Řekni „ano" a doplním; do té doby visí mimo strom.
-2. Test poběží na **PPF DEV** (na MPSV teď není přístup) — balík dostaneš, až
-   bude hotová F16 (více vlastníků). Do PPF jde **anonymizovaná** sada,
-   `runs/anonym`.
-3. Až bude přístup na MPSV: import `deploy/mpsv/procesnimapa_1_0_0_98.zip`
-   a zapnout `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
+2. **Otestuj `deploy/procesnimapa_1_0_0_99.zip` na PPF DEV.** Import jako
+   upgrade, otevřít ve Studiu, mikro-změna → Save → Publish. Co je nového:
+   tlačítko **Přesun** v řádku procesu (Editace → Procesy), sjednocený pruh
+   voleb na úvodní obrazovce a **víc vlastníků** u agendy, procesu i dílčího
+   procesu. Data pro PPF jsou anonymizovaná (`runs/anonym` → `src/import_data.js`),
+   číselník útvarů se změnil ze 7 na 44 položek, takže ho přenes taky.
+3. Ještě neodzkoušená v provozu je oprava `substring` z balíku 96 — plný přesun
+   z aplikace, blok **I** testovacího scénáře. To je jediné, co u přesunu chybí.
+4. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
+   `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
 ## 06.09.2026 večer — číselník útvarů, pruh voleb, tlačítko Přesun
+
+### F16/1 — víc vlastníků v aplikaci
+
+`vlastnik` u agendy, procesu i dílčího procesu byl jeden útvar z rozbalovátka.
+Data přitom víc vlastníků už nesla (`procesy.vlastnik` = `11; 33`) a nová
+evidenční karta s tím počítá taky.
+
+**Oddělovač `; ` je už v datech zavedený**, takže sloupec zůstal `Text`
+a migrace dat odpadla — u schváleného rejstříku podstatné.
+
+V formuláři je teď trojice na jednom řádku, bez přeskládání zbytku:
+
+```
+[ nabídka útvarů ▾ ][ + ][ 11; 33            ]
+      260 px         40        260 px
+```
+
+Zdrojem pravdy je **textové pole**, rozbalovátko je jen pomůcka pro přidání.
+Důvod: jinak by nešel zapsat útvar, který v číselníku ještě není — a to se
+u rozpracované evidence stává. Tlačítko `+` odmítne přidat útvar, který
+v seznamu už je. Před zápisem se seznam srovná (prázdné úseky pryč, jednotný
+oddělovač `; `), takže jeden vlastník nikdy nedostane středník navíc.
+
+Popisek pole už neslibuje „prázdné = ponechat stávajícího" — seznam je zdroj
+pravdy, takže prázdný seznam znamená žádný vlastník. Tooltip řádku dohledává
+název ke **každému** kódu zvlášť; `LookUp` na celý řetězec by u `11; 33`
+nenašel nic.
+
+**Mapa zásah nepotřebuje** — vlastníka jen přenáší z dat do JSON a nikde ho
+nevykresluje.
+
+### F16/2 — import z Excelu (zbývá)
+
+Rozhodnuto 06.09.2026 (uživatel): do listu Aktivity přibudou **tři sloupce**
+— vlastník agendy, procesu a dílčího procesu. Vyplňují se u každého řádku,
+takže si mohou odporovat: dvě aktivity téže agendy s různým vlastníkem musí
+import ohlásit jako rozpor, ne tiše přepsat.
 
 ### F15 — skutečný číselník útvarů (kroky 1–5 hotové)
 

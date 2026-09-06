@@ -137,7 +137,9 @@ Screens:
         Reset(drp_AgendaC);
         Reset(drp_ProcesC);
         Reset(txt_NazevC);
-        Reset(drp_VlastnikC)
+        Reset(drp_VlastnikC);
+        Set(varVlastniciC, "");
+        Reset(txt_VlastniciC)
     Children:
       # ---------- hlavička ----------
       - rec_HlavickaC:
@@ -280,7 +282,9 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
-              Reset(drp_VlastnikC)
+              Reset(drp_VlastnikC);
+              Set(varVlastniciC, "");
+              Reset(txt_VlastniciC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =11
@@ -311,7 +315,9 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
-              Reset(drp_VlastnikC)
+              Reset(drp_VlastnikC);
+              Set(varVlastniciC, "");
+              Reset(txt_VlastniciC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =11
@@ -342,7 +348,9 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
-              Reset(drp_VlastnikC)
+              Reset(drp_VlastnikC);
+              Set(varVlastniciC, "");
+              Reset(txt_VlastniciC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =11
@@ -377,7 +385,9 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
-              Reset(drp_VlastnikC)
+              Reset(drp_VlastnikC);
+              Set(varVlastniciC, "");
+              Reset(txt_VlastniciC)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =stylAkceStisk
             Size: =11
@@ -782,6 +792,16 @@ Screens:
                     Reset(drp_ProcesC);
                     Reset(txt_NazevC);
                     Reset(drp_VlastnikC);
+                    Set(
+                        varVlastniciC,
+                        Switch(
+                            varUrovenTyp,
+                            "agenda", LookUp(colAgendy, Title = varCiselnikKod, vlastnik),
+                            "proces", LookUp(colProcesy, Title = varCiselnikKod, vlastnik),
+                            LookUp(colDilci, Title = varCiselnikKod, vlastnik)
+                        )
+                    );
+                    Reset(txt_VlastniciC);
                     If(
                         ThisItem.uroven = "aktivita",
                         Set(varDetailZpet, "ciselnik");
@@ -796,11 +816,23 @@ Screens:
                     If(
                         IsBlank(ThisItem.vlastnik),
                         "Vlastník není vyplněný.",
-                        "Vlastník: " & ThisItem.vlastnik &
-                        If(
-                            IsBlank(LookUp(colUtvary, Title = ThisItem.vlastnik)),
-                            "",
-                            " · " & LookUp(colUtvary, Title = ThisItem.vlastnik, nazev)
+                        "Vlastník: " &
+                        Concat(
+                            ForAll(
+                                Split(Substitute(ThisItem.vlastnik, " ", ""), ";"),
+                                With(
+                                    {nalezeny: LookUp(colUtvary, Title = Value)},
+                                    {
+                                        popis: If(
+                                            IsBlank(nalezeny),
+                                            Value,
+                                            Value & " · " & nalezeny.nazev
+                                        )
+                                    }
+                                )
+                            ),
+                            popis,
+                            ", "
                         )
                     ) & Char(10) &
                     If(
@@ -1090,8 +1122,8 @@ Screens:
             Height: =20
             Size: =10 + varFs
             Text: |-
-              =If(varUrovenTyp = "agenda", "Vlastník agendy — sekce", "Vlastník — odbor") &
-              If(varCiselnikNova, " (nepovinné)", " (prázdné = ponechat stávajícího)")
+              =If(varUrovenTyp = "agenda", "Vlastníci agendy — sekce", "Vlastníci — odbor") &
+              " (nepovinné, víc oddělených středníkem)"
             Visible: =varUrovenTyp <> "aktivita"
             Width: =572
             X: =724
@@ -1100,21 +1132,7 @@ Screens:
           Control: Classic/DropDown@2.3.1
           Properties:
             AllowEmptySelection: =true
-            Default: |-
-              =If(
-                  varCiselnikNova,
-                  "",
-                  LookUp(
-                      colUtvary,
-                      Title = Switch(
-                          varUrovenTyp,
-                          "agenda", LookUp(colAgendy, Title = varCiselnikKod, vlastnik),
-                          "proces", LookUp(colProcesy, Title = varCiselnikKod, vlastnik),
-                          LookUp(colDilci, Title = varCiselnikKod, vlastnik)
-                      ),
-                      Title & " · " & nazev
-                  )
-              )
+            Default: =""
             FocusedBorderColor: =stylAkce
             FocusedBorderThickness: =2
             Font: =Font.'Open Sans'
@@ -1128,9 +1146,72 @@ Screens:
               )
             Size: =11 + varFs
             Visible: =varUrovenTyp <> "aktivita"
-            Tooltip: '="Nepovinné, doplnit jde kdykoli později. Metodika říká, že vlastníkem agendy je sekce a vlastníkem procesu i dílčího procesu odbor — nabídka se podle úrovně mění. Ukládá se kód útvaru, ne celý řádek s názvem, aby se evidence nerozešla s číselníkem při přejmenování útvaru."'
-            Width: =572
+            Tooltip: '="Nabídka útvarů — vybraný se tlačítkem + přidá do seznamu vpravo. Metodika říká, že vlastníkem agendy je sekce a vlastníkem procesu i dílčího procesu odbor, proto se nabídka podle úrovně mění. Ukládá se kód útvaru, ne celý řádek s názvem, aby se evidence nerozešla s číselníkem při přejmenování útvaru."'
+            Width: =260
             X: =724
+            Y: =444
+      # Vlastníků může být víc (metodika i evidenční karta s tím počítají).
+      # Zdrojem pravdy je textové pole se seznamem, rozbalovátko je jen
+      # pomůcka pro přidání — jinak by se nedal zapsat útvar, který v číselníku
+      # ještě není, a to se u rozpracované evidence stává.
+      - btn_PridatVlastnikaC:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =stylAkce
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverFill: =stylAkceHover
+            OnSelect: |-
+              =With(
+                  {
+                      pridavany: Left(
+                          drp_VlastnikC.Selected.Value,
+                          Find(" ·", drp_VlastnikC.Selected.Value & " ·") - 1
+                      )
+                  },
+                  If(
+                      IsBlank(pridavany),
+                      Notify("Nejdřív vyber útvar v nabídce vlevo.", NotificationType.Warning, varNotifyMs),
+                      IsBlank(
+                          LookUp(
+                              Split(Substitute(varVlastniciC, " ", ""), ";"),
+                              Value = pridavany
+                          )
+                      ),
+                      Set(
+                          varVlastniciC,
+                          If(IsBlank(varVlastniciC), pridavany, varVlastniciC & "; " & pridavany)
+                      );
+                      Reset(txt_VlastniciC);
+                      Reset(drp_VlastnikC),
+                      Notify(pridavany & " už v seznamu je.", NotificationType.Information, varNotifyMs)
+                  )
+              )
+            PressedFill: =stylAkceStisk
+            Size: =14 + varFs
+            Text: ="+"
+            Tooltip: ="Přidá útvar vybraný v nabídce vlevo do seznamu vlastníků."
+            Visible: =varUrovenTyp <> "aktivita"
+            Width: =40
+            X: =992
+            Y: =444
+      - txt_VlastniciC:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            BorderColor: =stylOkraj
+            Default: =varVlastniciC
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HintText: ="např. 11; 33"
+            HoverBorderColor: =stylAkce
+            Size: =11 + varFs
+            Tooltip: ="Vlastníci oddělení středníkem. Dá se upravit i ručně — třeba když útvar v číselníku ještě není."
+            Visible: =varUrovenTyp <> "aktivita"
+            Width: =260
+            X: =1036
             Y: =444
       - lbl_l_NahledKodC:
           Control: Label@2.5.1
@@ -1259,17 +1340,13 @@ Screens:
                   Notify(varChybaC, NotificationType.Warning, varNotifyMs),
                   Set(
                       varVlastnikC,
-                      If(
-                          !IsBlank(drp_VlastnikC.Selected.Value),
-                          Left(drp_VlastnikC.Selected.Value, Find(" ·", drp_VlastnikC.Selected.Value & " ·") - 1),
-                          varCiselnikNova,
-                          "",
-                          Switch(
-                              varUrovenTyp,
-                              "agenda", LookUp(colAgendy, Title = varCiselnikKod, vlastnik),
-                              "proces", LookUp(colProcesy, Title = varCiselnikKod, vlastnik),
-                              LookUp(colDilci, Title = varCiselnikKod, vlastnik)
-                          )
+                      Concat(
+                          Filter(
+                              Split(Substitute(txt_VlastniciC.Text, " ", ""), ";"),
+                              !IsBlank(Value)
+                          ),
+                          Value,
+                          "; "
                       )
                   );
                   If(
@@ -1753,7 +1830,9 @@ Screens:
                       Set(varCiselnikNova, true);
                       Set(varCiselnikKod, "");
                       Reset(txt_NazevC);
-                      Reset(drp_VlastnikC)
+                      Reset(drp_VlastnikC);
+              Set(varVlastniciC, "");
+              Reset(txt_VlastniciC)
                   );
                   Notify("Smazáno: " & varSmazatC.kod & ".", NotificationType.Success, varNotifyMs);
                   Set(varSmazatC, Blank()),
