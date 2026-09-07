@@ -89,7 +89,7 @@ přepsal ji samotnou.
 
 Vzorovou tabulku flow **nesestavuje**, jen vrací její adresu: `.xlsx` je zip
 a ten Logic Apps vyrobit neumí. Soubor tam nahraje správce (krok 5 v
-`INSTALACE.md`) a generuje ho `python src/make_sablona.py` ze `src/schema.json`.
+`README.md` nasazovací sady) a generuje ho `python src/make_sablona.py` ze `src/schema.json`.
 
 ## Akce (9)
 

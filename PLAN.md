@@ -2751,3 +2751,58 @@ v členění podle vykonávajících útvarů, ve tvaru vzoru
 a pokrytí všech aktivit.
 **risk:** pole `Text pro OŘ` bude v datech dlouho prázdné; generování má smysl
 až po jeho naplnění.
+
+## F18 — generovaná nasazovací sada pro PPF (`deploy/ppf/`) — HOTOVO 07.09.2026
+
+Zadáno 07.09.2026 uživatelem. Důvod: `deploy/INSTALACE.md` se udržoval ručně
+a zaostal o 13 verzí (balík 87 v nadpisu, čtyři obrazovky místo šesti, šest
+flow místo devíti). `deploy/mpsv/` tím netrpí, protože se generuje — PPF má
+dostat totéž. Rozhodnutí o tvaru: **`deploy/ppf/` jako zrcadlo `deploy/mpsv/`**,
+`INSTALACE.md` zanikne.
+
+1. [Šablona] — co: `src/sablona_instalace_ppf.md`
+   Vznikne z dnes srovnané `deploy/INSTALACE.md`; všechna čísla, která se
+   s balíkem mění, nahradí zástupné kotvy (`{{balik}}`, `{{obrazovky}}`,
+   `{{pocet_flow}}`, `{{tabulka_flow}}`, `{{tabulka_promennych}}`,
+   `{{pocet_promennych}}`, `{{pocet_listu}}`).
+   verify: `grep -c '{{' src/sablona_instalace_ppf.md` > 0 a v šabloně
+     nezůstane žádné natvrdo psané číslo verze — `grep '1_0_0_[0-9]'` nic nevrátí
+   edge cases: kotva použitá víckrát (tabulky flow); text, který číslo obsahuje
+     legitimně (historické poznámky o balících 85/87/99 — ty zůstávají natvrdo,
+     protože popisují minulost, ne aktuální balík)
+   risk: přepsat i historickou poznámku a tím ztratit informaci, proč se krok 1
+     spouští znovu
+
+2. [Generátor] — co: `src/make_deploy_ppf.py`
+   Sdílí s `make_deploy_mpsv.py` `posledni_balik()`, `overuj_bez_guidu()`,
+   `FLOW`, `VOLANA_Z_APPKY` a `VYPIS_GUIDU` (importem, ne kopií). Liší se ve
+   třech věcech: cíl `deploy/ppf/`, data z `runs/anonym` (bez
+   `--povolit-realna-data`) a README z šablony podle bodu 1.
+   verify: `python src/make_deploy_ppf.py` doběhne a ve výstupu je
+     `deploy/ppf/README.md`, `01_zaloz_listy.js`, `02_import_dat.js`,
+     `procesnimapa_1_0_0_100.zip`, `site_assets/`; v README nezůstane
+     žádné `{{`
+   edge cases: `runs/anonym` neexistuje (spustit anonymize.py); v deploy/ je
+     víc balíků — bere se nejvyšší verze
+   risk: omylem vzít ostrá data z `runs/normalize` — proti tomu stojí
+     kontrola anonymity v `make_import.py`, která bez `--povolit-realna-data`
+     odmítne reálné útvary a předpisy
+
+3. [Brána] — co: kontrola v `make_deploy_ppf.py`
+   Po vyplnění šablony ověří, že v README nezbyla nevyplněná kotva a že počet
+   flow v tabulce sedí na počet `Workflows/*.json` v balíku.
+   verify: mutační test — podvržený balík s odebraným jedním flow musí
+     generátor shodit s jasnou hláškou, nezměněný balík projít
+   edge cases: flow přibude, ale nebude v `FLOW` slovníku (chybí popis)
+   risk: brána projde jen proto, že se dívá na týž zdroj jako generátor —
+     proto se počet čte z balíku, ne z `FLOW`
+
+4. [Úklid] — co: `deploy/INSTALACE.md` smazat, odkazy přesměrovat
+   Dotčené: `deploy/flow_Export.md:92`, `deploy/mpsv/flow_Export.md:92`,
+   `PLAN.md` (3 místa), `STATUS.md` (2 místa).
+   verify: `grep -rn "INSTALACE" --include=*.md .` nevrátí odkaz na neexistující
+     soubor
+   edge cases: `deploy/mpsv/flow_Export.md` se generuje — opravit zdroj
+     v `deploy/`, ne kopii
+   risk: smazat návod dřív, než generátor vyrobí náhradu
+

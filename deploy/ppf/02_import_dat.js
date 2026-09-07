@@ -8,7 +8,7 @@
    4. Jedna polozka = jeden POST. Chyba jedne polozky beh nezastavi -
       nasbira se a vypise na konci, aby bylo videt, co presne selhalo.
 
-   SADA DAT: runs/normalize
+   SADA DAT: runs/anonym
    POCTY:    Agendy=7, Procesy=46, DilciProcesy=250, Aktivity=46, AktivitaDilciProces=46, Utvary=44
 */
 (async () => {
@@ -20,8 +20,8 @@ const DATA = [
   "rows": [
    {
     "Title": "01",
-    "nazev": "Organizace a řízení MPSV a resortu",
-    "vlastnik": "3",
+    "nazev": "Organizace a řízení XÚ a resortu",
+    "vlastnik": "92",
     "zdroj": "rejstrik"
    },
    {
@@ -56,8 +56,8 @@ const DATA = [
    },
    {
     "Title": "07",
-    "nazev": "Zajištění chodu MPSV a resortu",
-    "vlastnik": "3",
+    "nazev": "Zajištění chodu XÚ a resortu",
+    "vlastnik": "92",
     "zdroj": "rejstrik"
    }
   ]
@@ -67,17 +67,17 @@ const DATA = [
   "rows": [
    {
     "Title": "01-01",
-    "nazev": "Strategie a koncepce MPSV",
+    "nazev": "Strategie a koncepce XÚ",
     "agenda_kod": "01",
-    "vlastnik": "11; 33",
+    "vlastnik": "921; 922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
    {
     "Title": "01-02",
-    "nazev": "Operativní řízení útvarů MPSV a resortních organizací",
+    "nazev": "Operativní řízení útvarů XÚ a resortních organizací",
     "agenda_kod": "01",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -91,7 +91,7 @@ const DATA = [
    },
    {
     "Title": "01-04",
-    "nazev": "Programové financování MPSV a resortu",
+    "nazev": "Programové financování XÚ a resortu",
     "agenda_kod": "01",
     "vlastnik": "",
     "zdroj": "rejstrik",
@@ -101,7 +101,7 @@ const DATA = [
     "Title": "01-05",
     "nazev": "Boj proti korupci, oznamování",
     "agenda_kod": "01",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -323,7 +323,7 @@ const DATA = [
    },
    {
     "Title": "06-01",
-    "nazev": "Řízení pomoci z fondů EU a EHP",
+    "nazev": "Řízení pomoci z fondů EU a EHF",
     "agenda_kod": "06",
     "vlastnik": "",
     "zdroj": "rejstrik",
@@ -341,7 +341,7 @@ const DATA = [
     "Title": "07-01",
     "nazev": "Vnější komunikace",
     "agenda_kod": "07",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -365,7 +365,7 @@ const DATA = [
     "Title": "07-04",
     "nazev": "Právní podpora",
     "agenda_kod": "07",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -397,7 +397,7 @@ const DATA = [
     "Title": "07-08",
     "nazev": "Řízení lidských zdrojů",
     "agenda_kod": "07",
-    "vlastnik": "11; 33",
+    "vlastnik": "921; 922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -421,7 +421,7 @@ const DATA = [
     "Title": "07-11",
     "nazev": "Náhrada škody",
     "agenda_kod": "07",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -440,16 +440,16 @@ const DATA = [
   "rows": [
    {
     "Title": "01-01-001",
-    "nazev": "Řízení strategie MPSV",
+    "nazev": "Řízení strategie XÚ",
     "proces_kod": "01-01",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
    {
     "Title": "01-01-002",
-    "nazev": "Řízení koncepce MPSV",
+    "nazev": "Řízení koncepce XÚ",
     "proces_kod": "01-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -460,7 +460,7 @@ const DATA = [
     "Title": "01-01-003",
     "nazev": "Politika lidských zdrojů",
     "proces_kod": "01-01",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -469,7 +469,7 @@ const DATA = [
     "Title": "01-01-004",
     "nazev": "Plánování lidských zdrojů",
     "proces_kod": "01-01",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -485,16 +485,16 @@ const DATA = [
    },
    {
     "Title": "01-02-002",
-    "nazev": "Řízení resortních organizací MPSV",
+    "nazev": "Řízení resortních organizací XÚ",
     "proces_kod": "01-02",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
    {
     "Title": "01-02-003",
-    "nazev": "Tvorba a připomínkování metodik a interních řídících dokumentů MPSV",
+    "nazev": "Tvorba a připomínkování metodik a interních řídících dokumentů XÚ",
     "proces_kod": "01-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -512,7 +512,7 @@ const DATA = [
    },
    {
     "Title": "01-03-001",
-    "nazev": "Správa rozpočtu MPSV",
+    "nazev": "Správa rozpočtu XÚ",
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -521,7 +521,7 @@ const DATA = [
    },
    {
     "Title": "01-03-002",
-    "nazev": "Správa rozpočtu podřízených organizací MPSV",
+    "nazev": "Správa rozpočtu podřízených organizací XÚ",
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -530,7 +530,7 @@ const DATA = [
    },
    {
     "Title": "01-03-003",
-    "nazev": "Správa rozpočtu ÚP ČR",
+    "nazev": "Správa rozpočtu KAG",
     "proces_kod": "01-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -548,7 +548,7 @@ const DATA = [
    },
    {
     "Title": "01-04-001",
-    "nazev": "Metodické řízení v oblasti programového financování MPSV a resortu.",
+    "nazev": "Metodické řízení v oblasti programového financování XÚ a resortu.",
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -593,7 +593,7 @@ const DATA = [
    },
    {
     "Title": "01-04-006",
-    "nazev": "Zpracování dokumentace programu a řízení realizace akcí ÚP ČR.",
+    "nazev": "Zpracování dokumentace programu a řízení realizace akcí KAG.",
     "proces_kod": "01-04",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -604,7 +604,7 @@ const DATA = [
     "Title": "01-05-001",
     "nazev": "Boj proti korupci",
     "proces_kod": "01-05",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -613,7 +613,7 @@ const DATA = [
     "Title": "01-05-002",
     "nazev": "Oznamování protiprávního jednání",
     "proces_kod": "01-05",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -622,7 +622,7 @@ const DATA = [
     "Title": "01-05-003",
     "nazev": "Lobbování",
     "proces_kod": "01-05",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -746,7 +746,7 @@ const DATA = [
    },
    {
     "Title": "01-09-001",
-    "nazev": "Tvorba koncepce a metodiky systému rizik MPSV",
+    "nazev": "Tvorba koncepce a metodiky systému rizik XÚ",
     "proces_kod": "01-09",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -791,7 +791,7 @@ const DATA = [
    },
    {
     "Title": "01-10-003",
-    "nazev": "Zajištění BOZP a PO MPSV",
+    "nazev": "Zajištění BOZP a PO XÚ",
     "proces_kod": "01-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -800,7 +800,7 @@ const DATA = [
    },
    {
     "Title": "01-10-004",
-    "nazev": "Zajištění ochrany a ostrahy objektu MPSV",
+    "nazev": "Zajištění ochrany a ostrahy objektu XÚ",
     "proces_kod": "01-10",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -1439,7 +1439,7 @@ const DATA = [
    },
    {
     "Title": "04-01-004",
-    "nazev": "Metodické řízení ÚP ČR a SÚIP v oblasti politiky zaměstnanosti",
+    "nazev": "Metodické řízení KAG a INSP v oblasti politiky zaměstnanosti",
     "proces_kod": "04-01",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -1511,7 +1511,7 @@ const DATA = [
    },
    {
     "Title": "04-02-004",
-    "nazev": "Metodické řízení ÚP ČR v oblasti aktivní politiky zaměstnanosti",
+    "nazev": "Metodické řízení KAG v oblasti aktivní politiky zaměstnanosti",
     "proces_kod": "04-02",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -1601,7 +1601,7 @@ const DATA = [
    },
    {
     "Title": "04-04-003",
-    "nazev": "Metodické řízení ÚP ČR v oblasti mezinárodní pracovní mobility a integrace cizinců",
+    "nazev": "Metodické řízení KAG v oblasti mezinárodní pracovní mobility a integrace cizinců",
     "proces_kod": "04-04",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -1664,7 +1664,7 @@ const DATA = [
    },
    {
     "Title": "04-05-003",
-    "nazev": "Metodické řízení ÚP ČR v oblasti služeb trhu práce a dalšího vzdělávání",
+    "nazev": "Metodické řízení KAG v oblasti služeb trhu práce a dalšího vzdělávání",
     "proces_kod": "04-05",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -1709,7 +1709,7 @@ const DATA = [
    },
    {
     "Title": "04-06-003",
-    "nazev": "Metodické řízení ÚP ČR v oblasti zaměstnávání OZP a sociálního podnikání",
+    "nazev": "Metodické řízení KAG v oblasti zaměstnávání OZP a sociálního podnikání",
     "proces_kod": "04-06",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -1898,7 +1898,7 @@ const DATA = [
    },
    {
     "Title": "06-01-001",
-    "nazev": "Tvorba koncepcí v oblasti řízení a realizace programů, opatření a projektů z ESF",
+    "nazev": "Tvorba koncepcí v oblasti řízení a realizace programů, opatření a projektů z EUF",
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -1907,7 +1907,7 @@ const DATA = [
    },
    {
     "Title": "06-01-002",
-    "nazev": "Institucionální zajištění implementace programů z ESF včetně pracovních skupin",
+    "nazev": "Institucionální zajištění implementace programů z EUF včetně pracovních skupin",
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -1916,7 +1916,7 @@ const DATA = [
    },
    {
     "Title": "06-01-003",
-    "nazev": "Řízení a implementace programů z ESF včetně technické asistence",
+    "nazev": "Řízení a implementace programů z EUF včetně technické asistence",
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -1943,7 +1943,7 @@ const DATA = [
    },
    {
     "Title": "06-01-006",
-    "nazev": "Finanční řízení pomoci z ESF",
+    "nazev": "Finanční řízení pomoci z EUF",
     "proces_kod": "06-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2044,14 +2044,14 @@ const DATA = [
     "Title": "07-01-004",
     "nazev": "Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.",
     "proces_kod": "07-01",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
    {
     "Title": "07-01-005",
-    "nazev": "Tvorba a aktualizace webových stránek MPSV",
+    "nazev": "Tvorba a aktualizace webových stránek XÚ",
     "proces_kod": "07-01",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2114,7 +2114,7 @@ const DATA = [
    },
    {
     "Title": "07-03-002",
-    "nazev": "Zajišťování účasti na jednání výborů a komisí LRV, vlády",
+    "nazev": "Zajišťování účasti na jednání výborů a komisí PORV, vlády",
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2141,7 +2141,7 @@ const DATA = [
    },
    {
     "Title": "07-03-005",
-    "nazev": "Zajištění a práce s EKLEP",
+    "nazev": "Zajištění a práce s EDOC",
     "proces_kod": "07-03",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2186,9 +2186,9 @@ const DATA = [
    },
    {
     "Title": "07-04-002",
-    "nazev": "Zastupování MPSV a resortu před soudy, popř. jinými institucemi",
+    "nazev": "Zastupování XÚ a resortu před soudy, popř. jinými institucemi",
     "proces_kod": "07-04",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2206,7 +2206,7 @@ const DATA = [
     "Title": "07-04-004",
     "nazev": "Stížnosti a petice",
     "proces_kod": "07-04",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2215,14 +2215,14 @@ const DATA = [
     "Title": "07-04-005",
     "nazev": "Právní konzultace",
     "proces_kod": "07-04",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
    {
     "Title": "07-05-001",
-    "nazev": "Tvorba koncepce financování resortu MPSV",
+    "nazev": "Tvorba koncepce financování resortu XÚ",
     "proces_kod": "07-05",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2321,7 +2321,7 @@ const DATA = [
    },
    {
     "Title": "07-06-001",
-    "nazev": "Zpracování statistik za kapitolu 313 a statistik v působnosti resortu MPSV",
+    "nazev": "Zpracování statistik za kapitolu 313 a statistik v působnosti resortu XÚ",
     "proces_kod": "07-06",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2375,7 +2375,7 @@ const DATA = [
    },
    {
     "Title": "07-07-002",
-    "nazev": "Obnova majetku - investice MPSV",
+    "nazev": "Obnova majetku - investice XÚ",
     "proces_kod": "07-07",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2404,7 +2404,7 @@ const DATA = [
     "Title": "07-08-001",
     "nazev": "Personální správa",
     "proces_kod": "07-08",
-    "vlastnik": "11; 33",
+    "vlastnik": "921; 922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2413,7 +2413,7 @@ const DATA = [
     "Title": "07-08-002",
     "nazev": "Personální controlling",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2422,7 +2422,7 @@ const DATA = [
     "Title": "07-08-003",
     "nazev": "Finanční řízení v oblasti lidských zdrojů",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2431,7 +2431,7 @@ const DATA = [
     "Title": "07-08-004",
     "nazev": "Odměňování",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2440,7 +2440,7 @@ const DATA = [
     "Title": "07-08-005",
     "nazev": "Péče o zaměstnance",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2449,7 +2449,7 @@ const DATA = [
     "Title": "07-08-006",
     "nazev": "Hodnocení zaměstnanců",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2458,7 +2458,7 @@ const DATA = [
     "Title": "07-08-007",
     "nazev": "Úřednické zkoušky",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2467,7 +2467,7 @@ const DATA = [
     "Title": "07-08-008",
     "nazev": "Vzdělávání a rozvoj zaměstnanců",
     "proces_kod": "07-08",
-    "vlastnik": "11",
+    "vlastnik": "921",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2476,7 +2476,7 @@ const DATA = [
     "Title": "07-08-009",
     "nazev": "Organizační vztahy a systemizace",
     "proces_kod": "07-08",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2575,7 +2575,7 @@ const DATA = [
     "Title": "07-11-001",
     "nazev": "Náhrada škody podle zákona č. 82/1998 Sb.",
     "proces_kod": "07-11",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2584,7 +2584,7 @@ const DATA = [
     "Title": "07-11-002",
     "nazev": "Náhrada škody podle zákona č. 262/2006 Sb.",
     "proces_kod": "07-11",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2609,7 +2609,7 @@ const DATA = [
    },
    {
     "Title": "07-12-003",
-    "nazev": "Provoz, údržba a rozvoj výpočetní techniky MPSV",
+    "nazev": "Provoz, údržba a rozvoj výpočetní techniky XÚ",
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2618,7 +2618,7 @@ const DATA = [
    },
    {
     "Title": "07-12-004",
-    "nazev": "Provoz, údržba a rozvoj výpočetní techniky ÚP ČR",
+    "nazev": "Provoz, údržba a rozvoj výpočetní techniky KAG",
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2636,7 +2636,7 @@ const DATA = [
    },
    {
     "Title": "07-12-006",
-    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází MPSV",
+    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází XÚ",
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "využitý",
@@ -2645,7 +2645,7 @@ const DATA = [
    },
    {
     "Title": "07-12-007",
-    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází ÚP ČR",
+    "nazev": "Provoz, údržba a rozvoj informačních systémů, agend a databází KAG",
     "proces_kod": "07-12",
     "vlastnik": "",
     "stav_rejstrik": "nevyužitý",
@@ -2683,7 +2683,7 @@ const DATA = [
     "Title": "07-04-006",
     "nazev": "Podezření ze spáchání protiprávního jednání",
     "proces_kod": "07-04",
-    "vlastnik": "33",
+    "vlastnik": "922",
     "stav_rejstrik": "",
     "zdroj": "karta",
     "puvodni_kod": ""
@@ -2698,53 +2698,53 @@ const DATA = [
     "nazev": "Koordinace plnění úkolů resortních služebních úřadů",
     "nazev_kratky": "Koordinace plnění úkolů resortních služebních úřadů",
     "dilci_proces_kod": "01-02-002",
-    "vykonava": "331",
-    "spolupracuje": "věcněpříslušné útvary MPSV, podřízené služební úřady",
+    "vykonava": "9221",
+    "spolupracuje": "věcněpříslušné útvary XÚ, podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-08-009-0001",
-    "nazev": "Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISoSS (modul OSYS)",
-    "nazev_kratky": "Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISoSS (modul OSYS)",
+    "nazev": "Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISX (modul MODA)",
+    "nazev_kratky": "Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISX (modul MODA)",
     "dilci_proces_kod": "07-08-009",
-    "vykonava": "331",
-    "spolupracuje": "odbor 11, sekce 6, podřízené služební úřady",
+    "vykonava": "9221",
+    "spolupracuje": "odbor 921, sekce 94, podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-08-009-0002",
-    "nazev": "Tvorba Organizačního řádu MPSV a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka",
-    "nazev_kratky": "Tvorba Organizačního řádu MPSV a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka",
+    "nazev": "Tvorba Organizačního řádu XÚ a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka",
+    "nazev_kratky": "Tvorba Organizačního řádu XÚ a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka",
     "dilci_proces_kod": "07-08-009",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "SP 10/2021, SP 13/2025",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 01/2015, VP 02/2016",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-08-009-0003",
-    "nazev": "Tvorba Služebního řádu MPSV",
-    "nazev_kratky": "Tvorba Služebního řádu MPSV",
+    "nazev": "Tvorba Služebního řádu XÚ",
+    "nazev_kratky": "Tvorba Služebního řádu XÚ",
     "dilci_proces_kod": "07-08-009",
-    "vykonava": "332",
-    "spolupracuje": "odbor 11",
-    "vnitrni_predpis": "SP 7/2019",
+    "vykonava": "9222",
+    "spolupracuje": "odbor 921",
+    "vnitrni_predpis": "VP 03/2017",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2754,11 +2754,11 @@ const DATA = [
     "nazev": "Vyřizování stížností podle zákona o státní službě",
     "nazev_kratky": "Vyřizování stížností podle zákona o státní službě",
     "dilci_proces_kod": "07-04-004",
-    "vykonava": "332",
-    "spolupracuje": "věcněpříslušné útvary MPSV, podřízené služební úřady",
-    "vnitrni_predpis": "SP 2/2024; SP 7/2019; SP 7/2021",
+    "vykonava": "9222",
+    "spolupracuje": "věcněpříslušné útvary XÚ, podřízené služební úřady",
+    "vnitrni_predpis": "VP 04/2018; VP 03/2017; VP 05/2019",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2768,11 +2768,11 @@ const DATA = [
     "nazev": "Realizace správního řízení v záležitostech státní služby (vybrané úkoly prvoinstančního služebního orgánu a postupování odvolacímu služebnímu orgánu)",
     "nazev_kratky": "Realizace správního řízení v záležitostech státní služby (vybrané úkoly prvoinstančního služebního orgánu a postupování odvolacímu služebnímu orgánu)",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "332",
-    "spolupracuje": "odbor 11",
+    "vykonava": "9222",
+    "spolupracuje": "odbor 921",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2782,53 +2782,53 @@ const DATA = [
     "nazev": "Rozhodování státního tajemníka o odvoláních a v přezkumném řízení",
     "nazev_kratky": "Rozhodování státního tajemníka o odvoláních a v přezkumném řízení",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "332",
+    "vykonava": "9222",
     "spolupracuje": "podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-01-001-0001",
-    "nazev": "Koordinace řízení kvality v MPSV",
-    "nazev_kratky": "Koordinace řízení kvality v MPSV",
+    "nazev": "Koordinace řízení kvality v XÚ",
+    "nazev_kratky": "Koordinace řízení kvality v XÚ",
     "dilci_proces_kod": "01-01-001",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "PM 52/2019; MP ST 2/2022",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 06/2020; VP 07/2021",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-01-001-0002",
-    "nazev": "Koordinace strategického řízení v MPSV",
-    "nazev_kratky": "Koordinace strategického řízení v MPSV",
+    "nazev": "Koordinace strategického řízení v XÚ",
+    "nazev_kratky": "Koordinace strategického řízení v XÚ",
     "dilci_proces_kod": "01-01-001",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "PM 13/2023; SP 5/2023",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 08/2022; VP 09/2023",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-01-004-0001",
-    "nazev": "Vyřizování žádostí MPSV jako povinným subjektem podle zákona č. 106/1999 Sb.",
-    "nazev_kratky": "Vyřizování žádostí MPSV jako povinným subjektem podle zákona č. 106/1999 Sb.",
+    "nazev": "Vyřizování žádostí XÚ jako povinným subjektem podle zákona č. 106/1999 Sb.",
+    "nazev_kratky": "Vyřizování žádostí XÚ jako povinným subjektem podle zákona č. 106/1999 Sb.",
     "dilci_proces_kod": "07-01-004",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "PM 42/2016",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 10/2024",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2838,81 +2838,81 @@ const DATA = [
     "nazev": "Rozhodování ministra o stížnostech na postup při vyřizování žádostí o informace podle zákona č. 106/1999 Sb.",
     "nazev_kratky": "Rozhodování ministra o stížnostech na postup při vyřizování žádostí o informace podle zákona č. 106/1999 Sb.",
     "dilci_proces_kod": "07-01-004",
-    "vykonava": "332",
+    "vykonava": "9222",
     "spolupracuje": "",
-    "vnitrni_predpis": "PM 42/2016",
+    "vnitrni_predpis": "VP 10/2024",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-01-004-0003",
-    "nazev": "Činnosti MPSV jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 33, kontrolní činnost vůči podřízeným služebním úřadům)",
-    "nazev_kratky": "Činnosti MPSV jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 33, kontrolní činnost vůči podřízeným služebním úřadům)",
+    "nazev": "Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 922, kontrolní činnost vůči podřízeným služebním úřadům)",
+    "nazev_kratky": "Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 922, kontrolní činnost vůči podřízeným služebním úřadům)",
     "dilci_proces_kod": "07-01-004",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "PM 42/2016",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 10/2024",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-05-001-0001",
-    "nazev": "Tvorba Interního protikorupčního programu MPSV",
-    "nazev_kratky": "Tvorba Interního protikorupčního programu MPSV",
+    "nazev": "Tvorba Interního protikorupčního programu XÚ",
+    "nazev_kratky": "Tvorba Interního protikorupčního programu XÚ",
     "dilci_proces_kod": "01-05-001",
-    "vykonava": "331",
+    "vykonava": "9221",
     "spolupracuje": "",
-    "vnitrni_predpis": "PM 20/2018",
+    "vnitrni_predpis": "VP 11/2015",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-05-002-0001",
-    "nazev": "Tvorba a zajišťování Vnitřního oznamovacího systému MPSV pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.)",
-    "nazev_kratky": "Tvorba a zajišťování Vnitřního oznamovacího systému MPSV pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.)",
+    "nazev": "Tvorba a zajišťování Vnitřního oznamovacího systému XÚ pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.)",
+    "nazev_kratky": "Tvorba a zajišťování Vnitřního oznamovacího systému XÚ pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.)",
     "dilci_proces_kod": "01-05-002",
-    "vykonava": "331",
+    "vykonava": "9221",
     "spolupracuje": "",
-    "vnitrni_predpis": "VOS MPSV, PM 20/2018",
+    "vnitrni_predpis": "VOZ XÚ, VP 11/2015",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-04-004-0002",
-    "nazev": "Koordinace vyřizování petic doručených MPSV",
-    "nazev_kratky": "Koordinace vyřizování petic doručených MPSV",
+    "nazev": "Koordinace vyřizování petic doručených XÚ",
+    "nazev_kratky": "Koordinace vyřizování petic doručených XÚ",
     "dilci_proces_kod": "07-04-004",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "PM 4/2021",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 12/2016",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-05-003-0001",
-    "nazev": "Průběžná aktualizace registru lobbovaných v MPSV v souladu se zákonem č. 168/2025 Sb.",
-    "nazev_kratky": "Průběžná aktualizace registru lobbovaných v MPSV v souladu se zákonem č. 168/2025 Sb.",
+    "nazev": "Průběžná aktualizace registru lobbovaných v XÚ v souladu se zákonem č. 168/2025 Sb.",
+    "nazev_kratky": "Průběžná aktualizace registru lobbovaných v XÚ v souladu se zákonem č. 168/2025 Sb.",
     "dilci_proces_kod": "01-05-003",
-    "vykonava": "331",
-    "spolupracuje": "věcně příslušné útvary MPSV",
+    "vykonava": "9221",
+    "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2922,11 +2922,11 @@ const DATA = [
     "nazev": "Metodická činnost pro vyřizování stížností podle správního řádu",
     "nazev_kratky": "Metodická činnost pro vyřizování stížností podle správního řádu",
     "dilci_proces_kod": "07-04-004",
-    "vykonava": "332",
-    "spolupracuje": "věcně příslušné útvary MPSV",
-    "vnitrni_predpis": "PM 4/2021",
+    "vykonava": "9222",
+    "spolupracuje": "věcně příslušné útvary XÚ",
+    "vnitrni_predpis": "VP 12/2016",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2936,11 +2936,11 @@ const DATA = [
     "nazev": "Vyřizování žádostí o náhradu škody podle zákona č. 82/1998 Sb.",
     "nazev_kratky": "Vyřizování žádostí o náhradu škody podle zákona č. 82/1998 Sb.",
     "dilci_proces_kod": "07-11-001",
-    "vykonava": "332",
-    "spolupracuje": "věcně příslušné útvary MPSV",
+    "vykonava": "9222",
+    "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2950,11 +2950,11 @@ const DATA = [
     "nazev": "Projednávání nároků fyzických osob při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "nazev_kratky": "Projednávání nároků fyzických osob při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "dilci_proces_kod": "07-11-002",
-    "vykonava": "332",
-    "spolupracuje": "Generali pojišťovna a.s., Kooperativa pojišťovna, a.s., Vienna Insurance Group",
+    "vykonava": "9222",
+    "spolupracuje": "Pojišťovna A a.s., Pojišťovna B a.s.",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2964,11 +2964,11 @@ const DATA = [
     "nazev": "Koordinace odškodňování s pojišťovnami při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "nazev_kratky": "Koordinace odškodňování s pojišťovnami při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "dilci_proces_kod": "07-11-002",
-    "vykonava": "332",
-    "spolupracuje": "Generali pojišťovna a.s., Kooperativa pojišťovna, a.s., Vienna Insurance Group",
+    "vykonava": "9222",
+    "spolupracuje": "Pojišťovna A a.s., Pojišťovna B a.s.",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2978,11 +2978,11 @@ const DATA = [
     "nazev": "Zastupování před soudy - správní žaloby s výjimkou soudních sporů týkajících se zaměstnanosti a inspekce práce",
     "nazev_kratky": "Zastupování před soudy - správní žaloby s výjimkou soudních sporů týkajících se zaměstnanosti a inspekce práce",
     "dilci_proces_kod": "07-04-002",
-    "vykonava": "332",
-    "spolupracuje": "věcně příslušné útvary MPSV",
+    "vykonava": "9222",
+    "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -2992,39 +2992,39 @@ const DATA = [
     "nazev": "Zastupování před soudy - civilní žaloby s výjimkou soudních sporů týkajících se veřejných zakázek a smluv",
     "nazev_kratky": "Zastupování před soudy - civilní žaloby s výjimkou soudních sporů týkajících se veřejných zakázek a smluv",
     "dilci_proces_kod": "07-04-002",
-    "vykonava": "332",
-    "spolupracuje": "věcně příslušné útvary MPSV, podřízené služební úřady",
+    "vykonava": "9222",
+    "spolupracuje": "věcně příslušné útvary XÚ, podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-04-002-0003",
-    "nazev": "Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPZ/OPZ+",
-    "nazev_kratky": "Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPZ/OPZ+",
+    "nazev": "Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPX/OPX+",
+    "nazev_kratky": "Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPX/OPX+",
     "dilci_proces_kod": "07-04-002",
-    "vykonava": "332",
+    "vykonava": "9222",
     "spolupracuje": "sekce evropských fondů a mezinárodní spolupráce",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-04-006-0001",
-    "nazev": "Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům MPSV, s výjimkou oblastí svěřených oddělení centrálních nákupů a právní podpory",
-    "nazev_kratky": "Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům MPSV, s…",
+    "nazev": "Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům XÚ, s výjimkou oblastí svěřených oddělení centrálních nákupů a právní podpory",
+    "nazev_kratky": "Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům XÚ, s…",
     "dilci_proces_kod": "07-04-006",
-    "vykonava": "332",
-    "spolupracuje": "věcně příslušné útvary MPSV",
+    "vykonava": "9222",
+    "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3034,11 +3034,11 @@ const DATA = [
     "nazev": "Poskytování právněkonzultační podpory útvarům sekce státního tajemníka",
     "nazev_kratky": "Poskytování právněkonzultační podpory útvarům sekce státního tajemníka",
     "dilci_proces_kod": "07-04-005",
-    "vykonava": "332",
-    "spolupracuje": "O11, odd. 331",
+    "vykonava": "9222",
+    "spolupracuje": "O921, odd. 9221",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3048,11 +3048,11 @@ const DATA = [
     "nazev": "příprava, zpracování a aktualizace materiálů (strategií, koncepcí, vnitřních řídicích aktů apod.) v rámci dílčího procesu Politika lidských zdrojů v působnosti personálního oddělení",
     "nazev_kratky": "příprava, zpracování a aktualizace materiálů (strategií, koncepcí, vnitřních řídicích aktů apod.) v rámci dílčího procesu Politika lidských zdrojů v…",
     "dilci_proces_kod": "01-01-003",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP Politika lidských zdrojů v MPSV; Služební řád MPSV; Pracovní řád MPSV; SP Strategie rozvoje služebního úřadu MPSV; SP Pravidla etiky státních zaměstnanců MPSV; PM Etický kodex zaměstnanců MPSV",
+    "vnitrni_predpis": "SP Politika lidských zdrojů v XÚ; Služební řád XÚ; Pracovní řád XÚ; SP Strategie rozvoje služebního úřadu XÚ; SP Pravidla etiky státních zaměstnanců XÚ; PM Etický kodex zaměstnanců XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3062,39 +3062,39 @@ const DATA = [
     "nazev": "příprava, zpracování a aktualizace materiálů (strategií, koncepcí, vnitřních řídicích aktů apod.) v rámci dílčího procesu Politika lidských zdrojů v působnosti oddělení personálního rozvoje a metodik",
     "nazev_kratky": "příprava, zpracování a aktualizace materiálů (strategií, koncepcí, vnitřních řídicích aktů apod.) v rámci dílčího procesu Politika lidských zdrojů v…",
     "dilci_proces_kod": "01-01-003",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP Politika lidských zdrojů v MPSV; Služební řád MPSV; Pracovní řád MPSV; SP Strategie rozvoje služebního úřadu MPSV; SP Pravidla etiky státních zaměstnanců MPSV; PM Etický kodex zaměstnanců MPSV",
+    "vnitrni_predpis": "SP Politika lidských zdrojů v XÚ; Služební řád XÚ; Pracovní řád XÚ; SP Strategie rozvoje služebního úřadu XÚ; SP Pravidla etiky státních zaměstnanců XÚ; PM Etický kodex zaměstnanců XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-01-003-0003",
-    "nazev": "příprava a zpracování organizačního uspořádání MPSV",
-    "nazev_kratky": "příprava a zpracování organizačního uspořádání MPSV",
+    "nazev": "příprava a zpracování organizačního uspořádání XÚ",
+    "nazev_kratky": "příprava a zpracování organizačního uspořádání XÚ",
     "dilci_proces_kod": "01-01-003",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP, kterými se upravuje organizační struktura MPSV",
+    "vnitrni_predpis": "SP, kterými se upravuje organizační struktura XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "01-01-004-0001",
-    "nazev": "příprava a zpracování systemizace služebních a pracovních míst MPSV",
-    "nazev_kratky": "příprava a zpracování systemizace služebních a pracovních míst MPSV",
+    "nazev": "příprava a zpracování systemizace služebních a pracovních míst XÚ",
+    "nazev_kratky": "příprava a zpracování systemizace služebních a pracovních míst XÚ",
     "dilci_proces_kod": "01-01-004",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP o systemizaci nebo změně systemizace služebních a pracovních míst; SP o charakteristice systemizovaného služebního/ pracovního místa státních zaměstnanců a zaměstnanců MPSV",
+    "vnitrni_predpis": "SP o systemizaci nebo změně systemizace služebních a pracovních míst; SP o charakteristice systemizovaného služebního/ pracovního místa státních zaměstnanců a zaměstnanců XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3104,11 +3104,11 @@ const DATA = [
     "nazev": "personální marketing, práce s uchazeči o zaměstnání, stáže",
     "nazev_kratky": "personální marketing, práce s uchazeči o zaměstnání, stáže",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
     "vnitrni_predpis": "SP Průběh a realizace odborných stáží",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3118,11 +3118,11 @@ const DATA = [
     "nazev": "výběrová řízení",
     "nazev_kratky": "výběrová řízení",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
     "vnitrni_predpis": "SP MV o údajích zveřejňovaných v rámci výběrových řízení; MP NST, kterým se stanoví podrobnosti k provádění výběrových řízení",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3132,11 +3132,11 @@ const DATA = [
     "nazev": "nástupy nových zaměstnanců, převedení státních zaměstnanců z jiných služebních úřadů",
     "nazev_kratky": "nástupy nových zaměstnanců, převedení státních zaměstnanců z jiných služebních úřadů",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "Služební řád MPSV; Pracovní řád MPSV",
+    "vnitrni_predpis": "Služební řád XÚ; Pracovní řád XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3146,11 +3146,11 @@ const DATA = [
     "nazev": "adaptační proces",
     "nazev_kratky": "adaptační proces",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP Adaptační proces v MPSV",
+    "vnitrni_predpis": "SP Adaptační proces v XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3160,11 +3160,11 @@ const DATA = [
     "nazev": "slaďování rodinného a osobního života zaměstnanců",
     "nazev_kratky": "slaďování rodinného a osobního života zaměstnanců",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "Služební řád MPSV; Pracovní řád MPSV; SP pro sladění rodinného a osobního života s výkonem státní služby; SP, kterým se stanoví pružné rozvržení služební doby; PM Zásady režimu pružné pracovní doby na MPSV",
+    "vnitrni_predpis": "Služební řád XÚ; Pracovní řád XÚ; SP pro sladění rodinného a osobního života s výkonem státní služby; SP, kterým se stanoví pružné rozvržení služební doby; PM Zásady režimu pružné pracovní doby na XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3174,11 +3174,11 @@ const DATA = [
     "nazev": "změny a skončení služebních/pracovních poměrů",
     "nazev_kratky": "změny a skončení služebních/pracovních poměrů",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "Služební řád MPSV; Pracovní řád MPSV; MP MV, kterým se stanoví podrobnosti ke změnám služebního poměru; MP MV, kterým se stanoví podrobnosti ke skončení služebního poměru",
+    "vnitrni_predpis": "Služební řád XÚ; Pracovní řád XÚ; MP MV, kterým se stanoví podrobnosti ke změnám služebního poměru; MP MV, kterým se stanoví podrobnosti ke skončení služebního poměru",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3188,11 +3188,11 @@ const DATA = [
     "nazev": "správa dohod o pracovní činnosti a dohod o provedení práce",
     "nazev_kratky": "správa dohod o pracovní činnosti a dohod o provedení práce",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "Pracovní řád MPSV; Instrukce Postup schvalování a uzavírání dohod o pracích konaných mimo pracovní poměr na MPSV",
+    "vnitrni_predpis": "Pracovní řád XÚ; Instrukce Postup schvalování a uzavírání dohod o pracích konaných mimo pracovní poměr na XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3202,11 +3202,11 @@ const DATA = [
     "nazev": "nastavení a zpracování personálních a platových ukazatelů, statistik, výkazů, přehledů apod., analýzy a predikce dat",
     "nazev_kratky": "nastavení a zpracování personálních a platových ukazatelů, statistik, výkazů, přehledů apod., analýzy a predikce dat",
     "dilci_proces_kod": "07-08-002",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
     "vnitrni_predpis": "",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3216,11 +3216,11 @@ const DATA = [
     "nazev": "stanovování platů",
     "nazev_kratky": "stanovování platů",
     "dilci_proces_kod": "07-08-004",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "Služební řád MPSV; Pracovní řád MPSV; SP, kterým se stanoví pravidla pro nastavení výše příplatků za vedení na MPSV; SP, kterým se stanoví pravidla pro určení výše zvláštních příplatků na MPSV; SP o označení klíčových služebních systemizovaných míst na MPSV a určení zvýšeného platového tarifu",
+    "vnitrni_predpis": "Služební řád XÚ; Pracovní řád XÚ; SP, kterým se stanoví pravidla pro nastavení výše příplatků za vedení na XÚ; SP, kterým se stanoví pravidla pro určení výše zvláštních příplatků na XÚ; SP o označení klíčových služebních systemizovaných míst na XÚ a určení zvýšeného platového tarifu",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3230,11 +3230,11 @@ const DATA = [
     "nazev": "zpracování výplat, mzdové účetnictví",
     "nazev_kratky": "zpracování výplat, mzdové účetnictví",
     "dilci_proces_kod": "07-08-004",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "PM Zásady řídící kontroly v podmínkách MPSV; PM Oběh účetních dokladů na MPSV",
+    "vnitrni_predpis": "PM Zásady řídící kontroly v podmínkách XÚ; PM Oběh účetních dokladů na XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3244,11 +3244,11 @@ const DATA = [
     "nazev": "příprava rozpočtů, predikce čerpání, přehled skutečného čerpání",
     "nazev_kratky": "příprava rozpočtů, predikce čerpání, přehled skutečného čerpání",
     "dilci_proces_kod": "07-08-003",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "PM Zásady řídící kontroly v podmínkách MPSV; PM Oběh účetních dokladů na MPSV",
+    "vnitrni_predpis": "PM Zásady řídící kontroly v podmínkách XÚ; PM Oběh účetních dokladů na XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3258,11 +3258,11 @@ const DATA = [
     "nazev": "kolektivní dohoda, kolektivní smlouva, FKPS a benefity",
     "nazev_kratky": "kolektivní dohoda, kolektivní smlouva, FKPS a benefity",
     "dilci_proces_kod": "07-08-005",
-    "vykonava": "111",
+    "vykonava": "9211",
     "spolupracuje": "",
-    "vnitrni_predpis": "Služební řád MPSV; Pracovní řád MPSV; Kolektivní dohoda MPSV; Kolektivní smlouva MPSV",
+    "vnitrni_predpis": "Služební řád XÚ; Pracovní řád XÚ; Kolektivní dohoda XÚ; Kolektivní smlouva XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3272,25 +3272,25 @@ const DATA = [
     "nazev": "šetření spokojenosti zaměstnanců, výstupní dotazník",
     "nazev_kratky": "šetření spokojenosti zaměstnanců, výstupní dotazník",
     "dilci_proces_kod": "07-08-005",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
     "vnitrni_predpis": "MP ST Šetření spokojenosti zaměstnanců",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-08-007-0001",
-    "nazev": "gestorství úřednických zkoušek v oborech státní služby spadajících pod MPSV",
-    "nazev_kratky": "gestorství úřednických zkoušek v oborech státní služby spadajících pod MPSV",
+    "nazev": "gestorství úřednických zkoušek v oborech státní služby spadajících pod XÚ",
+    "nazev_kratky": "gestorství úřednických zkoušek v oborech státní služby spadajících pod XÚ",
     "dilci_proces_kod": "07-08-007",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
     "vnitrni_predpis": "SP NST o provádění a organizaci úřednických zkoušek",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3300,11 +3300,11 @@ const DATA = [
     "nazev": "realizace úřednických zkoušek",
     "nazev_kratky": "realizace úřednických zkoušek",
     "dilci_proces_kod": "07-08-007",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP NST o provádění a organizaci úřednických zkoušek; SP, kterým se vydává jednací řád zkušebních komisí ÚZ v resortu MPSV",
+    "vnitrni_predpis": "SP NST o provádění a organizaci úřednických zkoušek; SP, kterým se vydává jednací řád zkušebních komisí ÚZ v resortu XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3314,11 +3314,11 @@ const DATA = [
     "nazev": "nastavení, příprava a realizace metodik a aktivit v oblasti hodnocení zaměstnanců",
     "nazev_kratky": "nastavení, příprava a realizace metodik a aktivit v oblasti hodnocení zaměstnanců",
     "dilci_proces_kod": "07-08-006",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP, kterým se stanoví postup při realizaci a zabezpečení průběhu služebního hodnocení státních zaměstnanců MPSV a vedoucích služebních úřadů v resortu MPSV; SP NST, kterým se stanoví postup při provádění služebního hodnocení státních zaměstnanců",
+    "vnitrni_predpis": "SP, kterým se stanoví postup při realizaci a zabezpečení průběhu služebního hodnocení státních zaměstnanců XÚ a vedoucích služebních úřadů v resortu XÚ; SP NST, kterým se stanoví postup při provádění služebního hodnocení státních zaměstnanců",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3328,11 +3328,11 @@ const DATA = [
     "nazev": "nastavení, příprava a realizace metodik a aktivit v oblasti vzdělávání a rozvoje zaměstnanců",
     "nazev_kratky": "nastavení, příprava a realizace metodik a aktivit v oblasti vzdělávání a rozvoje zaměstnanců",
     "dilci_proces_kod": "07-08-008",
-    "vykonava": "113",
+    "vykonava": "9212",
     "spolupracuje": "",
-    "vnitrni_predpis": "SP, kterým se stanoví Rámcová pravidla vzdělávání na MPSV; SP, kterým se stanoví Rámcová pravidla jazykového vzdělávání zaměstnanců MPSV",
+    "vnitrni_predpis": "SP, kterým se stanoví Rámcová pravidla vzdělávání na XÚ; SP, kterým se stanoví Rámcová pravidla jazykového vzdělávání zaměstnanců XÚ",
     "text_pro_or": "",
-    "sekce": "3",
+    "sekce": "92",
     "stav": "pracovní",
     "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
@@ -3624,268 +3624,268 @@ const DATA = [
   "list": "Utvary",
   "rows": [
    {
-    "Title": "0",
-    "nazev": "Ministr",
+    "Title": "9",
+    "nazev": "Utvar 9 (ministr)",
     "uroven": "ministr",
     "nadrizeny_kod": ""
    },
    {
-    "Title": "12",
-    "nazev": "O12",
+    "Title": "91",
+    "nazev": "Utvar 91 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "0"
+    "nadrizeny_kod": "9"
    },
    {
-    "Title": "121",
-    "nazev": "O121",
+    "Title": "911",
+    "nazev": "Utvar 911 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "12"
+    "nadrizeny_kod": "91"
    },
    {
-    "Title": "122",
-    "nazev": "O122",
+    "Title": "912",
+    "nazev": "Utvar 912 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "12"
+    "nadrizeny_kod": "91"
    },
    {
-    "Title": "3",
-    "nazev": "Sekce 3",
+    "Title": "92",
+    "nazev": "Utvar 92 (sekce)",
     "uroven": "sekce",
-    "nadrizeny_kod": "0"
+    "nadrizeny_kod": "9"
    },
    {
-    "Title": "11",
-    "nazev": "O11",
+    "Title": "921",
+    "nazev": "Utvar 921 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "3"
+    "nadrizeny_kod": "92"
    },
    {
-    "Title": "111",
-    "nazev": "O111",
+    "Title": "9211",
+    "nazev": "Utvar 9211 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "11"
+    "nadrizeny_kod": "921"
    },
    {
-    "Title": "113",
-    "nazev": "O113",
+    "Title": "9212",
+    "nazev": "Utvar 9212 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "11"
+    "nadrizeny_kod": "921"
    },
    {
-    "Title": "33",
-    "nazev": "O33",
+    "Title": "922",
+    "nazev": "Utvar 922 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "3"
+    "nadrizeny_kod": "92"
    },
    {
-    "Title": "331",
-    "nazev": "O331",
+    "Title": "9221",
+    "nazev": "Utvar 9221 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "33"
+    "nadrizeny_kod": "922"
    },
    {
-    "Title": "332",
-    "nazev": "O332",
+    "Title": "9222",
+    "nazev": "Utvar 9222 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "33"
+    "nadrizeny_kod": "922"
    },
    {
-    "Title": "4",
-    "nazev": "Sekce 4",
+    "Title": "93",
+    "nazev": "Utvar 93 (sekce)",
     "uroven": "sekce",
-    "nadrizeny_kod": "0"
+    "nadrizeny_kod": "9"
    },
    {
-    "Title": "401",
-    "nazev": "O401",
+    "Title": "931",
+    "nazev": "Utvar 931 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "4"
+    "nadrizeny_kod": "93"
    },
    {
-    "Title": "42",
-    "nazev": "O42",
+    "Title": "932",
+    "nazev": "Utvar 932 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "4"
+    "nadrizeny_kod": "93"
    },
    {
-    "Title": "422",
-    "nazev": "O422",
+    "Title": "9321",
+    "nazev": "Utvar 9321 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "42"
+    "nadrizeny_kod": "932"
    },
    {
-    "Title": "424",
-    "nazev": "O424",
+    "Title": "9322",
+    "nazev": "Utvar 9322 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "42"
+    "nadrizeny_kod": "932"
    },
    {
-    "Title": "425",
-    "nazev": "O425",
+    "Title": "9323",
+    "nazev": "Utvar 9323 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "42"
+    "nadrizeny_kod": "932"
    },
    {
-    "Title": "44",
-    "nazev": "O44",
+    "Title": "933",
+    "nazev": "Utvar 933 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "4"
+    "nadrizeny_kod": "93"
    },
    {
-    "Title": "443",
-    "nazev": "O443",
+    "Title": "9331",
+    "nazev": "Utvar 9331 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "44"
+    "nadrizeny_kod": "933"
    },
    {
-    "Title": "445",
-    "nazev": "O445",
+    "Title": "9332",
+    "nazev": "Utvar 9332 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "44"
+    "nadrizeny_kod": "933"
    },
    {
-    "Title": "45",
-    "nazev": "O45",
+    "Title": "934",
+    "nazev": "Utvar 934 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "4"
+    "nadrizeny_kod": "93"
    },
    {
-    "Title": "451",
-    "nazev": "O451",
+    "Title": "9341",
+    "nazev": "Utvar 9341 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "45"
+    "nadrizeny_kod": "934"
    },
    {
-    "Title": "452",
-    "nazev": "O452",
+    "Title": "9342",
+    "nazev": "Utvar 9342 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "45"
+    "nadrizeny_kod": "934"
    },
    {
-    "Title": "453",
-    "nazev": "O453",
+    "Title": "9343",
+    "nazev": "Utvar 9343 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "45"
+    "nadrizeny_kod": "934"
    },
    {
-    "Title": "6",
-    "nazev": "Sekce 6",
+    "Title": "94",
+    "nazev": "Utvar 94 (sekce)",
     "uroven": "sekce",
-    "nadrizeny_kod": "0"
+    "nadrizeny_kod": "9"
    },
    {
-    "Title": "601",
-    "nazev": "O601",
+    "Title": "941",
+    "nazev": "Utvar 941 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "6"
+    "nadrizeny_kod": "94"
    },
    {
-    "Title": "32",
-    "nazev": "O32",
+    "Title": "942",
+    "nazev": "Utvar 942 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "6"
+    "nadrizeny_kod": "94"
    },
    {
-    "Title": "322",
-    "nazev": "O322",
+    "Title": "9421",
+    "nazev": "Utvar 9421 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "32"
+    "nadrizeny_kod": "942"
    },
    {
-    "Title": "323",
-    "nazev": "O323",
+    "Title": "9422",
+    "nazev": "Utvar 9422 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "32"
+    "nadrizeny_kod": "942"
    },
    {
-    "Title": "325",
-    "nazev": "O325",
+    "Title": "9423",
+    "nazev": "Utvar 9423 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "32"
+    "nadrizeny_kod": "942"
    },
    {
-    "Title": "34",
-    "nazev": "O34",
+    "Title": "943",
+    "nazev": "Utvar 943 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "6"
+    "nadrizeny_kod": "94"
    },
    {
-    "Title": "341",
-    "nazev": "O341",
+    "Title": "9431",
+    "nazev": "Utvar 9431 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "34"
+    "nadrizeny_kod": "943"
    },
    {
-    "Title": "342",
-    "nazev": "O342",
+    "Title": "9432",
+    "nazev": "Utvar 9432 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "34"
+    "nadrizeny_kod": "943"
    },
    {
-    "Title": "35",
-    "nazev": "O35",
+    "Title": "944",
+    "nazev": "Utvar 944 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "6"
+    "nadrizeny_kod": "94"
    },
    {
-    "Title": "351",
-    "nazev": "O351",
+    "Title": "9441",
+    "nazev": "Utvar 9441 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "35"
+    "nadrizeny_kod": "944"
    },
    {
-    "Title": "356",
-    "nazev": "O356",
+    "Title": "9442",
+    "nazev": "Utvar 9442 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "35"
+    "nadrizeny_kod": "944"
    },
    {
-    "Title": "357",
-    "nazev": "O357",
+    "Title": "9443",
+    "nazev": "Utvar 9443 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "35"
+    "nadrizeny_kod": "944"
    },
    {
-    "Title": "61",
-    "nazev": "O61",
+    "Title": "945",
+    "nazev": "Utvar 945 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "6"
+    "nadrizeny_kod": "94"
    },
    {
-    "Title": "611",
-    "nazev": "O611",
+    "Title": "9451",
+    "nazev": "Utvar 9451 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "61"
+    "nadrizeny_kod": "945"
    },
    {
-    "Title": "612",
-    "nazev": "O612",
+    "Title": "9452",
+    "nazev": "Utvar 9452 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "61"
+    "nadrizeny_kod": "945"
    },
    {
-    "Title": "62",
-    "nazev": "O62",
+    "Title": "946",
+    "nazev": "Utvar 946 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": "6"
+    "nadrizeny_kod": "94"
    },
    {
-    "Title": "621",
-    "nazev": "O621",
+    "Title": "9461",
+    "nazev": "Utvar 9461 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "62"
+    "nadrizeny_kod": "946"
    },
    {
-    "Title": "622",
-    "nazev": "O622",
+    "Title": "9462",
+    "nazev": "Utvar 9462 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "62"
+    "nadrizeny_kod": "946"
    },
    {
-    "Title": "623",
-    "nazev": "O623",
+    "Title": "9463",
+    "nazev": "Utvar 9463 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "62"
+    "nadrizeny_kod": "946"
    }
   ]
  }

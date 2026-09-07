@@ -1,4 +1,8 @@
-# Instalace balíku `procesnimapa_1_0_0_100.zip`
+<!-- ŠABLONA pro src/make_deploy_ppf.py — needituj deploy/ppf/README.md, ten se generuje.
+     Kotvy {{...}} vyplní generátor z balíku a ze schématu. Čísla balíků v historických
+     poznámkách (85, 87, 99) jsou natvrdo schválně: popisují minulost, ne aktuální balík. -->
+
+# Instalace balíku `{{balik}}`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -10,7 +14,7 @@ https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa
 ```
 
 > **Pro MPSV platí `deploy/mpsv/README.md`**, ne tenhle soubor. Ta složka se
-> generuje (`src/make_deploy_mpsv.py`) a je aktuální pro týž balík 1.0.0.100;
+> generuje (`src/make_deploy_mpsv.py`) a je aktuální pro týž balík {{verze}};
 > liší se tím, že veze **neanonymizovaná** data a osmý krok navíc.
 
 ## Pořadí kroků 1 a 2 je závazné
@@ -29,9 +33,9 @@ jako vada balíku. Krok 1 obojí zakládá, proto musí být první.
 
 | složka | co |
 |---|---|
-| `CanvasApps/` | canvas app *procesní mapa*, šest obrazovek |
-| `Workflows/` | devět flow (viz krok 3) |
-| `environmentvariabledefinitions/` | devět proměnných, **bez hodnot** |
+| `CanvasApps/` | canvas app *procesní mapa*, {{obrazovky_slovy}} obrazovek |
+| `Workflows/` | {{pocet_flow_slovy}} flow (viz krok 3) |
+| `environmentvariabledefinitions/` | {{pocet_promennych_slovy}} proměnných, **bez hodnot** |
 | `solution.xml`, `customizations.xml` | manifest a napojení |
 
 Dokumentace v zipu **není** — solution zip nese jen artefakty Power Platform.
@@ -52,7 +56,7 @@ Skript si web odvodí z adresy stránky, na které běží — žádnou URL v so
 Je **idempotentní**: co existuje, nezakládá znovu; co chybí, doplní; sloupce
 mimo výchozí zobrazení do něj přidá.
 
-Založí sedm listů, knihovny **`Zalohy`**, **`Exporty`** a **`Import`**
+Založí {{pocet_listu_slovy}} listů, knihovny **`Zalohy`**, **`Exporty`** a **`Import`**
 a doplní sloupec
 `puvodni_kod` do `Procesy`, `DilciProcesy` a `Aktivity`. Knihovny vznikají
 jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`,
@@ -68,29 +72,19 @@ jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`,
 V Site contents musí být vidět `Zálohy`, `Exporty`, `Import` a list `Historie kódů`.
 Struktura je popsaná v `sharepoint_schema.md`.
 
-## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
+## 2. Naimportovat solution a VYPLNIT VŠECH {{pocet_promennych_slovy_velka}} PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_100.zip`
+Power Apps → **Solutions → Import solution** → `{{balik}}`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
 
 1. **připojení** — connection reference na SharePoint,
-2. **devět proměnných**. U `mpsv_procesnimapaSite` zadej adresu webu; zbylých
-   osm se pak vybírá **z rozbalovátka listů toho webu** — knihovna `Zálohy`
+2. **{{pocet_promennych_slovy}} proměnných**. U `mpsv_procesnimapaSite` zadej adresu webu; zbylých
+   {{pocet_promennych_bez_webu_slovy}} se pak vybírá **z rozbalovátka listů toho webu** — knihovna `Zálohy`
    je v něm taky, knihovna je pro SharePoint taky list.
 
-| proměnná | zobrazí se jako | vybírá se |
-|---|---|---|
-| `mpsv_procesnimapaSite` | Procesni mapa - web | web |
-| `mpsv_listAgendy` | Procesni mapa - Agendy | list `Agendy` |
-| `mpsv_listProcesy` | Procesni mapa - Procesy | list `Procesy` |
-| `mpsv_listDilciProcesy` | Procesni mapa - Dilci procesy | list `Dílčí procesy` |
-| `mpsv_listAktivity` | Procesni mapa - Aktivity | list `Aktivity` |
-| `mpsv_listVazby` | Procesni mapa - Vazby | list `Vazba aktivita–dílčí proces` |
-| `mpsv_listUtvary` | Procesni mapa - Utvary | list `Útvary` |
-| `mpsv_listHistorieKodu` | Procesni mapa - Historie kodu | list `Historie kódů` |
-| `mpsv_listZalohy` | Procesni mapa - Zalohy | **knihovna** `Zálohy` |
+{{tabulka_promennych}}
 
 > **Průvodce neproklikávej.** Definice **nemají výchozí hodnotu** schválně:
 > s ní by průvodce předvyplnil adresu vývojového webu a import by tiše prošel
@@ -101,7 +95,7 @@ Průvodce se zeptá na:
 > **Zkontroluj je i tak** (Solutions → Environment variables): balík je nemá
 > čím přepsat, ale taky nemá čím doplnit.
 
-**Ověření:** import doběhne bez chyby a v Environment variables má všech devět
+**Ověření:** import doběhne bez chyby a v Environment variables má všech {{pocet_promennych_slovy}}
 proměnných vyplněnou *Current Value*.
 
 ## 3. Zapnout flow
@@ -110,22 +104,12 @@ proměnných vyplněnou *Current Value*.
 zůstane vypnuté i po importu opravené verze. Po importu, který skončil hláškou
 „one or more flows may not have turned on", je zapni ručně.
 
-| flow | co dělá | trigger |
-|---|---|---|
-| `MapaPublishFlow` | publikace HTML mapy | z appky |
-| `MapaPublishScheduled` | táž publikace | denně 7:00 |
-| `ExportFlow` | export přehledu do Wordu a Excelu | z appky |
-| `AktualizaceKratkehoNazvu` | zkrácený název aktivity | změna v listu |
-| `ZalohaFlow` | snímek rejstříku do `Zalohy` | z appky |
-| `ZalohaScheduled` | týž snímek | denně 5:00 |
-| `RestoreFlow` | obnova rejstříku ze snímku | z appky |
-| `ImportFlow` | hromadné pořízení aktivit z Excelu | z appky |
-| `PresunFlow` | přesun agendy, procesu nebo dílčího procesu | z appky |
+{{tabulka_flow}}
 
 Vypnuté flow se projeví jako chyba **appky**, ne flow: volající canvas app
 vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
 
-**Ověření:** všech **devět** má stav *On*.
+**Ověření:** všech **{{pocet_flow_slovy}}** má stav *On*.
 
 > **Testovací flow `import new data`** (to, kterým se ověřoval DLP pro
 > Excel Online) v balíku 84 **není** — vezlo v sobě natvrdo adresu webu

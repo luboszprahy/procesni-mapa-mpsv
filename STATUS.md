@@ -22,6 +22,38 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
+## 07.09.2026 — F18: nasazovací sada pro PPF se generuje (`deploy/ppf/`)
+
+**`deploy/INSTALACE.md` zanikla.** Byla to jediná ručně udržovaná část nasazení
+a zaostala o třináct verzí — v nadpisu balík 87, čtyři obrazovky místo šesti,
+šest flow místo devíti, `PresunFlow` nikde. Nikdo si toho nevšiml, protože
+návod vypadá pořád stejně; `deploy/mpsv/` tím netrpí, protože se generuje.
+
+Nově tedy **dvě zrcadlové sady**, obě generované:
+
+| sada | skript | data | čím se liší |
+|---|---|---|---|
+| `deploy/ppf/` | `src/make_deploy_ppf.py` | `runs/anonym` | 7 kroků, anonymizovaná data |
+| `deploy/mpsv/` | `src/make_deploy_mpsv.py` | `runs/normalize` | 8 kroků, ostrá data |
+
+Text návodu pro PPF drží šablona `src/sablona_instalace_ppf.md`; čísla (verze
+balíku, počet flow, obrazovek, proměnných, listů) i obě tabulky se vyplňují
+**z balíku a ze schématu**, ne z paměti. Sdílený kód (`posledni_balik`,
+`overuj_bez_guidu`, `FLOW`, `VYPIS_GUIDU`) se importuje z generátoru pro MPSV,
+takže popis flow existuje na jednom místě.
+
+**Brána v generátoru** hlídá, že README sedí na balík, se kterým se předává:
+nevyplněná kotva, chybějící flow v tabulce, flow bez popisu ve `FLOW` a
+neshoda počtu flow shodí build. Počet se čte **z balíku**, ne ze slovníku
+`FLOW` — jinak by brána ověřovala generátor sama sebou.
+
+Mutačně doloženo (4/4): ubylo flow v balíku → „README nežádá zapnutí osm flow";
+flow bez popisu → jmenuje ho; neznámá kotva v šabloně → jmenuje ji; README
+z jiného balíku → „README neuvádí balík …". Nezměněný vstup projde.
+
+Historické zmínky `INSTALACE.md` v `PLAN.md` a starších zápisech `STATUS.md`
+zůstávají — popisují stav v dané době, přepisovat je by falšovalo záznam.
+
 ## 07.09.2026 ráno — O33 zařazen, audit kola 8 vyřízen
 
 **`O33` patří pod `Sekce 3`.** V exportu z MPSV je nadřízený sám sobě, takže
