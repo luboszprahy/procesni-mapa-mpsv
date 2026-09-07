@@ -63,12 +63,15 @@
   #rozklad{flex:1 1 auto;min-width:0;background:var(--panel);border:1px solid var(--line);
         border-radius:8px;box-shadow:var(--shadow);padding:0;position:relative;overflow:hidden}
   .rz-hlavicky{display:flex;border-bottom:1px solid var(--line);background:var(--chip)}
-  .rz-hlavicky div{flex:1 1 0;min-width:0;padding:7px 10px;font-size:.8rem;font-weight:600;
+  /* Pevná čtvrtina, ne `flex:1 1 0`: při menším počtu sloupců by se zbylé
+     roztáhly přes celou plochu a karty v nich s nimi (07.09.2026). Šířka
+     karty tak zůstává stejná, ať je vidět jeden sloupec nebo čtyři. */
+  .rz-hlavicky div{flex:0 0 25%;min-width:0;padding:7px 10px;font-size:.8rem;font-weight:600;
         letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line)}
   .rz-hlavicky div:first-child{border-left:0}
   .rz-hlavicky div[hidden]{display:none}
   .rz-sloupce{display:flex;position:relative}
-  .rz-sloupec{flex:1 1 0;min-width:0;border-left:1px solid var(--line);padding:14px 0 14px 12px;
+  .rz-sloupec{flex:0 0 25%;min-width:0;border-left:1px solid var(--line);padding:14px 0 14px 12px;
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
@@ -621,7 +624,7 @@ function detail(n){
    určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:22";
+  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:25";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
