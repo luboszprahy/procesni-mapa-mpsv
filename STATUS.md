@@ -109,7 +109,8 @@ Dosud ji zúžení výběrem přebíjelo: kdo měl vybranou agendu bez aktivit
 a zvolil „vše až po aktivity", dostal hlášku, že rejstřík končí — přestože
 aktivity v rejstříku jsou. Změna volby proto výběr zahodí; zužovat se dá zase
 klikáním. Ověřeno v prohlížeči i testem: `7/46/250/46` v obou zobrazeních,
-349 karet celkem.
+349 karet celkem. Brána 46 kontrol, `test_rozklad.js` 44 kontrol,
+mutačně 5/5. (Zpráva commitu `fd0cdae` uvádí u testu 46 — správně je 44.)
 
 Přepínač se jmenuje `Strom │ Rozklad svisle │ Rozklad vodorovně`.
 
