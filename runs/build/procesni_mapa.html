@@ -155,8 +155,8 @@
   .rz-uzel .rz-sipka{position:absolute;right:4px;top:50%;transform:translateY(-50%);
         width:14px;height:14px;border-radius:50%;color:#fff;background:var(--muted);
         display:flex;align-items:center;justify-content:center;
-        font-size:.76rem;font-weight:700;line-height:1;opacity:.95;
-        box-shadow:0 1px 2px rgba(51,47,116,.28)}
+        opacity:.95;box-shadow:0 1px 2px rgba(51,47,116,.28)}
+  .rz-uzel .rz-sipka svg{width:9px;height:9px;display:block}
   /* Na syté ploše je kolečko bílé s barevnou šipkou — tmavé by v ní zmizelo. */
   .rz-uzel.lvl-a .rz-sipka{background:#fff;color:var(--a)}
   .rz-uzel.lvl-p .rz-sipka{background:#fff;color:var(--p)}
@@ -582,7 +582,20 @@ function rzUzel(n, vybrany){
   if ((n.kids || []).length){
     const sipka = document.createElement("span");
     sipka.className = "rz-sipka";
-    sipka.textContent = "›";           // › jednoduchá pravá uvozovka
+    /* Kreslená šipka, ne znak „›": ten má nesymetrický obrys, takže v kolečku
+       sedí nakřivo, a otočení o 90° tu odchylku ještě zvýrazní (07.09.2026).
+       Cesta je souměrná kolem x=12, tedy kolem středu viewBoxu. */
+    const svgS = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgS.setAttribute("viewBox", "0 0 24 24");
+    const cestaS = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    cestaS.setAttribute("d", "M9 6l6 6-6 6");
+    cestaS.setAttribute("fill", "none");
+    cestaS.setAttribute("stroke", "currentColor");
+    cestaS.setAttribute("stroke-width", "3.4");
+    cestaS.setAttribute("stroke-linecap", "round");
+    cestaS.setAttribute("stroke-linejoin", "round");
+    svgS.appendChild(cestaS);
+    sipka.appendChild(svgS);
     sipka.setAttribute("aria-hidden", "true");
     el.appendChild(sipka);
   }
@@ -876,7 +889,7 @@ function detail(n){
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 /* Sekce se do podtitulku nepíše (07.09.2026): mapa nese celý rejstřík
    (7 agend, 46 procesů), takže „Sekce 3“ z ní dělala výsek, kterým není. */
-document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:48";
+document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:51";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
