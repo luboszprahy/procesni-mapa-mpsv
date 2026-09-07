@@ -66,15 +66,16 @@
   .rz-hlavicky div{flex:1 1 0;min-width:0;padding:7px 10px;font-size:.8rem;font-weight:600;
         letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line)}
   .rz-hlavicky div:first-child{border-left:0}
+  .rz-hlavicky div[hidden]{display:none}
   .rz-sloupce{display:flex;position:relative}
-  .rz-sloupec{flex:1 1 0;min-width:0;border-left:1px solid var(--line);padding:10px 8px;
+  .rz-sloupec{flex:1 1 0;min-width:0;border-left:1px solid var(--line);padding:14px 12px;
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
   .rz-uzel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--line);
-        border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 7px;
-        cursor:pointer;display:flex;flex-direction:column;gap:2px}
+        border-left:4px solid var(--line);border-radius:6px;padding:8px 10px;margin:0 0 16px;
+        cursor:pointer;display:flex;flex-direction:column;gap:3px}
   .rz-uzel:hover{background:var(--chip)}
   .rz-uzel[aria-selected=true]{border-color:var(--a);background:var(--a-bg);box-shadow:var(--shadow)}
   .rz-uzel.lvl-a{border-left-color:var(--a-line)}
@@ -150,7 +151,7 @@
     <option value="schváleno">Stav: schváleno</option>
     <option value="pracovní">Stav: pracovní</option>
   </select>
-  <select id="fUroven" title="Do které vrstvy se strom rozbalí">
+  <select id="fUroven" title="Ve stromu: do které vrstvy se rozbalí. V rozkladu: kolik sloupců je vidět.">
     <option value="1">Rozbalit: jen agendy</option>
     <option value="2" selected>Rozbalit: + procesy</option>
     <option value="3">Rozbalit: + dílčí procesy</option>
@@ -402,13 +403,15 @@ const rzCesta = [];
 const elRozklad = document.getElementById("rozklad");
 const elSloupce = document.getElementById("rzSloupce");
 const elSpojnice = document.getElementById("rzSpojnice");
-const RZ_UROVNI = 4;
+const BARVA_VRSTVY = {a:"var(--a-line)", p:"var(--p-line)",
+                      d:"var(--d-line)", k:"var(--k-line)"};
 
 function rzUzel(n, vybrany){
   const el = document.createElement("div");
   el.className = "rz-uzel lvl-" + n.lvl + (n.lvl !== "k" && !n.aktCount ? " unmapped" : "");
   el.setAttribute("aria-selected", vybrany ? "true" : "false");
   el.dataset.kod = n.kod;
+  el.dataset.lvl = n.lvl;
 
   const kod = document.createElement("span");
   kod.className = "rz-kod"; kod.textContent = n.kod;
@@ -457,8 +460,14 @@ function renderRozklad(){
 
   elSloupce.querySelectorAll(".rz-sloupec").forEach(el => el.remove());
 
+  /* Volba „Rozbalit" tu neurčuje hloubku rozbalení jako ve stromu, ale kolik
+     sloupců je vidět — víc než čtyři úrovně rejstřík nemá. */
+  const sloupcu = uroven();
+  [...document.querySelectorAll(".rz-hlavicky div")]
+    .forEach((h, i) => h.hidden = i >= sloupcu);
+
   let nabidka = koren;
-  for (let i = 0; i < RZ_UROVNI; i++){
+  for (let i = 0; i < sloupcu; i++){
     const sloupec = document.createElement("div");
     sloupec.className = "rz-sloupec";
     sloupec.dataset.uroven = i;
@@ -520,8 +529,12 @@ function rzSpojnice(){
       cara.setAttribute("d", "M" + x1 + "," + y1
         + " C" + (x1 + ohyb) + "," + y1 + " " + (x2 - ohyb) + "," + y2 + " " + x2 + "," + y2);
       cara.setAttribute("fill", "none");
-      cara.setAttribute("stroke", "var(--line)");
-      cara.setAttribute("stroke-width", "1.5");
+      /* Barvu bere cílová vrstva, ne šedá --line: světle šedá čára na bílém
+         podkladu byla v provozu prakticky neviditelná (07.09.2026). */
+      cara.setAttribute("stroke", BARVA_VRSTVY[cil.dataset.lvl] || "var(--muted)");
+      cara.setAttribute("stroke-width", "2.5");
+      cara.setAttribute("stroke-linecap", "round");
+      cara.setAttribute("opacity", ".85");
       elSpojnice.appendChild(cara);
     });
   });
@@ -535,8 +548,6 @@ function prekresli(){
   const rozklad = zobrazeni() === "rozklad";
   elRozklad.hidden = !rozklad;
   document.getElementById("tree").hidden = rozklad;
-  // hloubku rozbalení řídí v rozkladu klikání, rozbalovátko by tam lhalo
-  document.getElementById("fUroven").style.display = rozklad ? "none" : "";
   if (rozklad) renderRozklad(); else render();
 }
 
