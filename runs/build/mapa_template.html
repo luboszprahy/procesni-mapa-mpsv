@@ -135,21 +135,33 @@
   .rzh-pas[data-uroven="1"]{background:#f1f4fc}
   .rzh-pas[data-uroven="2"]{background:#f6f8fd}
   .rzh-pas[data-uroven="3"]{background:#fafbfe}
-  .rzh-hlavicka{flex:0 0 112px;padding:12px;font-size:.84rem;font-weight:700;
-        letter-spacing:.06em;text-transform:uppercase;color:#fff;line-height:1.2}
-  .rzh-pas[data-uroven="0"] .rzh-hlavicka{background:var(--a)}
-  .rzh-pas[data-uroven="1"] .rzh-hlavicka{background:var(--p)}
-  .rzh-pas[data-uroven="2"] .rzh-hlavicka{background:var(--d)}
-  .rzh-pas[data-uroven="3"] .rzh-hlavicka{background:var(--k)}
+  /* Hlavička je štítek, ne plocha: plný tmavý blok přes celou výšku pásu byl
+     nejsytější věc na obrazovce a přebíjel karty, o které jde (07.09.2026). */
+  .rzh-hlavicka{flex:0 0 96px;padding:12px 10px;font-size:.76rem;font-weight:700;
+        letter-spacing:.05em;text-transform:uppercase;line-height:1.2;
+        border-right:3px solid var(--line);background:transparent}
+  .rzh-pas[data-uroven="0"] .rzh-hlavicka{color:var(--a);border-right-color:var(--a)}
+  .rzh-pas[data-uroven="1"] .rzh-hlavicka{color:var(--p);border-right-color:var(--p)}
+  .rzh-pas[data-uroven="2"] .rzh-hlavicka{color:var(--d);border-right-color:var(--d)}
+  .rzh-pas[data-uroven="3"] .rzh-hlavicka{color:var(--k);border-right-color:var(--k)}
   /* Řádka roluje vodorovně — 250 dílčích procesů se vedle sebe nevejde a pás
      se kvůli nim nesmí zalomit, jinak přestane být poznat, co je jedna úroveň. */
-  .rzh-radka{flex:1 1 auto;min-width:0;display:flex;gap:14px;padding:14px 14px 34px;
-        overflow-x:auto;overflow-y:hidden;align-items:flex-start}
+  /* `stretch` místo `flex-start`: karty v pásu tvoří mřížku, ne schody.
+     Výšku řádky přitom drží na uzdě ořez názvu níž — bez něj ji jediný
+     dlouhý název natáhl na čtyři řádky a pás zabral půl obrazovky. */
+  .rzh-radka{flex:1 1 auto;min-width:0;display:flex;gap:20px;padding:12px 16px 22px;
+        overflow-x:auto;overflow-y:hidden;align-items:stretch}
   /* Karta má v pásu pevnou šířku (ve sloupci je to procento jeho šířky) a dole
      místo pro spojnici do dalšího pásu — obdoba pruhu vpravo u sloupců. */
-  .rzh-radka .rz-uzel{flex:0 0 186px;width:186px;margin:0;padding:6px 9px 22px}
+  .rzh-radka .rz-uzel{flex:0 0 186px;width:186px;margin:0;padding:6px 9px 16px}
+  /* Dlouhý název se ořízne na tři řádky; celý zůstává v nápovědě karty. */
+  .rzh-radka .rz-nazev{display:-webkit-box;-webkit-line-clamp:3;
+        -webkit-box-orient:vertical;overflow:hidden}
+  .rzh-radka .rz-odznak{margin-top:auto}
   /* Rozpad vede dolů, ne doprava — značka se otočí a sedne pod text. */
-  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:1px;
+  /* Značka rozpadu je v pásu drobná: velká šipka pod každou kartou dělala
+     z řádky pilu a soupeřila se spojnicemi, které říkají totéž. */
+  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:0;font-size:.9rem;
         transform:translateX(-50%) rotate(90deg)}
   .rzh-radka .rz-uzel:hover .rz-sipka{transform:translateX(-50%) rotate(90deg) translateX(2px)}
   #rzhSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -662,25 +674,41 @@ function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
       const c = cil.getBoundingClientRect();
       if (venku(c, mezDal) || venku(zdroj, mez)) return;
 
-      let x1, y1, x2, y2, c1x, c1y, c2x, c2y;
+      let tvar, lvl = cil.dataset.lvl;
       if (dolu){
-        x1 = zdroj.left + zdroj.width / 2 - ramec.left; y1 = zdroj.bottom - ramec.top;
-        x2 = c.left + c.width / 2 - ramec.left;         y2 = c.top - ramec.top;
-        const ohyb = (y2 - y1) / 2;
-        c1x = x1; c1y = y1 + ohyb; c2x = x2; c2y = y2 - ohyb;
+        /* V pásech se kreslí LOMENĚ, ne obloukem. Rodič s deseti dětmi vyrobil
+           svazek deseti křivek, které se u něj sbíhaly do jednoho chuchvalce
+           a přes celou řádku se křížily — nepřehledné (řekl uživatel
+           07.09.2026). Lomená čára se naopak sejde do jedné svislé nohy
+           a jedné vodorovné sběrnice, jako v organizačním schématu. */
+        const x1 = zdroj.left + zdroj.width / 2 - ramec.left, y1 = zdroj.bottom - ramec.top;
+        const x2 = c.left + c.width / 2 - ramec.left,         y2 = c.top - ramec.top;
+        const stred = y1 + (y2 - y1) / 2;
+        const r = Math.min(9, Math.abs(x2 - x1) / 2, Math.abs(stred - y1), Math.abs(y2 - stred));
+        if (r < 1){                       // dítě je přesně pod rodičem
+          tvar = "M" + x1 + "," + y1 + " L" + x2 + "," + y2;
+        } else {
+          const smer = x2 > x1 ? 1 : -1;
+          tvar = "M" + x1 + "," + y1
+            + " L" + x1 + "," + (stred - r)
+            + " Q" + x1 + "," + stred + " " + (x1 + smer * r) + "," + stred
+            + " L" + (x2 - smer * r) + "," + stred
+            + " Q" + x2 + "," + stred + " " + x2 + "," + (stred + r)
+            + " L" + x2 + "," + y2;
+        }
       } else {
-        x1 = zdroj.right - ramec.left; y1 = zdroj.top + zdroj.height / 2 - ramec.top;
-        x2 = c.left - ramec.left;      y2 = c.top + c.height / 2 - ramec.top;
+        const x1 = zdroj.right - ramec.left, y1 = zdroj.top + zdroj.height / 2 - ramec.top;
+        const x2 = c.left - ramec.left,      y2 = c.top + c.height / 2 - ramec.top;
         const ohyb = (x2 - x1) / 2;
-        c1x = x1 + ohyb; c1y = y1; c2x = x2 - ohyb; c2y = y2;
+        tvar = "M" + x1 + "," + y1 + " C" + (x1 + ohyb) + "," + y1
+          + " " + (x2 - ohyb) + "," + y2 + " " + x2 + "," + y2;
       }
       const cara = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      cara.setAttribute("d", "M" + x1 + "," + y1 + " C" + c1x + "," + c1y
-        + " " + c2x + "," + c2y + " " + x2 + "," + y2);
+      cara.setAttribute("d", tvar);
       cara.setAttribute("fill", "none");
       /* Barvu bere cílová vrstva, ne šedá --line: světle šedá čára na bílém
          podkladu byla v provozu prakticky neviditelná (07.09.2026). */
-      cara.setAttribute("stroke", BARVA_VRSTVY[cil.dataset.lvl] || "var(--muted)");
+      cara.setAttribute("stroke", BARVA_VRSTVY[lvl] || "var(--muted)");
       cara.setAttribute("stroke-width", "1.8");
       cara.setAttribute("stroke-linecap", "round");
       cara.setAttribute("opacity", ".5");

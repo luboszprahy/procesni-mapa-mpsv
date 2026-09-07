@@ -76,11 +76,24 @@ nad starou, nezmutovanou stránkou**. Po opravě padá každá mutace z vlastní
 důvodu (test 4×, brána 2×). Mutační skript teď na neúspěšný build zastaví,
 místo aby ho přešel — bez toho měření tvrdí, co se mu zlíbí.
 
-**Co ověřené není:** jak vodorovná varianta vypadá a jestli spojnice sedí
-při scrollu pásů. Rozšíření Chrome zůstává nepřipojené, geometrii stub
-neuhlídá (vrací nulové rozměry). Osu spojnic proto hlídá aspoň strukturální
-kontrola v bráně — kopie-vložit mezi variantami je tam nejpravděpodobnější
-chyba.
+**Prohlédnuto v prohlížeči** (rozšíření Chrome se konečně připojilo — bylo
+nainstalované celou dobu, jen nebyl vybraný prohlížeč: `list_connected_browsers`
+ho ukázal a `select_browser` stačil). První podoba vodorovné varianty
+neobstála, uživatel ji odmítl slovy „moc namačkaně, nepřehledně". Tři
+příčiny a tři opravy:
+
+| co vadilo | proč | oprava |
+|---|---|---|
+| svazek křivek z jednoho rodiče | deset dětí = deset oblouků sbíhajících se do chuchvalce a křižujících celou řádku | v pásech se kreslí **lomeně** — jedna svislá noha, vodorovná sběrnice, odbočky k dětem, jako v org. schématu |
+| pás zabíral půl obrazovky | jediný dlouhý název natáhl řádku na čtyři řádky a všechny karty s ní | název se ořízne na tři řádky (celý zůstává v nápovědě), karty mají `align-items:stretch`, takže tvoří mřížku, ne schody |
+| hlavička pásu přebíjela obsah | plný tmavý blok přes celou výšku byl nejsytější věc na obrazovce | štítek: barevný text a svislý pruh, žádná plocha |
+
+Tím se na obrazovku vejdou všechny čtyři pásy najednou. Sloupcová varianta
+zůstala beze změny — křivky se v ní kříží mnohem míň, protože sousední
+vrstvy jsou vedle sebe, ne nad sebou.
+
+**Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
+(ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 
 ## 07.09.2026 — F20/model: rozklad ukazuje všechny větve, ne jednu cestu
 
