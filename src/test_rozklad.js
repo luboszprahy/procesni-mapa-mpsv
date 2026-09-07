@@ -164,6 +164,28 @@ prvky.fUroven.value = "4";
 M.renderRozklad();
 overit(sloupce().length === 4, "návrat na čtyři sloupce");
 
+/* Scénář hlášený 07.09.2026: uživatel klikne jen na agendu (cesta má jeden
+   prvek) a pak zvolí „vše až po aktivity". Sloupce se musí naplnit, ne zůstat
+   prázdné — jinak to vypadá, že volba nic neudělala. */
+prvky.fUroven.value = "1";
+M.renderRozklad();
+M.rzCesta.length = 0;
+M.rzCesta.push("02");                 // agenda, na kterou uživatel klikl
+prvky.fUroven.value = "4";
+M.renderRozklad();
+const poRozbaleni = sloupce();
+overit(poRozbaleni.length === 4, `po volbě všech stupňů jsou čtyři sloupce (${poRozbaleni.length})`);
+/* Poslední sloupec prázdný BÝT smí — vybraná větev nemusí mít aktivity.
+   Prázdný sloupec uprostřed by ale znamenal, že se výběr nedoplnil. */
+const prazdneUprostred = poRozbaleni.slice(0, -1).filter(x => uzly(x).length === 0).length;
+overit(prazdneUprostred === 0,
+       `žádný sloupec kromě posledního nezůstal prázdný (prázdných: ${prazdneUprostred})`);
+overit(M.rzCesta[0] === "02", `výběr uživatele zůstal zachován (${M.rzCesta[0]})`);
+overit([...M.rzCesta].every(k => typeof k === "string") && M.rzCesta.length >= 3,
+       `cesta se doplnila do hloubky (${JSON.stringify(M.rzCesta)})`);
+M.rzCesta.length = 0;
+M.renderRozklad();
+
 // značka „jde rozpadnout níž" smí být jen tam, kde potomci opravdu jsou
 const sipka = u => u.querySelectorAll(".rz-sipka").length > 0;
 const vseSloupce = sloupce();

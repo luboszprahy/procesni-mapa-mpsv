@@ -509,13 +509,6 @@ function renderRozklad(){
   [...document.querySelectorAll(".rz-hlavicky div")]
     .forEach((h, i) => h.hidden = i >= sloupcu);
 
-  /* Bez výběru by byly tři sloupce ze čtyř prázdné a diagram by po otevření
-     vypadal jako bez dat (hlášeno 07.09.2026). Při prvním zobrazení se proto
-     vybere první větev; jakmile uživatel klikne, řídí výběr on. */
-  if (!rzCesta.length){
-    for (let n = koren[0]; n; n = (n.kids || [])[0]) rzCesta.push(n.kod);
-  }
-
   let nabidka = koren;
   for (let i = 0; i < sloupcu; i++){
     const sloupec = document.createElement("div");
@@ -525,8 +518,18 @@ function renderRozklad(){
     /* Vybraný kód nemusí po změně filtru existovat — cesta se pak zkrátí.
        Podmínka `> i` je nutná: `length = i` na kratším poli ho naopak NATÁHNE
        o prázdné prvky a sloupec pak tvrdí, že výběr existuje. */
-    const vybrany = nabidka.find(n => n.kod === rzCesta[i]);
+    let vybrany = nabidka.find(n => n.kod === rzCesta[i]);
     if (!vybrany && rzCesta.length > i) rzCesta.length = i;
+
+    /* Sloupec, který není poslední viditelný, si výběr doplní sám první
+       položkou. Jinak by po zvolení „vše až po aktivity" zůstaly sloupce
+       napravo prázdné a volba by vypadala, že nic neudělala (07.09.2026);
+       totéž řeší i prázdný diagram hned po otevření. V posledním sloupci se
+       nedoplňuje — tam si vybírá uživatel. */
+    if (!vybrany && i < sloupcu - 1 && nabidka.length){
+      vybrany = nabidka[0];
+      rzCesta[i] = vybrany.kod;
+    }
 
     if (!nabidka.length){
       const p = document.createElement("div");
