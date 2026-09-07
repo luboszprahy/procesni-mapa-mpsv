@@ -276,6 +276,26 @@ Přepínač je přeuspořádaný podle zadání na `Rozklad vodorovně │ Rozkl
 tlačítko nese `aria-pressed`, a nechat aktivní jiné než první by vypadalo jako
 chyba.
 
+### Desáté kolo (20:41) — rozklady zůstávají syté, řádkové zobrazení světlé
+
+Uživatel oba rozklady schválil („ty rozklady jsou super") a zadal, že **řádkové
+zobrazení má být světlé a všude s černým písmem**. Plná sytost, která na kartách
+rozkladu funguje, dělá z řádku úzký barevný pruh přes celou šířku stránky —
+a takových pruhů jsou ve stromu stovky pod sebou.
+
+Zobrazení proto mají oddělené sady ploch: `--a-bg…--k-bg` drží plnou sytost pro
+oba rozklady, nová `--a-row…--k-row` je táž řada naředěná bílou (76 %) jen pro
+řádkové zobrazení:
+
+```
+agenda #cecdde   proces #d8d5e4   dílčí proces #d5dde8   aktivita #e2e9f8
+```
+
+Černý text má na nich 10,1 až 13,0:1. Odpadly tím všechny výjimky, které si
+syté plochy ve stromu vynutily (světlé chipy, obrácený trojúhelník, přebarvená
+nezmapovaná položka) — na světlém podkladu platí zase jedno pravidlo pro celý
+strom.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 

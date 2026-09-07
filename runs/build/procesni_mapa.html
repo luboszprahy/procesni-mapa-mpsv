@@ -28,8 +28,14 @@
     --a:#332f74; --p:#5b5290; --d:#52729e; --k:#53648d;
     --chip:#e9ebf5; --hit:#fff3bf; --akcent:#60acef;
     --shadow:0 1px 3px rgba(51,47,116,.14);
-    /* PLNÁ sytost jako plocha vrstvy — od nejtmavší po nejsvětlejší */
+    /* PLNÁ sytost jako plocha vrstvy — od nejtmavší po nejsvětlejší.
+       Platí pro OBA rozklady; řádkové zobrazení má vlastní světlou řadu níž. */
     --a-bg:#332f74; --p-bg:#5b5290; --d-bg:#52729e; --k-bg:#86a2e3;
+    /* Řádkové zobrazení: tytéž barvy naředěné bílou (76 %) a všude černé písmo
+       (rozhodl uživatel 07.09.2026). Řádek je úzký pruh přes celou šířku, takže
+       plná sytost, která na kartách rozkladu funguje, tu dělá z každé stránky
+       pruhovanou plochu. Černý text má na těchhle podkladech 10,1 až 13,0:1. */
+    --a-row:#cecdde; --p-row:#d8d5e4; --d-row:#d5dde8; --k-row:#e2e9f8;
     /* písmo na té ploše */
     --a-fg:#ffffff; --p-fg:#ffffff; --d-fg:#ffffff; --k-fg:var(--ink);
     --a-fg2:#e9eef8; --p-fg2:#e9eef8; --d-fg2:#ffffff; --k-fg2:#2a3140;
@@ -220,27 +226,18 @@
   body.bez-kodu .rz-kod{display:none}
   .nm{flex:1 1 auto;min-width:0}
   /* vrstvy se liší podkladem řádku a barvou svislé linky, ne jen barvou písma */
-  .lvl-a>.row{background:var(--a-bg);border-left-color:var(--a-line)}
-  .lvl-p>.row{background:var(--p-bg);border-left-color:var(--p-line)}
-  .lvl-d>.row{background:var(--d-bg);border-left-color:var(--d-line)}
-  .lvl-k>.row{background:var(--k-bg);border-left-color:var(--k-line)}
-  .lvl-a>.row>.nm{font-weight:600;color:var(--a-fg);font-size:1.07rem}
-  .lvl-p>.row>.nm{font-weight:600;color:var(--p-fg)}
-  .lvl-d>.row>.nm{color:var(--d-fg)}
-  .lvl-k>.row>.nm{color:var(--k-fg)}
-  /* Rozbalovací trojúhelník a odznak musí být vidět i na syté ploše. */
-  .lvl-a>.row>.tw{color:var(--a-fg2)}
-  .lvl-p>.row>.tw{color:var(--p-fg2)}
-  .lvl-d>.row>.tw{color:var(--d-fg2)}
-  .lvl-k>.row>.tw{color:var(--k-fg2)}
-  .lvl-a>.row>.badge,.lvl-p>.row>.badge,.lvl-d>.row>.badge{background:rgba(255,255,255,.20);color:#fff}
-  .lvl-a>.row>.badge.no,.lvl-p>.row>.badge.no,.lvl-d>.row>.badge.no{background:#fdecea;color:#a3352a}
-  .lvl-a>.row>.kod,.lvl-p>.row>.kod,.lvl-d>.row>.kod{background:rgba(255,255,255,.18);color:#fff}
-  /* Aktivita má plochu světlou, takže na ní zůstávají tmavé chipy. */
-  .lvl-k>.row>.kod{background:rgba(255,255,255,.55);color:var(--k-fg2)}
-  .lvl-k>.row>.badge{background:rgba(255,255,255,.55);color:var(--k-fg2)}
-  .node.unmapped.lvl-a > .row > .nm,.node.unmapped.lvl-p > .row > .nm,
-  .node.unmapped.lvl-d > .row > .nm,.node.unmapped.lvl-k > .row > .nm{opacity:.78}
+  .lvl-a>.row{background:var(--a-row);border-left-color:var(--a-line)}
+  .lvl-p>.row{background:var(--p-row);border-left-color:var(--p-line)}
+  .lvl-d>.row{background:var(--d-row);border-left-color:var(--d-line)}
+  .lvl-k>.row{background:var(--k-row);border-left-color:var(--k-line)}
+  /* Text je ve všech vrstvách černý; úroveň říká podklad, svislá linka
+     a odsazení, ne barva písma. */
+  .lvl-a>.row>.nm{font-weight:600;color:var(--ink);font-size:1.07rem}
+  .lvl-p>.row>.nm{font-weight:600;color:var(--ink)}
+  .lvl-d>.row>.nm{color:var(--ink)}
+  .lvl-k>.row>.nm{color:var(--ink)}
+  .lvl-a>.row>.kod,.lvl-p>.row>.kod,.lvl-d>.row>.kod,.lvl-k>.row>.kod{
+        background:rgba(255,255,255,.65);color:var(--muted)}
   .lvl-k>.row{cursor:pointer}
   /* Odsazení stupně 32+22 px. Dvě věci, které se snadno pletou: kde strom
      ZAČÍNÁ (to řeší úzký okraj `main`) a jak velký je KROK mezi úrovněmi.
@@ -879,7 +876,7 @@ function detail(n){
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 /* Sekce se do podtitulku nepíše (07.09.2026): mapa nese celý rejstřík
    (7 agend, 46 procesů), takže „Sekce 3“ z ní dělala výsek, kterým není. */
-document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:39";
+document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:42";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
