@@ -164,6 +164,20 @@ prvky.fUroven.value = "4";
 M.renderRozklad();
 overit(sloupce().length === 4, "návrat na čtyři sloupce");
 
+// značka „jde rozpadnout níž" smí být jen tam, kde potomci opravdu jsou
+const sipka = u => u.querySelectorAll(".rz-sipka").length > 0;
+const vseSloupce = sloupce();
+overit(uzly(vseSloupce[0]).every(sipka),
+       "všechny agendy mají značku rozpadu (každá má procesy)");
+overit(uzly(vseSloupce[3]).every(u => !sipka(u)),
+       "aktivity značku nemají — pod nimi už nic není");
+const bezPolozek = vseSloupce.flatMap(uzly).filter(u => /bez položek/.test(u.textContent));
+overit(bezPolozek.length > 0 && bezPolozek.every(u => !sipka(u)),
+       `karta „bez položek" značku nemá (${bezPolozek.length} takových)`);
+const sPolozkami = uzly(vseSloupce[2]).filter(u => !/bez položek/.test(u.textContent));
+overit(sPolozkami.length > 0 && sPolozkami.every(sipka),
+       `dílčí proces s aktivitami značku má (${sPolozkami.length} takových)`);
+
 // klik v posledním viditelném sloupci má sloupec přidat, aby šla celá větev
 // rozkliknout bez sahání na volbu vlevo
 prvky.fUroven.value = "2";

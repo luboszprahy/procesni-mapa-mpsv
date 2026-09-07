@@ -81,7 +81,7 @@
      sloupci a byla prakticky neviditelná (07.09.2026). */
   .rz-uzel{position:relative;z-index:1;width:48%;min-width:165px;
         background:var(--panel);border:1px solid var(--line);
-        border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 28px;
+        border-left:4px solid var(--line);border-radius:6px;padding:6px 22px 6px 9px;margin:0 0 28px;
         cursor:pointer;display:flex;flex-direction:column;gap:2px;
         transition:box-shadow .12s,transform .12s}
   /* Výplň nese vrstvu, stejně jako ve stromu — barva řekne úroveň dřív než
@@ -98,6 +98,12 @@
   .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.76rem;color:var(--muted)}
   .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
+  /* Značka „jde rozpadnout níž" — jen na kartách, které mají potomky.
+     Karta bez ní je konec větve, ne nedoklikaná cesta. */
+  .rz-uzel .rz-sipka{position:absolute;right:7px;top:50%;transform:translateY(-50%);
+        font-size:1.05rem;line-height:1;color:var(--muted);opacity:.65}
+  .rz-uzel:hover .rz-sipka{opacity:1;color:var(--a)}
+  .rz-uzel[aria-selected=true] .rz-sipka{opacity:1;color:var(--a)}
   .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
   .rz-prazdno{color:var(--muted);font-size:.88rem;padding:6px 4px}
   .node{border-radius:5px}
@@ -445,6 +451,14 @@ function rzUzel(n, vybrany){
       : "bez položek";
   }
   if (odznak.textContent) el.appendChild(odznak);
+
+  if ((n.kids || []).length){
+    const sipka = document.createElement("span");
+    sipka.className = "rz-sipka";
+    sipka.textContent = "›";           // › jednoduchá pravá uvozovka
+    sipka.setAttribute("aria-hidden", "true");
+    el.appendChild(sipka);
+  }
 
   el.title = TYPY[n.lvl] + " " + n.kod + (n.nazev ? " — " + n.nazev : "")
     + (n.lvl === "k" ? "\nKlikni pro detail" : "\nKlikni pro rozpad níž");
