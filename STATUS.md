@@ -30,6 +30,41 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
+## 07.09.2026 — F20/model: rozklad ukazuje všechny větve, ne jednu cestu
+
+Rozhodl uživatel. Původní chování (Power BI decomposition tree: sloupec N+1 =
+potomci **vybrané** položky) neodpovídalo tomu, co od tlačítka „Rozbalit"
+čekal — zvolil „vše až po aktivity" a viděl pořád jen jednu cestu.
+
+**Nový model:** sloupec ukazuje potomky **všech** položek vlevo. Bez výběru
+tedy sloupec procesů nese všech 46 procesů a sloupec dílčích procesů všech
+250. **Výběr slouží k zúžení**, ne k navigaci: klik na agendu `01` omezí
+sloupec procesů na jejích 10 a dílčí procesy na 41 pod nimi. Klik na už
+vybranou kartu výběr zruší a rozsah se zase rozšíří.
+
+Spojnice vedou od **každé** karty k jejím dětem, ne jen od vybrané — teprve
+tím vznikne stromový rozklad z předlohy.
+
+**Aktivita může patřit do víc dílčích procesů (M:N), takže se ve sloupci
+objeví víckrát** — jednou pod každým rodičem. Karty proto nejdou párovat podle
+kódu a spojnice se drží indexu rodiče (`data-rodic`).
+
+### Dvě chyby při přepisu a jedna poučná oprava testu
+
+1. **`rzCesta.length = i` natáhlo pole podruhé**, tentokrát v obsluze kliku.
+   Zkracování teď vede přes `rzZkrat()`, které navíc uklidí koncové díry,
+   takže platí invariant „poslední index vždy existuje".
+2. **Hláška „Tady rejstřík končí" u prázdného filtru** — prázdno kvůli filtru
+   není totéž co konec větve; rozlišuje se podle toho, jestli něco prošlo.
+3. **Test musel změnit kritérium.** Kontrola „cesta nemá díry" v novém modelu
+   neplatí: vybrat proces bez vybrané agendy je platný stav, protože sloupec
+   procesů ukazuje procesy všech agend. Řídké pole je tedy v pořádku — vadná
+   je jen díra na **posledním** indexu, což je přesně otisk omylem nataženého
+   pole.
+
+Mutačně ověřeno 4/4: sloupec jen z vybraného, výběr bez zúžení, karta bez
+rodiče, `rzZkrat` bez úklidu — každá mutace test shodí. Celkem 23 kontrol.
+
 ## 07.09.2026 — F20/oprava: rozklad byl po otevření prázdný
 
 Uživatel poslal snímek se třemi prázdnými sloupci a hláškou „Tady rejstřík

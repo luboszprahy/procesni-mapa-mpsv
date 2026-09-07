@@ -435,6 +435,15 @@ function hl(text, q){
    10 000 px. Vybraná cesta se drží v `rzCesta` jako pole kódů, ne jako odkazy
    na uzly — filtr uzly přestaví a odkazy by ukazovaly do starého stromu. */
 const rzCesta = [];
+/* Zkrácení cesty MUSÍ jít přes tohle. `rzCesta.length = i` na kratším poli ho
+   totiž NATÁHNE o prázdné prvky a sloupec pak tvrdí, že výběr existuje —
+   chyba, která se 07.09.2026 vrátila podruhé, jen na jiném řádku. */
+const rzZkrat = i => {
+  if (rzCesta.length > i) rzCesta.length = i;
+  // po zkrácení může na konci zůstat díra (nevybraná úroveň) — uklidit,
+  // ať platí, že poslední index vždy existuje
+  while (rzCesta.length && !((rzCesta.length - 1) in rzCesta)) rzCesta.length--;
+};
 const elRozklad = document.getElementById("rozklad");
 const elSloupce = document.getElementById("rzSloupce");
 const elSpojnice = document.getElementById("rzSpojnice");
@@ -509,48 +518,47 @@ function renderRozklad(){
   [...document.querySelectorAll(".rz-hlavicky div")]
     .forEach((h, i) => h.hidden = i >= sloupcu);
 
-  let nabidka = koren;
+  /* Sloupec ukazuje potomky VŠECH položek vlevo, ne jen vybrané — tím vznikne
+     stromový rozklad, ne jedna cesta (rozhodl uživatel 07.09.2026). Výběr
+     slouží k zúžení: dokud nic vybráno není, jde do dalšího sloupce celý
+     obsah toho předchozího.
+     Aktivita může patřit do víc dílčích procesů (M:N), takže se ve sloupci
+     objeví víckrát — jednou pod každým rodičem. Karty proto NEJDOU párovat
+     podle kódu a spojnice se drží indexu rodiče. */
+  let radky = koren.map((n, idx) => ({uzel: n, rodic: -1, idx: idx}));
+
   for (let i = 0; i < sloupcu; i++){
     const sloupec = document.createElement("div");
     sloupec.className = "rz-sloupec";
     sloupec.dataset.uroven = i;
 
-    /* Vybraný kód nemusí po změně filtru existovat — cesta se pak zkrátí.
-       Podmínka `> i` je nutná: `length = i` na kratším poli ho naopak NATÁHNE
-       o prázdné prvky a sloupec pak tvrdí, že výběr existuje. */
-    let vybrany = nabidka.find(n => n.kod === rzCesta[i]);
-    if (!vybrany && rzCesta.length > i) rzCesta.length = i;
+    // vybraný kód nemusí po změně filtru existovat
+    if (rzCesta[i] && !radky.some(r => r.uzel.kod === rzCesta[i])) rzZkrat(i);
 
-    /* Sloupec, který není poslední viditelný, si výběr doplní sám první
-       položkou. Jinak by po zvolení „vše až po aktivity" zůstaly sloupce
-       napravo prázdné a volba by vypadala, že nic neudělala (07.09.2026);
-       totéž řeší i prázdný diagram hned po otevření. V posledním sloupci se
-       nedoplňuje — tam si vybírá uživatel. */
-    if (!vybrany && i < sloupcu - 1 && nabidka.length){
-      vybrany = nabidka[0];
-      rzCesta[i] = vybrany.kod;
-    }
-
-    if (!nabidka.length){
+    if (!radky.length){
       const p = document.createElement("div");
       p.className = "rz-prazdno";
-      p.textContent = i === 0
-        ? "Nic neodpovídá zadanému filtru."
-        : (rzCesta[i - 1] ? "Tady rejstřík končí — níž už nic není." : "Vyber položku vlevo.");
+      /* Prázdno kvůli filtru není totéž co konec větve. Bez tohohle
+         rozlišení hlásí sloupce napravo „konec rejstříku" i tehdy, když
+         filtru neodpovídá vůbec nic. */
+      p.textContent = koren.length
+        ? "Tady rejstřík končí — níž už nic není."
+        : "Nic neodpovídá zadanému filtru.";
       sloupec.appendChild(p);
     } else {
-      nabidka.forEach(n => {
-        const el = rzUzel(n, n.kod === rzCesta[i]);
+      radky.forEach((r, poradi) => {
+        const el = rzUzel(r.uzel, r.uzel.kod === rzCesta[i]);
+        el.dataset.idx = String(poradi);
+        el.dataset.rodic = String(r.rodic);
         el.addEventListener("click", () => {
-          rzCesta.length = i;
-          rzCesta[i] = n.kod;
-          if (n.lvl === "k") detail(n);
-          /* Klik v posledním viditelném sloupci ho přidá, takže se dá celá
-             větev rozkliknout až na aktivity bez sahání na volbu vlevo.
-             Bez toho klik na proces při „Rozbalit: + procesy" nic neudělal
-             a vypadalo to, že karty nejsou klikací (07.09.2026). */
+          // klik na už vybranou kartu výběr zruší a vrátí do sloupce vše
+          if (rzCesta[i] === r.uzel.kod) rzZkrat(i);
+          else { rzZkrat(i); rzCesta[i] = r.uzel.kod; }
+          if (r.uzel.lvl === "k") detail(r.uzel);
+          /* Klik v posledním viditelném sloupci ho přidá, takže se dá větev
+             rozkliknout bez sahání na volbu vlevo. */
           const vol = document.getElementById("fUroven");
-          if (i === +vol.value - 1 && (n.kids || []).length && +vol.value < 4){
+          if (i === +vol.value - 1 && (r.uzel.kids || []).length && +vol.value < 4){
             vol.value = String(i + 2);
           }
           renderRozklad();
@@ -559,13 +567,25 @@ function renderRozklad(){
       });
     }
     elSloupce.appendChild(sloupec);
-    nabidka = vybrany ? (vybrany.kids || []) : [];
+
+    // do dalšího sloupce jde vybraná položka, a není-li, celý tenhle sloupec
+    const zaklad = rzCesta[i]
+      ? radky.filter(r => r.uzel.kod === rzCesta[i])
+      : radky;
+    const dalsi = [];
+    zaklad.forEach(r => {
+      const poradiRodice = radky.indexOf(r);
+      (r.uzel.kids || []).forEach(k => dalsi.push({uzel: k, rodic: poradiRodice}));
+    });
+    radky = dalsi;
   }
   rzSpojnice();
 }
 
 /* Spojnice se počítají z pozic v DOM, ne z indexů — sloupce mají vlastní
-   scroll a uzly různou výšku, takže žádný výpočet „dopředu" by neseděl. */
+   scroll a uzly různou výšku, takže žádný výpočet „dopředu" by neseděl.
+   Vede se čára od KAŽDÉ karty k jejím dětem (rodič se pozná podle
+   `data-rodic`), takže je vidět celý rozklad, ne jen vybraná cesta. */
 function rzSpojnice(){
   elSpojnice.textContent = "";
   const ramec = elSloupce.getBoundingClientRect();
@@ -575,17 +595,22 @@ function rzSpojnice(){
 
   const sloupce = [...elSloupce.querySelectorAll(".rz-sloupec")];
   sloupce.forEach((sloupec, i) => {
-    const vybrany = sloupec.querySelector('.rz-uzel[aria-selected=true]');
     const dalsi = sloupce[i + 1];
-    if (!vybrany || !dalsi) return;
-    const zdroj = vybrany.getBoundingClientRect();
-    const x1 = zdroj.right - ramec.left, y1 = zdroj.top + zdroj.height / 2 - ramec.top;
+    if (!dalsi) return;
+    const rodice = [...sloupec.querySelectorAll(".rz-uzel")];
+    const mezSl = sloupec.getBoundingClientRect();
+    const mezDal = dalsi.getBoundingClientRect();
 
     dalsi.querySelectorAll(".rz-uzel").forEach(cil => {
+      const rodic = rodice[+cil.dataset.rodic];
+      if (!rodic) return;
+      const zdroj = rodic.getBoundingClientRect();
       const c = cil.getBoundingClientRect();
-      // uzel odscrollovaný mimo sloupec by vyrobil čáru přes celou plochu
-      if (c.bottom < dalsi.getBoundingClientRect().top
-          || c.top > dalsi.getBoundingClientRect().bottom) return;
+      // co je odscrollované mimo svůj sloupec, by vyrobilo čáru přes celou plochu
+      if (c.bottom < mezDal.top || c.top > mezDal.bottom) return;
+      if (zdroj.bottom < mezSl.top || zdroj.top > mezSl.bottom) return;
+
+      const x1 = zdroj.right - ramec.left, y1 = zdroj.top + zdroj.height / 2 - ramec.top;
       const x2 = c.left - ramec.left, y2 = c.top + c.height / 2 - ramec.top;
       const ohyb = (x2 - x1) / 2;
       const cara = document.createElementNS("http://www.w3.org/2000/svg", "path");

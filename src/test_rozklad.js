@@ -130,6 +130,11 @@ const overit = (podminka, popis) => {
   if (!podminka) chyb++;
 };
 
+/* Cesta smí mít díru uprostřed — vybrat proces bez vybrané agendy je platný
+   stav, sloupec procesů ukazuje procesy všech agend. Co platné NENÍ, je díra
+   na POSLEDNÍM indexu: tak vypadá pole natažené omylem přes `length = i`. */
+const cestaPlatna = c => c.length === 0 || (c.length - 1) in c;
+
 const sloupce = () => elSloupceStub.querySelectorAll(".rz-sloupec");
 const uzly = s => s.querySelectorAll(".rz-uzel");
 const prazdno = s => s.querySelectorAll(".rz-prazdno").map(p => p.textContent);
@@ -147,11 +152,7 @@ const hlasky = s.flatMap(prazdno);
 overit(!hlasky.some(h => h.includes("Tady rejstřík končí")),
        "nikde nesvítí hláška o konci rejstříku tam, kde data jsou");
 
-/* Pozor na `every()`: v řídkém poli DÍRY PŘESKAKUJE, takže nad [ , , ] vrátí
-   true. Přesně tak byl tenhle test zprvu slepý k chybě, kvůli které vznikl.
-   Spread díry rozbalí na undefined a kontrola je pak poctivá. */
-overit(M.rzCesta.length >= 3 && [...M.rzCesta].every(k => typeof k === "string"),
-       `předvybraná cesta je úplná a bez děr (${JSON.stringify(M.rzCesta)})`);
+overit(cestaPlatna(M.rzCesta), `cesta po otevření je platná (${JSON.stringify(M.rzCesta)})`);
 
 // volba úrovně řídí počet sloupců
 prvky.fUroven.value = "2";
@@ -163,6 +164,34 @@ overit(hlavicky.filter(h => !h.hidden).length === 2,
 prvky.fUroven.value = "4";
 M.renderRozklad();
 overit(sloupce().length === 4, "návrat na čtyři sloupce");
+
+/* Jádro modelu (rozhodl uživatel 07.09.2026): sloupec ukazuje potomky VŠECH
+   položek vlevo, ne jen vybrané. Bez výběru tedy sloupec procesů nese všech
+   46 procesů, ne procesy jedné agendy. */
+M.rzCesta.length = 0;
+prvky.fUroven.value = "4";
+M.renderRozklad();
+const bezVyberu = sloupce();
+overit(uzly(bezVyberu[1]).length === 46,
+       `bez výběru ukazuje sloupec procesů všech 46 (${uzly(bezVyberu[1]).length})`);
+overit(uzly(bezVyberu[2]).length === 250,
+       `a sloupec dílčích procesů všech 250 (${uzly(bezVyberu[2]).length})`);
+
+// výběr agendy rozsah zúží
+M.rzCesta.length = 0;
+M.rzCesta.push("01");
+M.renderRozklad();
+const zuzeno = sloupce();
+overit(uzly(zuzeno[1]).length === 10,
+       `výběr agendy 01 zúží sloupec procesů na 10 (${uzly(zuzeno[1]).length})`);
+overit(uzly(zuzeno[2]).length > 0 && uzly(zuzeno[2]).length < 250,
+       `a dílčí procesy jen pod nimi (${uzly(zuzeno[2]).length})`);
+
+// každá karta ví, ke kterému rodiči patří — z toho se kreslí spojnice
+const bezRodice = uzly(zuzeno[1]).filter(u => !(+u.dataset.rodic >= 0)).length;
+overit(bezRodice === 0, `každá karta zná svého rodiče (bez rodiče: ${bezRodice})`);
+M.rzCesta.length = 0;
+M.renderRozklad();
 
 /* Scénář hlášený 07.09.2026: uživatel klikne jen na agendu (cesta má jeden
    prvek) a pak zvolí „vše až po aktivity". Sloupce se musí naplnit, ne zůstat
@@ -181,8 +210,7 @@ const prazdneUprostred = poRozbaleni.slice(0, -1).filter(x => uzly(x).length ===
 overit(prazdneUprostred === 0,
        `žádný sloupec kromě posledního nezůstal prázdný (prázdných: ${prazdneUprostred})`);
 overit(M.rzCesta[0] === "02", `výběr uživatele zůstal zachován (${M.rzCesta[0]})`);
-overit([...M.rzCesta].every(k => typeof k === "string") && M.rzCesta.length >= 3,
-       `cesta se doplnila do hloubky (${JSON.stringify(M.rzCesta)})`);
+overit(cestaPlatna(M.rzCesta), `cesta je platná (${JSON.stringify(M.rzCesta)})`);
 M.rzCesta.length = 0;
 M.renderRozklad();
 
@@ -223,8 +251,8 @@ overit(h2.some(h => h.includes("Nic neodpovídá")), "prázdný výsledek hledá
    prvky. `rzCesta.length = i` na kratším poli ho totiž NATÁHNE a sloupec pak
    tvrdí, že výběr existuje („Tady rejstřík končí" místo „Vyber položku vlevo").
    Předvýběr první větve tenhle bug maskuje, proto se zkouší až tady. */
-overit([...M.rzCesta].every(k => typeof k === "string"),
-       `po prázdném filtru nemá cesta díry (${JSON.stringify(M.rzCesta)})`);
+overit(cestaPlatna(M.rzCesta),
+       `po prázdném filtru je cesta platná (${JSON.stringify(M.rzCesta)})`);
 overit(!sloupce().flatMap(prazdno).some(h => h.includes("Tady rejstřík končí")),
        "prázdný filtr nehlásí konec rejstříku, ale prázdný výsledek");
 prvky.q.value = "";
@@ -232,8 +260,7 @@ prvky.q.value = "";
 // filtr zkrátí cestu, ale nesmí ji natáhnout o prázdné prvky
 prvky.fStav.value = "schváleno";
 M.renderRozklad();
-overit([...M.rzCesta].every(k => typeof k === "string"),
-       `cesta po filtru nemá díry (${JSON.stringify(M.rzCesta)})`);
+overit(cestaPlatna(M.rzCesta), `cesta po filtru je platná (${JSON.stringify(M.rzCesta)})`);
 prvky.fStav.value = "";
 
 console.log(chyb ? `\nNEPROŠLO — ${chyb} chyb` : "\nOK — rozkladový diagram se chová podle zadání");
