@@ -55,6 +55,37 @@
   #detail h2{margin:0 0 10px;font-size:1rem;color:var(--a)}
   #detail dt{font-size:.82rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:10px}
   #detail dd{margin:2px 0 0}
+  /* ---- rozkladový diagram ---- */
+  .prep{display:flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .prep button{border:0;border-left:1px solid var(--line);border-radius:0;padding:6px 12px}
+  .prep button:first-child{border-left:0}
+  .prep button[aria-pressed=true]{background:var(--a);color:#fff}
+  #rozklad{flex:1 1 auto;min-width:0;background:var(--panel);border:1px solid var(--line);
+        border-radius:8px;box-shadow:var(--shadow);padding:0;position:relative;overflow:hidden}
+  .rz-hlavicky{display:flex;border-bottom:1px solid var(--line);background:var(--chip)}
+  .rz-hlavicky div{flex:1 1 0;min-width:0;padding:7px 10px;font-size:.8rem;font-weight:600;
+        letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line)}
+  .rz-hlavicky div:first-child{border-left:0}
+  .rz-sloupce{display:flex;position:relative}
+  .rz-sloupec{flex:1 1 0;min-width:0;border-left:1px solid var(--line);padding:10px 8px;
+        max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
+  .rz-sloupec:first-child{border-left:0}
+  /* Spojnice leží pod uzly a nesmí brát kliknutí. */
+  #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .rz-uzel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--line);
+        border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 7px;
+        cursor:pointer;display:flex;flex-direction:column;gap:2px}
+  .rz-uzel:hover{background:var(--chip)}
+  .rz-uzel[aria-selected=true]{border-color:var(--a);background:var(--a-bg);box-shadow:var(--shadow)}
+  .rz-uzel.lvl-a{border-left-color:var(--a-line)}
+  .rz-uzel.lvl-p{border-left-color:var(--p-line)}
+  .rz-uzel.lvl-d{border-left-color:var(--d-line)}
+  .rz-uzel.lvl-k{border-left-color:var(--k-line)}
+  .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.82rem;color:var(--muted)}
+  .rz-uzel .rz-nazev{font-size:.93rem;line-height:1.35}
+  .rz-uzel .rz-odznak{align-self:flex-start;font-size:.76rem;color:var(--muted)}
+  .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
+  .rz-prazdno{color:var(--muted);font-size:.88rem;padding:6px 4px}
   .node{border-radius:5px}
   .row{display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:5px;cursor:default;
        border-left:3px solid transparent}
@@ -65,6 +96,7 @@
   .kod{flex:0 0 auto;font-family:Consolas,"Courier New",monospace;font-size:.86rem;color:var(--muted);
        background:var(--chip);border-radius:3px;padding:1px 5px;margin-top:1px}
   body.bez-kodu .kod{display:none}
+  body.bez-kodu .rz-kod{display:none}
   .nm{flex:1 1 auto;min-width:0}
   /* vrstvy se liší podkladem řádku a barvou svislé linky, ne jen barvou písma */
   .lvl-a>.row{background:var(--a-bg);border-left-color:var(--a-line)}
@@ -107,6 +139,10 @@
 </header>
 
 <div class="bar">
+  <span class="prep" id="fZobrazeni" title="Strom rozbaluje celou strukturu pod sebou; rozklad ukazuje jednu cestu ve sloupcích vedle sebe.">
+    <button type="button" data-zobrazeni="strom" aria-pressed="true">Strom</button>
+    <button type="button" data-zobrazeni="rozklad">Rozklad</button>
+  </span>
   <input type="search" id="q" placeholder="Hledat v agendách, procesech, dílčích procesech a aktivitách…" autocomplete="off">
   <select id="fUtvar"><option value="">Vykonává útvar: vše</option></select>
   <select id="fStav" title="Filtruje podle stavu aktivit, stejně jako přehled v aplikaci. Větev, ve které po odfiltrování žádná aktivita nezbude, se schová.">
@@ -141,6 +177,14 @@
 
 <main>
   <div id="tree"></div>
+  <div id="rozklad" hidden>
+    <div class="rz-hlavicky">
+      <div>Agenda</div><div>Proces</div><div>Dílčí proces</div><div>Aktivita</div>
+    </div>
+    <div class="rz-sloupce" id="rzSloupce">
+      <svg id="rzSpojnice" aria-hidden="true"></svg>
+    </div>
+  </div>
   <aside id="detail"><h2>Detail</h2><div id="detailBody" class="empty">Klikni na aktivitu.</div></aside>
 </main>
 
@@ -219,6 +263,27 @@ walk(TREE, n => {
   n.hay = norm(n.kod+" "+n.nazev+" "+(n.utvar||""));
 });
 
+/* ---- filtr ----
+   Jediné místo, kde se rozhoduje, co filtry propustí. Používá ho strom
+   i rozkladový diagram; kdyby každý filtroval po svém, rozešly by se
+   a čtenář by ve dvou zobrazeních téhož rejstříku viděl jiná čísla. */
+function filtruj(n, q, ut, stav, forced){
+  const hit    = forced || !q || n.hay.includes(q);
+  const selfUt = n.lvl !== "k" || !ut || (n.utvar||"").split(/,\s*/).includes(ut);
+  // shoda na uzlu zpristupni celou jeho podstrukturu
+  const kids = n.kids
+    .map(c => filtruj(c, q, ut, stav, forced || (!!q && n.hay.includes(q))))
+    .filter(Boolean);
+  /* Stav se u aktivity čte z ní samé, u větve z počtu aktivit toho stavu
+     uvnitř — jinak by se prázdné větve schovávaly i bez zapnutého filtru. */
+  const stavOk = !stav ? true
+    : n.lvl === "k" ? (stav === "schváleno") === ((n.rec||{}).stav === "schváleno")
+    : (stav === "schváleno" ? n.aktS > 0 : n.aktCount - n.aktS > 0);
+  const keepSelf = n.lvl === "k" ? hit && selfUt && stavOk : hit && !ut && stavOk;
+  if (!kids.length && !keepSelf) return null;
+  return Object.assign({}, n, {kids: kids});
+}
+
 /* ---- render ---- */
 const TYPY = {a:"Agenda", p:"Proces", d:"Dílčí proces", k:"Aktivita"};
 const sklonAkt = n => n === 1 ? "aktivitu" : n >= 2 && n <= 4 ? "aktivity" : "aktivit";
@@ -232,18 +297,8 @@ function render(){
   const jenOsirele = document.getElementById("cOsirele").checked;
   elTree.textContent = "";
 
-  const mk = (n, depth, forced) => {
-    const hit    = forced || !q || n.hay.includes(q);
-    const selfUt = n.lvl !== "k" || !ut || (n.utvar||"").split(/,\s*/).includes(ut);
-    // shoda na uzlu zpristupni celou jeho podstrukturu
-    const kids = n.kids.map(c => mk(c, depth+1, forced || (!!q && n.hay.includes(q)))).filter(Boolean);
-    /* Stav se u aktivity čte z ní samé, u větve z počtu aktivit toho stavu
-       uvnitř — jinak by se prázdné větve schovávaly i bez zapnutého filtru. */
-    const stavOk = !stav ? true
-      : n.lvl === "k" ? (stav === "schváleno") === ((n.rec||{}).stav === "schváleno")
-      : (stav === "schváleno" ? n.aktS > 0 : n.aktCount - n.aktS > 0);
-    const keepSelf = n.lvl === "k" ? hit && selfUt && stavOk : hit && !ut && stavOk;
-    if (!kids.length && !keepSelf) return null;
+  const mk = (n, depth) => {
+    const kids = (n.kids || []).map(c => mk(c, depth+1));
 
     const node = document.createElement("div");
     node.className = "node lvl-" + n.lvl;
@@ -312,8 +367,9 @@ function render(){
   };
 
   TREE.filter(n => !jenOsirele || n.sirotek)
-      .map(n => mk(n, 0, jenOsirele && !q))
+      .map(n => filtruj(n, q, ut, stav, jenOsirele && !q))
       .filter(Boolean)
+      .map(n => mk(n, 0))
       .forEach(n => elTree.appendChild(n));
   if (!elTree.children.length){
     const e = document.createElement("div"); e.className="empty";
@@ -336,6 +392,164 @@ function hl(text, q){
   frag.appendChild(document.createTextNode(text.slice(i)));
   return frag;
 }
+
+/* ---- rozkladový diagram ----
+   Sloupec N+1 ukazuje děti uzlu vybraného ve sloupci N. Celý strom najednou
+   se nekreslí schválně: dílčích procesů je 250 a stránka by měla přes
+   10 000 px. Vybraná cesta se drží v `rzCesta` jako pole kódů, ne jako odkazy
+   na uzly — filtr uzly přestaví a odkazy by ukazovaly do starého stromu. */
+const rzCesta = [];
+const elRozklad = document.getElementById("rozklad");
+const elSloupce = document.getElementById("rzSloupce");
+const elSpojnice = document.getElementById("rzSpojnice");
+const RZ_UROVNI = 4;
+
+function rzUzel(n, vybrany){
+  const el = document.createElement("div");
+  el.className = "rz-uzel lvl-" + n.lvl + (n.lvl !== "k" && !n.aktCount ? " unmapped" : "");
+  el.setAttribute("aria-selected", vybrany ? "true" : "false");
+  el.dataset.kod = n.kod;
+
+  const kod = document.createElement("span");
+  kod.className = "rz-kod"; kod.textContent = n.kod;
+  el.appendChild(kod);
+  const nm = document.createElement("span");
+  nm.className = "rz-nazev";
+  nm.appendChild(hl(n.nazev, norm(document.getElementById("q").value.trim())));
+  el.appendChild(nm);
+
+  const odznak = document.createElement("span");
+  odznak.className = "rz-odznak";
+  if (n.lvl === "k"){
+    odznak.textContent = n.utvar ? "vykonává " + n.utvar : "";
+  } else {
+    const poc = (n.kids || []).length;
+    odznak.textContent = poc
+      ? poc + " " + sklonNizsi(n.lvl, poc) + " · " + n.aktCount + " " + sklonAkt(n.aktCount)
+      : "bez položek";
+  }
+  if (odznak.textContent) el.appendChild(odznak);
+
+  el.title = TYPY[n.lvl] + " " + n.kod + (n.nazev ? " — " + n.nazev : "")
+    + (n.lvl === "k" ? "\nKlikni pro detail" : "\nKlikni pro rozpad níž");
+  return el;
+}
+
+const NIZSI_SKLON = {
+  a: ["proces", "procesy", "procesů"],
+  p: ["dílčí proces", "dílčí procesy", "dílčích procesů"],
+  d: ["aktivita", "aktivity", "aktivit"]
+};
+const sklonNizsi = (lvl, p) => {
+  const t = NIZSI_SKLON[lvl] || NIZSI_SKLON.d;
+  return p === 1 ? t[0] : p >= 2 && p <= 4 ? t[1] : t[2];
+};
+
+function renderRozklad(){
+  const q = norm(document.getElementById("q").value.trim());
+  const ut = document.getElementById("fUtvar").value;
+  const stav = document.getElementById("fStav").value;
+  const jenOsirele = document.getElementById("cOsirele").checked;
+
+  const koren = TREE.filter(n => !jenOsirele || n.sirotek)
+                    .map(n => filtruj(n, q, ut, stav, jenOsirele && !q))
+                    .filter(Boolean);
+
+  elSloupce.querySelectorAll(".rz-sloupec").forEach(el => el.remove());
+
+  let nabidka = koren;
+  for (let i = 0; i < RZ_UROVNI; i++){
+    const sloupec = document.createElement("div");
+    sloupec.className = "rz-sloupec";
+    sloupec.dataset.uroven = i;
+
+    /* Vybraný kód nemusí po změně filtru existovat — cesta se pak zkrátí. */
+    const vybrany = nabidka.find(n => n.kod === rzCesta[i]);
+    if (!vybrany) rzCesta.length = i;
+
+    if (!nabidka.length){
+      const p = document.createElement("div");
+      p.className = "rz-prazdno";
+      p.textContent = i === 0
+        ? "Nic neodpovídá zadanému filtru."
+        : (rzCesta.length > i - 1 ? "Tady rejstřík končí — níž už nic není." : "Vyber položku vlevo.");
+      sloupec.appendChild(p);
+    } else {
+      nabidka.forEach(n => {
+        const el = rzUzel(n, n.kod === rzCesta[i]);
+        el.addEventListener("click", () => {
+          rzCesta.length = i;
+          rzCesta[i] = n.kod;
+          if (n.lvl === "k") detail(n);
+          renderRozklad();
+        });
+        sloupec.appendChild(el);
+      });
+    }
+    elSloupce.appendChild(sloupec);
+    nabidka = vybrany ? (vybrany.kids || []) : [];
+  }
+  rzSpojnice();
+}
+
+/* Spojnice se počítají z pozic v DOM, ne z indexů — sloupce mají vlastní
+   scroll a uzly různou výšku, takže žádný výpočet „dopředu" by neseděl. */
+function rzSpojnice(){
+  elSpojnice.textContent = "";
+  const ramec = elSloupce.getBoundingClientRect();
+  elSpojnice.setAttribute("viewBox", "0 0 " + ramec.width + " " + ramec.height);
+  elSpojnice.setAttribute("width", ramec.width);
+  elSpojnice.setAttribute("height", ramec.height);
+
+  const sloupce = [...elSloupce.querySelectorAll(".rz-sloupec")];
+  sloupce.forEach((sloupec, i) => {
+    const vybrany = sloupec.querySelector('.rz-uzel[aria-selected=true]');
+    const dalsi = sloupce[i + 1];
+    if (!vybrany || !dalsi) return;
+    const zdroj = vybrany.getBoundingClientRect();
+    const x1 = zdroj.right - ramec.left, y1 = zdroj.top + zdroj.height / 2 - ramec.top;
+
+    dalsi.querySelectorAll(".rz-uzel").forEach(cil => {
+      const c = cil.getBoundingClientRect();
+      // uzel odscrollovaný mimo sloupec by vyrobil čáru přes celou plochu
+      if (c.bottom < dalsi.getBoundingClientRect().top
+          || c.top > dalsi.getBoundingClientRect().bottom) return;
+      const x2 = c.left - ramec.left, y2 = c.top + c.height / 2 - ramec.top;
+      const ohyb = (x2 - x1) / 2;
+      const cara = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      cara.setAttribute("d", "M" + x1 + "," + y1
+        + " C" + (x1 + ohyb) + "," + y1 + " " + (x2 - ohyb) + "," + y2 + " " + x2 + "," + y2);
+      cara.setAttribute("fill", "none");
+      cara.setAttribute("stroke", "var(--line)");
+      cara.setAttribute("stroke-width", "1.5");
+      elSpojnice.appendChild(cara);
+    });
+  });
+}
+
+/* ---- přepínač zobrazení ---- */
+const zobrazeni = () =>
+  document.querySelector('#fZobrazeni button[aria-pressed=true]').dataset.zobrazeni;
+
+function prekresli(){
+  const rozklad = zobrazeni() === "rozklad";
+  elRozklad.hidden = !rozklad;
+  document.getElementById("tree").hidden = rozklad;
+  // hloubku rozbalení řídí v rozkladu klikání, rozbalovátko by tam lhalo
+  document.getElementById("fUroven").style.display = rozklad ? "none" : "";
+  if (rozklad) renderRozklad(); else render();
+}
+
+document.getElementById("fZobrazeni").addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  [...e.currentTarget.querySelectorAll("button")]
+    .forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+  prekresli();
+});
+
+elSloupce.addEventListener("scroll", rzSpojnice, true);
+window.addEventListener("resize", () => { if (zobrazeni() === "rozklad") rzSpojnice(); });
 
 function detail(n){
   const k = n.rec, body = document.getElementById("detailBody");
@@ -380,7 +594,7 @@ const sel = document.getElementById("fUtvar");
 utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
 
 ["q","fUtvar","fStav","fUroven","cOsirele"].forEach(id => document.getElementById(id)
-  .addEventListener(id === "q" ? "input" : "change", render));
+  .addEventListener(id === "q" ? "input" : "change", prekresli));
 
 /* Bez osiřelých položek nemá přepínač co ukázat — zůstává vidět (jinak by
    nebylo poznat, že se na ně kontroluje), ale je neaktivní a řekne proč. */
@@ -411,6 +625,8 @@ function pouzijVelikost(px){
   fs.querySelectorAll("button").forEach(b =>
     b.setAttribute("aria-pressed", b.dataset.fs === String(px) ? "true" : "false"));
   pamet.write("mapa.fs", px);
+  // uzly změní výšku, takže spojnice spočítané pro starou velikost nesedí
+  if (typeof zobrazeni === "function" && zobrazeni() === "rozklad") rzSpojnice();
 }
 fs.addEventListener("click", e => {
   const b = e.target.closest("button[data-fs]");
@@ -418,7 +634,7 @@ fs.addEventListener("click", e => {
 });
 pouzijVelikost(+pamet.read("mapa.fs", "14") || 14);
 
-render();
+prekresli();
 </script>
 </body>
 </html>

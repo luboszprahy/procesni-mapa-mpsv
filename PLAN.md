@@ -2859,3 +2859,51 @@ staré balíky 96–99 smazat (jsou v git historii).
    edge cases: historické zápisy ve `STATUS.md` a `PLAN.md` se nepřepisují
    risk: nechat v CLAUDE.md příkaz, který příští session spustí a rozbije si tím build
 
+## F20 — druhé zobrazení mapy: rozkladový diagram — HOTOVO 07.09.2026
+
+Zadáno 07.09.2026 uživatelem (s předlohami: Power BI decomposition tree,
+stromový diagram MindOnMap). Rozhodnutí uživatele: **přepínač v existující
+mapě** (ne druhý soubor) a **rozbalování cesty à la Power BI** (ne celý strom
+najednou — při 250 dílčích procesech by stránka měla přes 10 000 px).
+
+1. [Refaktor filtru] — co: `src/mapa_template.html`, rozdělit `mk()`
+   Dnes `mk()` v jednom průchodu filtruje i staví DOM. Vznikne `filtruj(n, q,
+   ut, stav, forced)`, která vrátí filtrovanou kopii uzlu nebo `null`; `mk()`
+   pak jen staví DOM z už filtrovaného uzlu. Rozklad použije touž `filtruj`.
+   verify: `python src/build_mapa.py` + `python src/check_mapa_html.py`;
+     v prohlížeči strom vypadá a filtruje stejně jako před zásahem
+     (hledání, útvar, stav, osiřelé, hloubka rozbalení)
+   edge cases: shoda na uzlu zpřístupní celou podstrukturu (`forced`);
+     filtr útvaru platí jen na aktivity; stav se u větve počítá z `aktS`
+   risk: tichá změna chování filtru — proto se porovnává proti dnešnímu stavu,
+     ne jen „vypadá to rozumně"
+
+2. [Přepínač] — co: `src/mapa_template.html`, tlačítka Strom / Rozklad
+   Přepíná viditelnost `#tree` a nového `#rozklad`. Volba hloubky (`#fUroven`)
+   se v rozkladu schová — tam hloubku řídí klikání, ne rozbalovátko.
+   verify: přepnutí tam a zpět zachová hledání i filtry; `#fUroven` je vidět
+     jen ve stromu
+   edge cases: přepnutí s aktivním hledáním; přepnutí při zapnutém „jen osiřelé"
+   risk: filtry se při přepnutí resetují a uživatel přijde o rozdělanou práci
+
+3. [Rozkladový diagram] — co: nová funkce `renderRozklad()`
+   Čtyři sloupce (Agenda → Proces → Dílčí proces → Aktivita). Sloupec N+1
+   ukazuje děti uzlu vybraného ve sloupci N; klik vybírá a překresluje vpravo.
+   Spojnice vybraný uzel → jeho děti jako SVG křivky nad sloupci.
+   verify: klik na agendu otevře sloupec procesů; klik na aktivitu otevře
+     stejný detail jako ve stromu; při 250 dílčích procesech zůstane sloupec
+     scrollovatelný a spojnice sedí i po odscrollování
+   edge cases: uzel bez dětí (prázdný sloupec s hláškou); osiřelé pod uzlem
+     „Nezařazené"; aktivita ve víc dílčích procesech (M:N) se objeví v každém
+   risk: spojnice se rozjedou při scrollu nebo změně velikosti písma —
+     přepočítat na `scroll` i `resize`
+
+4. [Brána] — co: `src/check_mapa_html.py`
+   Přibude kontrola, že hotová stránka nese obě zobrazení (přepínač, kontejner
+   rozkladu, hlavičky sloupců) — dnes hlídá jen prvky stromu.
+   verify: mutace — odebrání přepínače ze šablony musí bránu shodit
+   edge cases: kontrola nesmí být závislá na textu popisků, ať ji nerozbije
+     přejmenování
+   risk: brána, která kontroluje jen existenci `id`, projde i nefunkčnímu
+     diagramu — proto se ověřuje i to, že se kreslí ze společné `filtruj`
+

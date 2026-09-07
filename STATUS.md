@@ -30,6 +30,39 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
+## 07.09.2026 — F20: mapa má druhé zobrazení, rozkladový diagram
+
+Zadal uživatel s předlohami (Power BI decomposition tree, stromový diagram).
+Rozhodl **přepínač v existující mapě** místo druhého souboru a **rozbalování
+jedné cesty** místo celého stromu — při 250 dílčích procesech by stránka
+vykreslená naráz měla přes 10 000 px.
+
+Nahoře v liště je `Strom | Rozklad`. Rozklad má čtyři sloupce
+(Agenda → Proces → Dílčí proces → Aktivita); sloupec N+1 ukazuje děti uzlu
+vybraného ve sloupci N, spojnice jsou SVG křivky od vybraného uzlu k jeho
+dětem. Klik na aktivitu otevře týž detail jako ve stromu.
+
+**Filtry jsou společné, a to je na tom to podstatné.** Filtrování bylo dosud
+zapletené do stavby DOM ve funkci `mk()`; vznikla z něj samostatná `filtruj()`,
+kterou volají obě zobrazení. Kdyby každé filtrovalo po svém, ukázala by dvě
+zobrazení téhož rejstříku jiná čísla — a to je přesně ten druh chyby, které si
+nikdo nevšimne. Brána to hlídá: ověřuje, že `filtruj` existuje **jednou** a že
+ji volá `render()` i `renderRozklad()`.
+
+Volba hloubky (`Rozbalit:`) se v rozkladu schová — tam hloubku řídí klikání.
+
+**Ověřeno bez prohlížeče** (rozšíření Chrome nebylo připojené):
+- datová vrstva v Node nad hotovou stránkou — průchod první větví dá
+  `7 → 10 → 4 → 2` uzlů a cestu `01 / 01-01 / 01-01-001 / 01-01-001-0001`,
+  celkem 7/46/250/46 uzlů, filtr vrací podmnožinu (hledání „rozpočt" → 2/3/6/1);
+- brána `check_mapa_html.py`: 37 kontrol (dřív 31), 0 chyb;
+- mutačně 4/4: odebraný přepínač, odebraný kontejner sloupců, rozklad
+  obcházející `filtruj`, chybějící hlavičky — každá mutace shodí bránu, a to
+  z vlastního důvodu, ne na kontrole čerstvosti stránky.
+
+**Co ověřené není:** jak to vypadá a jestli spojnice sedí při scrollu a změně
+velikosti písma. To umí posoudit jen oko v prohlížeči.
+
 ## 07.09.2026 odpoledne — balík 1.0.0.101: ImportFlow šlo zase zapnout
 
 **Příznak:** po importu balíku 100 nešlo `ImportFlow` zapnout:

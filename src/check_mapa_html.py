@@ -72,6 +72,23 @@ def main():
     overit(v_html <= hledana | {"tree", "detail", "detailBody"},
            f"v HTML je ovládací prvek, se kterým JS nepracuje: {sorted(v_html - hledana)}")
 
+    # --- druhé zobrazení: rozkladový diagram (F20) ---
+    # Kontroluje se kostra, ne popisky — přejmenování „Rozklad" bránu shodit nemá.
+    overit('id="fZobrazeni"' in tpl and 'data-zobrazeni="rozklad"' in tpl,
+           "chybí přepínač zobrazení strom/rozklad")
+    overit('id="rozklad"' in tpl and 'id="rzSloupce"' in tpl and 'id="rzSpojnice"' in tpl,
+           "chybí kontejner rozkladového diagramu, sloupců nebo spojnic")
+    overit(tpl.count('class="rz-hlavicky"') == 1 and tpl.count("<div>") >= 4,
+           "rozkladový diagram nemá hlavičky čtyř úrovní")
+    # Obě zobrazení musí filtrovat týmž kódem, jinak ukážou jiná čísla téhož
+    # rejstříku. Že `filtruj` existuje nestačí — musí ji volat oba renderery.
+    overit(tpl.count("function filtruj(") == 1,
+           "filtrovací funkce není společná (chybí, nebo je definovaná víckrát)")
+    for kdo in ("render", "renderRozklad"):
+        telo = tpl.split(f"function {kdo}(", 1)[-1].split(chr(10) + "function ", 1)[0]
+        overit("filtruj(" in telo,
+               f"{kdo}() nefiltruje přes společnou filtruj() — zobrazení se rozejdou")
+
     # --- ovládací prvky podle zadání F6/A ---
     overit('id="cKod"' in tpl and "bez-kodu" in tpl,
            "chybí zatržítko kódu nebo třída bez-kodu")
