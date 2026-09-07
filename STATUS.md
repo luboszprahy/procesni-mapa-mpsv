@@ -9,14 +9,22 @@ stejný**. Dvoubalíkový režim končí.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Otestuj `deploy/ppf/procesnimapa_1_0_0_101.zip` na PPF DEV.** Import jako
-   upgrade, otevřít ve Studiu, mikro-změna → Save → Publish. Co je nového:
-   tlačítko **Přesun** v řádku procesu (Editace → Procesy), sjednocený pruh
-   voleb na úvodní obrazovce a **víc vlastníků** u agendy, procesu i dílčího
-   procesu — a nová **importní šablona s 12 sloupci** (`deploy/sablona_import_aktivit.xlsx`,
-   nahraj ji do Site Assets). Data pro PPF jsou anonymizovaná (`runs/anonym`
-   → `src/import_data.js`), číselník útvarů se změnil ze 7 na 44 položek,
-   takže ho přenes taky.
+1. **Otestuj balík 1.0.0.101 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
+   postup krok za krokem v `deploy/ppf/README.md` (sedm kroků).
+
+   - **`ImportFlow` po importu ručně zapni** — v balíku 100 nešlo zapnout
+     (zacyklený `runAfter`, opraveno v 101) a import stav zapnutí nemění.
+   - **Krok 1 spusť znovu i tam, kde už běžel** (`deploy/ppf/01_zaloz_listy.js`) —
+     balík 99 přidal list `Útvary`, bez něj se formulář číselníku neotevře.
+   - Číselník útvarů narostl ze 7 na 44 položek → přenes data znovu
+     (`deploy/ppf/02_import_dat.js`, anonymizovaná).
+   - Do Site Assets nahraj `deploy/ppf/site_assets/` — je tam i importní
+     šablona s 12 sloupci.
+
+   Co je nového proti tomu, cos viděl naposledy: tlačítko **Přesun** v řádku
+   procesu (Editace → Procesy), sjednocený pruh voleb na úvodní obrazovce,
+   **víc vlastníků** u agendy, procesu i dílčího procesu, a `O33` je zařazený
+   pod `Sekce 3`.
 2. Ještě neodzkoušená v provozu je oprava `substring` z balíku 96 — plný přesun
    z aplikace, blok **I** testovacího scénáře. To je jediné, co u přesunu chybí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
