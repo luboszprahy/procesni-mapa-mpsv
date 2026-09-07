@@ -1,4 +1,4 @@
-# Instalace balíku `procesnimapa_1_0_0_87.zip`
+# Instalace balíku `procesnimapa_1_0_0_100.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -9,9 +9,9 @@ Cílový web:
 https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa
 ```
 
-> **Pro MPSV platí `deploy/mpsv/README.md`**, ne tenhle soubor. MPSV běží na
-> 1.0.0.65 a jeho složka je snímek k té verzi; přegeneruje se, až bude přístup
-> do tenantu.
+> **Pro MPSV platí `deploy/mpsv/README.md`**, ne tenhle soubor. Ta složka se
+> generuje (`src/make_deploy_mpsv.py`) a je aktuální pro týž balík 1.0.0.100;
+> liší se tím, že veze **neanonymizovaná** data a osmý krok navíc.
 
 ## Pořadí kroků 1 a 2 je závazné
 
@@ -29,15 +29,15 @@ jako vada balíku. Krok 1 obojí zakládá, proto musí být první.
 
 | složka | co |
 |---|---|
-| `CanvasApps/` | canvas app *procesní mapa*, čtyři obrazovky |
-| `Workflows/` | šest flow (viz krok 4) |
+| `CanvasApps/` | canvas app *procesní mapa*, šest obrazovek |
+| `Workflows/` | devět flow (viz krok 3) |
 | `environmentvariabledefinitions/` | devět proměnných, **bez hodnot** |
 | `solution.xml`, `customizations.xml` | manifest a napojení |
 
 Dokumentace v zipu **není** — solution zip nese jen artefakty Power Platform.
 Referenční popisy jsou vedle: `sharepoint_schema.md` (listy a knihovny),
 `flow_Zaloha.md`, `flow_Restore.md`, `flow_Import.md`, `flow_MapaPublish.md`,
-`flow_Export.md`,
+`flow_Export.md`, `flow_Presun.md`,
 `flow_AktualizaceKratkehoNazvu.md` (kontrakty flow), `navod_sprava.md`
 (jak appku používat), `navod_publikace_mapy.md` (HTML mapa).
 
@@ -58,9 +58,11 @@ a doplní sloupec
 jako BaseTemplate 101, tedy v kořenu webu (`/Zalohy`, `/Exporty`,
 `/Import`), ne pod `/Lists/`.
 
-> **Balíky 85 a 87 tenhle krok vyžadují znovu i tam, kde už skript běžel** —
-> knihovna `Import` je nová a `ImportFlow` by bez ní spadl na neexistující
-> složce. Skript je idempotentní, takže se nic dalšího nezaloží dvakrát.
+> **Balíky 85, 87 a 99 tenhle krok vyžadují znovu i tam, kde už skript běžel.**
+> 85/87: knihovna `Import`, bez které `ImportFlow` spadne na neexistující složce.
+> 99: list **`Útvary`** (číselník organizačních útvarů, 44 položek) — appka z něj
+> plní nabídku vlastníků a bez něj se formulář číselníku neotevře.
+> Skript je idempotentní, takže se nic dalšího nezaloží dvakrát.
 
 **Ověření:** poslední řádek výpisu musí říct, že chybných sloupců je **0**.
 V Site contents musí být vidět `Zálohy`, `Exporty`, `Import` a list `Historie kódů`.
@@ -68,7 +70,7 @@ Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_87.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_100.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:
@@ -118,11 +120,12 @@ zůstane vypnuté i po importu opravené verze. Po importu, který skončil hlá
 | `ZalohaScheduled` | týž snímek | denně 5:00 |
 | `RestoreFlow` | obnova rejstříku ze snímku | z appky |
 | `ImportFlow` | hromadné pořízení aktivit z Excelu | z appky |
+| `PresunFlow` | přesun agendy, procesu nebo dílčího procesu | z appky |
 
 Vypnuté flow se projeví jako chyba **appky**, ne flow: volající canvas app
 vidí jen `502 BadGateway / NoResponse` a příčinu z ní poznat nejde.
 
-**Ověření:** všech **osm** má stav *On*.
+**Ověření:** všech **devět** má stav *On*.
 
 > **Testovací flow `import new data`** (to, kterým se ověřoval DLP pro
 > Excel Online) v balíku 84 **není** — vezlo v sobě natvrdo adresu webu
@@ -206,6 +209,16 @@ mikro-změna → Save → Publish → **Export solution** a poslat zip.
 
 | **Data ▾ → Import z tabulky** | otevře obrazovku náhledu; v rozbalovátku jsou sešity z knihovny `Import` |
 | **Data ▾ → Obnova ze zálohy** | totéž pro snímky z knihovny `Zálohy` |
+
+Co přibylo v balících 95–100 a v předchozím návodu ještě nebylo:
+
+| co zkusit | co má nastat |
+|---|---|
+| Editace → Procesy → **Přesun** v řádku | otevře obrazovku přesunu; *Spočítat* ukáže náhled dopadu a *Provést* teprve zapíše |
+| číselník: pole **vlastníků** u agendy, procesu i dílčího procesu | trojice `nabídka útvarů ▾` + `+` + textové pole; `+` odmítne útvar, který v seznamu už je |
+| nabídka útvarů v číselníku | **44 položek** (dřív 7); zdrojem je list `Útvary` |
+| **Data ▾ → Vzorová tabulka pro import** | sešit má **12 sloupců** — tři z nich jsou vlastníci nadřazených úrovní |
+| pruh voleb na úvodní obrazovce | jeden sjednocený pruh, ne roztroušená tlačítka |
 
 Obojí vede na **jednu obrazovku** (od balíku 87): vyber soubor → Zkontrolovat
 → podívej se, co z toho vyjde → teprve pak Provést. Tlačítko *Provést* je
