@@ -153,10 +153,10 @@
      vycházejí spojnice, takže je vidět, že za ně může tahle karta
      (07.09.2026). */
   .rz-uzel .rz-sipka{position:absolute;right:4px;top:50%;transform:translateY(-50%);
-        width:19px;height:19px;border-radius:50%;color:#fff;background:var(--muted);
+        width:14px;height:14px;border-radius:50%;color:#fff;background:var(--muted);
         display:flex;align-items:center;justify-content:center;
-        font-size:1rem;font-weight:700;line-height:1;opacity:.95;
-        box-shadow:0 1px 3px rgba(51,47,116,.30)}
+        font-size:.76rem;font-weight:700;line-height:1;opacity:.95;
+        box-shadow:0 1px 2px rgba(51,47,116,.28)}
   /* Na syté ploše je kolečko bílé s barevnou šipkou — tmavé by v ní zmizelo. */
   .rz-uzel.lvl-a .rz-sipka{background:#fff;color:var(--a)}
   .rz-uzel.lvl-p .rz-sipka{background:#fff;color:var(--p)}
@@ -876,7 +876,7 @@ function detail(n){
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 /* Sekce se do podtitulku nepíše (07.09.2026): mapa nese celý rejstřík
    (7 agend, 46 procesů), takže „Sekce 3“ z ní dělala výsek, kterým není. */
-document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:42";
+document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:48";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]

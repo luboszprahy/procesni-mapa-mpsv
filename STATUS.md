@@ -296,6 +296,9 @@ syté plochy ve stromu vynutily (světlé chipy, obrácený trojúhelník, přeb
 nezmapovaná položka) — na světlém podkladu platí zase jedno pravidlo pro celý
 strom.
 
+Kolečko značky rozpadu zmenšeno z 19 na 14 px (20:48) — na sytých kartách
+bílý kroužek přebíjel text, který je vedle něj.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 
