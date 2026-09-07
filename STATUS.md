@@ -126,6 +126,25 @@ vrstev navazovaly a splývaly v jednu plochu.
 Vedlejší efekt delšího popisku: lišta se zalomila a přepínač velikosti písma
 spadl na druhý řádek. Vyhledávací pole má proto minimum 190 px místo 260.
 
+### Čtvrté kolo (19:56) — čáry zpět do jednoho bodu, značka jako kolečko
+
+Rozprostření začátků spojnic po spodní hraně rodiče (třetí kolo) uživatel
+zamítl: **čáry mají vycházet z jednoho středového bodu**. Vějíř z jednoho
+místa čte hierarchii líp — je vidět, že za všechny ty čáry může jedna karta.
+
+Značka „jde rozpadnout níž" je teď **kolečko v barvě vrstvy** s bílou šipkou,
+ne holá šipka. Sedí přesně v bodě, ze kterého spojnice vycházejí (v pásech
+dole uprostřed, ve sloupcích vpravo uprostřed), takže značka a začátek čar
+jsou totéž místo.
+
+**Otevřená otázka:** uživatel hlásí, že po volbě „Rozbalit: + dílčí procesy"
+nevidí dílčí procesy rozbalené. Naměřeno v prohlížeči je přitom všechno na
+místě — řádkové zobrazení ukazuje 7/46/250 viditelných uzlů, rozklad svisle
+3 sloupce se 7/46/250 kartami a správnými hlavičkami. Nejpravděpodobnější
+kandidát je **prázdná čtvrtina vpravo**: sloupce mají pevných 25 % šířky, při
+třech tedy zbývá prázdná plocha, která vypadá jako chybějící obsah. Čeká se
+na upřesnění, opravovat naslepo nemá smysl.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 

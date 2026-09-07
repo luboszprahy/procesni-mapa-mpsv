@@ -114,12 +114,18 @@
   .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
   /* Značka „jde rozpadnout níž" — jen na kartách, které mají potomky.
-     Karta bez ní je konec větve, ne nedoklikaná cesta. */
-  .rz-uzel .rz-sipka{position:absolute;right:6px;top:50%;transform:translateY(-50%);
-        font-size:1.5rem;font-weight:700;line-height:1;opacity:.9}
-  .rz-uzel.lvl-a .rz-sipka{color:var(--a)}
-  .rz-uzel.lvl-p .rz-sipka{color:var(--p)}
-  .rz-uzel.lvl-d .rz-sipka{color:var(--d)}
+     Karta bez ní je konec větve, ne nedoklikaná cesta. Je to kolečko
+     v barvě vrstvy, ne holá šipka: sedí přesně v bodě, ze kterého
+     vycházejí spojnice, takže je vidět, že za ně může tahle karta
+     (07.09.2026). */
+  .rz-uzel .rz-sipka{position:absolute;right:4px;top:50%;transform:translateY(-50%);
+        width:19px;height:19px;border-radius:50%;color:#fff;background:var(--muted);
+        display:flex;align-items:center;justify-content:center;
+        font-size:1rem;font-weight:700;line-height:1;opacity:.95;
+        box-shadow:0 1px 3px rgba(17,11,122,.35)}
+  .rz-uzel.lvl-a .rz-sipka{background:var(--a)}
+  .rz-uzel.lvl-p .rz-sipka{background:var(--p)}
+  .rz-uzel.lvl-d .rz-sipka{background:var(--d)}
   .rz-uzel:hover .rz-sipka{opacity:1;transform:translateY(-50%) translateX(2px)}
   .rz-uzel[aria-selected=true] .rz-sipka{opacity:1}
   .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
@@ -164,9 +170,8 @@
         -webkit-box-orient:vertical;overflow:hidden}
   .rzh-radka .rz-odznak{margin-top:auto}
   /* Rozpad vede dolů, ne doprava — značka se otočí a sedne pod text. */
-  /* Značka rozpadu je v pásu drobná: velká šipka pod každou kartou dělala
-     z řádky pilu a soupeřila se spojnicemi, které říkají totéž. */
-  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:0;font-size:1.1rem;
+  /* V pásu sedí kolečko dole uprostřed — v místě, odkud vede vějíř spojnic. */
+  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:1px;
         transform:translateX(-50%) rotate(90deg)}
   .rzh-radka .rz-uzel:hover .rz-sipka{transform:translateX(-50%) rotate(90deg) translateX(2px)}
   #rzhSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -676,16 +681,7 @@ function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
       ? (r.right < m.left || r.left > m.right)
       : (r.bottom < m.top || r.top > m.bottom);
 
-    /* Ve vodorovné variantě vycházejí čáry z RŮZNÝCH bodů spodní hrany rodiče,
-       rozprostřených podle pořadí dítěte. Z jednoho bodu se totiž vějíř deseti
-       čar u kořene slepí a přestane být poznat, která karta patří pod kterou
-       (řekl uživatel 07.09.2026). U sloupců to potřeba není — děti leží pod
-       sebou, takže se čáry rozbíhají samy. */
-    const cile = [...dalsi.querySelectorAll(".rz-uzel")];
-    const podleRodice = {};
-    cile.forEach(el => (podleRodice[el.dataset.rodic] = podleRodice[el.dataset.rodic] || []).push(el));
-
-    cile.forEach(cil => {
+    dalsi.querySelectorAll(".rz-uzel").forEach(cil => {
       const rodic = rodice[+cil.dataset.rodic];
       if (!rodic) return;
       const zdroj = rodic.getBoundingClientRect();
@@ -700,12 +696,12 @@ function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
            o tom, která karta patří pod kterou (řekl uživatel 07.09.2026).
            Vějíř samostatných křivek je proto zpět; místo, ve kterém se
            rozbíhají, dělá spodní odsazení řádky. */
-        const sourozenci = podleRodice[cil.dataset.rodic];
-        const podil = (sourozenci.indexOf(cil) + 1) / (sourozenci.length + 1);
-        // rozprostření drží uvnitř karty, ale nikdy ne až k jejím rohům
-        const x1 = zdroj.left + 10 + (zdroj.width - 20) * podil - ramec.left;
-        const y1 = zdroj.bottom - ramec.top;
-        const x2 = c.left + c.width / 2 - ramec.left, y2 = c.top - ramec.top;
+        /* Všechny čáry vycházejí z JEDNOHO bodu — středu spodní hrany rodiče,
+           tam, kde sedí značka rozpadu (rozhodl uživatel 07.09.2026). Vějíř
+           z jednoho místa čte hierarchii líp než rozprostřené začátky: je
+           vidět, že za všechny ty čáry může jedna karta. */
+        const x1 = zdroj.left + zdroj.width / 2 - ramec.left, y1 = zdroj.bottom - ramec.top;
+        const x2 = c.left + c.width / 2 - ramec.left,         y2 = c.top - ramec.top;
         const ohyb = (y2 - y1) / 2;
         tvar = "M" + x1 + "," + y1 + " C" + x1 + "," + (y1 + ohyb)
           + " " + x2 + "," + (y2 - ohyb) + " " + x2 + "," + y2;
