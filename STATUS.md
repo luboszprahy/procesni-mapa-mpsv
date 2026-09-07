@@ -30,6 +30,40 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
+## 07.09.2026 — F20/oprava: rozklad byl po otevření prázdný
+
+Uživatel poslal snímek se třemi prázdnými sloupci a hláškou „Tady rejstřík
+končí — níž už nic není." Dvě chyby najednou, obě moje:
+
+**1. `rzCesta.length = i` na kratším poli ho NATÁHNE.** Při prázdné cestě
+a `i = 1` vznikne řídké pole délky 1, sloupec pak tvrdí, že výběr existuje,
+a místo „Vyber položku vlevo" hlásí konec rejstříku. Podmínka je teď
+`if (!vybrany && rzCesta.length > i)`.
+
+**2. Prázdný diagram po otevření.** I s opravenou hláškou byly tři sloupce ze
+čtyř prázdné. Při prvním zobrazení se proto předvybere první větev; jakmile
+uživatel klikne, řídí výběr on.
+
+Zároveň podle připomínek: spojnice měly barvu `--line` (světle šedá na bílém,
+prakticky neviditelná) — berou teď **barvu cílové vrstvy**, tah 2,5 px; karty
+mají mezeru 16 px místo 7; volba „Rozbalit" se v rozkladu vrátila a určuje,
+**kolik sloupců je vidět** (skrývá se s nimi i hlavička).
+
+### Nový test `src/test_rozklad.js` — a proč byl zprvu slepý
+
+Brána `check_mapa_html.py` kontroluje strukturu, ne chování, takže tuhle chybu
+chytit nemohla. Přibyl test, který spouští **skutečnou** `renderRozklad()`
+z hotové stránky nad minimálním DOM stubem (12 kontrol).
+
+Poučné je, že první verze testu původní chybu **nechytila**:
+`rzCesta.length = 3` na prázdném poli vyrobí **řídké pole s dírami**
+a `Array.every()` díry **přeskakuje** — nad `[ , , ]` vrátí `true`. Kontrola
+tedy prošla nad polem, které JSON vypíše jako `[null,null,null]`. Léčba je
+spread (`[...pole].every(...)`), který díry rozbalí na `undefined`.
+
+Mutačně ověřeno 4/4: původní bug se zkracováním, odebraný předvýběr,
+ignorovaná volba úrovně, sloupec bez filtru — každá mutace test shodí.
+
 ## 07.09.2026 — F20: mapa má druhé zobrazení, rozkladový diagram
 
 Zadal uživatel s předlohami (Power BI decomposition tree, stromový diagram).

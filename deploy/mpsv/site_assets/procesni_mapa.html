@@ -466,22 +466,31 @@ function renderRozklad(){
   [...document.querySelectorAll(".rz-hlavicky div")]
     .forEach((h, i) => h.hidden = i >= sloupcu);
 
+  /* Bez výběru by byly tři sloupce ze čtyř prázdné a diagram by po otevření
+     vypadal jako bez dat (hlášeno 07.09.2026). Při prvním zobrazení se proto
+     vybere první větev; jakmile uživatel klikne, řídí výběr on. */
+  if (!rzCesta.length){
+    for (let n = koren[0]; n; n = (n.kids || [])[0]) rzCesta.push(n.kod);
+  }
+
   let nabidka = koren;
   for (let i = 0; i < sloupcu; i++){
     const sloupec = document.createElement("div");
     sloupec.className = "rz-sloupec";
     sloupec.dataset.uroven = i;
 
-    /* Vybraný kód nemusí po změně filtru existovat — cesta se pak zkrátí. */
+    /* Vybraný kód nemusí po změně filtru existovat — cesta se pak zkrátí.
+       Podmínka `> i` je nutná: `length = i` na kratším poli ho naopak NATÁHNE
+       o prázdné prvky a sloupec pak tvrdí, že výběr existuje. */
     const vybrany = nabidka.find(n => n.kod === rzCesta[i]);
-    if (!vybrany) rzCesta.length = i;
+    if (!vybrany && rzCesta.length > i) rzCesta.length = i;
 
     if (!nabidka.length){
       const p = document.createElement("div");
       p.className = "rz-prazdno";
       p.textContent = i === 0
         ? "Nic neodpovídá zadanému filtru."
-        : (rzCesta.length > i - 1 ? "Tady rejstřík končí — níž už nic není." : "Vyber položku vlevo.");
+        : (rzCesta[i - 1] ? "Tady rejstřík končí — níž už nic není." : "Vyber položku vlevo.");
       sloupec.appendChild(p);
     } else {
       nabidka.forEach(n => {
@@ -594,7 +603,7 @@ function detail(n){
    určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 14:48";
+  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 14:55";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
