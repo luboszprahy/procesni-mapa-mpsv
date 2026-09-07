@@ -299,6 +299,12 @@ strom.
 Kolečko značky rozpadu zmenšeno z 19 na 14 px (20:48) — na sytých kartách
 bílý kroužek přebíjel text, který je vedle něj.
 
+Šipka uvnitř kolečka je od 20:50 kreslená **SVG cestou, ne textovým znakem**.
+Znak jednoduché pravé uvozovky má nesymetrický obrys, takže v kruhu sedí
+nakřivo, a otočení o 90° ve vodorovné variantě tu odchylku zvýrazní — po
+zmenšení kolečka to bylo vidět naplno. Cesta `M9 6l6 6-6 6` je souměrná kolem
+středu viewBoxu, takže centrování drží v obou orientacích.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 
