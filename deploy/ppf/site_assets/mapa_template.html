@@ -6,25 +6,31 @@
 <title>Procesní mapa MPSV</title>
 <style>
   :root{
-    /* Paleta zadaná uživatelem 07.09.2026, druhá v pořadí (Adobe Color):
-       #5C75F2 #4AD1B2 #4F5BBD #EA9B0B #8A153E.
-       Vrstvy rozlišuje ODSTÍN, ne sytost — na čtyři úrovně sytost nestačí.
-       Základ `#4F5BBD` drží kontinuitu s dosavadní modrou hlavičkou (pravidlo
-       nulté), `#5C75F2` je jí příliš blízká na sousední vrstvu, takže z ní je
-       akcent vybrané karty.
-       Role: plné barvy nesou svislé linky u karet (plocha, ne text), ztmavené
-       varianty hlavičky s bílým písmem, barevný text, kolečka značek i spojnice
-       — mátová má na bílé jen 1,90:1 a okrová 2,28:1, jako tenká čára by zmizely.
-       Plochy jsou plná barva + 82 % bílé, podklady sloupců a pásů + 93 %.
-       Nejtěsnější dvojice text/podklad je 4,55:1, tedy nad WCAG AA. */
-    --bg:#f6f8fc; --panel:#fff; --ink:#1b2233; --muted:#4a5266; --line:#dce1ec;
-    --a:#4f5bbd; --p:#2b7967; --d:#885a06; --k:#8a153e;
-    --chip:#e7ebf4; --hit:#fff3bf; --akcent:#5c75f2;
-    --shadow:0 1px 3px rgba(79,91,189,.12);
-    /* podklady vrstev stromu — plná barva naředěná bílou */
-    --a-bg:#dfe1f3; --p-bg:#def7f1; --d-bg:#fbedd3; --k-bg:transparent;
-    /* svislé linky u karet — plné barvy palety */
-    --a-line:#4f5bbd; --p-line:#4ad1b2; --d-line:#ea9b0b; --k-line:#8a153e;
+    /* Paleta zadaná uživatelem 07.09.2026, třetí v pořadí (Adobe Color):
+       #426AC9 #6E20A3 #23C3BB #4166AE #230818 — a na přání použitá v PLNÉ
+       SYTOSTI jako plocha, s bílým písmem, ne jako světlá odvozenina.
+
+       Jedna výjimka je vynucená měřením, ne vkusem: `#23C3BB` má s bílým
+       písmem jen 2,19:1, takže dílčí proces nese text tmavý (7,25:1). Zbylé
+       tři bílý text unesou (5,62 / 8,76 / 18,76).
+
+       Aktivita zůstala bez plochy — `#230818` je prakticky černá a nejnižší
+       úroveň nese nejdelší texty; plný černý pruh přes celý řádek by z ní
+       udělal nejtěžší prvek stránky. Drží ji svislá linka.
+
+       Sekundární text (kód, odznak) je na sytých plochách světlý `#e9eef8`
+       místo šedé, jinak by na nich zmizel. */
+    --bg:#f4f6fb; --panel:#fff; --ink:#1b2233; --muted:#4a5266; --line:#dce1ec;
+    --a:#4166ae; --p:#6e20a3; --d:#14716c; --k:#230818;
+    --chip:#e7ebf4; --hit:#fff3bf; --akcent:#426ac9;
+    --shadow:0 1px 3px rgba(65,102,174,.14);
+    /* PLNÁ sytost jako plocha vrstvy */
+    --a-bg:#4166ae; --p-bg:#6e20a3; --d-bg:#23c3bb; --k-bg:transparent;
+    /* písmo na té ploše — bílé tam, kde projde, jinak tmavé */
+    --a-fg:#ffffff; --p-fg:#ffffff; --d-fg:var(--ink); --k-fg:var(--ink);
+    --a-fg2:#e9eef8; --p-fg2:#f0e6f7; --d-fg2:#33403f; --k-fg2:var(--muted);
+    /* svislé linky u karet a řádků — plné barvy palety */
+    --a-line:#4166ae; --p-line:#6e20a3; --d-line:#23c3bb; --k-line:#230818;
     /* jediné místo, které řídí velikost písma celé stránky (viz #fVelikost) */
     --fs:14px;
   }
@@ -93,10 +99,10 @@
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
   /* Podklad sloupce je táž barva jako karta, jen zesvětlená smícháním s bílou.
      Stupeň je tak vidět i pod hlavičkou a karta se od něj přesto odliší. */
-  .rz-sloupec[data-uroven="0"]{background:#f3f4fa}
-  .rz-sloupec[data-uroven="1"]{background:#f2fcfa}
-  .rz-sloupec[data-uroven="2"]{background:#fef8ee}
-  .rz-sloupec[data-uroven="3"]{background:#f7eff1}
+  .rz-sloupec[data-uroven="0"]{background:#f2f4f9}
+  .rz-sloupec[data-uroven="1"]{background:#f5eff9}
+  .rz-sloupec[data-uroven="2"]{background:#f0fbfa}
+  .rz-sloupec[data-uroven="3"]{background:#f0eeef}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -110,15 +116,22 @@
         transition:box-shadow .12s,transform .12s}
   /* Výplň nese vrstvu, stejně jako ve stromu — barva řekne úroveň dřív než
      text. Odstíny jsou světlé odvozeniny palety, aby text zůstal čitelný. */
-  .rz-uzel.lvl-a{background:var(--a-bg);border-left-color:var(--a-line)}
-  .rz-uzel.lvl-p{background:var(--p-bg);border-left-color:var(--p-line)}
-  .rz-uzel.lvl-d{background:var(--d-bg);border-left-color:var(--d-line)}
-  .rz-uzel.lvl-k{background:#ead5dc;border-left-color:var(--k-line)}
-  .rz-uzel:hover{box-shadow:0 2px 8px rgba(79,91,189,.22);transform:translateY(-1px)}
+  .rz-uzel.lvl-a{background:var(--a-bg);border-left-color:var(--a-line);color:var(--a-fg)}
+  .rz-uzel.lvl-p{background:var(--p-bg);border-left-color:var(--p-line);color:var(--p-fg)}
+  .rz-uzel.lvl-d{background:var(--d-bg);border-left-color:var(--d-line);color:var(--d-fg)}
+  .rz-uzel.lvl-k{background:#f2eff0;border-left-color:var(--k-line)}
+  .rz-uzel.lvl-a .rz-kod,.rz-uzel.lvl-a .rz-odznak{color:var(--a-fg2)}
+  .rz-uzel.lvl-p .rz-kod,.rz-uzel.lvl-p .rz-odznak{color:var(--p-fg2)}
+  .rz-uzel.lvl-d .rz-kod,.rz-uzel.lvl-d .rz-odznak{color:var(--d-fg2)}
+  /* Nezmapovaná položka se drží šedé `--muted` — ta má ale na sytých plochách
+     málo kontrastu, takže na nich přebírá světlou/tmavou barvu své vrstvy. */
+  .rz-uzel.lvl-a.unmapped .rz-nazev,.rz-uzel.lvl-p.unmapped .rz-nazev{color:var(--a-fg2)}
+  .rz-uzel.lvl-d.unmapped .rz-nazev{color:var(--d-fg2)}
+  .rz-uzel:hover{box-shadow:0 2px 8px rgba(65,102,174,.28);transform:translateY(-1px)}
   /* Vybraná karta se pozná rámečkem a stínem, ne jinou výplní — tu už drží
      vrstva a dvě barevné soustavy najednou by se bily. */
   .rz-uzel[aria-selected=true]{border-color:var(--akcent);border-width:2px;
-        box-shadow:0 0 0 2px rgba(92,117,242,.35),0 2px 10px rgba(79,91,189,.30)}
+        box-shadow:0 0 0 3px rgba(66,106,201,.45),0 2px 10px rgba(35,8,24,.30)}
   .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.76rem;color:var(--muted)}
   .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
@@ -131,10 +144,11 @@
         width:19px;height:19px;border-radius:50%;color:#fff;background:var(--muted);
         display:flex;align-items:center;justify-content:center;
         font-size:1rem;font-weight:700;line-height:1;opacity:.95;
-        box-shadow:0 1px 3px rgba(79,91,189,.35)}
-  .rz-uzel.lvl-a .rz-sipka{background:var(--a)}
-  .rz-uzel.lvl-p .rz-sipka{background:var(--p)}
-  .rz-uzel.lvl-d .rz-sipka{background:var(--d)}
+        box-shadow:0 1px 3px rgba(35,8,24,.30)}
+  /* Na syté ploše je kolečko bílé s barevnou šipkou — tmavé by v ní zmizelo. */
+  .rz-uzel.lvl-a .rz-sipka{background:#fff;color:var(--a)}
+  .rz-uzel.lvl-p .rz-sipka{background:#fff;color:var(--p)}
+  .rz-uzel.lvl-d .rz-sipka{background:#fff;color:var(--d)}
   .rz-uzel:hover .rz-sipka{opacity:1;transform:translateY(-50%) translateX(2px)}
   .rz-uzel[aria-selected=true] .rz-sipka{opacity:1}
   .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
@@ -148,10 +162,10 @@
   .rzh-pasy{position:relative}
   .rzh-pas{display:flex;align-items:stretch;border-top:1px solid var(--line)}
   .rzh-pas:first-child{border-top:0}
-  .rzh-pas[data-uroven="0"]{background:#f3f4fa}
-  .rzh-pas[data-uroven="1"]{background:#f2fcfa}
-  .rzh-pas[data-uroven="2"]{background:#fef8ee}
-  .rzh-pas[data-uroven="3"]{background:#f7eff1}
+  .rzh-pas[data-uroven="0"]{background:#f2f4f9}
+  .rzh-pas[data-uroven="1"]{background:#f5eff9}
+  .rzh-pas[data-uroven="2"]{background:#f0fbfa}
+  .rzh-pas[data-uroven="3"]{background:#f0eeef}
   /* Hlavička je štítek, ne plocha: plný tmavý blok přes celou výšku pásu byl
      nejsytější věc na obrazovce a přebíjel karty, o které jde (07.09.2026). */
   .rzh-hlavicka{flex:0 0 84px;padding:12px 8px;font-size:.76rem;font-weight:700;
@@ -203,10 +217,19 @@
   .lvl-p>.row{background:var(--p-bg);border-left-color:var(--p-line)}
   .lvl-d>.row{background:var(--d-bg);border-left-color:var(--d-line)}
   .lvl-k>.row{border-left-color:var(--k-line)}
-  .lvl-a>.row>.nm{font-weight:600;color:var(--a);font-size:1.07rem}
-  .lvl-p>.row>.nm{font-weight:600;color:var(--p)}
-  .lvl-d>.row>.nm{color:var(--d)}
+  .lvl-a>.row>.nm{font-weight:600;color:var(--a-fg);font-size:1.07rem}
+  .lvl-p>.row>.nm{font-weight:600;color:var(--p-fg)}
+  .lvl-d>.row>.nm{color:var(--d-fg)}
   .lvl-k>.row>.nm{color:var(--ink)}
+  /* Rozbalovací trojúhelník a odznak musí být vidět i na syté ploše. */
+  .lvl-a>.row>.tw{color:var(--a-fg2)}
+  .lvl-p>.row>.tw{color:var(--p-fg2)}
+  .lvl-d>.row>.tw{color:var(--d-fg2)}
+  .lvl-a>.row>.badge,.lvl-p>.row>.badge{background:rgba(255,255,255,.18);color:#fff}
+  .lvl-a>.row>.badge.no,.lvl-p>.row>.badge.no{background:#fdecea;color:#a3352a}
+  .lvl-a>.row>.kod,.lvl-p>.row>.kod{background:rgba(255,255,255,.16);color:var(--a-fg2)}
+  .node.unmapped.lvl-a > .row > .nm,.node.unmapped.lvl-p > .row > .nm,
+  .node.unmapped.lvl-d > .row > .nm{opacity:.78}
   .lvl-k>.row{cursor:pointer}
   /* Odsazení stupně 32+22 px. Dvě věci, které se snadno pletou: kde strom
      ZAČÍNÁ (to řeší úzký okraj `main`) a jak velký je KROK mezi úrovněmi.
@@ -228,8 +251,9 @@
   .legend{font-size:.86rem;color:var(--muted);padding:8px 12px 0;line-height:1.7}
   .legend[hidden]{display:none}
   .legend .badge{margin:0 2px;font-weight:600}
-  .badge.ut{background:#def7f1;color:var(--p)}
-  mark{background:var(--hit);padding:0 1px}
+  .badge.ut{background:#e6f9f8;color:var(--d)}
+  /* `mark` dědí barvu textu — na syté ploše by to byla bílá na žluté. */
+  mark{background:var(--hit);color:var(--ink);padding:0 1px}
   .empty{padding:20px;color:var(--muted);text-align:center}
   @media (max-width:900px){main{flex-direction:column}#detail{position:static;flex:1 1 auto;width:100%}}
 </style>

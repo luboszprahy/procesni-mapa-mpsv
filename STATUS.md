@@ -213,6 +213,39 @@ všechny její barvy byly tmavé.
 
 Nejtěsnější dvojice text/podklad: 4,55:1.
 
+### Osmé kolo (20:27) — třetí paleta, a poprvé v plné sytosti
+
+Paleta `#426AC9 #6E20A3 #23C3BB #4166AE #230818`, tentokrát se zadáním, které
+mění princip: **plné syté barvy jako plocha a bílé písmo**, ne světlé
+odvozeniny s tmavým textem. Dosavadní pravidlo skillu („syté barvy patří na
+akcenty, ne na plochy, přes které se čte") tím padá — u tří ze čtyř barev to
+vyjde, protože jsou dost tmavé.
+
+| vrstva | plocha (plná sytost) | písmo | kontrast |
+|---|---|---|---|
+| agenda | `#4166AE` | bílé | 5,62:1 |
+| proces | `#6E20A3` | bílé | 8,76:1 |
+| dílčí proces | `#23C3BB` | **tmavé** | 7,25:1 (bílé by mělo 2,19:1) |
+| aktivita | bez plochy, linka `#230818` | tmavé | — |
+
+Výjimka u tyrkysu není vkus, ale měření — a **týž závěr má i Adobe**: na jeho
+pruzích je popisek u `#23C3BB` tmavý, u ostatních čtyř bílý. Uživatel na to
+sám upozornil („v té paletě máš naznačené jaké písmo použít"), když už byla
+opravená; shoda výpočtu s tím, co nástroj sám ukazuje, je slušná kontrola.
+
+Aktivita zůstala bez plochy: `#230818` je prakticky černá a nejnižší úroveň
+nese nejdelší texty, takže by z ní plný černý pruh udělal nejtěžší prvek
+stránky.
+
+**Co plná sytost strhla s sebou** (nic z toho nebylo v zadání, všechno by bez
+opravy zmizelo):
+- sekundární text (kód, odznak) je na sytých plochách světlý `#e9eef8`, ne šedý;
+- kolečko značky rozpadu je bílé s barevnou šipkou — tmavé by v ploše zaniklo;
+- `mark` (zvýraznění hledání) dostal explicitní tmavou barvu, jinak by dědil
+  bílou a byla by bílá na žluté;
+- nezmapovaná položka se drží šedé `--muted`, která na sytých plochách nemá
+  kontrast — na nich přebírá světlou/tmavou barvu své vrstvy.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 
