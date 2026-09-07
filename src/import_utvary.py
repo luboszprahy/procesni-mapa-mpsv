@@ -10,10 +10,10 @@ Kód zůstává holé číslo (`11`, `331`, `3`), protože ho tak nesou aktivity
 i rejstřík; označení z MPSV (`O11`, `Sekce 3`) jde do názvu. Rozhodl uživatel
 06.09.2026 — data se tím nepřepisují.
 
-Nesrovnalosti ve zdroji skript **neopravuje sám**, jen vypíše: odbor pod
-odborem, oddělení bez odboru — legitimní organizační výjimky. Opravit se dá
-jen tím, co je jmenovitě v `OPRAVY_NADRIZENEHO` (cyklus `O33`, rozhodl
-uživatel 07.09.2026); i ta oprava se vypíše mezi nálezy.
+Nesrovnalosti ve zdroji skript **neopravuje**, jen vypíše: odbor pod odborem,
+oddělení bez odboru — legitimní organizační výjimky. Jedinou výjimkou je `O33`,
+který má v exportu jako nadřízeného sám sebe a je natvrdo zařazený pod
+`Sekce 3` (rozhodl uživatel 07.09.2026).
 
 Spouštět z kořene projektu:
     python src/import_utvary.py
@@ -40,15 +40,6 @@ UROVNE = {
     "sekce": "sekce",
     "odbor": "odbor",
     "oddělení": "oddělení",
-}
-
-# Ruční rozhodnutí o vadných řádcích zdroje: označení útvaru -> označení
-# nadřízeného. Uplatní se jen na ten konkrétní defekt, kvůli kterému vznikly;
-# zdrojový sešit se neupravuje. Až export z MPSV opraví, výjimka se přestane
-# uplatňovat a skript ji vypíše jako zbytečnou.
-OPRAVY_NADRIZENEHO = {
-    # ve zdroji nadřízený sám sobě, podle Pořadí 3330 a barvy sekce; 07.09.2026
-    "O33": "Sekce 3",
 }
 
 # Kód ministra. V datech se nevyskytuje (nic pod něj přímo nespadá), ale
@@ -100,7 +91,6 @@ def poradi(radek):
 def sestav(radky):
     """Vrátí (číselník, nálezy). Nálezy nezastavují — jen se vypíšou."""
     utvary, nalezy, mimo = [], [], []
-    pouzite_opravy = set()
 
     for radek in sorted(radky, key=poradi):
         oznaceni = str(radek.get("Útvar") or "").strip()
@@ -118,23 +108,19 @@ def sestav(radky):
             continue
 
         nadrizeny_zdroj = str(radek.get("Nadřízený útvar") or "").strip()
+        if oznaceni == "O33":
+            # Export z MPSV má u O33 jako nadřízeného sám sebe. Správně patří
+            # pod Sekci 3 (Pořadí 3330, barva sekce) — rozhodl uživatel 07.09.2026.
+            nadrizeny_zdroj = "Sekce 3"
         nadrizeny = ""
         if uroven == "ministr":
             pass  # kořen, rodiče nemá
         elif not nadrizeny_zdroj:
             nalezy.append(f"{oznaceni} ({kod}) nemá vyplněného nadřízeného")
         elif nadrizeny_zdroj == oznaceni:
-            oprava = OPRAVY_NADRIZENEHO.get(oznaceni)
-            if oprava is None:
-                nalezy.append(
-                    f"{oznaceni} ({kod}) je nadřízený sám sobě — cyklus, "
-                    f"nadřízený se zahodil a útvar zůstal bez rodiče")
-            else:
-                pouzite_opravy.add(oznaceni)
-                nadrizeny = kod_z_oznaceni(oprava)
-                nalezy.append(
-                    f"{oznaceni} ({kod}) je ve zdroji nadřízený sám sobě — "
-                    f"použit ruční nadřízený '{oprava}' ({nadrizeny})")
+            nalezy.append(
+                f"{oznaceni} ({kod}) je nadřízený sám sobě — cyklus, "
+                f"nadřízený se zahodil a útvar zůstal bez rodiče")
         else:
             nadrizeny = kod_z_oznaceni(nadrizeny_zdroj)
             if nadrizeny is None:
@@ -156,11 +142,6 @@ def sestav(radky):
     for kod, jmena in sorted(podle_kodu.items()):
         if len(jmena) > 1:
             nalezy.append(f"kód {kod} vyšel z víc označení: {', '.join(jmena)}")
-
-    for oznaceni in sorted(set(OPRAVY_NADRIZENEHO) - pouzite_opravy):
-        nalezy.append(
-            f"ruční výjimka pro {oznaceni} se neuplatnila — zdroj už ten řádek "
-            f"nemá vadný, výjimku smaž z OPRAVY_NADRIZENEHO")
 
     nalezy += nesrovnalosti_hierarchie(utvary, set(podle_kodu))
     return utvary, nalezy
