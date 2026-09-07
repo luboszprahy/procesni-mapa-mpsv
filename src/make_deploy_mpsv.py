@@ -35,6 +35,8 @@ import env_promenne as ep  # noqa: E402
 
 KOREN = Path(".")
 CIL = Path("deploy/mpsv")
+DOKUMENTACE = Path("docs")      # ručně psané kontrakty a návody
+BALIKY = Path("runs/build")     # co postavily build skripty
 DATA = Path("runs/normalize")
 PY = Path(".venv/Scripts/python.exe")
 
@@ -76,10 +78,10 @@ def spust(prikaz):
 
 
 def posledni_balik():
-    baliky = sorted(Path("deploy").glob("procesnimapa_*.zip"),
+    baliky = sorted(BALIKY.glob("procesnimapa_*.zip"),
                     key=lambda p: [int(c) for c in re.findall(r"\d+", p.stem)])
     if not baliky:
-        raise SystemExit("CHYBA: v deploy/ není žádný solution balík")
+        raise SystemExit(f"CHYBA: v {BALIKY}/ není žádný solution balík")
     return baliky[-1]
 
 
@@ -280,7 +282,7 @@ datasetové proměnné prostředí, textové ne.
 ```powershell
 $py = ".venv/Scripts/python.exe"
 & $py src/build_app.py --solution <zip_z_kroku_6> --verze <nova_verze>
-& $py src/check_solution.py --vstup <zip_z_kroku_6> --vystup deploy/procesnimapa_<verze>.zip
+& $py src/check_solution.py --vstup <zip_z_kroku_6> --vystup runs/build/procesnimapa_<verze>.zip
 & $py src/check_app.py
 & $py src/check_env.py
 ```
@@ -360,10 +362,12 @@ def main():
     shutil.copy(balik, CIL / balik.name)
 
     # dokumentace, kterou nasazující potřebuje u sebe, ne v repozitáři
-    for jmeno in ("sharepoint_schema.md", "navod_sprava.md",
-                  "navod_publikace_mapy.md", "TESTOVACI_SCENAR.md"):
-        shutil.copy(f"deploy/{jmeno}", CIL / jmeno)
-    for kontrakt in sorted(Path("deploy").glob("flow_*.md")):
+    # sharepoint_schema.md se generuje (check_schema.py), zbytek se píše ručně
+    shutil.copy(BALIKY / "sharepoint_schema.md", CIL / "sharepoint_schema.md")
+    for jmeno in ("navod_sprava.md", "navod_publikace_mapy.md",
+                  "TESTOVACI_SCENAR.md"):
+        shutil.copy(DOKUMENTACE / jmeno, CIL / jmeno)
+    for kontrakt in sorted(DOKUMENTACE.glob("flow_*.md")):
         shutil.copy(kontrakt, CIL / kontrakt.name)
 
     # soubory do knihovny Site Assets — bez nich mapa ani import nefungují
@@ -372,7 +376,7 @@ def main():
     assets.mkdir()
     for jmeno in ("mapa_template.html", "procesni_mapa.html",
                   "sablona_import_aktivit.xlsx"):
-        shutil.copy(f"deploy/{jmeno}", assets / jmeno)
+        shutil.copy(BALIKY / jmeno, assets / jmeno)
 
     with zipfile.ZipFile(balik) as zip_balik:
         flow = sorted(n.split("/")[1].rsplit("-", 5)[0]

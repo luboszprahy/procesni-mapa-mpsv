@@ -4,7 +4,7 @@ Overuje, ze se schema (src/schema.json) a data (runs/<sada>/*.csv) neshoduji
 jen nahodou: pokryti sloupcu obema smery, delky, hodnoty Choice, unikatnost
 klice a referencni integritu textovych odkazu.
 
-Vedlejsi vystup: deploy/sharepoint_schema.md - dokumentace se generuje ze
+Vedlejsi vystup: runs/build/sharepoint_schema.md - dokumentace se generuje ze
 schematu, aby nemohla zestarnout proti kodu.
 """
 import argparse
@@ -281,7 +281,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--schema", default="src/schema.json")
     ap.add_argument("--data", default="runs/normalize")
-    ap.add_argument("--doc", default="deploy/sharepoint_schema.md")
+    ap.add_argument("--doc", default="runs/build/sharepoint_schema.md")
     a = ap.parse_args()
 
     schema = json.loads(io.open(a.schema, encoding="utf-8").read())

@@ -21,7 +21,7 @@ import check_app  # noqa: E402  — návrhová plocha, proti které se počítaj
 
 _p = argparse.ArgumentParser()
 _p.add_argument("--vstup", default="input/procesnimapa_1_0_0_2 (2).zip")
-_p.add_argument("--vystup", default="deploy/procesnimapa_1_0_0_3.zip")
+_p.add_argument("--vystup", default="runs/build/procesnimapa_1_0_0_3.zip")
 _a = _p.parse_args()
 VSTUP = Path(_a.vstup)
 VYSTUP = Path(_a.vystup)

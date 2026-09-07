@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Generátor šablony pro hromadný import aktivit.
 
-Ze `src/schema.json` vyrobí `deploy/sablona_import_aktivit.xlsx` — sešit, který
+Ze `src/schema.json` vyrobí `runs/build/sablona_import_aktivit.xlsx` — sešit, který
 správce procesního rámce vyplní a nahraje do knihovny `Import`. Čte ho konektor
 Excel Online (Business) akcí `List rows present in a table`, a ta umí jen
 **formátovanou Tabulku**, ne volnou mřížku; proto se hlavička zakládá jako
@@ -35,7 +35,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 SCHEMA = Path("src/schema.json")
-VYSTUP = Path("deploy/sablona_import_aktivit.xlsx")
+VYSTUP = Path("runs/build/sablona_import_aktivit.xlsx")
 
 LIST = "Aktivity"          # list schématu, ze kterého se šablona staví
 TABULKA = "Aktivity"       # jméno Tabulky — na něj se odkazuje ImportFlow

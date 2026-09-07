@@ -22,6 +22,45 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
+## 07.09.2026 — F19: `deploy/` obsahuje jen hotové sady
+
+Zadal uživatel. Kořen `deploy/` míchal tři různé věci a všechny vypadaly jako
+„výstup k nasazení": ručně psanou dokumentaci, generované mezistupně a pět
+solution balíků. Přitom **dvě z nich byly vstupem** obou generátorů sad, takže
+je nešlo jen smazat.
+
+| co | kam | proč |
+|---|---|---|
+| 7× `flow_*.md`, `navod_*.md`, `TESTOVACI_SCENAR.md`, `app_navrh.md` | `docs/` | píše se ručně, je to zdroj |
+| balík, `mapa_template.html`, `procesni_mapa.html`, `sharepoint_schema.md`, `sablona_import_aktivit.xlsx` | `runs/build/` | vyrábí je build skripty |
+| balíky 96–99 | smazány | jsou v git historii, dají se odtud vytáhnout |
+
+`deploy/` = `ppf/` + `mpsv/`, nic jiného.
+
+**Přepsáno devět skriptů:** `build_app.py`, `build_mapa.py`, `check_mapa_html.py`,
+`check_schema.py`, `check_solution.py`, `make_sablona.py`, `make_deploy_mpsv.py`,
+`make_deploy_ppf.py` (+ docstringy). V generátorech vznikly konstanty
+`DOKUMENTACE = docs/` a `BALIKY = runs/build/`, takže se cesty neopakují.
+
+**Past, do které jsem sám spadl:** `sharepoint_schema.md` vypadá jako
+dokumentace, ale generuje ho `check_schema.py` — patří do `runs/build/`, ne do
+`docs/`. Nejdřív jsem ho kopíroval ze špatného místa; chytila to až kontrola
+proti baseline.
+
+**Jak je doloženo, že reorganizace nic nerozbila:** před prvním zásahem otisk
+(`sha256`) všech 38 souborů obou sad, po dokončení přegenerování a porovnání.
+**37 z 38 sedí bit po bitu.** Jediný rozdíl je `deploy/mpsv/README.md`, kde se
+změnila jedna cesta v návodu na build (`deploy/procesnimapa_<verze>.zip` →
+`runs/build/…`) — tedy přesně ta změna, která je smyslem F19, ne vedlejší účinek.
+
+Brány po reorganizaci: `check_schema`, `check_mapa_html`, `check_app`,
+`check_app --solution`, `check_setup.js`, `check_import.js` — všechny zelené.
+
+`CLAUDE.md` má novou strukturu i příkazy na oba generátory. `HANDOVER.md` má
+srovnané cesty a **nově nahoře upozornění, že jeho popis stavu je z 24.08. a
+neplatí** (mluvil o balíku 55) — cesty by jinak seděly a stav lhal, což je
+horší než zjevně starý dokument.
+
 ## 07.09.2026 — F18: nasazovací sada pro PPF se generuje (`deploy/ppf/`)
 
 **`deploy/INSTALACE.md` zanikla.** Byla to jediná ručně udržovaná část nasazení

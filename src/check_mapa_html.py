@@ -121,19 +121,19 @@ def main():
                f"stránku:\n  {radek.strip()}")
 
     # --- deploy kopie musí sedět na zdroj ---
-    # Do Site Assets se nahrává deploy/, takže rozejít se smí leda tiše: appka
-    # i mapa vypadají v pořádku a jen se nic nezměnilo. Přesně to se 21.08.2026
-    # stalo.
-    dep_tpl = Path("deploy/mapa_template.html")
-    dep_out = Path("deploy/procesni_mapa.html")
+    # Do Site Assets se nahrává kopie z runs/build/, takže rozejít se smí leda
+    # tiše: appka i mapa vypadají v pořádku a jen se nic nezměnilo. Přesně to
+    # se 21.08.2026 stalo.
+    dep_tpl = Path("runs/build/mapa_template.html")
+    dep_out = Path("runs/build/procesni_mapa.html")
     overit(dep_tpl.exists() and dep_tpl.read_text(encoding="utf-8") == tpl,
-           "deploy/mapa_template.html neodpovídá src/mapa_template.html — "
-           "flow bere šablonu ze Site Assets, kam se nahrává deploy kopie")
+           "runs/build/mapa_template.html neodpovídá src/mapa_template.html — "
+           "flow bere šablonu ze Site Assets, kam se nahrává tahle kopie")
     overit(dep_out.exists() and "__DATA_JSON__" not in dep_out.read_text(encoding="utf-8"),
-           "deploy/procesni_mapa.html chybí nebo v ní zbyla kotva")
+           "runs/build/procesni_mapa.html chybí nebo v ní zbyla kotva")
     for prvek in ('id="cKod"', 'id="fUroven"', 'id="fVelikost"'):
         overit(prvek in dep_out.read_text(encoding="utf-8"),
-               f"deploy/procesni_mapa.html je zastaralá — chybí {prvek}")
+               f"runs/build/procesni_mapa.html je zastaralá — chybí {prvek}")
 
     # --- hotová stránka: kotvy pryč, ovládání uvnitř ---
     overit("__DATA_JSON__" not in out and "__GEN__" not in out,

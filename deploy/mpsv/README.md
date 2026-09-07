@@ -162,7 +162,7 @@ datasetové proměnné prostředí, textové ne.
 ```powershell
 $py = ".venv/Scripts/python.exe"
 & $py src/build_app.py --solution <zip_z_kroku_6> --verze <nova_verze>
-& $py src/check_solution.py --vstup <zip_z_kroku_6> --vystup deploy/procesnimapa_<verze>.zip
+& $py src/check_solution.py --vstup <zip_z_kroku_6> --vystup runs/build/procesnimapa_<verze>.zip
 & $py src/check_app.py
 & $py src/check_env.py
 ```

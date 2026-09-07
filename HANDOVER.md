@@ -1,11 +1,16 @@
 # HANDOVER — vstupní bod pro další session (24.08.2026)
 
+> **POZOR — stav v tomhle souboru je z 24.08.2026 a neplatí.** Mluví o balíku
+> 1.0.0.55; aktuální je **1.0.0.100**. Cesty jsou srovnané s reorganizací
+> z 07.09.2026 (`docs/`, `runs/build/`, `deploy/ppf|mpsv/`), ale popis stavu
+> ne. **Aktuální stav drží `STATUS.md`** — čti napřed jeho hlavičku.
+
 Vstupní bod pro novou session. Pořadí čtení: **tenhle soubor** (co se má dělat
 teď) → `STATUS.md` (chronologie a odůvodnění rozhodnutí) → `PLAN.md` (fáze).
 Zadání drží `PRD.md`.
 
 > **Stav:** appka běží v provozu a je **ověřená v tenantu**. Aktuální balík
-> je **`deploy/procesnimapa_1_0_0_55.zip`** — nese připomínky z vyzkoušení
+> je **`runs/build/procesnimapa_1_0_0_55.zip`** — nese připomínky z vyzkoušení
 > 1.0.0.50 (menší písmo, sloupec POLOŽKY, přepínač kódu, subtilnější ovládací
 > prvky, nová paleta, mapa bez jména správce, filtr stavu a chip osiřelých).
 > Poslední potvrzeně naběhlá verze je 1.0.0.50.
@@ -38,14 +43,14 @@ Headless test mapy hledá Edge nebo Chrome ve standardních cestách.
    novou paletu a je to nejrychlejší způsob, jak posoudit, jestli sedí.
    Kdyby ne, vrací se to změnou hodnot (`styl*` v `App.OnStart`, CSS proměnné
    v šabloně), ne přepisem prvků.
-2. **Naimportovat `deploy/procesnimapa_1_0_0_55.zip`** jako upgrade — nese
+2. **Naimportovat `runs/build/procesnimapa_1_0_0_55.zip`** jako upgrade — nese
    **opravu prázdných počtů** (strom se stavěl z nedonačtených kolekcí,
    viz `STATUS.md`). Proti
    1.0.0.50 přibylo: menší tři stupně písma, sloupec **POLOŽKY** posunutý od
    ikony „+" s vycentrovanými čísly, **přepínač kódu** zpátky v pruhu nad
    stromem, ovládací prvky číselníku a detailu **na velikost z Přehledu**
    (32 px) a nová paleta.
-3. **Nahrát do Site Assets OBĚ HTML z `deploy/`** — `mapa_template.html`
+3. **Nahrát do Site Assets OBĚ HTML z `runs/build/`** — `mapa_template.html`
    i `procesni_mapa.html`. Šablona se dnes měnila (barvy, filtr stavu, chip
    osiřelých, hlavička bez jména), takže bez nahrání se nic z toho v publikované
    mapě neprojeví. Tím se zároveň objeví volba **Zobrazit kód**, která
@@ -116,7 +121,7 @@ Rozpracovaného nic není. Plán drží `PLAN.md` §F7.
 
 Připravené k vytažení, až přijde čas:
 
-- **`deploy/navod_sprava.md`** (krok 13) — rozepsaný, přerušený zadáním F7.
+- **`docs/navod_sprava.md`** (krok 13) — rozepsaný, přerušený zadáním F7.
 - **Rejstřík nad 2 000 aktivitami** — hotový plán v `PLAN.md`, spouštěč je
   zhruba 1 500 aktivit, dnes 47.
 - **A-08 z auditu** — zbývá `$top: 5000` bez stránkování a testovací tenant
@@ -177,7 +182,7 @@ a „flow má jediný trigger".
   poznat, co ho shodilo. Půjde samostatně, bez jiných změn.
 - **Brána `/audit`** (`powerplatform-auditor`) před transportem na MPSV —
   krok 11 v `PLAN.md`. Zatím neproběhla, protože transport je blokovaný.
-- **`deploy/navod_sprava.md`** (krok 13) — rozhodnuto 21.08.2026 psát ho až
+- **`docs/navod_sprava.md`** (krok 13) — rozhodnuto 21.08.2026 psát ho až
   podle finální podoby appky, tedy po F6/D.
 - **Adresa testovacího webu je v balíku na 20 místech**, ne na jednom
   (nález B-01, kolo 4 — do té doby tu stálo, že je to jen `varMapaUrl`):
@@ -277,7 +282,7 @@ tu složku na začátku maže.
 
 ```powershell
 $zaklad = "$env:TEMP/base.zip"
-Copy-Item deploy/procesnimapa_1_0_0_62.zip $zaklad
+Copy-Item runs/build/procesnimapa_1_0_0_62.zip $zaklad
 
 & $py src/build_mapa_flow.py   --solution $zaklad
 & $py src/build_export_flow.py --solution $zaklad
@@ -293,8 +298,8 @@ s `pac` (rozšíření VS Code Power Platform Tools) se přepínač vynechá.
 
 ```powershell
 # --- brány nad hotovým balíkem ---
-$z = "deploy/procesnimapa_1_0_0_63.zip"
-& $py src/check_solution.py --vstup deploy/procesnimapa_1_0_0_62.zip --vystup $z
+$z = "runs/build/procesnimapa_1_0_0_63.zip"
+& $py src/check_solution.py --vstup runs/build/procesnimapa_1_0_0_62.zip --vystup $z
 & $py src/check_mapa_flow.py   --solution $z   # --base = předchozí balík
 & $py src/check_export_flow.py --solution $z
 & $py src/check_flow.py        --solution $z
@@ -309,7 +314,7 @@ $z = "deploy/procesnimapa_1_0_0_63.zip"
 
 **Poslední export ze Studia je `input/procesnimapa_1_0_0_57.zip`** — z něj se
 staví na stroji s `pac`. Na stroji bez `pac` se staví z posledního vlastního
-balíku (`deploy/procesnimapa_1_0_0_62.zip` a novější) přes `--bez-pac`; export
+balíku (`runs/build/procesnimapa_1_0_0_62.zip` a novější) přes `--bez-pac`; export
 ze Studia tak upravit nejde, protože YAML zdroje nenese.
 
 ## 6. Dělba práce u canvas appky

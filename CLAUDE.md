@@ -55,11 +55,19 @@ slouží k rychlému čtení obsahu bez rozbalování Office formátů.
 input/            zadání a podklady (Office soubory + extracted/ textové výtahy)
 input/extracted/  generované .txt výtahy podkladů
 src/              skripty a zdrojáky (pa.yaml, build skripty, extraktory)
-deploy/           finální výstupy k nasazení (solution zipy, návody, HTML)
+docs/             ručně psaná dokumentace: kontrakty flow, návody, testovací scénář
+deploy/ppf/       hotová nasazovací sada pro PPF DEV (generovaná, anonymizovaná data)
+deploy/mpsv/      hotová nasazovací sada pro tenant MPSV (generovaná, ostrá data)
+runs/build/       co postavily build skripty: solution balík, mapa, schéma, šablona
 runs/             jednotlivé testovací běhy, každý ve vlastním podadresáři
 viz/              grafické výstupy (HTML mapy, obrázky)
 (root)            .md dokumenty, konfigurace
 ```
+
+V `deploy/` nesmí být nic než ty dvě sady — obě se **generují** a skládají se
+z `docs/` (ručně psaný text) a `runs/build/` (artefakty). Když do kořene
+`deploy/` něco přibude, je to skoro jistě soubor, který patří do jedné z těch
+dvou složek.
 
 ## Příkazy
 
@@ -79,9 +87,13 @@ $py = ".venv/Scripts/python.exe"
 & $py src/build_mapa.py --model runs/anonym/model.json --out viz/mapa_dev_anonym.html
 
 # --- SharePoint vrstva (vše se generuje ze src/schema.json) ---
-& $py src/check_schema.py     # validace schéma<->data + deploy/sharepoint_schema.md
+& $py src/check_schema.py     # validace schéma<->data + runs/build/sharepoint_schema.md
 & $py src/make_setup.py       # -> src/setup_sharepoint.js  (založení listů a sloupců)
 & $py src/make_import.py      # -> src/import_data.js       (import dat, jen anonymizovaná)
+
+# --- nasazovaci sady (deploy/) ---
+& $py src/make_deploy_ppf.py  # -> deploy/ppf/  (anonymizovana data, 7 kroku)
+& $py src/make_deploy_mpsv.py # -> deploy/mpsv/ (ostra data, 8 kroku)
 
 # --- testy (Node) ---
 node src/check_setup.js       # 32 kontrol provisioningu proti falešnému SharePointu
@@ -108,7 +120,10 @@ Prohlédnutí HTML v prohlížeči: `file://` bývá blokované, spusť
 | `kody.json` | zmrazený rejstřík identifikačních kódů — jednou přidělený kód se nemění |
 | `PRD.md` / `PLAN.md` / `STATUS.md` | zadání / postup / stav; `STATUS.md` má nahoře „CO JE NA TOBĚ" a „CO DĚLÁM JÁ" |
 | `AUDIT.md` | nálezy nezávislého auditu a jejich vyřízení |
-| `deploy/` | výstupy k nasazení: schéma listů, návrh appky, návod na publikační flow |
+| `deploy/ppf/`, `deploy/mpsv/` | hotové nasazovací sady; **generují se**, needitovat ručně |
+| `src/make_deploy_ppf.py`, `src/make_deploy_mpsv.py` | generátory obou sad; sdílejí popisy flow a bránu proti GUIDům |
+| `src/sablona_instalace_ppf.md` | text návodu pro PPF; čísla do něj doplní generátor z balíku |
+| `docs/` | ručně psaná dokumentace, ze které se sady skládají |
 
 ## Datový model (implementovaný)
 

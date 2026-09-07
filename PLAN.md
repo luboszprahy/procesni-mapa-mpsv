@@ -2806,3 +2806,56 @@ dostat totéž. Rozhodnutí o tvaru: **`deploy/ppf/` jako zrcadlo `deploy/mpsv/`
      v `deploy/`, ne kopii
    risk: smazat návod dřív, než generátor vyrobí náhradu
 
+## F19 — úklid `deploy/`: jen hotové sady — HOTOVO 07.09.2026
+
+Zadáno 07.09.2026 uživatelem: „v deploy nechal bych jen ppf a mpsv, to co je
+pod deploy by nemělo být relevantní a mělo by zmizet". Kořen `deploy/` dnes
+míchá ručně psanou dokumentaci a generované mezistupně, a obojí je zároveň
+**vstupem** obou generátorů sad — proto se nedá jen smazat.
+
+Cíl: `deploy/` = `ppf/` + `mpsv/`, nic jiného.
+Rozhodnutí uživatele: dokumentace do `docs/`, artefakty do `runs/build/`,
+staré balíky 96–99 smazat (jsou v git historii).
+
+1. [Baseline] — co: otisk obou sad před zásahem
+   verify: `sha256sum` všech 38 souborů v `deploy/ppf` a `deploy/mpsv`
+     uložen mimo repo; po dokončení se sady přegenerují a otisk musí sedět
+   edge cases: soubory, které nesou časové razítko generování — pokud se
+     objeví rozdíl, musí být vysvětlitelný, ne odmávnutý
+   risk: baseline pořízený až po prvním zásahu by nedokázal nic
+
+2. [Dokumentace] — co: `git mv` 11 ručně psaných .md do `docs/`
+   `flow_*.md` (7), `navod_sprava.md`, `navod_publikace_mapy.md`,
+   `TESTOVACI_SCENAR.md`, `app_navrh.md`
+   verify: `ls docs/ | wc -l` = 11; `git status` ukáže přejmenování (R),
+     ne smazání a přidání
+   edge cases: `deploy/mpsv/` a `deploy/ppf/` mají vlastní kopie týchž jmen —
+     přesouvá se jen kořen
+   risk: přesunout i generovanou kopii a rozbít sadu
+
+3. [Artefakty] — co: `runs/build/` + úprava sedmi skriptů
+   `build_app.py` (`VYSTUP`), `build_mapa.py`, `check_mapa_html.py`,
+   `check_schema.py` (`--doc`), `make_sablona.py` (`VYSTUP`),
+   `make_deploy_mpsv.py` a `make_deploy_ppf.py` (`posledni_balik`, zdroje kopií)
+   verify: každý skript spustit; `grep -rn '"deploy/' src/*.py` vrátí jen
+     `deploy/ppf` a `deploy/mpsv`
+   edge cases: `posledni_balik()` řadí podle čísel v názvu — po smazání
+     starých balíků zbude jediný, řazení musí dál fungovat
+   risk: skript, na který se zapomene, bude tiše zapisovat do neexistující
+     cesty nebo obnoví kořen `deploy/`
+
+4. [Kontrola] — co: přegenerovat obě sady a porovnat s baseline
+   verify: `sha256sum -c` nad baseline projde beze zbytku; `ls deploy/`
+     vrátí jen `mpsv` a `ppf`
+   edge cases: README nese jméno balíku — po smazání starých balíků se
+     nesmí změnit, protože poslední zůstává týž
+   risk: rozdíl se svede na „to je jen razítko" bez ověření
+
+5. [Dokumentace projektu] — co: `CLAUDE.md`, `HANDOVER.md`, `STATUS.md`
+   Sekce „Struktura repozitáře" a „Příkazy" v projektovém `CLAUDE.md` popisují
+   starou strukturu a cesty ve všech příkazech.
+   verify: `grep -rn "deploy/" CLAUDE.md HANDOVER.md` nevrátí cestu, která
+     po reorganizaci neexistuje
+   edge cases: historické zápisy ve `STATUS.md` a `PLAN.md` se nepřepisují
+   risk: nechat v CLAUDE.md příkaz, který příští session spustí a rozbije si tím build
+

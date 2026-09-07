@@ -9,9 +9,9 @@ a popisy flow. Liší se ve dvou věcech, a obě jsou podstatné:
   * README vzniká z `src/sablona_instalace_ppf.md`, takže čísla (verze balíku,
     počet flow, obrazovek a proměnných) pocházejí z balíku, ne z paměti.
 
-Druhý bod je celý důvod, proč tenhle skript existuje: ručně udržovaná
-`deploy/INSTALACE.md` zaostala o třináct verzí a nikdo to nepoznal, protože
-návod vypadal pořád stejně.
+Druhý bod je celý důvod, proč tenhle skript existuje: ručně udržovaný návod
+zaostal o třináct verzí a nikdo si toho nevšiml, protože návod vypadá pořád
+stejně.
 
 Spouštět z kořene projektu:
     python src/make_deploy_ppf.py
@@ -28,6 +28,7 @@ from pathlib import Path
 sys.path.insert(0, "src")
 import env_promenne as ep  # noqa: E402
 from make_deploy_mpsv import (  # noqa: E402
+    BALIKY, DOKUMENTACE,
     FLOW, VYPIS_GUIDU, overuj_bez_guidu, posledni_balik, spust,
 )
 
@@ -157,10 +158,12 @@ def main():
         stary.unlink()
     shutil.copy(balik, CIL / balik.name)
 
-    for jmeno in ("sharepoint_schema.md", "navod_sprava.md",
-                  "navod_publikace_mapy.md", "TESTOVACI_SCENAR.md"):
-        shutil.copy(f"deploy/{jmeno}", CIL / jmeno)
-    for kontrakt in sorted(Path("deploy").glob("flow_*.md")):
+    # sharepoint_schema.md se generuje (check_schema.py), zbytek se píše ručně
+    shutil.copy(BALIKY / "sharepoint_schema.md", CIL / "sharepoint_schema.md")
+    for jmeno in ("navod_sprava.md", "navod_publikace_mapy.md",
+                  "TESTOVACI_SCENAR.md"):
+        shutil.copy(DOKUMENTACE / jmeno, CIL / jmeno)
+    for kontrakt in sorted(DOKUMENTACE.glob("flow_*.md")):
         shutil.copy(kontrakt, CIL / kontrakt.name)
 
     assets = CIL / "site_assets"
@@ -168,7 +171,7 @@ def main():
     assets.mkdir()
     for jmeno in ("mapa_template.html", "procesni_mapa.html",
                   "sablona_import_aktivit.xlsx"):
-        shutil.copy(f"deploy/{jmeno}", assets / jmeno)
+        shutil.copy(BALIKY / jmeno, assets / jmeno)
 
     with zipfile.ZipFile(balik) as zip_balik:
         flow = sorted(n.split("/")[1].rsplit("-", 5)[0]

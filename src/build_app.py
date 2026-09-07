@@ -28,7 +28,7 @@ import env_promenne  # noqa: E402
 
 APP_SRC = Path("src/app_src")
 VYCHOZI_SOLUTION = Path("input/procesnimapa_1_0_0_1.zip")
-VYSTUP = Path("deploy")
+VYSTUP = Path("runs/build")
 PRACOVNI = Path("runs/app_build")
 SABLONY = Path("src/control_templates.json")
 
