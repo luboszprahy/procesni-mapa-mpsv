@@ -6,18 +6,26 @@
 <title>Procesní mapa MPSV</title>
 <style>
   :root{
-    /* Jedna monochromatická řada odvozená z barvy navbaru #110B7A (07.09.2026).
-       Dřívější paleta mísila tyrkys a zelenou; vedle tmavě modré hlavičky to byly
-       tři nesouvisející rodiny. Hierarchii teď dělá SYTOST téže modré, ne odstín —
-       proto k ní není potřeba legenda. Každá dvojice text/podklad je spočítaná
-       proti WCAG AA, nejtěsnější je 4,62:1 (sekundární text na podkladu agendy). */
-    --bg:#f6f8fc; --panel:#fff; --ink:#1b2233; --muted:#545e73; --line:#dce1ec;
-    --a:#110b7a; --p:#2a3f9e; --d:#4463bd; --k:#5470c4;
-    --chip:#e7ebf4; --hit:#fff3bf; --shadow:0 1px 3px rgba(17,11,122,.10);
-    /* podklady vrstev stromu — táž modrá, jen naředěná bílou */
-    --a-bg:#d5d8ef; --p-bg:#e2e7f6; --d-bg:#eef1fb; --k-bg:transparent;
-    /* svislé linky vrstev — plné stupně téže řady */
-    --a-line:#110b7a; --p-line:#2a3f9e; --d-line:#4463bd; --k-line:#5470c4;
+    /* Paleta zadaná uživatelem 07.09.2026 (Adobe Color):
+       #1C0F99 #17885A #545715 #A17863 #22B7F4. Nahradila monochromatickou modrou
+       řadu, ve které vrstvy splývaly — rozlišuje je teď ODSTÍN, ne sytost.
+       Základní barva sedí k navbaru sama od sebe (#1C0F99 je prakticky ta modrá,
+       která na stránce už byla), takže nevznikly dvě nesouvisející rodiny.
+       Role: plné barvy nesou svislé linky a kolečka značek, plochy jsou jejich
+       světlé odvozeniny (plná + 82 % bílé), podklady sloupců ještě světlejší
+       (93 %). Barvy pro TEXT a hlavičky s bílým písmem jsou ztmavené tam, kde
+       plná neprošla WCAG AA: zelená má na bílé jen 4,46:1 a terakota 3,90:1.
+       Nejtěsnější dvojice text/podklad je po úpravě 4,84:1.
+       #22B7F4 je na plochu i na text moc světlá (2,30:1) — slouží jako akcent
+       vybrané karty, což je jediné místo, kde nic nenese text. */
+    --bg:#f6f8fc; --panel:#fff; --ink:#1b2233; --muted:#4a5266; --line:#dce1ec;
+    --a:#1c0f99; --p:#13704a; --d:#545715; --k:#745647;
+    --chip:#e7ebf4; --hit:#fff3bf; --akcent:#22b7f4;
+    --shadow:0 1px 3px rgba(28,15,153,.10);
+    /* podklady vrstev stromu — plná barva naředěná bílou */
+    --a-bg:#d6d4ed; --p-bg:#d5eae1; --d-bg:#e0e1d5; --k-bg:transparent;
+    /* svislé linky a kolečka vrstev — plné barvy palety */
+    --a-line:#1c0f99; --p-line:#17885a; --d-line:#545715; --k-line:#a17863;
     /* jediné místo, které řídí velikost písma celé stránky (viz #fVelikost) */
     --fs:14px;
   }
@@ -86,10 +94,10 @@
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
   /* Podklad sloupce je táž barva jako karta, jen zesvětlená smícháním s bílou.
      Stupeň je tak vidět i pod hlavičkou a karta se od něj přesto odliší. */
-  .rz-sloupec[data-uroven="0"]{background:#ecedf8}
-  .rz-sloupec[data-uroven="1"]{background:#f1f4fc}
-  .rz-sloupec[data-uroven="2"]{background:#f6f8fd}
-  .rz-sloupec[data-uroven="3"]{background:#fafbfe}
+  .rz-sloupec[data-uroven="0"]{background:#efeef8}
+  .rz-sloupec[data-uroven="1"]{background:#eff7f3}
+  .rz-sloupec[data-uroven="2"]{background:#f3f3ef}
+  .rz-sloupec[data-uroven="3"]{background:#f8f6f4}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -106,12 +114,12 @@
   .rz-uzel.lvl-a{background:var(--a-bg);border-left-color:var(--a-line)}
   .rz-uzel.lvl-p{background:var(--p-bg);border-left-color:var(--p-line)}
   .rz-uzel.lvl-d{background:var(--d-bg);border-left-color:var(--d-line)}
-  .rz-uzel.lvl-k{background:#f5f7fd;border-left-color:var(--k-line)}
-  .rz-uzel:hover{box-shadow:0 2px 8px rgba(17,11,122,.18);transform:translateY(-1px)}
+  .rz-uzel.lvl-k{background:#eee7e3;border-left-color:var(--k-line)}
+  .rz-uzel:hover{box-shadow:0 2px 8px rgba(28,15,153,.18);transform:translateY(-1px)}
   /* Vybraná karta se pozná rámečkem a stínem, ne jinou výplní — tu už drží
      vrstva a dvě barevné soustavy najednou by se bily. */
-  .rz-uzel[aria-selected=true]{border-color:var(--a);border-width:2px;
-        box-shadow:0 2px 10px rgba(17,11,122,.28)}
+  .rz-uzel[aria-selected=true]{border-color:var(--akcent);border-width:2px;
+        box-shadow:0 0 0 2px rgba(34,183,244,.35),0 2px 10px rgba(28,15,153,.28)}
   .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.76rem;color:var(--muted)}
   .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
@@ -124,7 +132,7 @@
         width:19px;height:19px;border-radius:50%;color:#fff;background:var(--muted);
         display:flex;align-items:center;justify-content:center;
         font-size:1rem;font-weight:700;line-height:1;opacity:.95;
-        box-shadow:0 1px 3px rgba(17,11,122,.35)}
+        box-shadow:0 1px 3px rgba(28,15,153,.35)}
   .rz-uzel.lvl-a .rz-sipka{background:var(--a)}
   .rz-uzel.lvl-p .rz-sipka{background:var(--p)}
   .rz-uzel.lvl-d .rz-sipka{background:var(--d)}
@@ -141,10 +149,10 @@
   .rzh-pasy{position:relative}
   .rzh-pas{display:flex;align-items:stretch;border-top:1px solid var(--line)}
   .rzh-pas:first-child{border-top:0}
-  .rzh-pas[data-uroven="0"]{background:#ecedf8}
-  .rzh-pas[data-uroven="1"]{background:#f1f4fc}
-  .rzh-pas[data-uroven="2"]{background:#f6f8fd}
-  .rzh-pas[data-uroven="3"]{background:#fafbfe}
+  .rzh-pas[data-uroven="0"]{background:#efeef8}
+  .rzh-pas[data-uroven="1"]{background:#eff7f3}
+  .rzh-pas[data-uroven="2"]{background:#f3f3ef}
+  .rzh-pas[data-uroven="3"]{background:#f8f6f4}
   /* Hlavička je štítek, ne plocha: plný tmavý blok přes celou výšku pásu byl
      nejsytější věc na obrazovce a přebíjel karty, o které jde (07.09.2026). */
   .rzh-hlavicka{flex:0 0 84px;padding:12px 8px;font-size:.76rem;font-weight:700;
@@ -201,11 +209,11 @@
   .lvl-d>.row>.nm{color:var(--d)}
   .lvl-k>.row>.nm{color:var(--ink)}
   .lvl-k>.row{cursor:pointer}
-  /* Odsazení stupně 24+18 px. Dvě věci, které se snadno pletou: kde strom
+  /* Odsazení stupně 32+22 px. Dvě věci, které se snadno pletou: kde strom
      ZAČÍNÁ (to řeší úzký okraj `main`) a jak velký je KROK mezi úrovněmi.
      Krok musí být výrazný, jinak hlubší úroveň vypadá zarovnaně s tou nad
-     ní — přesně to se stalo 24.08.2026 při 17+9 px. */
-  .kids{margin-left:24px;border-left:1px solid var(--line);padding-left:18px}
+     ní — přesně to se stalo 24.08.2026 při 17+9 px. Od 20:11 je 32+22 px. */
+  .kids{margin-left:32px;border-left:1px solid var(--line);padding-left:22px}
   .lvl-a>.kids{border-left-color:var(--a-line)}
   .lvl-p>.kids{border-left-color:var(--p-line)}
   .lvl-d>.kids{border-left-color:var(--d-line)}
@@ -221,7 +229,7 @@
   .legend{font-size:.86rem;color:var(--muted);padding:8px 12px 0;line-height:1.7}
   .legend[hidden]{display:none}
   .legend .badge{margin:0 2px;font-weight:600}
-  .badge.ut{background:#e8ecf9;color:var(--p)}
+  .badge.ut{background:#dceee6;color:var(--p)}
   mark{background:var(--hit);padding:0 1px}
   .empty{padding:20px;color:var(--muted);text-align:center}
   @media (max-width:900px){main{flex-direction:column}#detail{position:static;flex:1 1 auto;width:100%}}

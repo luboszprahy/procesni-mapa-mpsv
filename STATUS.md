@@ -151,6 +151,42 @@ které se snadno pletou a v tomhle projektu se popletly: kde strom **začíná**
 (řeší okraj `main`) a jak velký je **krok mezi úrovněmi**. Ve třetím kole se
 zmenšilo obojí naráz, ačkoli vadilo jen to první.
 
+### Šesté kolo (20:11) — nová paleta, odstín místo sytosti
+
+Monochromatická modrá řada z prvního kola **neobstála v provozu**: „je potřeba
+použít odlišnější barvy, tohle moc splývá." Čtyři stupně sytosti téže modré
+jsou na papíře elegantní, ale nad dlouhými názvy a přes čtyři úrovně se rozdíl
+mezi sousedními stupni ztratí. Uživatel dodal paletu z Adobe Color:
+
+```
+#1C0F99  #17885A  #545715  #A17863  #22B7F4
+```
+
+Sedla bez úprav v jedné podstatné věci: `#1C0F99` je prakticky ta modrá, která
+na stránce už byla (navbar), takže nevznikly dvě nesouvisející rodiny —
+podmínka, kvůli které se 24.08.2026 musela vyhodit paleta šalvějová a krémová.
+
+Rozdělení podle role a spočítané kontrasty:
+
+| vrstva | linka a kolečko | text / hlavička | plocha |
+|---|---|---|---|
+| agenda | `#1C0F99` | `#1C0F99` (13,31:1) | `#d6d4ed` |
+| proces | `#17885A` | `#13704a` (6,10:1) | `#d5eae1` |
+| dílčí proces | `#545715` | `#545715` (7,63:1) | `#e0e1d5` |
+| aktivita | `#A17863` | `#745647` (6,64:1) | `#eee7e3` |
+
+Zelená má na bílé jen **4,46:1** a terakota **3,90:1**, takže pro bílý text na
+nich musely vzniknout ztmavené varianty; plné barvy zůstaly tam, kde nic nenese
+text (linky, kolečka). `#22B7F4` je na plochu i na text moc světlá (2,30:1) —
+slouží jako akcent vybrané karty, jediné místo bez textu. Sekundární barva textu
+se ztmavila na `#4a5266`. Nejtěsnější dvojice text/podklad je 4,84:1.
+
+Krok odsazení ve stromu je 32+22 px.
+
+**Poučení k zápisu do skillu:** pravidlo „hierarchii dělá sytost, ne odstín"
+platí na dvě úrovně, ne na čtyři. Při čtyřech se sousední stupně téže barvy
+přestanou lišit dřív, než dojde barva.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 
