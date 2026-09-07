@@ -112,7 +112,19 @@ klikáním. Ověřeno v prohlížeči i testem: `7/46/250/46` v obou zobrazeníc
 349 karet celkem. Brána 46 kontrol, `test_rozklad.js` 44 kontrol,
 mutačně 5/5. (Zpráva commitu `fd0cdae` uvádí u testu 46 — správně je 44.)
 
-Přepínač se jmenuje `Strom │ Rozklad svisle │ Rozklad vodorovně`.
+Přepínač se jmenuje `Řádkové zobrazení │ Rozklad svisle │ Rozklad vodorovně`.
+
+### Třetí kolo (19:52) — úprava stromu
+
+Zadal uživatel: přejmenovat první tlačítko, posunout úrovně vlevo a dát mezeru
+mezi řádky. Odsazení stupně bylo 26+14 px — na čtvrté úrovni odtékal text
+doprava a řádky se zkracovaly; je teď 16+12. Zpět až na 17+9 px to jít nemůže,
+ty 24.08.2026 splývaly, ale hierarchii navíc drží nová mezera 4 px za každým
+řádkem (i mezi rodičem a prvním potomkem) — bez ní na sebe barevné pruhy
+vrstev navazovaly a splývaly v jednu plochu.
+
+Vedlejší efekt delšího popisku: lišta se zalomila a přepínač velikosti písma
+spadl na druhý řádek. Vyhledávací pole má proto minimum 190 px místo 260.
 
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.

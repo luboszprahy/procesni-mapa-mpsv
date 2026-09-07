@@ -33,7 +33,9 @@
        display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5}
   .bar input[type=search],.bar select{font:inherit;padding:6px 9px;border:1px solid var(--line);
        border-radius:5px;background:#fff;color:inherit}
-  .bar input[type=search]{min-width:260px;flex:1 1 260px}
+  /* Užší minimum než 260 px: delší popisek „Řádkové zobrazení" jinak vytlačí
+     přepínač velikosti písma na druhý řádek lišty (07.09.2026). */
+  .bar input[type=search]{min-width:190px;flex:1 1 190px}
   .bar label{display:flex;align-items:center;gap:6px;font-size:.93rem;color:var(--muted);white-space:nowrap}
   .bar button{font:inherit;padding:6px 11px;border:1px solid var(--line);border-radius:5px;
        background:#fff;cursor:pointer;color:var(--a)}
@@ -169,8 +171,10 @@
   .rzh-radka .rz-uzel:hover .rz-sipka{transform:translateX(-50%) rotate(90deg) translateX(2px)}
   #rzhSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
   .node{border-radius:5px}
-  .row{display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:5px;cursor:default;
-       border-left:3px solid transparent}
+  /* Mezera za každým řádkem — i mezi rodičem a jeho prvním potomkem. Bez ní
+     na sebe barevné pruhy vrstev navazovaly a splývaly v jednu plochu. */
+  .row{display:flex;align-items:flex-start;gap:7px;padding:4px 6px;border-radius:5px;cursor:default;
+       border-left:3px solid transparent;margin-bottom:4px}
   .row:hover{background:var(--chip)}
   .tw{flex:0 0 16px;width:16px;text-align:center;color:var(--muted);cursor:pointer;
       user-select:none;font-size:.79rem;line-height:1.9}
@@ -190,9 +194,11 @@
   .lvl-d>.row>.nm{color:var(--d)}
   .lvl-k>.row>.nm{color:var(--ink)}
   .lvl-k>.row{cursor:pointer}
-  /* Odsazení každého stupně je znát na první pohled — 17+9 px splývalo,
-     takže hlubší úroveň vypadala skoro zarovnaně s tou nad ní (24.08.2026). */
-  .kids{margin-left:26px;border-left:1px solid var(--line);padding-left:14px}
+  /* Odsazení stupně: 26+14 px bylo na 250 dílčích procesů moc — čtvrtá úroveň
+     odtékala doprava a řádky se zkracovaly (07.09.2026). Zpět ale ne až na
+     17+9 px, které 24.08.2026 splývaly; 16+12 je mezi tím a hierarchii navíc
+     drží i mezera mezi řádky, kterou předtím strom neměl. */
+  .kids{margin-left:16px;border-left:1px solid var(--line);padding-left:12px}
   .lvl-a>.kids{border-left-color:var(--a-line)}
   .lvl-p>.kids{border-left-color:var(--p-line)}
   .lvl-d>.kids{border-left-color:var(--d-line)}
@@ -223,7 +229,7 @@
 
 <div class="bar">
   <span class="prep" id="fZobrazeni" title="Strom rozbaluje celou strukturu pod sebou. Rozklad ukazuje úrovně vedle sebe ve sloupcích, vodorovná varianta pod sebou v pásech — obsah je v obou stejný, liší se jen rozvržení.">
-    <button type="button" data-zobrazeni="strom" aria-pressed="true">Strom</button>
+    <button type="button" data-zobrazeni="strom" aria-pressed="true">Řádkové zobrazení</button>
     <button type="button" data-zobrazeni="rozklad">Rozklad svisle</button>
     <button type="button" data-zobrazeni="rozkladH">Rozklad vodorovně</button>
   </span>
