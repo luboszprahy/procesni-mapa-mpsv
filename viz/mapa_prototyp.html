@@ -76,7 +76,7 @@
   /* Karta nezabírá celou šířku sloupce: vpravo zůstává pruh, kterým vede
      spojnice do dalšího sloupce. Bez něj se čára krčila do mezery mezi
      sloupci a byla prakticky neviditelná (07.09.2026). */
-  .rz-uzel{position:relative;z-index:1;width:38%;min-width:145px;
+  .rz-uzel{position:relative;z-index:1;width:48%;min-width:165px;
         background:var(--panel);border:1px solid var(--line);
         border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 28px;
         cursor:pointer;display:flex;flex-direction:column;gap:2px;
@@ -559,9 +559,9 @@ function rzSpojnice(){
       /* Barvu bere cílová vrstva, ne šedá --line: světle šedá čára na bílém
          podkladu byla v provozu prakticky neviditelná (07.09.2026). */
       cara.setAttribute("stroke", BARVA_VRSTVY[cil.dataset.lvl] || "var(--muted)");
-      cara.setAttribute("stroke-width", "1.2");
+      cara.setAttribute("stroke-width", "1.8");
       cara.setAttribute("stroke-linecap", "round");
-      cara.setAttribute("opacity", ".38");
+      cara.setAttribute("opacity", ".5");
       elSpojnice.appendChild(cara);
     });
   });
@@ -621,7 +621,7 @@ function detail(n){
    určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:12";
+  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:22";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
