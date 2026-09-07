@@ -76,16 +76,22 @@
   /* Karta nezabírá celou šířku sloupce: vpravo zůstává pruh, kterým vede
      spojnice do dalšího sloupce. Bez něj se čára krčila do mezery mezi
      sloupci a byla prakticky neviditelná (07.09.2026). */
-  .rz-uzel{position:relative;z-index:1;width:calc(100% - 72px);
+  .rz-uzel{position:relative;z-index:1;width:38%;min-width:145px;
         background:var(--panel);border:1px solid var(--line);
-        border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 20px;
-        cursor:pointer;display:flex;flex-direction:column;gap:2px}
-  .rz-uzel:hover{background:var(--chip)}
-  .rz-uzel[aria-selected=true]{border-color:var(--a);background:var(--a-bg);box-shadow:var(--shadow)}
-  .rz-uzel.lvl-a{border-left-color:var(--a-line)}
-  .rz-uzel.lvl-p{border-left-color:var(--p-line)}
-  .rz-uzel.lvl-d{border-left-color:var(--d-line)}
-  .rz-uzel.lvl-k{border-left-color:var(--k-line)}
+        border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 28px;
+        cursor:pointer;display:flex;flex-direction:column;gap:2px;
+        transition:box-shadow .12s,transform .12s}
+  /* Výplň nese vrstvu, stejně jako ve stromu — barva řekne úroveň dřív než
+     text. Odstíny jsou světlé odvozeniny palety, aby text zůstal čitelný. */
+  .rz-uzel.lvl-a{background:var(--a-bg);border-left-color:var(--a-line)}
+  .rz-uzel.lvl-p{background:var(--p-bg);border-left-color:var(--p-line)}
+  .rz-uzel.lvl-d{background:var(--d-bg);border-left-color:var(--d-line)}
+  .rz-uzel.lvl-k{background:#eef3f8;border-left-color:var(--k-line)}
+  .rz-uzel:hover{box-shadow:0 2px 8px rgba(17,11,122,.18);transform:translateY(-1px)}
+  /* Vybraná karta se pozná rámečkem a stínem, ne jinou výplní — tu už drží
+     vrstva a dvě barevné soustavy najednou by se bily. */
+  .rz-uzel[aria-selected=true]{border-color:var(--a);border-width:2px;
+        box-shadow:0 2px 10px rgba(17,11,122,.28)}
   .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.76rem;color:var(--muted)}
   .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
@@ -503,6 +509,14 @@ function renderRozklad(){
           rzCesta.length = i;
           rzCesta[i] = n.kod;
           if (n.lvl === "k") detail(n);
+          /* Klik v posledním viditelném sloupci ho přidá, takže se dá celá
+             větev rozkliknout až na aktivity bez sahání na volbu vlevo.
+             Bez toho klik na proces při „Rozbalit: + procesy" nic neudělal
+             a vypadalo to, že karty nejsou klikací (07.09.2026). */
+          const vol = document.getElementById("fUroven");
+          if (i === +vol.value - 1 && (n.kids || []).length && +vol.value < 4){
+            vol.value = String(i + 2);
+          }
           renderRozklad();
         });
         sloupec.appendChild(el);
@@ -545,9 +559,9 @@ function rzSpojnice(){
       /* Barvu bere cílová vrstva, ne šedá --line: světle šedá čára na bílém
          podkladu byla v provozu prakticky neviditelná (07.09.2026). */
       cara.setAttribute("stroke", BARVA_VRSTVY[cil.dataset.lvl] || "var(--muted)");
-      cara.setAttribute("stroke-width", "2.5");
+      cara.setAttribute("stroke-width", "1.2");
       cara.setAttribute("stroke-linecap", "round");
-      cara.setAttribute("opacity", ".85");
+      cara.setAttribute("opacity", ".38");
       elSpojnice.appendChild(cara);
     });
   });
@@ -607,7 +621,7 @@ function detail(n){
    určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:07";
+  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:12";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]

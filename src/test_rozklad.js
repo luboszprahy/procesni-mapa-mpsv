@@ -38,7 +38,7 @@ function mkEl(tag){
     remove(){ if (this.parent) this.parent.removeChild(this); },
     setAttribute(k, v){ this.attrs[k] = String(v); },
     getAttribute(k){ return this.attrs[k]; },
-    addEventListener(){},
+    addEventListener(typ, fn){ (this._on = this._on || {})[typ] = fn; },
     getBoundingClientRect(){ return {top:0,left:0,right:0,bottom:0,width:0,height:0}; },
     querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
     querySelectorAll(sel){
@@ -163,6 +163,20 @@ overit(hlavicky.filter(h => !h.hidden).length === 2,
 prvky.fUroven.value = "4";
 M.renderRozklad();
 overit(sloupce().length === 4, "návrat na čtyři sloupce");
+
+// klik v posledním viditelném sloupci má sloupec přidat, aby šla celá větev
+// rozkliknout bez sahání na volbu vlevo
+prvky.fUroven.value = "2";
+M.renderRozklad();
+const procesy = uzly(sloupce()[1]);
+overit(procesy.length > 0, "druhý sloupec má procesy, na které jde kliknout");
+const sVetvi = procesy.find(u => !/bez položek/.test(u.textContent)) || procesy[0];
+sVetvi._on.click();
+overit(prvky.fUroven.value === "3",
+       `klik v posledním sloupci volbu posunul na tři (${prvky.fUroven.value})`);
+overit(sloupce().length === 3, `a přibyl třetí sloupec (${sloupce().length})`);
+prvky.fUroven.value = "4";
+M.renderRozklad();
 
 // filtr, kterému nic neodpovídá
 prvky.q.value = "nexistujicivyraz";
