@@ -92,6 +92,27 @@ Tím se na obrazovku vejdou všechny čtyři pásy najednou. Sloupcová varianta
 zůstala beze změny — křivky se v ní kříží mnohem míň, protože sousední
 vrstvy jsou vedle sebe, ne nad sebou.
 
+### Druhé kolo připomínek (19:44) — a jedna oprava, která platí pro oba rozklady
+
+Lomené čáry z předchozího kola **neobstály**: „nesjednocuj ty čáry, není poznat
+jak karty patří pod sebe." Sdílená vodorovná sběrnice je hezká na pohled, ale
+právě tím sdílením vzala informaci o tom, které dítě patří kterému rodiči.
+Spojnice jsou proto zase **samostatné křivky** — s tím rozdílem, že ve
+vodorovné variantě vycházejí z **různých bodů spodní hrany rodiče**,
+rozprostřených podle pořadí dítěte. To byl skutečný důvod původního
+chuchvalce: ne oblouky, ale jeden společný výchozí bod. Mezery mezi kartami
+jsou vzaté ze sloupcové varianty (tam karta zabírá 48 % šířky sloupce a zbytek
+je pruh pro čáru) — tady je to spodní odsazení řádky, 46 px.
+
+**Volba „Rozbalit" teď rozbaluje opravdu vše, a to v obou rozkladech.**
+Dosud ji zúžení výběrem přebíjelo: kdo měl vybranou agendu bez aktivit
+a zvolil „vše až po aktivity", dostal hlášku, že rejstřík končí — přestože
+aktivity v rejstříku jsou. Změna volby proto výběr zahodí; zužovat se dá zase
+klikáním. Ověřeno v prohlížeči i testem: `7/46/250/46` v obou zobrazeních,
+349 karet celkem.
+
+Přepínač se jmenuje `Strom │ Rozklad svisle │ Rozklad vodorovně`.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 

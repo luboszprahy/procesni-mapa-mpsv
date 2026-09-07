@@ -333,5 +333,36 @@ overit(JSON.stringify(filtrSl) === JSON.stringify(filtrPa),
        `hledání odřízne v pásech totéž co ve sloupcích (${filtrPa.join("/")})`);
 prvky.q.value = "";
 
+/* ---- volba „Rozbalit" rozbaluje opravdu vše (F23) ----
+   Scénář, který to shodil v provozu: vybraná agenda bez aktivit + volba
+   „vše až po aktivity" → poslední vrstva hlásila konec rejstříku, ačkoli
+   aktivity v rejstříku jsou. Volba musí výběr zahodit, ne se jím nechat zúžit. */
+M.rzCesta.length = 0;
+M.rzCesta.push("03");                 // agenda, pod kterou žádné aktivity nejsou
+prvky.fUroven.value = "4";
+M.renderRozklad();
+const podVyberem = uzly(sloupce()[3]).length;
+overit(podVyberem === 0, `pod agendou 03 skutečně žádné aktivity nejsou (${podVyberem})`);
+
+prvky.fUroven._on.change();           // uživatel sáhl na volbu „Rozbalit"
+overit(M.rzCesta.length === 0,
+       `volba Rozbalit zahodila výběr (${JSON.stringify(M.rzCesta)})`);
+overit(uzly(sloupce()[3]).length === 46,
+       `a poslední sloupec ukazuje všech 46 aktivit (${uzly(sloupce()[3]).length})`);
+overit(!sloupce().flatMap(prazdno).some(h => h.includes("Tady rejstřík končí")),
+       "po rozbalení nikde nesvítí hláška o konci rejstříku");
+
+// totéž ve vodorovné variantě
+tlacitkoZobrazeni.dataset.zobrazeni = "rozkladH";
+M.rzCesta.length = 0;
+M.rzCesta.push("03");
+M.renderRozkladH();
+overit(uzlyH(pasy()[3]).length === 0, "v pásech pod agendou 03 aktivity taky nejsou");
+prvky.fUroven._on.change();
+overit(uzlyH(pasy()[3]).length === 46,
+       `po volbě Rozbalit ukazuje pás aktivit všech 46 (${uzlyH(pasy()[3]).length})`);
+tlacitkoZobrazeni.dataset.zobrazeni = "rozklad";
+M.rzCesta.length = 0;
+
 console.log(chyb ? `\nNEPROŠLO — ${chyb} chyb` : "\nOK — rozkladový diagram se chová podle zadání");
 process.exit(chyb ? 1 : 0);

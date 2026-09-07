@@ -148,8 +148,11 @@
      se kvůli nim nesmí zalomit, jinak přestane být poznat, co je jedna úroveň. */
   /* `stretch` místo `flex-start`: karty v pásu tvoří mřížku, ne schody.
      Výšku řádky přitom drží na uzdě ořez názvu níž — bez něj ji jediný
-     dlouhý název natáhl na čtyři řádky a pás zabral půl obrazovky. */
-  .rzh-radka{flex:1 1 auto;min-width:0;display:flex;gap:20px;padding:12px 16px 22px;
+     dlouhý název natáhl na čtyři řádky a pás zabral půl obrazovky.
+     Mezery jsou vzaté ze sloupcové varianty: tam karta zabírá 48 %
+     šířky sloupce a zbytek je pruh, kterým vede spojnice — tady je to
+     spodní odsazení řádky, do kterého se vějíř čar rozbíhá. */
+  .rzh-radka{flex:1 1 auto;min-width:0;display:flex;gap:30px;padding:14px 18px 46px;
         overflow-x:auto;overflow-y:hidden;align-items:stretch}
   /* Karta má v pásu pevnou šířku (ve sloupci je to procento jeho šířky) a dole
      místo pro spojnici do dalšího pásu — obdoba pruhu vpravo u sloupců. */
@@ -161,7 +164,7 @@
   /* Rozpad vede dolů, ne doprava — značka se otočí a sedne pod text. */
   /* Značka rozpadu je v pásu drobná: velká šipka pod každou kartou dělala
      z řádky pilu a soupeřila se spojnicemi, které říkají totéž. */
-  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:0;font-size:.9rem;
+  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:0;font-size:1.1rem;
         transform:translateX(-50%) rotate(90deg)}
   .rzh-radka .rz-uzel:hover .rz-sipka{transform:translateX(-50%) rotate(90deg) translateX(2px)}
   #rzhSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -221,7 +224,7 @@
 <div class="bar">
   <span class="prep" id="fZobrazeni" title="Strom rozbaluje celou strukturu pod sebou. Rozklad ukazuje úrovně vedle sebe ve sloupcích, vodorovná varianta pod sebou v pásech — obsah je v obou stejný, liší se jen rozvržení.">
     <button type="button" data-zobrazeni="strom" aria-pressed="true">Strom</button>
-    <button type="button" data-zobrazeni="rozklad">Rozklad</button>
+    <button type="button" data-zobrazeni="rozklad">Rozklad svisle</button>
     <button type="button" data-zobrazeni="rozkladH">Rozklad vodorovně</button>
   </span>
   <input type="search" id="q" placeholder="Hledat v agendách, procesech, dílčích procesech a aktivitách…" autocomplete="off">
@@ -667,7 +670,16 @@ function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
       ? (r.right < m.left || r.left > m.right)
       : (r.bottom < m.top || r.top > m.bottom);
 
-    dalsi.querySelectorAll(".rz-uzel").forEach(cil => {
+    /* Ve vodorovné variantě vycházejí čáry z RŮZNÝCH bodů spodní hrany rodiče,
+       rozprostřených podle pořadí dítěte. Z jednoho bodu se totiž vějíř deseti
+       čar u kořene slepí a přestane být poznat, která karta patří pod kterou
+       (řekl uživatel 07.09.2026). U sloupců to potřeba není — děti leží pod
+       sebou, takže se čáry rozbíhají samy. */
+    const cile = [...dalsi.querySelectorAll(".rz-uzel")];
+    const podleRodice = {};
+    cile.forEach(el => (podleRodice[el.dataset.rodic] = podleRodice[el.dataset.rodic] || []).push(el));
+
+    cile.forEach(cil => {
       const rodic = rodice[+cil.dataset.rodic];
       if (!rodic) return;
       const zdroj = rodic.getBoundingClientRect();
@@ -676,26 +688,21 @@ function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
 
       let tvar, lvl = cil.dataset.lvl;
       if (dolu){
-        /* V pásech se kreslí LOMENĚ, ne obloukem. Rodič s deseti dětmi vyrobil
-           svazek deseti křivek, které se u něj sbíhaly do jednoho chuchvalce
-           a přes celou řádku se křížily — nepřehledné (řekl uživatel
-           07.09.2026). Lomená čára se naopak sejde do jedné svislé nohy
-           a jedné vodorovné sběrnice, jako v organizačním schématu. */
-        const x1 = zdroj.left + zdroj.width / 2 - ramec.left, y1 = zdroj.bottom - ramec.top;
-        const x2 = c.left + c.width / 2 - ramec.left,         y2 = c.top - ramec.top;
-        const stred = y1 + (y2 - y1) / 2;
-        const r = Math.min(9, Math.abs(x2 - x1) / 2, Math.abs(stred - y1), Math.abs(y2 - stred));
-        if (r < 1){                       // dítě je přesně pod rodičem
-          tvar = "M" + x1 + "," + y1 + " L" + x2 + "," + y2;
-        } else {
-          const smer = x2 > x1 ? 1 : -1;
-          tvar = "M" + x1 + "," + y1
-            + " L" + x1 + "," + (stred - r)
-            + " Q" + x1 + "," + stred + " " + (x1 + smer * r) + "," + stred
-            + " L" + (x2 - smer * r) + "," + stred
-            + " Q" + x2 + "," + stred + " " + x2 + "," + (stred + r)
-            + " L" + x2 + "," + y2;
-        }
+        /* Každá spojnice vede samostatně od rodiče k dítěti. Mezistupeň
+           s lomenými čarami sdílel vodorovnou sběrnice v půli mezery — vypadalo
+           to jako organizační schéma, ale právě to sdílení vzalo informaci
+           o tom, která karta patří pod kterou (řekl uživatel 07.09.2026).
+           Vějíř samostatných křivek je proto zpět; místo, ve kterém se
+           rozbíhají, dělá spodní odsazení řádky. */
+        const sourozenci = podleRodice[cil.dataset.rodic];
+        const podil = (sourozenci.indexOf(cil) + 1) / (sourozenci.length + 1);
+        // rozprostření drží uvnitř karty, ale nikdy ne až k jejím rohům
+        const x1 = zdroj.left + 10 + (zdroj.width - 20) * podil - ramec.left;
+        const y1 = zdroj.bottom - ramec.top;
+        const x2 = c.left + c.width / 2 - ramec.left, y2 = c.top - ramec.top;
+        const ohyb = (y2 - y1) / 2;
+        tvar = "M" + x1 + "," + y1 + " C" + x1 + "," + (y1 + ohyb)
+          + " " + x2 + "," + (y2 - ohyb) + " " + x2 + "," + y2;
       } else {
         const x1 = zdroj.right - ramec.left, y1 = zdroj.top + zdroj.height / 2 - ramec.top;
         const x2 = c.left - ramec.left,      y2 = c.top + c.height / 2 - ramec.top;
@@ -835,7 +842,16 @@ const sel = document.getElementById("fUtvar");
 utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
 
 ["q","fUtvar","fStav","fUroven","cOsirele"].forEach(id => document.getElementById(id)
-  .addEventListener(id === "q" ? "input" : "change", prekresli));
+  .addEventListener(id === "q" ? "input" : "change", () => {
+    /* Sáhnout na „Rozbalit" znamená „ukaž vše až po tuhle úroveň" — a to
+       platí v obou rozkladech, ne jen ve stromu. Dokud volba nechávala
+       výběr být, ukázala jen jednu větev: kdo měl vybranou agendu bez
+       aktivit, dostal na „vše až po aktivity" hlášku, že rejstřík končí
+       (řekl uživatel 07.09.2026). Výběr se proto zahazuje a zužovat se dá
+       zase klikáním. */
+    if (id === "fUroven") rzCesta.length = 0;
+    prekresli();
+  }));
 
 /* Bez osiřelých položek nemá přepínač co ukázat — zůstává vidět (jinak by
    nebylo poznat, že se na ně kontroluje), ale je neaktivní a řekne proč. */
