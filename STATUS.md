@@ -1,6 +1,11 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-06 19:55**. Balík **1.0.0.100** — F15 (číselník
+Aktualizováno: **2026-09-07 20:55**. Poslední práce byla celá na **mapě**
+(F20–F33): druhé a třetí zobrazení, nová paleta, úprava vzhledu. Balík appky
+se nezměnil — pořád platí **1.0.0.101**, jen `site_assets/` v obou sadách
+nesou novou mapu, takže se při nasazení musí nahrát znovu.
+
+Předchozí stav: balík **1.0.0.100** — F15 (číselník
 útvarů), F16 (víc vlastníků v appce **i v importním Excelu**), F17 (pruh
 voleb), tlačítko Přesun a čtyři opravy z auditu kola 7.
 Hotová **F14**: krátký název se zapisuje přes REST MERGE, ne `PatchItem` —
@@ -19,7 +24,13 @@ stejný**. Dvoubalíkový režim končí.
    - Číselník útvarů narostl ze 7 na 44 položek → přenes data znovu
      (`deploy/ppf/02_import_dat.js`, anonymizovaná).
    - Do Site Assets nahraj `deploy/ppf/site_assets/` — je tam i importní
-     šablona s 12 sloupci.
+     šablona s 12 sloupci a **nová podoba mapy** (viz níže).
+
+   **Mapa vypadá jinak než při posledním nasazení.** Má tři zobrazení
+   (`Rozklad vodorovně │ Rozklad svisle │ Řádkové zobrazení`, vodorovný je
+   výchozí), novou paletu `#86A2E3 #52729E #332F74 #60ACEF #5B5290` a volba
+   „Rozbalit" teď rozbaluje celou úroveň, ne jen vybranou větev. Prohlédnuté
+   v prohlížeči, brána 46 kontrol a `test_rozklad.js` 44 kontrol jsou zelené.
 
    Co je nového proti tomu, cos viděl naposledy: tlačítko **Přesun** v řádku
    procesu (Editace → Procesy), sjednocený pruh voleb na úvodní obrazovce,
