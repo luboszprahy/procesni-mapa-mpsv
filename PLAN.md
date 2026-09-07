@@ -2907,3 +2907,76 @@ najednou — při 250 dílčích procesech by stránka měla přes 10 000 px).
    risk: brána, která kontroluje jen existenci `id`, projde i nefunkčnímu
      diagramu — proto se ověřuje i to, že se kreslí ze společné `filtruj`
 
+
+## F21 — úklid mapy a sjednocení barev (zadáno 07.09.2026) — HOTOVO
+
+Zadal uživatel nad snímkem mapy: pryč nápis „Sekce 3", pryč barevné puntíky
+legendy, pryč vysvětlivka odznaku (v rozkladu nedává smysl), sjednotit barvy.
+
+1. [Podtitulek bez sekce] — co: `src/mapa_template.html`, init `#meta`
+   verify: v šabloně 0× `DATA.meta.sekce`; hlavička ukazuje jen
+     „vygenerováno DD.MM.RRRR HH:MM"
+   edge cases: `meta.sekce` se jinde nepoužívá, data se nemění
+   risk: žádné — údaj byl navíc nepravdivý, mapa nese celý rejstřík (7 agend)
+
+2. [Legenda barev pryč] — co: HTML blok `.legend`, CSS `.legend i`, `.g1`–`.g4`
+   verify: brána `check_mapa_html.py` zelená; v šabloně 0× `class="g1"`
+   edge cases: vysvětlivka odznaku zůstává, jen bez puntíků
+   risk: bez legendy musí být úroveň poznat odjinud — je (hlavička sloupce,
+     odsazení stromu, sytost podkladu)
+
+3. [Vysvětlivka odznaku jen ve stromu] — co: `prekresli()` skrývá `#legenda`
+   verify: přepnutí na kterýkoli rozklad → `#legenda` má `hidden`
+   edge cases: návrat na strom ji musí vrátit
+   risk: text mluví o odznaku v ŘÁDKU; v kartách rozkladu žádný takový není
+
+4. [Jedna monochromatická řada] — co: `:root` v šabloně, řada z barvy navbaru
+     `#110b7a` → `#2a3f9e` → `#4463bd` → `#5470c4`, podklady tytéž barvy
+     naředěné bílou
+   verify: spočítaný kontrast každé dvojice text/podklad proti WCAG AA;
+     nejtěsnější 4,62:1 (sekundární text na podkladu agendy), bílý text na
+     nejsvětlejší hlavičce 4,68:1
+   edge cases: brána hlídá, že vrstvy mají vlastní podklad — splněno jinými
+     odstíny téže barvy
+   risk: tyrkys a zelená se ztratí i tam, kde nesly význam — nenesly, úroveň
+     říká pozice
+
+## F22 — vodorovná varianta rozkladu (zadáno 07.09.2026) — HOTOVO
+
+Zadal uživatel: druhá varianta rozkladu postavená vodorovně, stávající
+sloupcová zůstává, uživatel si vybere. Přepínač má tedy tři volby.
+
+5. [Společný výpočet vrstev] — co: `rzVrstvy()`, `rzKarta()`, `rzKlik()`,
+     `rzPrazdno()` vytažené z `renderRozklad()`
+   verify: `test_rozklad.js` beze změny zelený (28 kontrol) — refaktor nesmí
+     hnout chováním; brána ověří, že `rzVrstvy` je jedna a volají ji oba
+     renderery, a že sama filtruje přes `filtruj()`
+   edge cases: zkrácení cesty při zmizení vybraného kódu patří do `rzVrstvy`,
+     jinak by se dělo jen v jednom zobrazení
+   risk: dvě zobrazení téhož rejstříku s jinými čísly — chyba, které si nikdo
+     nevšimne; proto je to hlídané branou, ne jen dobrým úmyslem
+
+6. [Vodorovné rozvržení] — co: `renderRozkladH()`, `#rozkladH`, `.rzh-pas`
+     (hlavička vlevo + vodorovně rolující řádka karet)
+   verify: Node test — 4 pásy, počty `7/46/250/46` shodné se sloupci, výběr
+     agendy zužuje obě stejně (`7/10/41/10`), hledání „rozpočt" dá `2/3/6/1`
+     v obou
+   edge cases: 250 dílčích procesů se vedle sebe nevejde → řádka roluje,
+     pás se nesmí zalomit
+   risk: karta má ve sloupci šířku v procentech, v pásu musí být pevná
+
+7. [Spojnice pro obě osy] — co: `rzKresliSpojnice(ramec, svg, skupiny, dolu)`
+   verify: brána hlídá jednu společnou funkci a to, že vodorovná varianta
+     předává `true` a sloupcová `false`
+   edge cases: ořez odscrollovaných karet je u pásů na ose X, u sloupců na Y
+   risk: geometrii bez prohlížeče neověřím — stub vrací nulové rozměry;
+     strukturální kontrola osy je náhrada za oko, ne důkaz
+
+8. [Mutační ověření] — co: 5 mutací (vlastní výpočet vrstev, chybějící
+     hlavička, karta bez rodiče, špatná osa spojnic, ignorovaná volba
+     „Rozbalit")
+   verify: každá mutace shodí bránu nebo test, a z vlastního důvodu
+   edge cases: první běh ukázal „chyceno" u všech pěti jen proto, že se
+     nepodařilo spustit build a testovala se stará stránka — mutační skript
+     proto na neúspěšný build padá, místo aby ho přešel
+   risk: zelený test nad zeleným kódem nedokazuje nic

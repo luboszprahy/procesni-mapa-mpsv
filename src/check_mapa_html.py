@@ -72,7 +72,7 @@ def main():
     overit(v_html <= hledana | {"tree", "detail", "detailBody"},
            f"v HTML je ovládací prvek, se kterým JS nepracuje: {sorted(v_html - hledana)}")
 
-    # --- druhé zobrazení: rozkladový diagram (F20) ---
+    # --- druhé a třetí zobrazení: rozkladový diagram (F20, F22) ---
     # Kontroluje se kostra, ne popisky — přejmenování „Rozklad" bránu shodit nemá.
     overit('id="fZobrazeni"' in tpl and 'data-zobrazeni="rozklad"' in tpl,
            "chybí přepínač zobrazení strom/rozklad")
@@ -80,14 +80,42 @@ def main():
            "chybí kontejner rozkladového diagramu, sloupců nebo spojnic")
     overit(tpl.count('class="rz-hlavicky"') == 1 and tpl.count("<div>") >= 4,
            "rozkladový diagram nemá hlavičky čtyř úrovní")
-    # Obě zobrazení musí filtrovat týmž kódem, jinak ukážou jiná čísla téhož
-    # rejstříku. Že `filtruj` existuje nestačí — musí ji volat oba renderery.
+    overit('data-zobrazeni="rozkladH"' in tpl
+           and 'id="rozkladH"' in tpl and 'id="rzhPasy"' in tpl and 'id="rzhSpojnice"' in tpl,
+           "chybí vodorovná varianta rozkladu (přepínač nebo její kontejner)")
+
+    # Všechna zobrazení musí filtrovat týmž kódem, jinak ukážou jiná čísla téhož
+    # rejstříku. Že `filtruj` existuje nestačí — musí k ní vést cesta z každého
+    # rendereru. Obě varianty rozkladu k ní chodí přes společnou `rzVrstvy()`,
+    # která navíc drží i výběr a zúžení; kdyby si vrstvy počítala každá po svém,
+    # rozešly by se dvě zobrazení téhož rejstříku (F22).
     overit(tpl.count("function filtruj(") == 1,
            "filtrovací funkce není společná (chybí, nebo je definovaná víckrát)")
-    for kdo in ("render", "renderRozklad"):
+    overit(tpl.count("function rzVrstvy(") == 1,
+           "výpočet vrstev rozkladu není společný (chybí, nebo je definovaný víckrát)")
+    telo_vrstev = tpl.split("function rzVrstvy(", 1)[-1].split(chr(10) + "function ", 1)[0]
+    overit("filtruj(" in telo_vrstev,
+           "rzVrstvy() nefiltruje přes společnou filtruj() — zobrazení se rozejdou")
+    for kdo, volana in (("render", "filtruj("),
+                        ("renderRozklad", "rzVrstvy("),
+                        ("renderRozkladH", "rzVrstvy(")):
         telo = tpl.split(f"function {kdo}(", 1)[-1].split(chr(10) + "function ", 1)[0]
-        overit("filtruj(" in telo,
-               f"{kdo}() nefiltruje přes společnou filtruj() — zobrazení se rozejdou")
+        overit(volana in telo,
+               f"{kdo}() nestaví na společné {volana[:-1]}() — zobrazení se rozejdou")
+
+    # Spojnice kreslí jedna funkce pro obě osy; dvě kopie geometrie by se
+    # rozešly při první opravě jen v jedné z nich.
+    overit(tpl.count("function rzKresliSpojnice(") == 1,
+           "spojnice nekreslí jedna společná funkce")
+    for kdo, osa in (("rzSpojnice", "false"), ("rzSpojniceH", "true")):
+        volani = tpl.split(f"const {kdo} = () => rzKresliSpojnice(", 1)
+        overit(len(volani) == 2, f"{kdo} nevede přes společnou rzKresliSpojnice()")
+        if len(volani) == 2:
+            # Osu nelze ověřit během testu bez prohlížeče (stub vrací nulové
+            # rozměry), a kopie-vložit mezi oběma variantami je přitom ta
+            # nejpravděpodobnější chyba — proto aspoň strukturálně.
+            overit(volani[1].split(");", 1)[0].rstrip().endswith(osa),
+                   f"{kdo} kreslí spojnice po špatné ose (čeká se {osa})")
 
     # --- ovládací prvky podle zadání F6/A ---
     overit('id="cKod"' in tpl and "bez-kodu" in tpl,

@@ -6,18 +6,18 @@
 <title>Procesní mapa MPSV</title>
 <style>
   :root{
-    /* Paleta zadaná 24.08.2026 (Adobe Color): #110B7A #149EBB #A9C7EC #171F09 #3CA050.
-       Plné barvy nesou svislé linky vrstev, plochy jsou jejich světlé odvozeniny —
-       přes sytý tyrkys ani zelenou by nešly číst dlouhé názvy. Odstíny pro TEXT
-       jsou ztmavené (tyrkys má na bílé jen 3,16:1, zelená 3,31:1); každá dvojice
-       text/podklad je spočítaná proti WCAG AA, nejtěsnější je 5,45:1. */
+    /* Jedna monochromatická řada odvozená z barvy navbaru #110B7A (07.09.2026).
+       Dřívější paleta mísila tyrkys a zelenou; vedle tmavě modré hlavičky to byly
+       tři nesouvisející rodiny. Hierarchii teď dělá SYTOST téže modré, ne odstín —
+       proto k ní není potřeba legenda. Každá dvojice text/podklad je spočítaná
+       proti WCAG AA, nejtěsnější je 4,62:1 (sekundární text na podkladu agendy). */
     --bg:#f6f8fc; --panel:#fff; --ink:#1b2233; --muted:#545e73; --line:#dce1ec;
-    --a:#110b7a; --p:#0c5f70; --d:#246030; --k:#1b2233;
+    --a:#110b7a; --p:#2a3f9e; --d:#4463bd; --k:#5470c4;
     --chip:#e7ebf4; --hit:#fff3bf; --shadow:0 1px 3px rgba(17,11,122,.10);
-    /* podklady vrstev stromu */
-    --a-bg:#d5d8ef; --p-bg:#e2e9f6; --d-bg:#edf2fa; --k-bg:transparent;
-    /* svislé linky vrstev — plné barvy palety */
-    --a-line:#110b7a; --p-line:#149ebb; --d-line:#3ca050; --k-line:#a9c7ec;
+    /* podklady vrstev stromu — táž modrá, jen naředěná bílou */
+    --a-bg:#d5d8ef; --p-bg:#e2e7f6; --d-bg:#eef1fb; --k-bg:transparent;
+    /* svislé linky vrstev — plné stupně téže řady */
+    --a-line:#110b7a; --p-line:#2a3f9e; --d-line:#4463bd; --k-line:#5470c4;
     /* jediné místo, které řídí velikost písma celé stránky (viz #fVelikost) */
     --fs:14px;
   }
@@ -83,9 +83,9 @@
   /* Podklad sloupce je táž barva jako karta, jen zesvětlená smícháním s bílou.
      Stupeň je tak vidět i pod hlavičkou a karta se od něj přesto odliší. */
   .rz-sloupec[data-uroven="0"]{background:#ecedf8}
-  .rz-sloupec[data-uroven="1"]{background:#f2f5fb}
-  .rz-sloupec[data-uroven="2"]{background:#f7f9fd}
-  .rz-sloupec[data-uroven="3"]{background:#f7fafc}
+  .rz-sloupec[data-uroven="1"]{background:#f1f4fc}
+  .rz-sloupec[data-uroven="2"]{background:#f6f8fd}
+  .rz-sloupec[data-uroven="3"]{background:#fafbfe}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -102,7 +102,7 @@
   .rz-uzel.lvl-a{background:var(--a-bg);border-left-color:var(--a-line)}
   .rz-uzel.lvl-p{background:var(--p-bg);border-left-color:var(--p-line)}
   .rz-uzel.lvl-d{background:var(--d-bg);border-left-color:var(--d-line)}
-  .rz-uzel.lvl-k{background:#eef3f8;border-left-color:var(--k-line)}
+  .rz-uzel.lvl-k{background:#f5f7fd;border-left-color:var(--k-line)}
   .rz-uzel:hover{box-shadow:0 2px 8px rgba(17,11,122,.18);transform:translateY(-1px)}
   /* Vybraná karta se pozná rámečkem a stínem, ne jinou výplní — tu už drží
      vrstva a dvě barevné soustavy najednou by se bily. */
@@ -122,6 +122,37 @@
   .rz-uzel[aria-selected=true] .rz-sipka{opacity:1}
   .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
   .rz-prazdno{color:var(--muted);font-size:.88rem;padding:6px 4px}
+  /* ---- vodorovná varianta rozkladu: vrstvy jako pásy pod sebou ---- */
+  /* Druhé rozvržení téhož rozkladu (zadal uživatel 07.09.2026, obě zůstávají).
+     Sloupce se hodí, když má být vidět dlouhý seznam v jedné úrovni; pásy když
+     má být vidět tvar větve, protože rozpad jde odshora dolů jako v org. schématu. */
+  #rozkladH{flex:1 1 auto;min-width:0;background:var(--panel);border:1px solid var(--line);
+        border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+  .rzh-pasy{position:relative}
+  .rzh-pas{display:flex;align-items:stretch;border-top:1px solid var(--line)}
+  .rzh-pas:first-child{border-top:0}
+  .rzh-pas[data-uroven="0"]{background:#ecedf8}
+  .rzh-pas[data-uroven="1"]{background:#f1f4fc}
+  .rzh-pas[data-uroven="2"]{background:#f6f8fd}
+  .rzh-pas[data-uroven="3"]{background:#fafbfe}
+  .rzh-hlavicka{flex:0 0 112px;padding:12px;font-size:.84rem;font-weight:700;
+        letter-spacing:.06em;text-transform:uppercase;color:#fff;line-height:1.2}
+  .rzh-pas[data-uroven="0"] .rzh-hlavicka{background:var(--a)}
+  .rzh-pas[data-uroven="1"] .rzh-hlavicka{background:var(--p)}
+  .rzh-pas[data-uroven="2"] .rzh-hlavicka{background:var(--d)}
+  .rzh-pas[data-uroven="3"] .rzh-hlavicka{background:var(--k)}
+  /* Řádka roluje vodorovně — 250 dílčích procesů se vedle sebe nevejde a pás
+     se kvůli nim nesmí zalomit, jinak přestane být poznat, co je jedna úroveň. */
+  .rzh-radka{flex:1 1 auto;min-width:0;display:flex;gap:14px;padding:14px 14px 34px;
+        overflow-x:auto;overflow-y:hidden;align-items:flex-start}
+  /* Karta má v pásu pevnou šířku (ve sloupci je to procento jeho šířky) a dole
+     místo pro spojnici do dalšího pásu — obdoba pruhu vpravo u sloupců. */
+  .rzh-radka .rz-uzel{flex:0 0 186px;width:186px;margin:0;padding:6px 9px 22px}
+  /* Rozpad vede dolů, ne doprava — značka se otočí a sedne pod text. */
+  .rzh-radka .rz-sipka{right:auto;top:auto;left:50%;bottom:1px;
+        transform:translateX(-50%) rotate(90deg)}
+  .rzh-radka .rz-uzel:hover .rz-sipka{transform:translateX(-50%) rotate(90deg) translateX(2px)}
+  #rzhSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
   .node{border-radius:5px}
   .row{display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:5px;cursor:default;
        border-left:3px solid transparent}
@@ -155,13 +186,14 @@
          color:var(--muted);margin-top:2px;white-space:nowrap}
   .badge.no{background:#fdecea;color:#a3352a}
   .node.unmapped > .row > .nm{opacity:.62;font-style:italic}
-  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);padding:8px 20px 0}
-  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+  /* Barevná legenda vrstev je pryč (07.09.2026): monochromatická řada
+     nemá co vysvětlovat a v rozkladu úroveň říká hlavička sloupce.
+     Zůstala jen vysvětlivka odznaku — a ta patří ke stromu, takže se
+     v rozkladu schová celá (viz prekresli()). */
+  .legend{font-size:.86rem;color:var(--muted);padding:8px 20px 0;line-height:1.7}
+  .legend[hidden]{display:none}
   .legend .badge{margin:0 2px;font-weight:600}
-  .legend .vysvetlivky{flex:1 1 100%;line-height:1.7}
-  .legend .g1{background:var(--a-line)}.legend .g2{background:var(--p-line)}
-  .legend .g3{background:var(--d-line)}.legend .g4{background:var(--k-line)}
-  .badge.ut{background:#e8f0f7;color:var(--p)}
+  .badge.ut{background:#e8ecf9;color:var(--p)}
   mark{background:var(--hit);padding:0 1px}
   .empty{padding:20px;color:var(--muted);text-align:center}
   @media (max-width:900px){main{flex-direction:column}#detail{position:static;flex:1 1 auto;width:100%}}
@@ -175,9 +207,10 @@
 </header>
 
 <div class="bar">
-  <span class="prep" id="fZobrazeni" title="Strom rozbaluje celou strukturu pod sebou; rozklad ukazuje jednu cestu ve sloupcích vedle sebe.">
+  <span class="prep" id="fZobrazeni" title="Strom rozbaluje celou strukturu pod sebou. Rozklad ukazuje úrovně vedle sebe ve sloupcích, vodorovná varianta pod sebou v pásech — obsah je v obou stejný, liší se jen rozvržení.">
     <button type="button" data-zobrazeni="strom" aria-pressed="true">Strom</button>
     <button type="button" data-zobrazeni="rozklad">Rozklad</button>
+    <button type="button" data-zobrazeni="rozkladH">Rozklad vodorovně</button>
   </span>
   <input type="search" id="q" placeholder="Hledat v agendách, procesech, dílčích procesech a aktivitách…" autocomplete="off">
   <select id="fUtvar"><option value="">Vykonává útvar: vše</option></select>
@@ -202,13 +235,8 @@
   </span>
 </div>
 
-<div class="legend">
-  <span><i class="g1"></i>agenda</span>
-  <span><i class="g2"></i>proces</span>
-  <span><i class="g3"></i>dílčí proces</span>
-  <span><i class="g4"></i>aktivita</span>
-  <span class="vysvetlivky">Odznak vpravo v řádku říká, kolik aktivit je uvnitř větve.
-    <b class="badge no">bez aktivit</b> = položka v rejstříku je, ale činnosti k ní zatím nikdo nepopsal.</span>
+<div class="legend" id="legenda">Odznak vpravo v řádku říká, kolik aktivit je uvnitř větve.
+  <b class="badge no">bez aktivit</b> = položka v rejstříku je, ale činnosti k ní zatím nikdo nepopsal.
 </div>
 
 <main>
@@ -219,6 +247,11 @@
     </div>
     <div class="rz-sloupce" id="rzSloupce">
       <svg id="rzSpojnice" aria-hidden="true"></svg>
+    </div>
+  </div>
+  <div id="rozkladH" hidden>
+    <div class="rzh-pasy" id="rzhPasy">
+      <svg id="rzhSpojnice" aria-hidden="true"></svg>
     </div>
   </div>
   <aside id="detail"><h2>Detail</h2><div id="detailBody" class="empty">Klikni na aktivitu.</div></aside>
@@ -500,7 +533,18 @@ const sklonNizsi = (lvl, p) => {
   return p === 1 ? t[0] : p >= 2 && p <= 4 ? t[1] : t[2];
 };
 
-function renderRozklad(){
+/* Obsah vrstev počítá JEDNA funkce pro obě zobrazení. Kdyby si ho svislý
+   a vodorovný rozklad počítal každý po svém, ukázala by dvě zobrazení téhož
+   rejstříku jiná čísla — táž past, kvůli které vznikla společná `filtruj()`.
+   Renderery se tedy liší jen tím, jak vrstvy vykreslí.
+
+   Vrstva ukazuje potomky VŠECH položek v té předchozí, ne jen vybrané — tím
+   vznikne stromový rozklad, ne jedna cesta (rozhodl uživatel 07.09.2026).
+   Výběr slouží k zúžení: dokud nic vybráno není, jde dál celý obsah.
+   Aktivita může patřit do víc dílčích procesů (M:N), takže se ve vrstvě
+   objeví víckrát — jednou pod každým rodičem. Karty proto NEJDOU párovat
+   podle kódu a spojnice se drží indexu rodiče. */
+function rzVrstvy(pocet){
   const q = norm(document.getElementById("q").value.trim());
   const ut = document.getElementById("fUtvar").value;
   const stav = document.getElementById("fStav").value;
@@ -510,6 +554,58 @@ function renderRozklad(){
                     .map(n => filtruj(n, q, ut, stav, jenOsirele && !q))
                     .filter(Boolean);
 
+  const vrstvy = [];
+  let radky = koren.map(n => ({uzel: n, rodic: -1}));
+  for (let i = 0; i < pocet; i++){
+    // vybraný kód nemusí po změně filtru existovat
+    if (rzCesta[i] && !radky.some(r => r.uzel.kod === rzCesta[i])) rzZkrat(i);
+    vrstvy.push(radky);
+
+    const zaklad = rzCesta[i] ? radky.filter(r => r.uzel.kod === rzCesta[i]) : radky;
+    const dalsi = [];
+    zaklad.forEach(r => {
+      const poradiRodice = radky.indexOf(r);
+      (r.uzel.kids || []).forEach(k => dalsi.push({uzel: k, rodic: poradiRodice}));
+    });
+    radky = dalsi;
+  }
+  return {koren: koren, vrstvy: vrstvy};
+}
+
+/* Prázdno kvůli filtru není totéž co konec větve. Bez tohohle rozlišení
+   hlásí další vrstvy „konec rejstříku" i tehdy, když filtru neodpovídá nic. */
+function rzPrazdno(korenu){
+  const p = document.createElement("div");
+  p.className = "rz-prazdno";
+  p.textContent = korenu
+    ? "Tady rejstřík končí — níž už nic není."
+    : "Nic neodpovídá zadanému filtru.";
+  return p;
+}
+
+function rzKlik(i, uzel){
+  // klik na už vybranou kartu výběr zruší a vrátí do vrstvy vše
+  if (rzCesta[i] === uzel.kod) rzZkrat(i);
+  else { rzZkrat(i); rzCesta[i] = uzel.kod; }
+  if (uzel.lvl === "k") detail(uzel);
+  /* Klik v poslední viditelné vrstvě ji přidá, takže se dá větev rozkliknout
+     bez sahání na volbu vlevo. */
+  const vol = document.getElementById("fUroven");
+  if (i === +vol.value - 1 && (uzel.kids || []).length && +vol.value < 4){
+    vol.value = String(i + 2);
+  }
+  prekresli();
+}
+
+function rzKarta(r, i, poradi){
+  const el = rzUzel(r.uzel, r.uzel.kod === rzCesta[i]);
+  el.dataset.idx = String(poradi);
+  el.dataset.rodic = String(r.rodic);
+  el.addEventListener("click", () => rzKlik(i, r.uzel));
+  return el;
+}
+
+function renderRozklad(){
   elSloupce.querySelectorAll(".rz-sloupec").forEach(el => el.remove());
 
   /* Volba „Rozbalit" tu neurčuje hloubku rozbalení jako ve stromu, ale kolik
@@ -518,104 +614,69 @@ function renderRozklad(){
   [...document.querySelectorAll(".rz-hlavicky div")]
     .forEach((h, i) => h.hidden = i >= sloupcu);
 
-  /* Sloupec ukazuje potomky VŠECH položek vlevo, ne jen vybrané — tím vznikne
-     stromový rozklad, ne jedna cesta (rozhodl uživatel 07.09.2026). Výběr
-     slouží k zúžení: dokud nic vybráno není, jde do dalšího sloupce celý
-     obsah toho předchozího.
-     Aktivita může patřit do víc dílčích procesů (M:N), takže se ve sloupci
-     objeví víckrát — jednou pod každým rodičem. Karty proto NEJDOU párovat
-     podle kódu a spojnice se drží indexu rodiče. */
-  let radky = koren.map((n, idx) => ({uzel: n, rodic: -1, idx: idx}));
+  const {koren, vrstvy} = rzVrstvy(sloupcu);
 
-  for (let i = 0; i < sloupcu; i++){
+  vrstvy.forEach((radky, i) => {
     const sloupec = document.createElement("div");
     sloupec.className = "rz-sloupec";
     sloupec.dataset.uroven = i;
-
-    // vybraný kód nemusí po změně filtru existovat
-    if (rzCesta[i] && !radky.some(r => r.uzel.kod === rzCesta[i])) rzZkrat(i);
-
-    if (!radky.length){
-      const p = document.createElement("div");
-      p.className = "rz-prazdno";
-      /* Prázdno kvůli filtru není totéž co konec větve. Bez tohohle
-         rozlišení hlásí sloupce napravo „konec rejstříku" i tehdy, když
-         filtru neodpovídá vůbec nic. */
-      p.textContent = koren.length
-        ? "Tady rejstřík končí — níž už nic není."
-        : "Nic neodpovídá zadanému filtru.";
-      sloupec.appendChild(p);
-    } else {
-      radky.forEach((r, poradi) => {
-        const el = rzUzel(r.uzel, r.uzel.kod === rzCesta[i]);
-        el.dataset.idx = String(poradi);
-        el.dataset.rodic = String(r.rodic);
-        el.addEventListener("click", () => {
-          // klik na už vybranou kartu výběr zruší a vrátí do sloupce vše
-          if (rzCesta[i] === r.uzel.kod) rzZkrat(i);
-          else { rzZkrat(i); rzCesta[i] = r.uzel.kod; }
-          if (r.uzel.lvl === "k") detail(r.uzel);
-          /* Klik v posledním viditelném sloupci ho přidá, takže se dá větev
-             rozkliknout bez sahání na volbu vlevo. */
-          const vol = document.getElementById("fUroven");
-          if (i === +vol.value - 1 && (r.uzel.kids || []).length && +vol.value < 4){
-            vol.value = String(i + 2);
-          }
-          renderRozklad();
-        });
-        sloupec.appendChild(el);
-      });
-    }
+    if (!radky.length) sloupec.appendChild(rzPrazdno(koren.length));
+    else radky.forEach((r, poradi) => sloupec.appendChild(rzKarta(r, i, poradi)));
     elSloupce.appendChild(sloupec);
-
-    // do dalšího sloupce jde vybraná položka, a není-li, celý tenhle sloupec
-    const zaklad = rzCesta[i]
-      ? radky.filter(r => r.uzel.kod === rzCesta[i])
-      : radky;
-    const dalsi = [];
-    zaklad.forEach(r => {
-      const poradiRodice = radky.indexOf(r);
-      (r.uzel.kids || []).forEach(k => dalsi.push({uzel: k, rodic: poradiRodice}));
-    });
-    radky = dalsi;
-  }
+  });
   rzSpojnice();
 }
 
-/* Spojnice se počítají z pozic v DOM, ne z indexů — sloupce mají vlastní
-   scroll a uzly různou výšku, takže žádný výpočet „dopředu" by neseděl.
+/* Spojnice se počítají z pozic v DOM, ne z indexů — vrstvy mají vlastní
+   scroll a uzly různou velikost, takže žádný výpočet „dopředu" by neseděl.
    Vede se čára od KAŽDÉ karty k jejím dětem (rodič se pozná podle
-   `data-rodic`), takže je vidět celý rozklad, ne jen vybraná cesta. */
-function rzSpojnice(){
-  elSpojnice.textContent = "";
-  const ramec = elSloupce.getBoundingClientRect();
-  elSpojnice.setAttribute("viewBox", "0 0 " + ramec.width + " " + ramec.height);
-  elSpojnice.setAttribute("width", ramec.width);
-  elSpojnice.setAttribute("height", ramec.height);
+   `data-rodic`), takže je vidět celý rozklad, ne jen vybraná cesta.
 
-  const sloupce = [...elSloupce.querySelectorAll(".rz-sloupec")];
-  sloupce.forEach((sloupec, i) => {
-    const dalsi = sloupce[i + 1];
+   Jedna funkce kreslí obě zobrazení; liší se jen osou. Ve sloupcích vede
+   čára doprava (z pravé hrany rodiče do levé hrany dítěte), v pásech dolů
+   (ze spodní hrany do horní). Ořez „co je odscrollované, nekresli" je proto
+   taky na jiné ose — a kdyby zůstal na té původní, čáry by přebíhaly přes
+   celou plochu. */
+function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
+  svgEl.textContent = "";
+  const ramec = ramecEl.getBoundingClientRect();
+  svgEl.setAttribute("viewBox", "0 0 " + ramec.width + " " + ramec.height);
+  svgEl.setAttribute("width", ramec.width);
+  svgEl.setAttribute("height", ramec.height);
+
+  skupiny.forEach((skupina, i) => {
+    const dalsi = skupiny[i + 1];
     if (!dalsi) return;
-    const rodice = [...sloupec.querySelectorAll(".rz-uzel")];
-    const mezSl = sloupec.getBoundingClientRect();
+    const rodice = [...skupina.querySelectorAll(".rz-uzel")];
+    const mez = skupina.getBoundingClientRect();
     const mezDal = dalsi.getBoundingClientRect();
+    // mimo svou skupinu odscrollovaná karta by vyrobila čáru přes celou plochu
+    const venku = (r, m) => dolu
+      ? (r.right < m.left || r.left > m.right)
+      : (r.bottom < m.top || r.top > m.bottom);
 
     dalsi.querySelectorAll(".rz-uzel").forEach(cil => {
       const rodic = rodice[+cil.dataset.rodic];
       if (!rodic) return;
       const zdroj = rodic.getBoundingClientRect();
       const c = cil.getBoundingClientRect();
-      // co je odscrollované mimo svůj sloupec, by vyrobilo čáru přes celou plochu
-      if (c.bottom < mezDal.top || c.top > mezDal.bottom) return;
-      if (zdroj.bottom < mezSl.top || zdroj.top > mezSl.bottom) return;
+      if (venku(c, mezDal) || venku(zdroj, mez)) return;
 
-      const x1 = zdroj.right - ramec.left, y1 = zdroj.top + zdroj.height / 2 - ramec.top;
-      const x2 = c.left - ramec.left, y2 = c.top + c.height / 2 - ramec.top;
-      const ohyb = (x2 - x1) / 2;
+      let x1, y1, x2, y2, c1x, c1y, c2x, c2y;
+      if (dolu){
+        x1 = zdroj.left + zdroj.width / 2 - ramec.left; y1 = zdroj.bottom - ramec.top;
+        x2 = c.left + c.width / 2 - ramec.left;         y2 = c.top - ramec.top;
+        const ohyb = (y2 - y1) / 2;
+        c1x = x1; c1y = y1 + ohyb; c2x = x2; c2y = y2 - ohyb;
+      } else {
+        x1 = zdroj.right - ramec.left; y1 = zdroj.top + zdroj.height / 2 - ramec.top;
+        x2 = c.left - ramec.left;      y2 = c.top + c.height / 2 - ramec.top;
+        const ohyb = (x2 - x1) / 2;
+        c1x = x1 + ohyb; c1y = y1; c2x = x2 - ohyb; c2y = y2;
+      }
       const cara = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      cara.setAttribute("d", "M" + x1 + "," + y1
-        + " C" + (x1 + ohyb) + "," + y1 + " " + (x2 - ohyb) + "," + y2 + " " + x2 + "," + y2);
+      cara.setAttribute("d", "M" + x1 + "," + y1 + " C" + c1x + "," + c1y
+        + " " + c2x + "," + c2y + " " + x2 + "," + y2);
       cara.setAttribute("fill", "none");
       /* Barvu bere cílová vrstva, ne šedá --line: světle šedá čára na bílém
          podkladu byla v provozu prakticky neviditelná (07.09.2026). */
@@ -623,20 +684,68 @@ function rzSpojnice(){
       cara.setAttribute("stroke-width", "1.8");
       cara.setAttribute("stroke-linecap", "round");
       cara.setAttribute("opacity", ".5");
-      elSpojnice.appendChild(cara);
+      svgEl.appendChild(cara);
     });
   });
 }
+
+const rzSpojnice = () => rzKresliSpojnice(
+  elSloupce, elSpojnice, [...elSloupce.querySelectorAll(".rz-sloupec")], false);
+
+/* Vodorovná varianta: táž data, jen jinak rozvržená. Vrstvy počítá `rzVrstvy()`
+   společná s variantou sloupcovou, karty staví `rzKarta()` — renderer řeší
+   výhradně rozvržení, takže se obě zobrazení nemají čím rozejít.
+   Hlavičky se tu generují (u sloupců jsou v HTML), protože pás je hlavička
+   a řádka dohromady a počet pásů se mění s volbou „Rozbalit". */
+const elRozkladH = document.getElementById("rozkladH");
+const elPasy = document.getElementById("rzhPasy");
+const elSpojniceH = document.getElementById("rzhSpojnice");
+const PORADI_VRSTEV = ["a", "p", "d", "k"];
+
+function renderRozkladH(){
+  elPasy.querySelectorAll(".rzh-pas").forEach(el => el.remove());
+  const pocet = uroven();
+  const {koren, vrstvy} = rzVrstvy(pocet);
+
+  vrstvy.forEach((radky, i) => {
+    const pas = document.createElement("div");
+    pas.className = "rzh-pas";
+    pas.dataset.uroven = i;
+
+    const hlavicka = document.createElement("div");
+    hlavicka.className = "rzh-hlavicka";
+    hlavicka.textContent = TYPY[PORADI_VRSTEV[i]];
+    pas.appendChild(hlavicka);
+
+    const radka = document.createElement("div");
+    radka.className = "rzh-radka";
+    if (!radky.length) radka.appendChild(rzPrazdno(koren.length));
+    else radky.forEach((r, poradi) => radka.appendChild(rzKarta(r, i, poradi)));
+    pas.appendChild(radka);
+
+    elPasy.appendChild(pas);
+  });
+  rzSpojniceH();
+}
+
+const rzSpojniceH = () => rzKresliSpojnice(
+  elPasy, elSpojniceH, [...elPasy.querySelectorAll(".rzh-radka")], true);
 
 /* ---- přepínač zobrazení ---- */
 const zobrazeni = () =>
   document.querySelector('#fZobrazeni button[aria-pressed=true]').dataset.zobrazeni;
 
 function prekresli(){
-  const rozklad = zobrazeni() === "rozklad";
+  const z = zobrazeni();
+  const rozklad = z === "rozklad", rozkladH = z === "rozkladH";
   elRozklad.hidden = !rozklad;
-  document.getElementById("tree").hidden = rozklad;
-  if (rozklad) renderRozklad(); else render();
+  elRozkladH.hidden = !rozkladH;
+  document.getElementById("tree").hidden = rozklad || rozkladH;
+  // vysvětlivka mluví o odznaku v ŘÁDKU stromu — v rozkladu nemá co popisovat
+  document.getElementById("legenda").hidden = rozklad || rozkladH;
+  if (rozklad) renderRozklad();
+  else if (rozkladH) renderRozkladH();
+  else render();
 }
 
 document.getElementById("fZobrazeni").addEventListener("click", e => {
@@ -648,7 +757,11 @@ document.getElementById("fZobrazeni").addEventListener("click", e => {
 });
 
 elSloupce.addEventListener("scroll", rzSpojnice, true);
-window.addEventListener("resize", () => { if (zobrazeni() === "rozklad") rzSpojnice(); });
+elPasy.addEventListener("scroll", rzSpojniceH, true);
+window.addEventListener("resize", () => {
+  if (zobrazeni() === "rozklad") rzSpojnice();
+  else if (zobrazeni() === "rozkladH") rzSpojniceH();
+});
 
 function detail(n){
   const k = n.rec, body = document.getElementById("detailBody");
@@ -681,8 +794,9 @@ function detail(n){
 /* Jméno správce se do hlavičky nepíše — je to údaj o osobě, který v mapě
    určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
-document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · " + __GEN__;
+/* Sekce se do podtitulku nepíše (07.09.2026): mapa nese celý rejstřík
+   (7 agend, 46 procesů), takže „Sekce 3“ z ní dělala výsek, kterým není. */
+document.getElementById("meta").textContent = __GEN__;
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]

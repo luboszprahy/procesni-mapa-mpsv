@@ -30,6 +30,58 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
+## 07.09.2026 večer — F21/F22: úklid mapy a druhá varianta rozkladu
+
+Zadal uživatel nad snímkem mapy. Dvě věci najednou: **úklid** toho, co
+na stránce přebývalo, a **vodorovná varianta** rozkladu vedle sloupcové.
+
+**Co zmizelo.** Podtitulek „Sekce 3 · vygenerováno …" — mapa nese celý
+rejstřík (7 agend, 46 procesů), takže z ní ta hlavička dělala výsek, kterým
+není; zůstalo jen datum. Barevná legenda se čtyřmi puntíky. Vysvětlivka
+odznaku zůstala u stromu, ale **v obou rozkladech se schová** — mluví
+o odznaku v řádku, a ten karty rozkladu nemají.
+
+**Barvy jsou teď jedna monochromatická řada** odvozená z barvy navbaru:
+`#110b7a → #2a3f9e → #4463bd → #5470c4`, podklady tytéž barvy naředěné bílou.
+Předtím se v paletě mísil tyrkys se zelenou a vedle tmavě modré hlavičky to
+byly tři nesouvisející rodiny. Hierarchii teď dělá **sytost**, ne odstín —
+což je zároveň důvod, proč k ní není potřeba legenda. Kontrast je spočítaný,
+ne odhadnutý: nejtěsnější dvojice je 4,62:1 (sekundární text na podkladu
+agendy), bílý text na nejsvětlejší hlavičce 4,68:1 — obojí nad WCAG AA.
+
+**Vodorovná varianta** je třetí volba přepínače (`Strom │ Rozklad │ Rozklad
+vodorovně`); sloupcová zůstala beze změny. Úrovně leží jako pásy pod sebou,
+hlavička vlevo, karty v pásu vedle sebe, pás roluje vodorovně — 250 dílčích
+procesů se do řádky nevejde a zalomit ji nelze, jinak přestane být poznat,
+co je jedna úroveň. Spojnice vedou dolů místo doprava.
+
+**Podstatné je, že si obě zobrazení nemají čím lhát.** Vrstvy počítá jedna
+`rzVrstvy()`, karty staví jedna `rzKarta()`, spojnice kreslí jedna
+`rzKresliSpojnice()` s osou jako parametrem; renderery řeší výhradně
+rozvržení. Kdyby si každé počítalo své, obě stránky by vypadaly věrohodně
+a jen jedna by mluvila pravdu. Brána to hlídá stejně, jako od F20 hlídá
+společnou `filtruj()`.
+
+**Ověřeno:** brána `check_mapa_html.py` 46 kontrol / 0 chyb (dřív 37),
+`test_rozklad.js` 38 kontrol (dřív 28) — mezi nimi přímé porovnání počtů
+mezi zobrazeními: `7/46/250/46` bez výběru, `7/10/41/10` po výběru agendy 01,
+`2/3/6/1` při hledání „rozpočt", v pásech i sloupcích totéž.
+
+**Mutačně 5/5** — a stojí za zápis, proč první běh nic nedokazoval: hlásil
+„chyceno" u všech pěti mutací, ale test byl u všech zelený a červenala jen
+brána. Příčina nebyla v mutacích: mutační skript spouštěl build přes
+`shell=True` s dopřednými lomítky v cestě, cmd.exe ho nespustil, brána
+zčervenala na nesouhlasu `runs/build` se zdrojem a **test celou dobu běžel
+nad starou, nezmutovanou stránkou**. Po opravě padá každá mutace z vlastního
+důvodu (test 4×, brána 2×). Mutační skript teď na neúspěšný build zastaví,
+místo aby ho přešel — bez toho měření tvrdí, co se mu zlíbí.
+
+**Co ověřené není:** jak vodorovná varianta vypadá a jestli spojnice sedí
+při scrollu pásů. Rozšíření Chrome zůstává nepřipojené, geometrii stub
+neuhlídá (vrací nulové rozměry). Osu spojnic proto hlídá aspoň strukturální
+kontrola v bráně — kopie-vložit mezi variantami je tam nejpravděpodobnější
+chyba.
+
 ## 07.09.2026 — F20/model: rozklad ukazuje všechny větve, ne jednu cestu
 
 Rozhodl uživatel. Původní chování (Power BI decomposition tree: sloupec N+1 =

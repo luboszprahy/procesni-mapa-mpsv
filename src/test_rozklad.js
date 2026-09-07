@@ -89,6 +89,9 @@ prvek("fVelikost");
 prvek("fZobrazeni");
 
 const elSloupceStub = prvek("rzSloupce");
+const elPasyStub = prvek("rzhPasy");
+prvek("rozkladH");
+prvek("rzhSpojnice");
 /* Aktivní zobrazení; test si ho přepíná sám. */
 const tlacitkoZobrazeni = mkEl("button");
 tlacitkoZobrazeni.dataset.zobrazeni = "rozklad";
@@ -120,7 +123,7 @@ const html = fs.readFileSync(STRANKA, "utf8");
 const skript = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 /* Init na konci sahá na věci, které stub nemá; test volá renderRozklad sám. */
 const bezInitu = skript.replace(/\nprekresli\(\);\s*$/, "\n");
-const modul = new Function(bezInitu + "\nreturn {renderRozklad, rzCesta, TREE, filtruj, norm};");
+const modul = new Function(bezInitu + "\nreturn {renderRozklad, renderRozkladH, rzCesta, TREE, filtruj, norm};");
 const M = modul();
 
 /* ---- kontroly ---- */
@@ -262,6 +265,73 @@ prvky.fStav.value = "schváleno";
 M.renderRozklad();
 overit(cestaPlatna(M.rzCesta), `cesta po filtru je platná (${JSON.stringify(M.rzCesta)})`);
 prvky.fStav.value = "";
+
+/* ---- vodorovná varianta (F22) ----
+   Podstatné není, že se něco vykreslí, ale že obě zobrazení ukazují TATÁŽ
+   čísla. Kdyby si každé počítalo vrstvy po svém, rozdíl by nikdo nenašel —
+   obě stránky vypadají věrohodně, jen jedna z nich lže. */
+const pasy = () => elPasyStub.querySelectorAll(".rzh-pas");
+const radkaPasu = pas => pas.querySelectorAll(".rzh-radka")[0];
+const uzlyH = pas => radkaPasu(pas).querySelectorAll(".rz-uzel");
+
+M.rzCesta.length = 0;
+prvky.fUroven.value = "4";
+M.renderRozklad();
+const poctySl = sloupce().map(x => uzly(x).length);
+M.renderRozkladH();
+const poctyPa = pasy().map(uzlyH).map(u => u.length);
+overit(pasy().length === 4, `vodorovná varianta má čtyři pásy (${pasy().length})`);
+overit(JSON.stringify(poctySl) === JSON.stringify(poctyPa),
+       `pásy nesou tytéž počty jako sloupce (${poctyPa.join("/")} vs. ${poctySl.join("/")})`);
+
+const nadpisy = pasy().map(pas => pas.querySelectorAll(".rzh-hlavicka")[0].textContent);
+overit(JSON.stringify(nadpisy) === JSON.stringify(["Agenda", "Proces", "Dílčí proces", "Aktivita"]),
+       `každý pás je pojmenovaný svou úrovní (${nadpisy.join(" / ")})`);
+
+const bezRodiceH = uzlyH(pasy()[1]).filter(u => !(+u.dataset.rodic >= 0)).length;
+overit(bezRodiceH === 0, `karta v pásu zná svého rodiče (bez rodiče: ${bezRodiceH})`);
+
+// volba úrovně řídí počet pásů stejně jako počet sloupců
+prvky.fUroven.value = "2";
+M.renderRozkladH();
+overit(pasy().length === 2, `volba dvou úrovní nechá dva pásy (${pasy().length})`);
+prvky.fUroven.value = "4";
+
+// výběr zužuje v obou zobrazeních stejně
+M.rzCesta.length = 0;
+M.rzCesta.push("01");
+M.renderRozklad();
+const zuzenoSl = sloupce().map(x => uzly(x).length);
+M.renderRozkladH();
+const zuzenoPa = pasy().map(uzlyH).map(u => u.length);
+overit(JSON.stringify(zuzenoSl) === JSON.stringify(zuzenoPa),
+       `výběr agendy zužuje obě zobrazení stejně (${zuzenoPa.join("/")})`);
+M.rzCesta.length = 0;
+
+// klik v pásu se chová jako klik ve sloupci
+tlacitkoZobrazeni.dataset.zobrazeni = "rozkladH";
+prvky.fUroven.value = "2";
+M.renderRozkladH();
+const procesyH = uzlyH(pasy()[1]);
+const sVetviH = procesyH.find(u => !/bez položek/.test(u.textContent)) || procesyH[0];
+sVetviH._on.click();
+overit(prvky.fUroven.value === "3",
+       `klik v posledním pásu volbu posunul na tři (${prvky.fUroven.value})`);
+overit(pasy().length === 3, `a přibyl třetí pás (${pasy().length})`);
+overit(cestaPlatna(M.rzCesta), `cesta po kliku v pásu je platná (${JSON.stringify(M.rzCesta)})`);
+tlacitkoZobrazeni.dataset.zobrazeni = "rozklad";
+M.rzCesta.length = 0;
+prvky.fUroven.value = "4";
+
+// filtr platí i pro pásy — a odřízne v nich totéž co ve sloupcích
+prvky.q.value = "rozpočt";
+M.renderRozklad();
+const filtrSl = sloupce().map(x => uzly(x).length);
+M.renderRozkladH();
+const filtrPa = pasy().map(uzlyH).map(u => u.length);
+overit(JSON.stringify(filtrSl) === JSON.stringify(filtrPa),
+       `hledání odřízne v pásech totéž co ve sloupcích (${filtrPa.join("/")})`);
+prvky.q.value = "";
 
 console.log(chyb ? `\nNEPROŠLO — ${chyb} chyb` : "\nOK — rozkladový diagram se chová podle zadání");
 process.exit(chyb ? 1 : 0);
