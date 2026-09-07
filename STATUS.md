@@ -246,6 +246,36 @@ opravy zmizelo):
 - nezmapovaná položka se drží šedé `--muted`, která na sytých plochách nemá
   kontrast — na nich přebírá světlou/tmavou barvu své vrstvy.
 
+### Deváté kolo (20:36) — čtvrtá paleta a přeuspořádaný přepínač
+
+Paleta `#86A2E3 #52729E #332F74 #60ACEF #5B5290`, opět v plné sytosti. Tahle
+se od předchozích liší tím, že **se sama odstupňuje**: seřazená podle relativní
+luminance dá `0,040 → 0,103 → 0,163 → 0,365`, což je přesně čtyřstupňová řada
+od agendy po aktivitu. Vrstvy tedy rozlišuje odstín i světlost zároveň.
+
+| vrstva | plocha | písmo | kontrast |
+|---|---|---|---|
+| agenda | `#332F74` | bílé | 11,67:1 |
+| proces | `#5B5290` | bílé | 6,88:1 |
+| dílčí proces | `#52729E` | bílé | 4,93:1 |
+| aktivita | `#86A2E3` | tmavé | 6,27:1 |
+
+Rozdělení bílá/tmavá zase sedlo s tím, co Adobe ukazuje na svých pruzích.
+U `#52729E` je bílá těsná (4,93), takže **i sekundární text je čistě bílý** —
+odlišuje ho velikost, ne barva; na světlejší šedou tam kontrast nezbývá.
+`--k` je ztmavená varianta `#86A2E3` pro hlavičku sloupce, kolečko a spojnice,
+kde je potřeba bílý text a viditelná tenká čára.
+
+**Aktivita dostala plochu poprvé** — u minulé palety to nešlo, protože
+`#230818` je prakticky černá. Vyžádalo si to pravidlo, které dosud neexistovalo
+(`.lvl-k>.row{background:…}`): dokud byla `--k-bg` průhledná, nebylo co nastavit,
+takže samotná změna proměnné se v řádkovém zobrazení neprojevila.
+
+Přepínač je přeuspořádaný podle zadání na `Rozklad vodorovně │ Rozklad svisle │
+Řádkové zobrazení`. **Vodorovný rozklad je tím i výchozím zobrazením** — první
+tlačítko nese `aria-pressed`, a nechat aktivní jiné než první by vypadalo jako
+chyba.
+
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
 
