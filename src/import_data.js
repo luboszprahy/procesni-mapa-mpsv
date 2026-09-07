@@ -69,7 +69,7 @@ const DATA = [
     "Title": "01-01",
     "nazev": "Strategie a koncepce XÚ",
     "agenda_kod": "01",
-    "vlastnik": "921; 95",
+    "vlastnik": "921; 922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -77,7 +77,7 @@ const DATA = [
     "Title": "01-02",
     "nazev": "Operativní řízení útvarů XÚ a resortních organizací",
     "agenda_kod": "01",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -101,7 +101,7 @@ const DATA = [
     "Title": "01-05",
     "nazev": "Boj proti korupci, oznamování",
     "agenda_kod": "01",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -341,7 +341,7 @@ const DATA = [
     "Title": "07-01",
     "nazev": "Vnější komunikace",
     "agenda_kod": "07",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -365,7 +365,7 @@ const DATA = [
     "Title": "07-04",
     "nazev": "Právní podpora",
     "agenda_kod": "07",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -397,7 +397,7 @@ const DATA = [
     "Title": "07-08",
     "nazev": "Řízení lidských zdrojů",
     "agenda_kod": "07",
-    "vlastnik": "921; 95",
+    "vlastnik": "921; 922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -421,7 +421,7 @@ const DATA = [
     "Title": "07-11",
     "nazev": "Náhrada škody",
     "agenda_kod": "07",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
    },
@@ -442,7 +442,7 @@ const DATA = [
     "Title": "01-01-001",
     "nazev": "Řízení strategie XÚ",
     "proces_kod": "01-01",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -487,7 +487,7 @@ const DATA = [
     "Title": "01-02-002",
     "nazev": "Řízení resortních organizací XÚ",
     "proces_kod": "01-02",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -604,7 +604,7 @@ const DATA = [
     "Title": "01-05-001",
     "nazev": "Boj proti korupci",
     "proces_kod": "01-05",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -613,7 +613,7 @@ const DATA = [
     "Title": "01-05-002",
     "nazev": "Oznamování protiprávního jednání",
     "proces_kod": "01-05",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -622,7 +622,7 @@ const DATA = [
     "Title": "01-05-003",
     "nazev": "Lobbování",
     "proces_kod": "01-05",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2044,7 +2044,7 @@ const DATA = [
     "Title": "07-01-004",
     "nazev": "Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.",
     "proces_kod": "07-01",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2188,7 +2188,7 @@ const DATA = [
     "Title": "07-04-002",
     "nazev": "Zastupování XÚ a resortu před soudy, popř. jinými institucemi",
     "proces_kod": "07-04",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2206,7 +2206,7 @@ const DATA = [
     "Title": "07-04-004",
     "nazev": "Stížnosti a petice",
     "proces_kod": "07-04",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2215,7 +2215,7 @@ const DATA = [
     "Title": "07-04-005",
     "nazev": "Právní konzultace",
     "proces_kod": "07-04",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2404,7 +2404,7 @@ const DATA = [
     "Title": "07-08-001",
     "nazev": "Personální správa",
     "proces_kod": "07-08",
-    "vlastnik": "921; 95",
+    "vlastnik": "921; 922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2476,7 +2476,7 @@ const DATA = [
     "Title": "07-08-009",
     "nazev": "Organizační vztahy a systemizace",
     "proces_kod": "07-08",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2575,7 +2575,7 @@ const DATA = [
     "Title": "07-11-001",
     "nazev": "Náhrada škody podle zákona č. 82/1998 Sb.",
     "proces_kod": "07-11",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2584,7 +2584,7 @@ const DATA = [
     "Title": "07-11-002",
     "nazev": "Náhrada škody podle zákona č. 262/2006 Sb.",
     "proces_kod": "07-11",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "využitý",
     "zdroj": "rejstrik",
     "puvodni_kod": ""
@@ -2683,7 +2683,7 @@ const DATA = [
     "Title": "07-04-006",
     "nazev": "Podezření ze spáchání protiprávního jednání",
     "proces_kod": "07-04",
-    "vlastnik": "95",
+    "vlastnik": "922",
     "stav_rejstrik": "",
     "zdroj": "karta",
     "puvodni_kod": ""
@@ -2698,13 +2698,13 @@ const DATA = [
     "nazev": "Koordinace plnění úkolů resortních služebních úřadů",
     "nazev_kratky": "Koordinace plnění úkolů resortních služebních úřadů",
     "dilci_proces_kod": "01-02-002",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcněpříslušné útvary XÚ, podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2712,13 +2712,13 @@ const DATA = [
     "nazev": "Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISX (modul MODA)",
     "nazev_kratky": "Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISX (modul MODA)",
     "dilci_proces_kod": "07-08-009",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "odbor 921, sekce 94, podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2726,13 +2726,13 @@ const DATA = [
     "nazev": "Tvorba Organizačního řádu XÚ a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka",
     "nazev_kratky": "Tvorba Organizačního řádu XÚ a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka",
     "dilci_proces_kod": "07-08-009",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 01/2015, VP 02/2016",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2740,13 +2740,13 @@ const DATA = [
     "nazev": "Tvorba Služebního řádu XÚ",
     "nazev_kratky": "Tvorba Služebního řádu XÚ",
     "dilci_proces_kod": "07-08-009",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "odbor 921",
     "vnitrni_predpis": "VP 03/2017",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2754,13 +2754,13 @@ const DATA = [
     "nazev": "Vyřizování stížností podle zákona o státní službě",
     "nazev_kratky": "Vyřizování stížností podle zákona o státní službě",
     "dilci_proces_kod": "07-04-004",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "věcněpříslušné útvary XÚ, podřízené služební úřady",
     "vnitrni_predpis": "VP 04/2018; VP 03/2017; VP 05/2019",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2768,13 +2768,13 @@ const DATA = [
     "nazev": "Realizace správního řízení v záležitostech státní služby (vybrané úkoly prvoinstančního služebního orgánu a postupování odvolacímu služebnímu orgánu)",
     "nazev_kratky": "Realizace správního řízení v záležitostech státní služby (vybrané úkoly prvoinstančního služebního orgánu a postupování odvolacímu služebnímu orgánu)",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "odbor 921",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2782,13 +2782,13 @@ const DATA = [
     "nazev": "Rozhodování státního tajemníka o odvoláních a v přezkumném řízení",
     "nazev_kratky": "Rozhodování státního tajemníka o odvoláních a v přezkumném řízení",
     "dilci_proces_kod": "07-08-001",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2796,13 +2796,13 @@ const DATA = [
     "nazev": "Koordinace řízení kvality v XÚ",
     "nazev_kratky": "Koordinace řízení kvality v XÚ",
     "dilci_proces_kod": "01-01-001",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 06/2020; VP 07/2021",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2810,13 +2810,13 @@ const DATA = [
     "nazev": "Koordinace strategického řízení v XÚ",
     "nazev_kratky": "Koordinace strategického řízení v XÚ",
     "dilci_proces_kod": "01-01-001",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 08/2022; VP 09/2023",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2824,13 +2824,13 @@ const DATA = [
     "nazev": "Vyřizování žádostí XÚ jako povinným subjektem podle zákona č. 106/1999 Sb.",
     "nazev_kratky": "Vyřizování žádostí XÚ jako povinným subjektem podle zákona č. 106/1999 Sb.",
     "dilci_proces_kod": "07-01-004",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 10/2024",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2838,27 +2838,27 @@ const DATA = [
     "nazev": "Rozhodování ministra o stížnostech na postup při vyřizování žádostí o informace podle zákona č. 106/1999 Sb.",
     "nazev_kratky": "Rozhodování ministra o stížnostech na postup při vyřizování žádostí o informace podle zákona č. 106/1999 Sb.",
     "dilci_proces_kod": "07-01-004",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "",
     "vnitrni_predpis": "VP 10/2024",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
     "Title": "07-01-004-0003",
-    "nazev": "Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 95, kontrolní činnost vůči podřízeným služebním úřadům)",
-    "nazev_kratky": "Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 95, kontrolní činnost vůči podřízeným služebním úřadům)",
+    "nazev": "Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 922, kontrolní činnost vůči podřízeným služebním úřadům)",
+    "nazev_kratky": "Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 922, kontrolní činnost vůči podřízeným služebním úřadům)",
     "dilci_proces_kod": "07-01-004",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 10/2024",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2866,13 +2866,13 @@ const DATA = [
     "nazev": "Tvorba Interního protikorupčního programu XÚ",
     "nazev_kratky": "Tvorba Interního protikorupčního programu XÚ",
     "dilci_proces_kod": "01-05-001",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "",
     "vnitrni_predpis": "VP 11/2015",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2880,13 +2880,13 @@ const DATA = [
     "nazev": "Tvorba a zajišťování Vnitřního oznamovacího systému XÚ pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.)",
     "nazev_kratky": "Tvorba a zajišťování Vnitřního oznamovacího systému XÚ pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.)",
     "dilci_proces_kod": "01-05-002",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "",
     "vnitrni_predpis": "VOZ XÚ, VP 11/2015",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2894,13 +2894,13 @@ const DATA = [
     "nazev": "Koordinace vyřizování petic doručených XÚ",
     "nazev_kratky": "Koordinace vyřizování petic doručených XÚ",
     "dilci_proces_kod": "07-04-004",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 12/2016",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2908,13 +2908,13 @@ const DATA = [
     "nazev": "Průběžná aktualizace registru lobbovaných v XÚ v souladu se zákonem č. 168/2025 Sb.",
     "nazev_kratky": "Průběžná aktualizace registru lobbovaných v XÚ v souladu se zákonem č. 168/2025 Sb.",
     "dilci_proces_kod": "01-05-003",
-    "vykonava": "951",
+    "vykonava": "9221",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2922,13 +2922,13 @@ const DATA = [
     "nazev": "Metodická činnost pro vyřizování stížností podle správního řádu",
     "nazev_kratky": "Metodická činnost pro vyřizování stížností podle správního řádu",
     "dilci_proces_kod": "07-04-004",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "VP 12/2016",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2936,13 +2936,13 @@ const DATA = [
     "nazev": "Vyřizování žádostí o náhradu škody podle zákona č. 82/1998 Sb.",
     "nazev_kratky": "Vyřizování žádostí o náhradu škody podle zákona č. 82/1998 Sb.",
     "dilci_proces_kod": "07-11-001",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2950,13 +2950,13 @@ const DATA = [
     "nazev": "Projednávání nároků fyzických osob při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "nazev_kratky": "Projednávání nároků fyzických osob při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "dilci_proces_kod": "07-11-002",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "Pojišťovna A a.s., Pojišťovna B a.s.",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2964,13 +2964,13 @@ const DATA = [
     "nazev": "Koordinace odškodňování s pojišťovnami při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "nazev_kratky": "Koordinace odškodňování s pojišťovnami při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.)",
     "dilci_proces_kod": "07-11-002",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "Pojišťovna A a.s., Pojišťovna B a.s.",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2978,13 +2978,13 @@ const DATA = [
     "nazev": "Zastupování před soudy - správní žaloby s výjimkou soudních sporů týkajících se zaměstnanosti a inspekce práce",
     "nazev_kratky": "Zastupování před soudy - správní žaloby s výjimkou soudních sporů týkajících se zaměstnanosti a inspekce práce",
     "dilci_proces_kod": "07-04-002",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -2992,13 +2992,13 @@ const DATA = [
     "nazev": "Zastupování před soudy - civilní žaloby s výjimkou soudních sporů týkajících se veřejných zakázek a smluv",
     "nazev_kratky": "Zastupování před soudy - civilní žaloby s výjimkou soudních sporů týkajících se veřejných zakázek a smluv",
     "dilci_proces_kod": "07-04-002",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "věcně příslušné útvary XÚ, podřízené služební úřady",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3006,13 +3006,13 @@ const DATA = [
     "nazev": "Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPX/OPX+",
     "nazev_kratky": "Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPX/OPX+",
     "dilci_proces_kod": "07-04-002",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "sekce evropských fondů a mezinárodní spolupráce",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3020,13 +3020,13 @@ const DATA = [
     "nazev": "Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům XÚ, s výjimkou oblastí svěřených oddělení centrálních nákupů a právní podpory",
     "nazev_kratky": "Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům XÚ, s…",
     "dilci_proces_kod": "07-04-006",
-    "vykonava": "952",
+    "vykonava": "9222",
     "spolupracuje": "věcně příslušné útvary XÚ",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3034,13 +3034,13 @@ const DATA = [
     "nazev": "Poskytování právněkonzultační podpory útvarům sekce státního tajemníka",
     "nazev_kratky": "Poskytování právněkonzultační podpory útvarům sekce státního tajemníka",
     "dilci_proces_kod": "07-04-005",
-    "vykonava": "952",
-    "spolupracuje": "O921, odd. 951",
+    "vykonava": "9222",
+    "spolupracuje": "O921, odd. 9221",
     "vnitrni_predpis": "",
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3054,7 +3054,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3068,7 +3068,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3082,7 +3082,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3096,7 +3096,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3110,7 +3110,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3124,7 +3124,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3138,7 +3138,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3152,7 +3152,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3166,7 +3166,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3180,7 +3180,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3194,7 +3194,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3208,7 +3208,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3222,7 +3222,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3236,7 +3236,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3250,7 +3250,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3264,7 +3264,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3278,7 +3278,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3292,7 +3292,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3306,7 +3306,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3320,7 +3320,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    },
    {
@@ -3334,7 +3334,7 @@ const DATA = [
     "text_pro_or": "",
     "sekce": "92",
     "stav": "pracovní",
-    "datum_aktualizace": "2026-09-06T00:00:00Z",
+    "datum_aktualizace": "2026-09-07T00:00:00Z",
     "puvodni_kod": ""
    }
   ]
@@ -3672,22 +3672,22 @@ const DATA = [
     "nadrizeny_kod": "921"
    },
    {
-    "Title": "95",
-    "nazev": "Utvar 95 (odbor)",
+    "Title": "922",
+    "nazev": "Utvar 922 (odbor)",
     "uroven": "odbor",
-    "nadrizeny_kod": ""
+    "nadrizeny_kod": "92"
    },
    {
-    "Title": "951",
-    "nazev": "Utvar 951 (oddělení)",
+    "Title": "9221",
+    "nazev": "Utvar 9221 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "95"
+    "nadrizeny_kod": "922"
    },
    {
-    "Title": "952",
-    "nazev": "Utvar 952 (oddělení)",
+    "Title": "9222",
+    "nazev": "Utvar 9222 (oddělení)",
     "uroven": "oddělení",
-    "nadrizeny_kod": "95"
+    "nadrizeny_kod": "922"
    },
    {
     "Title": "93",

@@ -1,10 +1,10 @@
 ﻿kod;nazev;proces_kod;vlastnik;stav_rejstrik;pocet_aktivit;zdroj
-01-01-001;Řízení strategie XÚ;01-01;95;využitý;2;rejstrik
+01-01-001;Řízení strategie XÚ;01-01;922;využitý;2;rejstrik
 01-01-002;Řízení koncepce XÚ;01-01;;nevyužitý;0;rejstrik
 01-01-003;Politika lidských zdrojů;01-01;921;využitý;3;rejstrik
 01-01-004;Plánování lidských zdrojů;01-01;921;využitý;1;rejstrik
 01-02-001;Organizace a řízení projektů;01-02;;nevyužitý;0;rejstrik
-01-02-002;Řízení resortních organizací XÚ;01-02;95;využitý;1;rejstrik
+01-02-002;Řízení resortních organizací XÚ;01-02;922;využitý;1;rejstrik
 01-02-003;Tvorba a připomínkování metodik a interních řídících dokumentů XÚ;01-02;;využitý;0;rejstrik
 01-02-004;Analytická, statistická a prognostická činnost;01-02;;nevyužitý;0;rejstrik
 01-03-001;Správa rozpočtu XÚ;01-03;;nevyužitý;0;rejstrik
@@ -17,9 +17,9 @@
 01-04-004;Řízení a koordinace zpracování dokumentací programů kapitoly.;01-04;;nevyužitý;0;rejstrik
 01-04-005;Správa programu dotací do sociální oblasti.;01-04;;nevyužitý;0;rejstrik
 01-04-006;Zpracování dokumentace programu a řízení realizace akcí KAG.;01-04;;nevyužitý;0;rejstrik
-01-05-001;Boj proti korupci;01-05;95;využitý;1;rejstrik
-01-05-002;Oznamování protiprávního jednání;01-05;95;využitý;1;rejstrik
-01-05-003;Lobbování;01-05;95;využitý;1;rejstrik
+01-05-001;Boj proti korupci;01-05;922;využitý;1;rejstrik
+01-05-002;Oznamování protiprávního jednání;01-05;922;využitý;1;rejstrik
+01-05-003;Lobbování;01-05;922;využitý;1;rejstrik
 01-06-001;Tvorba koncepcí a strategií v oblasti výzkumu a vývoje;01-06;;využitý-S4;0;rejstrik
 01-06-002;Koordinační a organizační činnosti v oblasti výzkumu a vývoje a odborná podpora;01-06;;využitý;0;rejstrik
 01-06-003;Poskytování finanční podpory v oblasti výzkumu a vývoje;01-06;;využitý-S4;0;rejstrik
@@ -177,7 +177,7 @@
 07-01-001;Zajišťování vztahů s médii;07-01;;nevyužitý;0;rejstrik
 07-01-002;Příprava tiskových konferencí, tiskových zpráv a dalších podkladů;07-01;;nevyužitý;0;rejstrik
 07-01-003;Poskytování informací veřejnosti, včetně vyřizování stížností, podnětů a oznámení;07-01;;nevyužitý;0;rejstrik
-07-01-004;Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.;07-01;95;využitý;3;rejstrik
+07-01-004;Poskytování informací veřejnosti dle zákona č. 106/1999 Sb.;07-01;922;využitý;3;rejstrik
 07-01-005;Tvorba a aktualizace webových stránek XÚ;07-01;;nevyužitý;0;rejstrik
 07-01-006;Monitoring vybraného tisku;07-01;;nevyužitý;0;rejstrik
 07-02-001;Příprava podkladů pro jednání ministra;07-02;;nevyužitý;0;rejstrik
@@ -193,10 +193,10 @@
 07-03-007;Zajištění činnosti rozkladové komise, včetně účasti a zpracování podkladů;07-03;;nevyužitý;0;rejstrik
 07-03-008;Meziresortní připomínková řízení;07-03;;nevyužitý;0;rejstrik
 07-04-001;Připomínkování návrhů smluv;07-04;;nevyužitý;0;rejstrik
-07-04-002;Zastupování XÚ a resortu před soudy, popř. jinými institucemi;07-04;95;využitý;3;rejstrik
+07-04-002;Zastupování XÚ a resortu před soudy, popř. jinými institucemi;07-04;922;využitý;3;rejstrik
 07-04-003;Právní servis (vyřizování právních a majetkových záležitostí);07-04;;nevyužitý;0;rejstrik
-07-04-004;Stížnosti a petice;07-04;95;využitý;3;rejstrik
-07-04-005;Právní konzultace;07-04;95;využitý;1;rejstrik
+07-04-004;Stížnosti a petice;07-04;922;využitý;3;rejstrik
+07-04-005;Právní konzultace;07-04;922;využitý;1;rejstrik
 07-05-001;Tvorba koncepce financování resortu XÚ;07-05;;nevyužitý;0;rejstrik
 07-05-002;Metodika financování a účetnictví;07-05;;nevyužitý;0;rejstrik
 07-05-003;Účetní a finanční výkaznictví;07-05;;nevyužitý;0;rejstrik
@@ -217,7 +217,7 @@
 07-07-002;Obnova majetku - investice XÚ;07-07;;nevyužitý;0;rejstrik
 07-07-003;Nákup;07-07;;nevyužitý;0;rejstrik
 07-07-004;Autoprovoz;07-07;;nevyužitý;0;rejstrik
-07-08-001;Personální správa;07-08;"921; 95";využitý;9;rejstrik
+07-08-001;Personální správa;07-08;"921; 922";využitý;9;rejstrik
 07-08-002;Personální controlling;07-08;921;využitý;1;rejstrik
 07-08-003;Finanční řízení v oblasti lidských zdrojů;07-08;921;využitý;1;rejstrik
 07-08-004;Odměňování;07-08;921;využitý;2;rejstrik
@@ -225,7 +225,7 @@
 07-08-006;Hodnocení zaměstnanců;07-08;921;využitý;1;rejstrik
 07-08-007;Úřednické zkoušky;07-08;921;využitý;2;rejstrik
 07-08-008;Vzdělávání a rozvoj zaměstnanců;07-08;921;využitý;1;rejstrik
-07-08-009;Organizační vztahy a systemizace;07-08;95;využitý;3;rejstrik
+07-08-009;Organizační vztahy a systemizace;07-08;922;využitý;3;rejstrik
 07-09-001;Analytické a expertní činnosti, které nejsou předmětem hlavní činnosti;07-09;;nevyužitý;0;rejstrik
 07-09-002;Činnost v meziresortních a resortních pracovních skupinách a komisích;07-09;;nevyužitý;0;rejstrik
 07-09-003;Vnitřní připomínková řízení - zpracování podkladů a stanovisek;07-09;;nevyužitý;0;rejstrik
@@ -236,8 +236,8 @@
 07-10-004;Spisová služba;07-10;;nevyužitý;0;rejstrik
 07-10-005;Správa archivu;07-10;;nevyužitý;0;rejstrik
 07-10-006;Zajištění provozu podatelny;07-10;;nevyužitý;0;rejstrik
-07-11-001;Náhrada škody podle zákona č. 82/1998 Sb.;07-11;95;využitý;1;rejstrik
-07-11-002;Náhrada škody podle zákona č. 262/2006 Sb.;07-11;95;využitý;2;rejstrik
+07-11-001;Náhrada škody podle zákona č. 82/1998 Sb.;07-11;922;využitý;1;rejstrik
+07-11-002;Náhrada škody podle zákona č. 262/2006 Sb.;07-11;922;využitý;2;rejstrik
 07-12-001;Koncepční činnost v oblasti ICT včetně podřízených organizací;07-12;;nevyužitý;0;rejstrik
 07-12-002;Provoz a rozvoj infrastruktury resortu, včetně napojení na externí prostředí;07-12;;nevyužitý;0;rejstrik
 07-12-003;Provoz, údržba a rozvoj výpočetní techniky XÚ;07-12;;nevyužitý;0;rejstrik
@@ -248,4 +248,4 @@
 07-12-008;Provoz, údržba a rozvoj informačních systémů, agend a databází obcí vykonávajících agendu hmotné nouze a sociálních služeb;07-12;;nevyužitý;0;rejstrik
 07-12-009;Finanční a smluvní zajištění výstavby a správy informačních systémů;07-12;;nevyužitý;0;rejstrik
 07-12-010;Provoz, údržba a rozvoj komunikační infrastruktury resortu;07-12;;nevyužitý;0;rejstrik
-07-04-006;Podezření ze spáchání protiprávního jednání;07-04;95;;1;karta
+07-04-006;Podezření ze spáchání protiprávního jednání;07-04;922;;1;karta

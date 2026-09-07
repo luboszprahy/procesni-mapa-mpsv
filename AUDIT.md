@@ -1,12 +1,20 @@
 # AUDIT — Procesní mapa MPSV
 
-Poslední audit: 06.09.2026 20:15 · auditor: powerplatform-auditor · kolo: 7 (balík `deploy/procesnimapa_1_0_0_99.zip`, F16/1 víc vlastníků + tlačítko Přesun + F17 pruh voleb + F15 číselník útvarů)
+Poslední audit: 07.09.2026 10:40 · auditor: powerplatform-auditor · kolo: 8 (balík `deploy/procesnimapa_1_0_0_100.zip`, brána před importem do DEV)
+Verdikt kolo 8: NÁLEZY (1 blokující / 1 opravit / 0 eskalací) — integrita balíku (verze,
+  `Managed`, GUID, env proměnné) je v pořádku a flow/schéma/šablona (F14, F15, F16/2) jsou bez
+  nálezu, ale **kompilovaný `Controls/*.json` uvnitř `.msapp` je zastaralý (odpovídá appce
+  ~1.0.0.93, naposledy skutečně zabalené `pac canvas pack` 04.09.2026)** — F16/1 víc vlastníků,
+  tlačítko Přesun a F17 sjednocený pruh voleb v naimportované appce nebudou, kola 7 P-01/P-02
+  jsou tím bezpředmětná (kód, který opravovala, v appce není) a navíc se vrátil dřív opravený
+  pád appky (balík 95) — viz P-01 níže
+Předchozí: 06.09.2026 20:15 · kolo: 7 (balík `deploy/procesnimapa_1_0_0_99.zip`, F16/1 víc vlastníků + tlačítko Přesun + F17 pruh voleb + F15 číselník útvarů)
 Verdikt kolo 7: NÁLEZY (2 blokující / 2 opravit / 0 eskalací) — integrita balíku (verze, `Managed`,
   žádný GUID natvrdo, žádné `<defaultvalue>`/`environmentvariablevalues.json`) je v pořádku a
   G-01 z kola 6 je vyřízeno (balík 98 i F14 jsou komitnuté), ale appka samotná v novém
   formuláři „víc vlastníků" na dvou místech tiše zapíše nebo smaže jiná data, než appka
-  a `STATUS.md` tvrdí — viz P-01/P-02 níže
-Předchozí: 06.09.2026 19:15 · kolo: 6 (balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
+  a `STATUS.md` tvrdí — viz P-01/P-02 (kolo 7) — **kolo 8: bezpředmětné, viz P-01 (kolo 8)**
+Před tím: 06.09.2026 19:15 · kolo: 6 (balík `deploy/procesnimapa_1_0_0_98.zip`, F14)
 Verdikt kolo 6: NÁLEZY (1 blokující / 1 opravit / 0 eskalací) — balík samotný je technicky v pořádku
   (žádný GUID natvrdo, ostatních 8 flow beze změny proti 97, REST zápis tvarově správný a ověřený
   proti produkčně běžícím dvojčatům), ale **implementace F14 a balík 98 nejsou v gitu** — viz G-01
@@ -33,6 +41,347 @@ V tomto projektu **neplatí** kritéria vázaná na publisher `ppf`/prefix `ppf_
 tenant `ppfbanka.sharepoint.com` — viz zdůvodnění v kole 1 níže (beze změny).
 Testovací tenant je skutečně `ppfbanka.sharepoint.com` a jeho výskyt v balíku
 proto sám o sobě není nález.
+
+## Vyřízení kola 8 (07.09.2026) — P-01 zamítnuto s důkazem, P-02 opraveno
+
+**P-01 · ZAMÍTNUTO.** Zaostávání `Controls/*.json` za `Src/*.pa.yaml` je u
+YAML-first balíku normální stav, ne regrese. Rozhodl přímý důkaz z historie
+vlastních balíků — `varVerze` v obou vrstvách napříč verzemi:
+
+| balík | `Src/App.pa.yaml` | `Controls/*.json` | `LastPackedDateTimeUtc` |
+|---|---|---|---|
+| 1.0.0.93 | 1.0.0.93 | **1.0.0.85** | 2026-09-03 20:06:55Z |
+| 1.0.0.95 | 1.0.0.95 | **1.0.0.93** | 2026-09-04 10:09:50Z |
+| 1.0.0.96–100 | 96…100 | **1.0.0.93** | 2026-09-04 10:57:50Z |
+
+`Controls/*.json` nedrží verzi z doby balení, ale verzi **předchozího balíku**.
+Kdyby Studio četlo `Controls/*.json`, dostal by uživatel po importu balíku 93
+appku ve verzi 85 — a hodnota `1.0.0.93`, kterou má balík 95 ve svých
+`Controls`, by nikdy nevznikla. Vznikla jediným možným způsobem: Studio
+načetlo balík 93 **z YAML**, materializovalo z něj `Controls/*.json` a export
+té appky se stal základnou pro balík 95. Tím je vyvrácena i premisa nálezu,
+že „Studio čte `Controls/*.json` bez ohledu na `LoadFromYaml`".
+
+Doplňkové zjištění ke stejnému mechanismu: `pac canvas pack` `Controls/*.json`
+**negeneruje**, jen je přenese — proto mají balíky 96–100 stejnou hodnotu jako
+balík 95, přestože mezi 95 a 96 skutečný `pac` běh proběhl (razítko balení se
+liší, obsah `Controls` ne). Tvrzení `STATUS.md` o bajtové shodě balíku z `pac`
+a z `--bez-pac` tedy platí a `--bez-pac` není horší cesta buildu.
+
+Pravidlo ze skillu (`canvas-json-editing.md`, ověřeno 01.07.2026), o které se
+nález opíral, platí — ale pro **balík exportovaný ze Studia**, který
+`Src/*.pa.yaml` vůbec nenese a `packed.json` s `LoadFromYaml` nemá. Pro
+YAML-first balík (`PackedStructureVersion 0.1`, `LoadFromYaml: true`) neplatí.
+Rozdíl je doplněn do skillu, aby příští kolo nešlo touž slepou uličkou.
+
+**Co z P-01 platí a zůstává:** appku je po importu nutné otevřít ve Studiu
+a udělat Save & Publish, jinak hráči dostanou předchozí verzi. To v
+`STATUS.md` i v předávacím návodu jako povinný krok už je.
+
+**P-02 · OPRAVENO.** `src/check_app.py` dostal `argparse` a přepínač
+`--solution <zip>` teď dělá, co slibuje: vytáhne `Src/*.pa.yaml` z `.msapp`
+uvnitř solution zipu a kontroluje **je** místo zdrojů v repu (`_EditorState`
+se přeskakuje, chybějící obrazovka je chyba). Nad balíkem 100: 7 YAML,
+6 obrazovek, 287 prvků, 3206 vzorců, 0 chyb.
+
+Mutačně ověřeno, že přepínač kontroluje balík, a ne repo — obojí nad podvrženou
+kopií balíku 100:
+
+| mutace v `.msapp` | výsledek |
+|---|---|
+| smazaná `Src/scr_Presun.pa.yaml` | exit 1, „v balíku chybí obrazovky: scr_Presun.pa.yaml" |
+| `vlastnik` → `vlastnikXYZ` ve `scr_Ciselnik` | exit 1, sloupec nesedí na schéma |
+| nezměněný balík 100 | exit 0 |
+
+Nález byl správný v tom, co tvrdil o skriptu: přepínač se čtyři kola tiše
+ignoroval, takže „`check_app.py --solution …` → OK" dokazovalo něco jiného,
+než si volající myslel. Že se za tím žádná skutečná vada neskrývala, je shoda
+okolností — balík YAML z repa opravdu veze.
+
+## Kolo 8 (07.09.2026, balík `deploy/procesnimapa_1_0_0_100.zip`, brána před importem do DEV)
+
+Zadání: nezávisle ověřit, že čtyři nálezy z kola 7 (P-01 až P-04, formulář „víc
+vlastníků" v `scr_Ciselnik.pa.yaml`) jsou v balíku 100 skutečně opravené —
+ne podle popisu opravy, ale nad rozbaleným balíkem — a projít novinky proti
+99 (tlačítko Přesun, sjednocený pruh voleb, číselník útvarů F15, víc
+vlastníků F16/1+F16/2, kontrola překryvu).
+
+Postup: `deploy/procesnimapa_1_0_0_100.zip` rozbalen do scratchpadu (`unzip -t`
+bez chyby na solution zipu i vnořeném `.msapp`), `CanvasApps/*.msapp` rozbalen
+zvlášť. Nálezy z kola 7 se nedaly ověřit přímo — vedly k mnohem závažnějšímu
+zjištění popsanému v P-01 níže. Pro srovnání rozbaleny i balíky 96-99 (`deploy/`)
+a jejich `.msapp`. Brány spuštěny přímo nad balíkem 100 (ne převzato):
+`check_app.py` (bez efektu — viz P-02), `check_solution.py --vstup 99 --vystup
+100`, `check_flow.py`, `check_restore_flow.py`, `check_zaloha_flow.py`,
+`check_import_flow.py`, `check_mapa_flow.py`, `check_export_flow.py`,
+`check_presun_flow.py`, `check_env.py`, `check_schema.py`, `check_sablona.py`,
+`node check_setup.js`, `node check_import.js`.
+
+### P-01 · BLOKUJÍCÍ · `CanvasApps/*.msapp` v `deploy/procesnimapa_1_0_0_100.zip` — kompilovaný `Controls/*.json` (to, co Studio a import skutečně načtou) odpovídá appce ve verzi cca **1.0.0.93**, ne 1.0.0.100; F16/1, F17, tlačítko Přesun a všechny čtyři opravy z kola 7 v naimportované appce nebudou
+
+Balík **vypadá** správně na všech místech, která předchozí kola auditovala
+(`solution.xml` verze `1.0.0.100`, `Src/*.pa.yaml` uvnitř `.msapp` bajtově
+odpovídá `src/app_src/*.pa.yaml` v repu, `check_app.py` hlásí OK). Jenže
+**`Src/*.pa.yaml` je jen read-only náhled, který Studio ani import nečtou**
+— skutečný zdroj pravdy je `Controls/*.json` (skill `power-Apps-skill`,
+`reference/canvas-json-editing.md:16-17`, „OVĚŘENO 01.07.2026": *„Runtime/
+import čte `Controls/*.json` + `Components/*.json`, NE `Src/*.pa.yaml` (ten
+je jen read-only náhled a po úpravě JSON nesedí — nevadí, nečte se)."* —
+a checklist C1 totéž. A `Controls/*.json` v balíku 100 je **zastaralé**.
+
+**Přímý důkaz z `packed.json` uvnitř `.msapp` (balík 100):**
+```
+{"PackedStructureVersion": "0.1",
+ "LastPackedDateTimeUtc": "2026-09-04 10:57:50Z",
+ "PackingClient": {"Name": "Pac CLI", "Version": "2.11.2"},
+ "LoadConfiguration": {"LoadFromYaml": true}}
+```
+Naposledy appku skutečně zabalil `pac canvas pack` **04.09.2026 v 10:57 UTC**
+— tři dny před balíkem 100 a ještě před tím, než podle `STATUS.md` vznikly
+F17 (04.09. odpoledne), F15/F16/tlačítko Přesun (06.09.).
+
+**Přímý důkaz z kompilovaného `App.OnStart` (`Controls/1.json`, ne
+`Src/App.pa.yaml`):**
+```
+python: extrahováno z Controls/1.json → "varVerze, \"1.0.0.93\")"
+```
+Appka, kterou uživatel po importu balíku **1.0.0.100** ve Studiu otevře,
+si při startu nastaví `varVerze` na **`"1.0.0.93"`** — přesně ten diagnostický
+tooltip, který `STATUS.md` samo doporučuje jako test mikro-změny
+(„tooltip názvu appky ukáže 1.0.0.100"), ukáže **1.0.0.93**.
+
+**Konkrétní chybějící/vrácené funkce — ověřeno strukturálním diffem
+jmen ovládacích prvků mezi `Controls/*.json` (kompilováno) a `src/app_src/*.pa.yaml`
+(repo), oboje parsováno properly (json/`yaml.safe_load`), ne regexem:**
+
+| obrazovka | v repu (Src) je, v `Controls/*.json` (kompilováno) chybí | dopad |
+|---|---|---|
+| `scr_Ciselnik` (`Controls/155.json`) | `btn_PresunC`, `btn_PridatVlastnikaC`, `txt_VlastniciC` (místo nich `ico_PresunC` — stará ikona) | **F16/1 víc vlastníků a tlačítko Přesun v naimportované appce vůbec nejsou** — celý formulář „vlastník" pracuje se starým jedním rozbalovátkem (`drp_VlastnikC.Selected.Value` + `Switch` fallback na `Kód`, ne `Concat/Filter/Split(txt_VlastniciC…)`); P-01/P-02 z kola 7 se netýkají existujícího kódu, protože ta větev kódu v appce není |
+| `scr_Dashboard` (`Controls/4.json`) | `btn_StavMenu`, `rec_MenuStavPanel` (místo nich zvlášť stojící `btn_StavVse`/`btn_StavSchvaleno`/`btn_StavPracovni`/`btn_NezarazeneD`, styl „chip" s `RadiusTopLeft=10`, `btn_NezarazeneD.X=902`) | **F17 (sjednocený pruh voleb) v naimportované appce není** — pruh je pořád ve staré, roztříštěné podobě |
+
+**Vrácený, dřív opravený crash bug (ne jen chybějící feature).**
+`Controls/89.json` (`scr_Detail`, kompilováno) má v `btn_Ulozit.OnSelect`:
+```
+If(varPresun,
+    ForAll(Filter('Vazba aktivita–dílčí proces', 'Aktivita (kód)' = varStaryKod) As v,
+        Patch('Vazba aktivita–dílčí proces', v, {...})))
+```
+— `Patch()` nad zdrojem, který `ForAll`/`Filter` právě prochází. `STATUS.md`
+(„Co se udělalo 04.09.2026 — balík 1.0.0.95") popisuje přesně tenhle vzorec
+jako příčinu pádu appky s hláškou *„This function cannot operate on the
+same data source that is used in ForAll"* a opravu (přesun řádků do
+`colVazbySirotka`, `ForAll` nad kolekcí). Oprava **je** v `src/app_src/scr_Detail.pa.yaml`
+(`grep colVazbySirotka` → 2 výskyty), ale **není** v kompilovaném
+`Controls/89.json` — appka, kterou uživatel po importu balíku 100 dostane,
+při přiřazení sirotka/přesunu aktivity s víc vazbami znovu spadne na
+tutéž chybu, kterou balík 95 už jednou opravil.
+
+**Mechanismus (proč se tohle stalo — dohledatelné v `src/build_app.py`,
+ne spekulace):** funkce `vymen_zdroje_bez_pac()` (řádek 232-274), použitá
+přepínačem `--bez-pac`, **vymění v `.msapp` jen položky `Src/*.pa.yaml`** —
+`Controls/*.json` se jí vůbec nedotkne (žádné volání `pac canvas pack`).
+Její vlastní docstring to popisuje jako záměr: *„Balík zabalený z YAML má
+v `packed.json` `LoadFromYaml=true`, takže Studio čte `Src/*.pa.yaml` a
+`Controls/*.json` si dogeneruje samo."* To je **přesně ta domněnka, kterou
+skill (`canvas-json-editing.md`, ověřeno 01.07.2026) vyvrací** — Studio
+`Controls/*.json` čte bez ohledu na `LoadFromYaml`. `check_solution.py`
+(řádek 382-386) má totéž mylné očekávání zabudované jako kontrolu: ověří
+jen, že `packed.json` nese `LoadFromYaml=true`, a bere to jako důkaz, že
+zastaralé `Controls/*.json` nevadí — komentář u kontroly to říká doslova
+(„Studio by načetlo zastaralé `Controls/*.json`" je popsáno jako riziko,
+které samotná přítomnost příznaku údajně řeší). Žádná ze zelených bran
+(`check_app.py`, `check_solution.py`) neporovnává **obsah** `Controls/*.json`
+proti `Src/*.pa.yaml` — obojí se dívá jen na jednu nebo druhou stranu, nikdy
+na shodu mezi nimi.
+
+**Balíky 96 až 100 mají identický `packed.json`** (`LastPackedDateTimeUtc
+2026-09-04 10:57:50Z`, `varVerze` v `Controls/1.json` „1.0.0.93" u obou
+prověřených 96 i 100) — regrese tedy nevznikla balíkem 100, je v celém
+řetězci od balíku ~96/97 dál, jen ji žádné předchozí kolo auditu nezachytilo,
+protože se vždy dívalo na `Src/*.pa.yaml` (viz P-02). **Totéž postihuje
+`deploy/mpsv/procesnimapa_1_0_0_96.zip`** — nasazovací sadu pro MPSV, poslední
+commitnutou v repu (`git log`: „Nasazovaci sada pro MPSV z balíku 1.0.0.96") —
+její `.msapp` má **stejný** `packed.json` a stejné `varVerze="1.0.0.93"`,
+takže i appka mířící na produkční MPSV je dnes v gitu ve skutečnosti appka
+z ~1.0.0.93, ne appka odpovídající zbytku sady.
+
+Toto je přesně ten scénář, před kterým varuje kolo 4 (B-03/N-06, viz níže
+v historii tohoto souboru) — mechanismus „`LoadFromYaml=true` stačí" byl
+tehdy uznán jako fungující jen **pro obsah, který už prošel skutečným
+Studiem-materializovaným uložením** (tlačítko Export), s eskalací, že nová
+YAML-only vlastnost (`varVerze` v 1.0.0.60) svoje první ověření teprve čeká.
+Přechod na `--bez-pac` jako běžnou cestu buildu (od cca balíku 97, „na 5CG5210MB2
+`pac` nebyl") tuhle podmínku porušil systematicky — žádný build od té doby
+neprošel skutečným Studiem ani skutečným `pac canvas pack` s aktuálním
+zdrojem, takže se nic nikdy nematerializovalo.
+
+**Reprodukce (příkazy a jejich výstup, nad rozbaleným balíkem, ne odhad):**
+```
+unzip -q procesnimapa_1_0_0_100.zip -d scratch/100
+unzip -q scratch/100/CanvasApps/mpsv_procesnimapa_..._DocumentUri.msapp -d scratch/100_msapp
+cat scratch/100_msapp/packed.json
+→ {"LastPackedDateTimeUtc":"2026-09-04 10:57:50Z", "PackingClient":{"Name":"Pac CLI","Version":"2.11.2"}, ...}
+
+python: najdi App.OnStart v Controls/1.json, hledej "varVerze"
+→ varVerze, "1.0.0.93")
+
+python: seznam jmen controlů v Controls/155.json (scr_Ciselnik) vs
+        yaml.safe_load(src/app_src/scr_Ciselnik.pa.yaml)
+→ jen v repu, chybí v Controls: btn_PresunC, btn_PridatVlastnikaC, txt_VlastniciC
+→ jen v Controls, chybí v repu: ico_PresunC (stará ikona)
+
+python: btn_Ulozit.OnSelect v Controls/89.json (scr_Detail)
+→ obsahuje "ForAll(Filter('Vazba aktivita–dílčí proces', ...) As v, Patch('Vazba
+  aktivita–dílčí proces', v, {...}))" — anti-pattern z balíku 94, opravený v 95
+grep colVazbySirotka src/app_src/scr_Detail.pa.yaml → 2 (oprava je jen ve zdroji)
+```
+
+Checklist: **C1** (přesně formulovaný scénář — „úprava jen v pa.yaml se
+neprojeví"), **F3** („po rebuildu rozbal výsledný zip a najdi konkrétní
+změněný `InvariantScript` — nestačí, že build proběhl bez chyby"), **H1**
+(`STATUS.md` tvrdí F16/1, F17, tlačítko Přesun a čtyři opravy kola 7 jako
+hotové — verifikační krok, který by tohle odhalil, proveden nebyl), **H2**
+(appka po importu tiše dělá výrazně méně, než balík a `STATUS.md` tvrdí —
+navíc obsahuje vrácenou, dřív opravenou chybu).
+
+Dopad na tuhle bránu („před importem do DEV"): import samotný pravděpodobně
+**neselže** (balík je strukturálně validní, `Controls/*.json` je vnitřně
+konzistentní appka, jen stará) — proto to není pád importu, ale **tichá
+regrese o 7 verzí v tom, co appka dělá**, plus vrácený crash bug u přesunu/
+přiřazení sirotka. Přesně scénář B3 z checklistu (import „tiše rozbije"
+cílové prostředí — tady ne data, ale funkčnost appky) a přesně to, co má
+tahle brána zachytit dřív, než se import spustí.
+
+Doporučená oprava (neprovedeno, jen návrh): příští build appky spustit
+**se skutečným `pac`** (bez `--bez-pac`) z aktuálního `src/app_src/`, ne
+řetězit `--bez-pac` přes několik generací balíků. Do `check_solution.py`
+přidat kontrolu, která **porovná obsah** `Controls/*.json` proti
+`Src/*.pa.yaml` (např. množina jmen ovládacích prvků a/nebo hash klíčových
+`InvariantScript` řetězců), místo aby se spokojila s příznakem
+`LoadFromYaml=true`. Do `check_app.py` přidat skutečné čtení `--solution`
+(dnes ho tiše ignoruje, viz P-02) a nad `Controls/*.json`, ne jen nad
+`src/app_src/`. Po opravě přegenerovat i `deploy/mpsv/procesnimapa_1_0_0_96.zip`
+(nebo nasazovací sadu rovnou na aktuální verzi), protože nese tutéž vadu.
+Stav: otevřeno
+
+### P-02 · OPRAVIT · `src/check_app.py` — `main()` nemá `argparse`, `--solution <cokoli>` se tiše ignoruje a brána vždy validuje jen `src/app_src/*.pa.yaml`
+
+`check_app.py:1747-1751` (`def main()`) čte natvrdo `APP_SRC = Path("src/app_src")`
+a žádný argument nezpracovává. Příkaz `check_app.py --solution
+deploy/procesnimapa_1_0_0_100.zip`, který se v kolech 5-7 opakovaně používal
+a citoval jako důkaz („`check_app.py --solution deploy/procesnimapa_1_0_0_99.zip`
+→ OK"), **neudělá nic jiného, než `check_app.py` bez argumentů** — `--solution`
+projde jako neznámý argv prvek, který nikdo nečte, exit kód i výstup jsou
+identické:
+```
+python src/check_app.py --solution deploy/procesnimapa_1_0_0_100.zip
+→ souborů: 7   obrazovek: 6   prvků: 287   vzorců: 3206 … OK   (exit 0)
+python src/check_app.py
+→ týž výstup, týž exit kód
+```
+Tahle brána tedy nikdy neověřovala **balík**, vždy jen **editovatelný zdroj**
+v repu — a je to přímá spolupříčina, proč P-01 přežilo čtyři kola auditu
+beze zmínky: i nezávislý audit (kolo 5-7) bral „check_app.py --solution
+…zip → OK" jako doklad o balíku, ačkoli balík se do kontroly vůbec
+nezapojil.
+Checklist: H1 (verifikační krok se tváří jako provedený nad artefaktem,
+fakticky nad zdrojem), přímá souvislost s C1/F3.
+Doporučená oprava (neprovedeno, jen návrh): buď `main()` doplnit o
+`argparse` s `--solution`, který rozbalí `.msapp` a validuje `Controls/*.json`
+místo/vedle `src/app_src/*.pa.yaml`, nebo — pokud má zůstat kontrolou jen
+zdroje — CLI tak, aby na neznámý argument **selhal** (`argparse` bez
+`--solution` by na něj samo vypsalo `unrecognized arguments` a ukončilo
+nenulovým kódem, jak se to skutečně stalo u `check_schema.py`/`check_sablona.py`
+v tomhle kole), ať se omylem nevydává za kontrolu balíku.
+Stav: otevřeno
+
+### Ostatní části balíku 100 — bez nálezu
+
+Flow, schéma dat a šablona importu **nejsou** postiženy P-01 — `Workflows/*.json`
+se generují přímo (`build_flow.py`/`build_*_flow.py`), nejdou přes
+`pac canvas pack`/`--bez-pac`, a čísla z gates to potvrzují:
+
+| brána | výsledek |
+|---|---|
+| `unzip -t` solution zip i vnořený `.msapp` | bez chyby |
+| `solution.xml` `<Version>` / `<Managed>` | `1.0.0.100` (> `1.0.0.99`), `<Managed>0</Managed>` |
+| GUID (regex) ve `Workflows/` | 0 výskytů |
+| `<defaultvalue>` v definicích env proměnných | žádná |
+| `environmentvariablevalues.json` v balíku | není |
+| `check_solution.py --vstup 99 --vystup 100` | 679 kontrol, 0 chyb (nekontroluje obsah `Controls/*.json`, viz P-01) |
+| `check_flow.py` | 30/0 |
+| `check_restore_flow.py` | 571 |
+| `check_zaloha_flow.py` | 184 |
+| `check_import_flow.py` | 243 (F16/2 — 12sloupcová šablona, MERGE na `vlastnik`) |
+| `check_mapa_flow.py` | 144 |
+| `check_export_flow.py` | 129 |
+| `check_presun_flow.py` | 111 |
+| `check_env.py` | OK |
+| `check_schema.py` | OK — `Utvary=44` (F15 v datové vrstvě je v pořádku, je nezávislá na `.msapp`) |
+| `check_sablona.py --sablona deploy/sablona_import_aktivit.xlsx` | 206/0 (12 sloupců, F16/2) |
+| `node src/check_setup.js` | smoke test OK |
+| `node src/check_import.js` | smoke test OK |
+
+F16/2 (import s vlastníky ze tří nových sloupců Excelu) je tedy podle
+dostupných statických kontrol v pořádku — je to čistě flow/data funkce,
+appky (a tedy P-01) se netýká. F15 (číselník útvarů, 44 položek) je v
+pořádku na úrovni schématu/importu; appka ho zobrazí (dropdown se plní ze
+SharePoint listu za běhu, ne z `.msapp`), ale formulář „víc vlastníků",
+který by z něj měl číst, v appce chybí (viz P-01).
+
+### Ověřeno spuštěním — kolo 8
+
+| příkaz / kontrola | výsledek |
+|---|---|
+| `unzip -t deploy/procesnimapa_1_0_0_100.zip` (solution + `.msapp`) | bez chyby |
+| `packed.json` v `.msapp` balíku 100 | `LastPackedDateTimeUtc: 2026-09-04 10:57:50Z`, `LoadFromYaml: true` |
+| `Controls/1.json` (App) → `varVerze` v `OnStart` | `"1.0.0.93"` |
+| `Src/App.pa.yaml` (v `.msapp`) vs `src/app_src/App.pa.yaml` (repo) | shoda kromě `varVerze` (repo má placeholder „vývojová", msapp má „1.0.0.100" — očekávané, build ho vkládá jen do YAML) |
+| Diff jmen controlů `Controls/155.json` (scr_Ciselnik) vs `yaml.safe_load(src/app_src/scr_Ciselnik.pa.yaml)` | chybí `btn_PresunC`, `btn_PridatVlastnikaC`, `txt_VlastniciC`; navíc stará `ico_PresunC` |
+| Diff jmen controlů `Controls/4.json` (scr_Dashboard) vs repo | chybí `btn_StavMenu`, `rec_MenuStavPanel`; `btn_NezarazeneD.X = 902` (starý „chip" styl) |
+| `Controls/89.json` (scr_Detail) `btn_Ulozit.OnSelect` | obsahuje `ForAll(Filter(datasource)…, Patch(datasource,…))` — anti-pattern z balíku 94, vrácený |
+| `grep colVazbySirotka src/app_src/scr_Detail.pa.yaml` | 2 (oprava je jen ve zdroji, ne v `Controls/*.json`) |
+| `packed.json` balíku 96 (`deploy/mpsv/procesnimapa_1_0_0_96.zip`, i `deploy/procesnimapa_1_0_0_96.zip`) | identické s balíkem 100 — regrese sahá minimálně k balíku 96 |
+| `check_app.py --solution deploy/procesnimapa_1_0_0_100.zip` vs bez argumentu | identický výstup/exit kód — `--solution` se ignoruje (P-02) |
+| `check_solution.py --vstup 99 --vystup 100` | 679/0 |
+| `check_flow.py` / `check_restore_flow.py` / `check_zaloha_flow.py` / `check_import_flow.py` / `check_mapa_flow.py` / `check_export_flow.py` / `check_presun_flow.py` | 30/571/184/243/144/129/111 — vše 0 chyb |
+| `check_env.py` | OK |
+| `check_schema.py` | OK — `Utvary=44` |
+| `check_sablona.py --sablona deploy/sablona_import_aktivit.xlsx` | 206/0 |
+| `node src/check_setup.js` / `node src/check_import.js` | smoke OK |
+| `solution.xml` verze/`Managed` | `1.0.0.100` > `1.0.0.99`, `<Managed>0</Managed>` |
+| GUID (regex) ve `Workflows/` | 0 výskytů |
+| `<defaultvalue>` / `environmentvariablevalues.json` | žádná / není |
+| G1 — externí CDN v `deploy/**/*.html`, `viz/*.html` | 0 výskytů `http(s)://` |
+
+### Zamítnuté nálezy — kolo 8
+
+*(žádné)*
+
+## Neověřeno — kolo 8
+
+### N-10 · skutečné chování Power Apps Studio po importu balíku se zastaralým `Controls/*.json`
+P-01 je odvozen z obsahu balíku (co appka bude dělat hned po importu, než
+ji kdokoli uloží), ne z pozorování živého importu — na to auditor nemá
+prostředí. Teoreticky by `Controls/*.json` mohlo být Studiem při prvním
+otevření tiše přepsáno podle `Src/*.pa.yaml` (přesně to `vymen_zdroje_bez_pac()`
+předpokládá) — jenže tomu skill (`canvas-json-editing.md`, ověřeno 01.07.2026)
+i checklist C1 přímo odporují a kolo 4 (B-03/N-06) totéž pozorovalo u
+menší, izolované vlastnosti (`varVerze` samo nejdřív žádný efekt nemělo,
+dokud appku někdo ve Studiu neuložil). Potřeba k doověření: reálný import
+balíku 100 do PPF DEV, otevření appky ve Studiu BEZ jakékoli úpravy a
+kontrola tooltipu verze / formuláře „víc vlastníků" hned po otevření —
+očekávané chování podle P-01 je verze `1.0.0.93` a chybějící tlačítko
+Přesun; pokud se ukáže `1.0.0.100` a tlačítko Přesun rovnou, P-01 je třeba
+přehodnotit (ale statický důkaz z `Controls/*.json` teorii „Studio to samo
+opraví" nepodporuje).
+
+### N-11 · dopad P-01 na reálné testování v `STATUS.md` „CO JE NA TOBĚ"
+`STATUS.md` žádá test tlačítka Přesun, sjednoceného pruhu a víc vlastníků
+na balíku 100 — pokud se import chová podle P-01, žádná z těchto věcí se
+nedá reálně otestovat, dokud appka neprojde skutečným `pac canvas pack`
+(nebo Studiem-materializovaným uložením). Nejde o samostatné zjištění, jen
+důsledek P-01 pro plánování dalšího kroku.
 
 ## Kolo 7 (06.09.2026, balík `deploy/procesnimapa_1_0_0_99.zip`, F16/1 + tlačítko Přesun + F17 + F15)
 

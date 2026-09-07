@@ -1,13 +1,24 @@
 """Kontrola zdrojů canvas appky (src/app_src/*.pa.yaml) proti schématu listů a delegaci.
 
-Spouštět z kořene projektu:  python src/check_app.py
+Spouštět z kořene projektu:
+    python src/check_app.py                       # zdroje v repu
+    python src/check_app.py --solution <zip>      # YAML vytažené z hotového balíku
+
+Druhá varianta odpovídá na jinou otázku než první: ne „je zdroj v repu v pořádku",
+ale „veze balík opravdu ten zdroj". Do kola 8 auditu ten přepínač neexistoval
+a skript ho **tiše ignoroval**, takže „check_app.py --solution … → OK" čtyři kola
+dokazovalo něco jiného, než si volající myslel.
+
 Návratový kód 0 = vše v pořádku, 1 = nalezena chyba.
 """
 
+import argparse
 import io
 import json
 import re
 import sys
+import tempfile
+import zipfile
 from xml.etree import ElementTree
 from pathlib import Path
 
@@ -1744,11 +1755,64 @@ def kontrola_varianty(soubory):
                     f"v Templates.json")
 
 
+def yaml_ze_solution(cesta_zip, kam):
+    """Vytáhne Src/*.pa.yaml z .msapp uvnitř solution zipu. Vrátí seznam cest.
+
+    `_EditorState.pa.yaml` se přeskakuje — je to stav editoru, ne zdroj obrazovky,
+    a v repu proti němu nic není.
+    """
+    with zipfile.ZipFile(cesta_zip) as solution:
+        msappy = [n for n in solution.namelist() if n.lower().endswith(".msapp")]
+        if len(msappy) != 1:
+            raise SystemExit(
+                f"CHYBA: v {cesta_zip} není právě jeden .msapp (nalezeno {len(msappy)})")
+        data = solution.read(msappy[0])
+
+    cesta_msapp = kam / "app.msapp"
+    cesta_msapp.write_bytes(data)
+    vytazene = []
+    with zipfile.ZipFile(cesta_msapp) as msapp:
+        for jmeno in msapp.namelist():
+            cista = jmeno.replace("\\", "/")
+            if not cista.startswith("Src/") or not cista.endswith(".pa.yaml"):
+                continue
+            zaklad = cista.rsplit("/", 1)[-1]
+            if zaklad.startswith("_"):
+                continue
+            cil = kam / zaklad
+            cil.write_bytes(msapp.read(jmeno))
+            vytazene.append(cil)
+    if not vytazene:
+        raise SystemExit(f"CHYBA: {cesta_zip} nenese v .msapp žádné Src/*.pa.yaml")
+    return sorted(vytazene)
+
+
 def main():
-    soubory = sorted(APP_SRC.glob("*.pa.yaml"))
-    if not soubory:
-        print("CHYBA: v src/app_src nejsou žádné .pa.yaml soubory")
-        return 1
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--solution", default=None,
+                        help="kontrolovat YAML vytažené z tohoto solution zipu "
+                             "místo zdrojů v src/app_src")
+    argumenty = parser.parse_args()
+
+    docasny = None
+    if argumenty.solution:
+        zip_cesta = Path(argumenty.solution)
+        if not zip_cesta.exists():
+            print(f"CHYBA: {zip_cesta} neexistuje")
+            return 1
+        docasny = tempfile.TemporaryDirectory()
+        soubory = yaml_ze_solution(zip_cesta, Path(docasny.name))
+        chybi = ({c.name for c in APP_SRC.glob("*.pa.yaml")}
+                 - {c.name for c in soubory})
+        if chybi:
+            print(f"CHYBA: v balíku chybí obrazovky: {', '.join(sorted(chybi))}")
+            return 1
+        print(f"zdroj: {zip_cesta} ({len(soubory)} YAML z .msapp)")
+    else:
+        soubory = sorted(APP_SRC.glob("*.pa.yaml"))
+        if not soubory:
+            print("CHYBA: v src/app_src nejsou žádné .pa.yaml soubory")
+            return 1
 
     schema = nacti_schema()
     controly, obrazovky, vzorce = projdi_stromy(soubory)

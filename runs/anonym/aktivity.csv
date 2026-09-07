@@ -1,29 +1,29 @@
 ﻿kod;nazev;dilci_proces_kod;vykonava;spolupracuje;vnitrni_predpis;sekce;zdroj_radek
-01-02-002-0001;Koordinace plnění úkolů resortních služebních úřadů;01-02-002;951;věcněpříslušné útvary XÚ, podřízené služební úřady;;92;6
-07-08-009-0001;Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISX (modul MODA);07-08-009;951;odbor 921, sekce 94, podřízené služební úřady;;92;7
-07-08-009-0002;Tvorba Organizačního řádu XÚ a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka;07-08-009;951;věcně příslušné útvary XÚ;VP 01/2015, VP 02/2016;92;8
-07-08-009-0003;Tvorba Služebního řádu XÚ;07-08-009;952;odbor 921;VP 03/2017;92;9
-07-04-004-0001;Vyřizování stížností podle zákona o státní službě;07-04-004;952;věcněpříslušné útvary XÚ, podřízené služební úřady;"VP 04/2018; VP 03/2017; VP 05/2019";92;10
-07-08-001-0001;Realizace správního řízení v záležitostech státní služby (vybrané úkoly prvoinstančního služebního orgánu a postupování odvolacímu služebnímu orgánu);07-08-001;952;odbor 921;;92;11
-07-08-001-0002;Rozhodování státního tajemníka o odvoláních a v přezkumném řízení;07-08-001;952;podřízené služební úřady;;92;12
-01-01-001-0001;Koordinace řízení kvality v XÚ;01-01-001;951;věcně příslušné útvary XÚ;"VP 06/2020; VP 07/2021";92;13
-01-01-001-0002;Koordinace strategického řízení v XÚ;01-01-001;951;věcně příslušné útvary XÚ;"VP 08/2022; VP 09/2023";92;14
-07-01-004-0001;Vyřizování žádostí XÚ jako povinným subjektem podle zákona č. 106/1999 Sb.;07-01-004;951;věcně příslušné útvary XÚ;VP 10/2024;92;15
-07-01-004-0002;Rozhodování ministra o stížnostech na postup při vyřizování žádostí o informace podle zákona č. 106/1999 Sb.;07-01-004;952;;VP 10/2024;92;16
-07-01-004-0003;Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 95, kontrolní činnost vůči podřízeným služebním úřadům);07-01-004;951;věcně příslušné útvary XÚ;VP 10/2024;92;17
-01-05-001-0001;Tvorba Interního protikorupčního programu XÚ;01-05-001;951;;VP 11/2015;92;18
-01-05-002-0001;Tvorba a zajišťování Vnitřního oznamovacího systému XÚ pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.);01-05-002;951;;VOZ XÚ, VP 11/2015;92;19
-07-04-004-0002;Koordinace vyřizování petic doručených XÚ;07-04-004;951;věcně příslušné útvary XÚ;VP 12/2016;92;20
-01-05-003-0001;Průběžná aktualizace registru lobbovaných v XÚ v souladu se zákonem č. 168/2025 Sb.;01-05-003;951;věcně příslušné útvary XÚ;;92;21
-07-04-004-0003;Metodická činnost pro vyřizování stížností podle správního řádu;07-04-004;952;věcně příslušné útvary XÚ;VP 12/2016;92;22
-07-11-001-0001;Vyřizování žádostí o náhradu škody podle zákona č. 82/1998 Sb.;07-11-001;952;věcně příslušné útvary XÚ;;92;23
-07-11-002-0001;Projednávání nároků fyzických osob při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.);07-11-002;952;Pojišťovna A a.s., Pojišťovna B a.s.;;92;24
-07-11-002-0002;Koordinace odškodňování s pojišťovnami při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.);07-11-002;952;Pojišťovna A a.s., Pojišťovna B a.s.;;92;25
-07-04-002-0001;Zastupování před soudy - správní žaloby s výjimkou soudních sporů týkajících se zaměstnanosti a inspekce práce;07-04-002;952;věcně příslušné útvary XÚ;;92;26
-07-04-002-0002;Zastupování před soudy - civilní žaloby s výjimkou soudních sporů týkajících se veřejných zakázek a smluv;07-04-002;952;věcně příslušné útvary XÚ, podřízené služební úřady;;92;27
-07-04-002-0003;Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPX/OPX+;07-04-002;952;sekce evropských fondů a mezinárodní spolupráce;;92;28
-07-04-006-0001;Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům XÚ, s výjimkou oblastí svěřených oddělení centrálních nákupů a právní podpory;07-04-006;952;věcně příslušné útvary XÚ;;92;29
-07-04-005-0001;Poskytování právněkonzultační podpory útvarům sekce státního tajemníka;07-04-005;952;O921, odd. 951;;92;30
+01-02-002-0001;Koordinace plnění úkolů resortních služebních úřadů;01-02-002;9221;věcněpříslušné útvary XÚ, podřízené služební úřady;;92;6
+07-08-009-0001;Koordinace a schvalování návrhů systemizace resortních služebních úřadů v ISX (modul MODA);07-08-009;9221;odbor 921, sekce 94, podřízené služební úřady;;92;7
+07-08-009-0002;Tvorba Organizačního řádu XÚ a metodická činnost k vydávání služebních předpisů a metodických pokynů státního tajemníka;07-08-009;9221;věcně příslušné útvary XÚ;VP 01/2015, VP 02/2016;92;8
+07-08-009-0003;Tvorba Služebního řádu XÚ;07-08-009;9222;odbor 921;VP 03/2017;92;9
+07-04-004-0001;Vyřizování stížností podle zákona o státní službě;07-04-004;9222;věcněpříslušné útvary XÚ, podřízené služební úřady;"VP 04/2018; VP 03/2017; VP 05/2019";92;10
+07-08-001-0001;Realizace správního řízení v záležitostech státní služby (vybrané úkoly prvoinstančního služebního orgánu a postupování odvolacímu služebnímu orgánu);07-08-001;9222;odbor 921;;92;11
+07-08-001-0002;Rozhodování státního tajemníka o odvoláních a v přezkumném řízení;07-08-001;9222;podřízené služební úřady;;92;12
+01-01-001-0001;Koordinace řízení kvality v XÚ;01-01-001;9221;věcně příslušné útvary XÚ;"VP 06/2020; VP 07/2021";92;13
+01-01-001-0002;Koordinace strategického řízení v XÚ;01-01-001;9221;věcně příslušné útvary XÚ;"VP 08/2022; VP 09/2023";92;14
+07-01-004-0001;Vyřizování žádostí XÚ jako povinným subjektem podle zákona č. 106/1999 Sb.;07-01-004;9221;věcně příslušné útvary XÚ;VP 10/2024;92;15
+07-01-004-0002;Rozhodování ministra o stížnostech na postup při vyřizování žádostí o informace podle zákona č. 106/1999 Sb.;07-01-004;9222;;VP 10/2024;92;16
+07-01-004-0003;Činnosti XÚ jako odvolacího orgánu podle zákona č. 106/1999 Sb. (rozhodování ŘO 922, kontrolní činnost vůči podřízeným služebním úřadům);07-01-004;9221;věcně příslušné útvary XÚ;VP 10/2024;92;17
+01-05-001-0001;Tvorba Interního protikorupčního programu XÚ;01-05-001;9221;;VP 11/2015;92;18
+01-05-002-0001;Tvorba a zajišťování Vnitřního oznamovacího systému XÚ pro podávání oznámení (korupce, obtěžování, zákon č. 171/2023 Sb.);01-05-002;9221;;VOZ XÚ, VP 11/2015;92;19
+07-04-004-0002;Koordinace vyřizování petic doručených XÚ;07-04-004;9221;věcně příslušné útvary XÚ;VP 12/2016;92;20
+01-05-003-0001;Průběžná aktualizace registru lobbovaných v XÚ v souladu se zákonem č. 168/2025 Sb.;01-05-003;9221;věcně příslušné útvary XÚ;;92;21
+07-04-004-0003;Metodická činnost pro vyřizování stížností podle správního řádu;07-04-004;9222;věcně příslušné útvary XÚ;VP 12/2016;92;22
+07-11-001-0001;Vyřizování žádostí o náhradu škody podle zákona č. 82/1998 Sb.;07-11-001;9222;věcně příslušné útvary XÚ;;92;23
+07-11-002-0001;Projednávání nároků fyzických osob při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.);07-11-002;9222;Pojišťovna A a.s., Pojišťovna B a.s.;;92;24
+07-11-002-0002;Koordinace odškodňování s pojišťovnami při pracovních úrazech a nemocech z povolání (§ 364 odst. 4 – 6 zák. č. 262/2006 Sb.);07-11-002;9222;Pojišťovna A a.s., Pojišťovna B a.s.;;92;25
+07-04-002-0001;Zastupování před soudy - správní žaloby s výjimkou soudních sporů týkajících se zaměstnanosti a inspekce práce;07-04-002;9222;věcně příslušné útvary XÚ;;92;26
+07-04-002-0002;Zastupování před soudy - civilní žaloby s výjimkou soudních sporů týkajících se veřejných zakázek a smluv;07-04-002;9222;věcně příslušné útvary XÚ, podřízené služební úřady;;92;27
+07-04-002-0003;Zastupování před soudy - žaloby ve věcech týkajících se řídícího orgánu nebo zprostředkujícího subjektu OPX/OPX+;07-04-002;9222;sekce evropských fondů a mezinárodní spolupráce;;92;28
+07-04-006-0001;Poskytování právní podpory při šetření záležitostí podezření ze spáchání protiprávního jednání ve služebním úřadu, jakož i vůči zaměstnancům XÚ, s výjimkou oblastí svěřených oddělení centrálních nákupů a právní podpory;07-04-006;9222;věcně příslušné útvary XÚ;;92;29
+07-04-005-0001;Poskytování právněkonzultační podpory útvarům sekce státního tajemníka;07-04-005;9222;O921, odd. 9221;;92;30
 01-01-003-0001;příprava, zpracování a aktualizace materiálů (strategií, koncepcí, vnitřních řídicích aktů apod.) v rámci dílčího procesu Politika lidských zdrojů v působnosti personálního oddělení;01-01-003;9211;;"SP Politika lidských zdrojů v XÚ; Služební řád XÚ; Pracovní řád XÚ; SP Strategie rozvoje služebního úřadu XÚ; SP Pravidla etiky státních zaměstnanců XÚ; PM Etický kodex zaměstnanců XÚ";92;31
 01-01-003-0002;příprava, zpracování a aktualizace materiálů (strategií, koncepcí, vnitřních řídicích aktů apod.) v rámci dílčího procesu Politika lidských zdrojů v působnosti oddělení personálního rozvoje a metodik;01-01-003;9212;;"SP Politika lidských zdrojů v XÚ; Služební řád XÚ; Pracovní řád XÚ; SP Strategie rozvoje služebního úřadu XÚ; SP Pravidla etiky státních zaměstnanců XÚ; PM Etický kodex zaměstnanců XÚ";92;32
 01-01-003-0003;příprava a zpracování organizačního uspořádání XÚ;01-01-003;9211;;SP, kterými se upravuje organizační struktura XÚ;92;33

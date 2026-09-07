@@ -22,20 +22,43 @@ stejný**. Dvoubalíkový režim končí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
 
-## 07.09.2026 ráno — O33 zařazen, běží audit kola 8
+## 07.09.2026 ráno — O33 zařazen, audit kola 8 vyřízen
 
-`O33` byl v exportu z MPSV nadřízený sám sobě, takže odbor zůstal bez rodiče
-a mimo strom. Uživatel potvrdil zařazení pod `Sekce 3` (07.09.2026) —
-`src/import_utvary.py` má na to jmenovitou výjimku v `OPRAVY_NADRIZENEHO`,
-zdrojový sešit zůstává nedotčený. Až MPSV export opraví, skript výjimku
-ohlásí jako neuplatněnou, ať v kódu nezůstane viset.
+**`O33` patří pod `Sekce 3`.** V exportu z MPSV je nadřízený sám sobě, takže
+odbor zůstával bez rodiče a mimo strom. `src/import_utvary.py` ho zařazuje
+natvrdo jedním řádkem hned za načtením nadřízeného (uživatel 07.09.2026:
+žádná mechanika výjimek); zdrojový sešit se needituje. **Chyba je ale
+v produkčním listu *Organizační útvary* na MPSV** — dokud se neopraví tam,
+bude každý další export vadný stejně.
 
-`runs/normalize/utvary.csv` je přegenerovaný (44 útvarů). **Navazující
-artefakty ale ještě ne** — `runs/anonym` a `src/import_data.js` se přegenerují
-až po dokončení auditu kola 8, ať se auditorovi nemění balík pod rukama.
-Do PPF DEV tedy zatím jde číselník bez zařazeného `O33`.
+Přegenerováno: `runs/normalize/utvary.csv` (44 útvarů, `33;O33;odbor;3`),
+`runs/anonym`, `src/import_data.js`. V anonymizovaných datech se útvar posunul
+z `95` (bez rodiče) na `922` pod `92` — přímý dopad zařazení, ne chyba
+anonymizace. Brány: `check_schema` OK, `check_setup.js` a `check_import.js`
+smoke OK.
 
-Audit kola 8 (balík `1.0.0.100`) běží; do jeho výsledku se nenasazuje.
+### Audit kola 8 — P-01 zamítnuto, P-02 opraveno
+
+Auditor označil za blokující, že `Controls/*.json` v balíku 100 odpovídají
+appce 1.0.0.93. **Zamítnuto s důkazem:** u YAML-first balíku (`packed.json`
+→ `LoadFromYaml: true`) zaostávají `Controls` o generaci vždycky a nesou verzi
+*předchozího* balíku — balík 93 měl v `Controls` 1.0.0.85, balík 95 měl
+1.0.0.93. Ta hodnota mohla vzniknout jedině tím, že Studio načetlo balík 93
+**z YAML**. Kdyby četlo `Controls`, dostal by uživatel z balíku 93 appku 85.
+`pac canvas pack` `Controls/*.json` negeneruje, jen přenáší. Rozlišení
+YAML-first balíku od exportu ze Studia je doplněné do skillu `power-Apps-skill`,
+protože právě vytržené pravidlo ten falešný nález vyrobilo.
+
+**P-02 opraveno:** `src/check_app.py` neměl `argparse` a `--solution <zip>`
+tiše ignoroval — čtyři kola auditu tak tím přepínačem „ověřovala balík"
+a přitom četla repo. Teď skutečně vytáhne `Src/*.pa.yaml` z `.msapp` a
+kontroluje je (balík 100: 7 YAML, 6 obrazovek, 287 prvků, 3206 vzorců, 0 chyb).
+Mutačně doloženo: smazaná obrazovka i podvržený sloupec v balíku dají exit 1,
+nezměněný balík exit 0.
+
+**Balík 1.0.0.100 je tím bez otevřeného blokujícího nálezu a připravený
+k testu na PPF DEV.** Číselník útvarů se ale změnil až teď, takže se přenáší
+znovu (`src/import_data.js`).
 
 ## 06.09.2026 večer — číselník útvarů, pruh voleb, tlačítko Přesun
 
