@@ -66,13 +66,26 @@
   /* Pevná čtvrtina, ne `flex:1 1 0`: při menším počtu sloupců by se zbylé
      roztáhly přes celou plochu a karty v nich s nimi (07.09.2026). Šířka
      karty tak zůstává stejná, ať je vidět jeden sloupec nebo čtyři. */
-  .rz-hlavicky div{flex:0 0 25%;min-width:0;padding:7px 10px;font-size:.8rem;font-weight:600;
-        letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line)}
+  .rz-hlavicky div{flex:0 0 25%;min-width:0;padding:9px 12px;font-size:.84rem;font-weight:700;
+        letter-spacing:.06em;text-transform:uppercase;color:#fff;border-left:1px solid var(--panel)}
+  /* Barvy jsou ZTMAVENÉ varianty palety (--a/--p/--d/--k), ne plné --*-line:
+     bílý text má na plném tyrkysu jen 3,16:1 a na zelené 3,31:1, tedy pod
+     WCAG AA. Takhle je nejtěsnější 7,28:1. */
+  .rz-hlavicky div:nth-child(1){background:var(--a)}
+  .rz-hlavicky div:nth-child(2){background:var(--p)}
+  .rz-hlavicky div:nth-child(3){background:var(--d)}
+  .rz-hlavicky div:nth-child(4){background:var(--k)}
   .rz-hlavicky div:first-child{border-left:0}
   .rz-hlavicky div[hidden]{display:none}
   .rz-sloupce{display:flex;position:relative}
   .rz-sloupec{flex:0 0 25%;min-width:0;border-left:1px solid var(--line);padding:14px 0 14px 12px;
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
+  /* Podklad sloupce je táž barva jako karta, jen zesvětlená smícháním s bílou.
+     Stupeň je tak vidět i pod hlavičkou a karta se od něj přesto odliší. */
+  .rz-sloupec[data-uroven="0"]{background:#ecedf8}
+  .rz-sloupec[data-uroven="1"]{background:#f2f5fb}
+  .rz-sloupec[data-uroven="2"]{background:#f7f9fd}
+  .rz-sloupec[data-uroven="3"]{background:#f7fafc}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -100,10 +113,13 @@
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
   /* Značka „jde rozpadnout níž" — jen na kartách, které mají potomky.
      Karta bez ní je konec větve, ne nedoklikaná cesta. */
-  .rz-uzel .rz-sipka{position:absolute;right:7px;top:50%;transform:translateY(-50%);
-        font-size:1.05rem;line-height:1;color:var(--muted);opacity:.65}
-  .rz-uzel:hover .rz-sipka{opacity:1;color:var(--a)}
-  .rz-uzel[aria-selected=true] .rz-sipka{opacity:1;color:var(--a)}
+  .rz-uzel .rz-sipka{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+        font-size:1.5rem;font-weight:700;line-height:1;opacity:.9}
+  .rz-uzel.lvl-a .rz-sipka{color:var(--a)}
+  .rz-uzel.lvl-p .rz-sipka{color:var(--p)}
+  .rz-uzel.lvl-d .rz-sipka{color:var(--d)}
+  .rz-uzel:hover .rz-sipka{opacity:1;transform:translateY(-50%) translateX(2px)}
+  .rz-uzel[aria-selected=true] .rz-sipka{opacity:1}
   .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
   .rz-prazdno{color:var(--muted);font-size:.88rem;padding:6px 4px}
   .node{border-radius:5px}
@@ -638,7 +654,7 @@ function detail(n){
    určené celému úřadu nemá co dělat, a v generujícím flow byl navíc zapsaný
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 document.getElementById("meta").textContent =
-  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:28";
+  "Sekce " + DATA.meta.sekce + " · " + "vygenerováno 07.09.2026 15:33";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
