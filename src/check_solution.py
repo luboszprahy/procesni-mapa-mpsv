@@ -189,6 +189,63 @@ def promenne_ve_flow(vystupni, promenne_appky=frozenset()):
            f"se na ni zeptá a nikdo nebude vědět proč")
 
 
+def bez_cyklu_runafter(vystupni):
+    """Řetěz `runAfter` nesmí být zacyklený — jinak flow nejde zapnout.
+
+    Projeví se to při zapnutí jako
+    `Flow save failed with code 'InvalidTemplate' … The circular dependency
+    detected in template language expressions`, což nejmenuje ani flow, ani
+    akci. V designeru je poznávacím znamením graf rozpadlý na dva kusy, které
+    nejsou spojené s triggerem.
+
+    Vzniklo to tím, že generátor zavedl podruhé jméno akce, které už patřilo
+    jiné akci (`Kody_dilcich`, F16/2): přepsaná akce zmizela, její `runAfter`
+    nahradil ten nový a řetěz se uzavřel do kruhu. Generátor doběhl bez chyby
+    a ostatní brány prošly — 07.09.2026, PPF DEV, balík 1.0.0.100.
+    """
+    for jmeno, soubor in _flow_soubory(vystupni):
+        definice = json.loads(cti(vystupni, jmeno)).get(
+            "properties", {}).get("definition", {})
+
+        akce = {}
+
+        def sber(skupina, rodic=None):
+            for nazev, uzel in (skupina or {}).items():
+                if not isinstance(uzel, dict):
+                    continue
+                akce[nazev] = uzel
+                sber(uzel.get("actions"), nazev)
+                vetev = uzel.get("else")
+                if isinstance(vetev, dict):
+                    sber(vetev.get("actions"), nazev)
+
+        sber(definice.get("actions"))
+
+        barva = {n: 0 for n in akce}
+        cyklus = []
+
+        def projdi(uzel, cesta):
+            barva[uzel] = 1
+            cesta.append(uzel)
+            for dalsi in (akce[uzel].get("runAfter") or {}):
+                if dalsi not in akce or cyklus:
+                    continue
+                if barva[dalsi] == 1:
+                    cyklus.extend(cesta[cesta.index(dalsi):] + [dalsi])
+                elif barva[dalsi] == 0:
+                    projdi(dalsi, cesta)
+            cesta.pop()
+            barva[uzel] = 2
+
+        for nazev in akce:
+            if barva[nazev] == 0 and not cyklus:
+                projdi(nazev, [])
+
+        overit(not cyklus,
+               f"{soubor}: runAfter je zacyklený, flow nepůjde zapnout — "
+               + " po ".join(cyklus))
+
+
 def deklarace_parametru(vystupni):
     """Každý parametr, na který se flow odkazuje, musí být deklarovaný.
 
@@ -552,6 +609,7 @@ def main():
                 promenne_appky.add(prepis_listu["environmentVariableName"])
     promenne_ve_flow(vystupni, promenne_appky)
     deklarace_parametru(vystupni)
+    bez_cyklu_runafter(vystupni)
 
     print(f"kontrol: {kontrol}, chyb: {len(chyby)}")
     for text_varovani in varovani:

@@ -9,7 +9,7 @@ stejný**. Dvoubalíkový režim končí.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Otestuj `deploy/procesnimapa_1_0_0_100.zip` na PPF DEV.** Import jako
+1. **Otestuj `deploy/ppf/procesnimapa_1_0_0_101.zip` na PPF DEV.** Import jako
    upgrade, otevřít ve Studiu, mikro-změna → Save → Publish. Co je nového:
    tlačítko **Přesun** v řádku procesu (Editace → Procesy), sjednocený pruh
    voleb na úvodní obrazovce a **víc vlastníků** u agendy, procesu i dílčího
@@ -21,6 +21,54 @@ stejný**. Dvoubalíkový režim končí.
    z aplikace, blok **I** testovacího scénáře. To je jediné, co u přesunu chybí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
+
+## 07.09.2026 odpoledne — balík 1.0.0.101: ImportFlow šlo zase zapnout
+
+**Příznak:** po importu balíku 100 nešlo `ImportFlow` zapnout:
+
+```
+Flow save failed with code 'InvalidTemplate' … The circular dependency
+detected in template language expressions
+```
+
+Hláška nejmenuje flow ani akci. Poznávacím znamením byl **graf rozpadlý na dva
+kusy** — pravá část v designeru nevisela na triggeru (všiml si uživatel).
+
+**Příčina: kolize jmen akcí.** F16/2 generuje pro každou úroveň vlastníků
+šestici akcí, mezi nimi `Kody_{úroveň}`. Pro úroveň `dilcich` z toho vyšlo
+`Kody_dilcich` — jméno, které od F1 patří **validační** akci (seznam
+existujících dílčích procesů z listu, čte `Nacti_DilciProcesy`). Python slovník
+starou akci tiše přepsal:
+
+| balík | `Kody_dilcich` čte | runAfter |
+|---|---|---|
+| 97 (šel zapnout) | `Nacti_DilciProcesy` | `Nacti_Aktivity` |
+| 100 (nešel) | `Unikatni_dilcich` | `Unikatni_dilcich` |
+
+Tím se `runAfter` uzavřel do kruhu přes 28 akcí: `Kody_dilcich` po
+`Unikatni_dilcich` po … po `Nezarazene` po … po `Klice_aktivit` po
+`Kody_dilcich`. Balík 97 cyklus neměl žádný.
+
+Druhá, tišší část škody: `Zarazene` a `Neznamy_dilci` čtou `body('Kody_dilcich')`
+v původním významu (existující kódy z listu), ale dostaly by kódy ze sešitu.
+I kdyby cyklus nebyl, flow by třídilo řádky podle špatného seznamu.
+
+**Oprava trojí:**
+1. akce se jmenuje `Kody_vlastniku_{úroveň}` — `Kody_dilcich` je zase validační;
+2. `build_import_flow.py` staví akce do slovníku `Kroky`, který **přepsání
+   jména odmítne** místo aby ho tiše provedl;
+3. `check_solution.py` má bránu `bez_cyklu_runafter` nad **všemi** flow v balíku
+   — ta chytí zacyklení bez ohledu na to, čím vzniklo.
+
+**Doloženo zpětně na skutečně vadném balíku**, ne jen zelenou bránou: nad
+balíkem 100 brána nález vypíše i s celým řetězem, nad balíkem 97 mlčí.
+
+Brány balíku 101: `check_solution` 688 kontrol / 0 chyb, `check_import_flow`
+243 kontrol, `check_app --solution` čistý.
+
+**Poznámka k radě z „Assist me"**, kterou vrátil designer: mluvila o chybějících
+povinných údajích v řádcích (`Popis_chybne`, `Chybne`). Byla mimo — flow se
+nespustilo, takže žádný řádek nikdo nečetl. Šlo o vadu definice, ne dat.
 
 ## 07.09.2026 — F19: `deploy/` obsahuje jen hotové sady
 

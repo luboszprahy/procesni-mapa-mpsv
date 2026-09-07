@@ -194,8 +194,25 @@ def bunka(sloupec):
             f"?[{lit(sloupec['display'])}], '')))")
 
 
+class Kroky(dict):
+    """Akce flow; tiché přepsání jména je chyba, ne přepis.
+
+    F16/2 zavedlo `Kody_dilcich` podruhé a smazalo tím validační akci téhož
+    jména. Generátor doběhl, brány prošly a projevilo se to až tím, že flow
+    nešlo zapnout: `The circular dependency detected in template language
+    expressions` (07.09.2026, PPF DEV).
+    """
+
+    def __setitem__(self, klic, hodnota):
+        if klic in self:
+            raise SystemExit(
+                f"CHYBA: akce '{klic}' se v definici objevila podruhé — "
+                f"jméno už patří jiné akci, zvol jiné")
+        super().__setitem__(klic, hodnota)
+
+
 def akce(schema):
-    kroky = {}
+    kroky = Kroky()
     sloupce = sloupce_sablony(schema)
     podle_jmena = {c["name"]: c for c in sloupce}
 
@@ -498,7 +515,11 @@ def akce(schema):
             "inputs": f"@union(body('Klice_{k}'), body('Klice_{k}'))",
             "runAfter": {f"Klice_{k}": ["Succeeded"]},
         }
-        kroky[f"Kody_{k}"] = {
+        # Jméno musí být `Kody_vlastniku_*`, ne `Kody_*`: pro úroveň `dilcich`
+        # by z toho vyšlo `Kody_dilcich`, což je akce, která existuje odjinud
+        # (seznam existujících dílčích procesů pro validaci). Přepsání se
+        # neprojevilo chybou generátoru, ale zacyklením runAfter — 07.09.2026.
+        kroky[f"Kody_vlastniku_{k}"] = {
             "type": "Select",
             "inputs": {"from": f"@outputs('Unikatni_{k}')",
                        "select": f"@split(item(), {lit(ODD_POLE)})[0]"},
@@ -509,14 +530,14 @@ def akce(schema):
         # dvojic objeví právě tolikrát, kolik RŮZNÝCH vlastníků k němu sešit
         # uvádí — víc než jednou tedy znamená rozpor.
         vyskyty = (f"length(split(concat({lit(ODD_RADKU)},"
-                   f" join(body('Kody_{k}'), {lit(ODD_RADKU)}), {lit(ODD_RADKU)}),"
+                   f" join(body('Kody_vlastniku_{k}'), {lit(ODD_RADKU)}), {lit(ODD_RADKU)}),"
                    f" concat({lit(ODD_RADKU)}, split(item(), {lit(ODD_POLE)})[0],"
                    f" {lit(ODD_RADKU)})))")
         kroky[f"Rozpor_{k}"] = {
             "type": "Query",
             "inputs": {"from": f"@outputs('Unikatni_{k}')",
                        "where": f"@greater({vyskyty}, 2)"},
-            "runAfter": {f"Kody_{k}": ["Succeeded"]},
+            "runAfter": {f"Kody_vlastniku_{k}": ["Succeeded"]},
         }
         kroky[f"K_zapisu_{k}"] = {
             "type": "Query",
