@@ -137,13 +137,19 @@ ne holá šipka. Sedí přesně v bodě, ze kterého spojnice vycházejí (v pá
 dole uprostřed, ve sloupcích vpravo uprostřed), takže značka a začátek čar
 jsou totéž místo.
 
-**Otevřená otázka:** uživatel hlásí, že po volbě „Rozbalit: + dílčí procesy"
-nevidí dílčí procesy rozbalené. Naměřeno v prohlížeči je přitom všechno na
-místě — řádkové zobrazení ukazuje 7/46/250 viditelných uzlů, rozklad svisle
-3 sloupce se 7/46/250 kartami a správnými hlavičkami. Nejpravděpodobnější
-kandidát je **prázdná čtvrtina vpravo**: sloupce mají pevných 25 % šířky, při
-třech tedy zbývá prázdná plocha, která vypadá jako chybějící obsah. Čeká se
-na upřesnění, opravovat naslepo nemá smysl.
+**Rozbalování uživatel potvrdil jako v pořádku** (20:05) — měření sedělo,
+chyba tam žádná nebyla.
+
+### Páté kolo (20:05) — místo pro obsah
+
+Okraje byly široké a panel Detail zabíral 330 px, většinou prázdných. Zúženo:
+`main` má 10 px po stranách místo 20, panel 248 px, štítek vrstvy v pásech
+84 px místo 96. Do pásu se tím vejde šest karet místo pěti.
+
+Zároveň se zvětšil **krok odsazení ve stromu** na 24+18 px. To jsou dvě věci,
+které se snadno pletou a v tomhle projektu se popletly: kde strom **začíná**
+(řeší okraj `main`) a jak velký je **krok mezi úrovněmi**. Ve třetím kole se
+zmenšilo obojí naráz, ačkoli vadilo jen to první.
 
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
