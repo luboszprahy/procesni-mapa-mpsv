@@ -68,23 +68,27 @@
   .rz-hlavicky div:first-child{border-left:0}
   .rz-hlavicky div[hidden]{display:none}
   .rz-sloupce{display:flex;position:relative}
-  .rz-sloupec{flex:1 1 0;min-width:0;border-left:1px solid var(--line);padding:14px 12px;
+  .rz-sloupec{flex:1 1 0;min-width:0;border-left:1px solid var(--line);padding:14px 0 14px 12px;
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
-  .rz-uzel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--line);
-        border-left:4px solid var(--line);border-radius:6px;padding:8px 10px;margin:0 0 16px;
-        cursor:pointer;display:flex;flex-direction:column;gap:3px}
+  /* Karta nezabírá celou šířku sloupce: vpravo zůstává pruh, kterým vede
+     spojnice do dalšího sloupce. Bez něj se čára krčila do mezery mezi
+     sloupci a byla prakticky neviditelná (07.09.2026). */
+  .rz-uzel{position:relative;z-index:1;width:calc(100% - 72px);
+        background:var(--panel);border:1px solid var(--line);
+        border-left:4px solid var(--line);border-radius:6px;padding:6px 9px;margin:0 0 20px;
+        cursor:pointer;display:flex;flex-direction:column;gap:2px}
   .rz-uzel:hover{background:var(--chip)}
   .rz-uzel[aria-selected=true]{border-color:var(--a);background:var(--a-bg);box-shadow:var(--shadow)}
   .rz-uzel.lvl-a{border-left-color:var(--a-line)}
   .rz-uzel.lvl-p{border-left-color:var(--p-line)}
   .rz-uzel.lvl-d{border-left-color:var(--d-line)}
   .rz-uzel.lvl-k{border-left-color:var(--k-line)}
-  .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.82rem;color:var(--muted)}
-  .rz-uzel .rz-nazev{font-size:.93rem;line-height:1.35}
-  .rz-uzel .rz-odznak{align-self:flex-start;font-size:.76rem;color:var(--muted)}
+  .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.76rem;color:var(--muted)}
+  .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
+  .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
   .rz-uzel.unmapped .rz-nazev{color:var(--muted)}
   .rz-prazdno{color:var(--muted);font-size:.88rem;padding:6px 4px}
   .node{border-radius:5px}
