@@ -9,10 +9,7 @@ stejný**. Dvoubalíkový režim končí.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Potvrď `O33`** — v dodaném exportu je nadřízený sám sobě (cyklus), takže
-   útvar zůstal bez rodiče. Podle `Pořadí` 3330 a barvy sekce patří pod
-   `Sekce 3`. Řekni „ano" a doplním; do té doby visí mimo strom.
-2. **Otestuj `deploy/procesnimapa_1_0_0_100.zip` na PPF DEV.** Import jako
+1. **Otestuj `deploy/procesnimapa_1_0_0_100.zip` na PPF DEV.** Import jako
    upgrade, otevřít ve Studiu, mikro-změna → Save → Publish. Co je nového:
    tlačítko **Přesun** v řádku procesu (Editace → Procesy), sjednocený pruh
    voleb na úvodní obrazovce a **víc vlastníků** u agendy, procesu i dílčího
@@ -20,10 +17,25 @@ stejný**. Dvoubalíkový režim končí.
    nahraj ji do Site Assets). Data pro PPF jsou anonymizovaná (`runs/anonym`
    → `src/import_data.js`), číselník útvarů se změnil ze 7 na 44 položek,
    takže ho přenes taky.
-3. Ještě neodzkoušená v provozu je oprava `substring` z balíku 96 — plný přesun
+2. Ještě neodzkoušená v provozu je oprava `substring` z balíku 96 — plný přesun
    z aplikace, blok **I** testovacího scénáře. To je jediné, co u přesunu chybí.
-4. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
+3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout
    `AktualizaceKratkehoNazvu` (blok **K** testovacího scénáře).
+
+## 07.09.2026 ráno — O33 zařazen, běží audit kola 8
+
+`O33` byl v exportu z MPSV nadřízený sám sobě, takže odbor zůstal bez rodiče
+a mimo strom. Uživatel potvrdil zařazení pod `Sekce 3` (07.09.2026) —
+`src/import_utvary.py` má na to jmenovitou výjimku v `OPRAVY_NADRIZENEHO`,
+zdrojový sešit zůstává nedotčený. Až MPSV export opraví, skript výjimku
+ohlásí jako neuplatněnou, ať v kódu nezůstane viset.
+
+`runs/normalize/utvary.csv` je přegenerovaný (44 útvarů). **Navazující
+artefakty ale ještě ne** — `runs/anonym` a `src/import_data.js` se přegenerují
+až po dokončení auditu kola 8, ať se auditorovi nemění balík pod rukama.
+Do PPF DEV tedy zatím jde číselník bez zařazeného `O33`.
+
+Audit kola 8 (balík `1.0.0.100`) běží; do jeho výsledku se nenasazuje.
 
 ## 06.09.2026 večer — číselník útvarů, pruh voleb, tlačítko Přesun
 
