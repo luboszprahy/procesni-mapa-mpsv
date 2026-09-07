@@ -6,26 +6,25 @@
 <title>Procesní mapa MPSV</title>
 <style>
   :root{
-    /* Paleta zadaná uživatelem 07.09.2026 (Adobe Color):
-       #1C0F99 #17885A #545715 #A17863 #22B7F4. Nahradila monochromatickou modrou
-       řadu, ve které vrstvy splývaly — rozlišuje je teď ODSTÍN, ne sytost.
-       Základní barva sedí k navbaru sama od sebe (#1C0F99 je prakticky ta modrá,
-       která na stránce už byla), takže nevznikly dvě nesouvisející rodiny.
-       Role: plné barvy nesou svislé linky a kolečka značek, plochy jsou jejich
-       světlé odvozeniny (plná + 82 % bílé), podklady sloupců ještě světlejší
-       (93 %). Barvy pro TEXT a hlavičky s bílým písmem jsou ztmavené tam, kde
-       plná neprošla WCAG AA: zelená má na bílé jen 4,46:1 a terakota 3,90:1.
-       Nejtěsnější dvojice text/podklad je po úpravě 4,84:1.
-       #22B7F4 je na plochu i na text moc světlá (2,30:1) — slouží jako akcent
-       vybrané karty, což je jediné místo, kde nic nenese text. */
+    /* Paleta zadaná uživatelem 07.09.2026, druhá v pořadí (Adobe Color):
+       #5C75F2 #4AD1B2 #4F5BBD #EA9B0B #8A153E.
+       Vrstvy rozlišuje ODSTÍN, ne sytost — na čtyři úrovně sytost nestačí.
+       Základ `#4F5BBD` drží kontinuitu s dosavadní modrou hlavičkou (pravidlo
+       nulté), `#5C75F2` je jí příliš blízká na sousední vrstvu, takže z ní je
+       akcent vybrané karty.
+       Role: plné barvy nesou svislé linky u karet (plocha, ne text), ztmavené
+       varianty hlavičky s bílým písmem, barevný text, kolečka značek i spojnice
+       — mátová má na bílé jen 1,90:1 a okrová 2,28:1, jako tenká čára by zmizely.
+       Plochy jsou plná barva + 82 % bílé, podklady sloupců a pásů + 93 %.
+       Nejtěsnější dvojice text/podklad je 4,55:1, tedy nad WCAG AA. */
     --bg:#f6f8fc; --panel:#fff; --ink:#1b2233; --muted:#4a5266; --line:#dce1ec;
-    --a:#1c0f99; --p:#13704a; --d:#545715; --k:#745647;
-    --chip:#e7ebf4; --hit:#fff3bf; --akcent:#22b7f4;
-    --shadow:0 1px 3px rgba(28,15,153,.10);
+    --a:#4f5bbd; --p:#2b7967; --d:#885a06; --k:#8a153e;
+    --chip:#e7ebf4; --hit:#fff3bf; --akcent:#5c75f2;
+    --shadow:0 1px 3px rgba(79,91,189,.12);
     /* podklady vrstev stromu — plná barva naředěná bílou */
-    --a-bg:#d6d4ed; --p-bg:#d5eae1; --d-bg:#e0e1d5; --k-bg:transparent;
-    /* svislé linky a kolečka vrstev — plné barvy palety */
-    --a-line:#1c0f99; --p-line:#17885a; --d-line:#545715; --k-line:#a17863;
+    --a-bg:#dfe1f3; --p-bg:#def7f1; --d-bg:#fbedd3; --k-bg:transparent;
+    /* svislé linky u karet — plné barvy palety */
+    --a-line:#4f5bbd; --p-line:#4ad1b2; --d-line:#ea9b0b; --k-line:#8a153e;
     /* jediné místo, které řídí velikost písma celé stránky (viz #fVelikost) */
     --fs:14px;
   }
@@ -34,7 +33,7 @@
   body{margin:0;font:1rem/1.5 "Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
   header{background:var(--a);color:#fff;padding:12px 12px}
   header h1{margin:0;font-size:1.36rem;font-weight:600}
-  header .meta{margin-top:4px;font-size:.89rem;opacity:.85}
+  header .meta{margin-top:4px;font-size:.89rem;opacity:.92}
   .counts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .counts b{background:rgba(255,255,255,.15);border-radius:4px;padding:3px 9px;font-weight:600;font-size:.86rem}
   .bar{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 12px;
@@ -94,10 +93,10 @@
         max-height:calc(100vh - 210px);overflow-y:auto;overflow-x:hidden}
   /* Podklad sloupce je táž barva jako karta, jen zesvětlená smícháním s bílou.
      Stupeň je tak vidět i pod hlavičkou a karta se od něj přesto odliší. */
-  .rz-sloupec[data-uroven="0"]{background:#efeef8}
-  .rz-sloupec[data-uroven="1"]{background:#eff7f3}
-  .rz-sloupec[data-uroven="2"]{background:#f3f3ef}
-  .rz-sloupec[data-uroven="3"]{background:#f8f6f4}
+  .rz-sloupec[data-uroven="0"]{background:#f3f4fa}
+  .rz-sloupec[data-uroven="1"]{background:#f2fcfa}
+  .rz-sloupec[data-uroven="2"]{background:#fef8ee}
+  .rz-sloupec[data-uroven="3"]{background:#f7eff1}
   .rz-sloupec:first-child{border-left:0}
   /* Spojnice leží pod uzly a nesmí brát kliknutí. */
   #rzSpojnice{position:absolute;inset:0;pointer-events:none;z-index:0}
@@ -114,12 +113,12 @@
   .rz-uzel.lvl-a{background:var(--a-bg);border-left-color:var(--a-line)}
   .rz-uzel.lvl-p{background:var(--p-bg);border-left-color:var(--p-line)}
   .rz-uzel.lvl-d{background:var(--d-bg);border-left-color:var(--d-line)}
-  .rz-uzel.lvl-k{background:#eee7e3;border-left-color:var(--k-line)}
-  .rz-uzel:hover{box-shadow:0 2px 8px rgba(28,15,153,.18);transform:translateY(-1px)}
+  .rz-uzel.lvl-k{background:#ead5dc;border-left-color:var(--k-line)}
+  .rz-uzel:hover{box-shadow:0 2px 8px rgba(79,91,189,.22);transform:translateY(-1px)}
   /* Vybraná karta se pozná rámečkem a stínem, ne jinou výplní — tu už drží
      vrstva a dvě barevné soustavy najednou by se bily. */
   .rz-uzel[aria-selected=true]{border-color:var(--akcent);border-width:2px;
-        box-shadow:0 0 0 2px rgba(34,183,244,.35),0 2px 10px rgba(28,15,153,.28)}
+        box-shadow:0 0 0 2px rgba(92,117,242,.35),0 2px 10px rgba(79,91,189,.30)}
   .rz-uzel .rz-kod{font-family:Consolas,"Courier New",monospace;font-size:.76rem;color:var(--muted)}
   .rz-uzel .rz-nazev{font-size:.87rem;line-height:1.3}
   .rz-uzel .rz-odznak{align-self:flex-start;font-size:.71rem;color:var(--muted)}
@@ -132,7 +131,7 @@
         width:19px;height:19px;border-radius:50%;color:#fff;background:var(--muted);
         display:flex;align-items:center;justify-content:center;
         font-size:1rem;font-weight:700;line-height:1;opacity:.95;
-        box-shadow:0 1px 3px rgba(28,15,153,.35)}
+        box-shadow:0 1px 3px rgba(79,91,189,.35)}
   .rz-uzel.lvl-a .rz-sipka{background:var(--a)}
   .rz-uzel.lvl-p .rz-sipka{background:var(--p)}
   .rz-uzel.lvl-d .rz-sipka{background:var(--d)}
@@ -149,10 +148,10 @@
   .rzh-pasy{position:relative}
   .rzh-pas{display:flex;align-items:stretch;border-top:1px solid var(--line)}
   .rzh-pas:first-child{border-top:0}
-  .rzh-pas[data-uroven="0"]{background:#efeef8}
-  .rzh-pas[data-uroven="1"]{background:#eff7f3}
-  .rzh-pas[data-uroven="2"]{background:#f3f3ef}
-  .rzh-pas[data-uroven="3"]{background:#f8f6f4}
+  .rzh-pas[data-uroven="0"]{background:#f3f4fa}
+  .rzh-pas[data-uroven="1"]{background:#f2fcfa}
+  .rzh-pas[data-uroven="2"]{background:#fef8ee}
+  .rzh-pas[data-uroven="3"]{background:#f7eff1}
   /* Hlavička je štítek, ne plocha: plný tmavý blok přes celou výšku pásu byl
      nejsytější věc na obrazovce a přebíjel karty, o které jde (07.09.2026). */
   .rzh-hlavicka{flex:0 0 84px;padding:12px 8px;font-size:.76rem;font-weight:700;
@@ -229,7 +228,7 @@
   .legend{font-size:.86rem;color:var(--muted);padding:8px 12px 0;line-height:1.7}
   .legend[hidden]{display:none}
   .legend .badge{margin:0 2px;font-weight:600}
-  .badge.ut{background:#dceee6;color:var(--p)}
+  .badge.ut{background:#def7f1;color:var(--p)}
   mark{background:var(--hit);padding:0 1px}
   .empty{padding:20px;color:var(--muted);text-align:center}
   @media (max-width:900px){main{flex-direction:column}#detail{position:static;flex:1 1 auto;width:100%}}
@@ -516,8 +515,10 @@ const rzZkrat = i => {
 const elRozklad = document.getElementById("rozklad");
 const elSloupce = document.getElementById("rzSloupce");
 const elSpojnice = document.getElementById("rzSpojnice");
-const BARVA_VRSTVY = {a:"var(--a-line)", p:"var(--p-line)",
-                      d:"var(--d-line)", k:"var(--k-line)"};
+/* Spojnice berou ZTMAVENÉ varianty (--a…--k), ne plné barvy linek: plná
+   mátová má na bílé 1,90:1 a okrová 2,28:1, takže by tenká čára s poloviční
+   průhledností zmizela (07.09.2026). */
+const BARVA_VRSTVY = {a:"var(--a)", p:"var(--p)", d:"var(--d)", k:"var(--k)"};
 
 function rzUzel(n, vybrany){
   const el = document.createElement("div");
@@ -730,7 +731,7 @@ function rzKresliSpojnice(ramecEl, svgEl, skupiny, dolu){
       cara.setAttribute("stroke", BARVA_VRSTVY[lvl] || "var(--muted)");
       cara.setAttribute("stroke-width", "1.8");
       cara.setAttribute("stroke-linecap", "round");
-      cara.setAttribute("opacity", ".5");
+      cara.setAttribute("opacity", ".6");
       svgEl.appendChild(cara);
     });
   });
@@ -843,7 +844,7 @@ function detail(n){
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 /* Sekce se do podtitulku nepíše (07.09.2026): mapa nese celý rejstřík
    (7 agend, 46 procesů), takže „Sekce 3“ z ní dělala výsek, kterým není. */
-document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:14";
+document.getElementById("meta").textContent = "vygenerováno 07.09.2026 20:22";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]

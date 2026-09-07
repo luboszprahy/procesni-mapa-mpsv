@@ -183,9 +183,35 @@ se ztmavila na `#4a5266`. Nejtěsnější dvojice text/podklad je 4,84:1.
 
 Krok odsazení ve stromu je 32+22 px.
 
-**Poučení k zápisu do skillu:** pravidlo „hierarchii dělá sytost, ne odstín"
-platí na dvě úrovně, ne na čtyři. Při čtyřech se sousední stupně téže barvy
-přestanou lišit dřív, než dojde barva.
+**Poučení zapsané do skillu** `harmonicke-barvy` (commit `d331925`): pravidlo
+„hierarchii dělá sytost, ne odstín" platí na dvě úrovně, ne na čtyři. Při
+čtyřech se sousední stupně téže barvy přestanou lišit dřív, než dojde barva.
+Druhý zápis tamtéž: sytá barva z palety zpravidla neunese bílý text.
+
+### Sedmé kolo (20:20) — druhá paleta z Adobe Color
+
+Uživatel dodal jinou paletu: `#5C75F2 #4AD1B2 #4F5BBD #EA9B0B #8A153E`.
+Postup byl týž jako u předchozí, jen s jinými čísly:
+
+| vrstva | linka | text / hlavička / kolečko | plocha | pruh |
+|---|---|---|---|---|
+| agenda | `#4F5BBD` | `#4F5BBD` (5,89:1) | `#dfe1f3` | `#f3f4fa` |
+| proces | `#4AD1B2` | `#2b7967` (5,21:1) | `#def7f1` | `#f2fcfa` |
+| dílčí proces | `#EA9B0B` | `#885a06` (5,98:1) | `#fbedd3` | `#fef8ee` |
+| aktivita | `#8A153E` | `#8A153E` (9,30:1) | `#ead5dc` | `#f7eff1` |
+
+`#4F5BBD` je základ (drží kontinuitu s dosavadní modrou hlavičkou),
+`#5C75F2` je mu na sousední vrstvu příliš blízká, takže z ní je **akcent**
+vybrané karty. Mátová a okrová jsou světlé — na bílý text potřebovaly ztmavit
+o 42 %, což je dvakrát víc než u předchozí palety.
+
+**Změna proti minulému kolu, která nebyla vidět dopředu:** spojnice teď berou
+**ztmavené** varianty, ne plné barvy linek. Plná mátová má na bílé 1,90:1
+a okrová 2,28:1 — jako tenká čára s poloviční průhledností by prostě zmizely.
+Průhlednost šla z 0,5 na 0,6. U předchozí palety tenhle problém nebyl, protože
+všechny její barvy byly tmavé.
+
+Nejtěsnější dvojice text/podklad: 4,55:1.
 
 **Co ověřené není:** chování spojnic při rolování pásů do velké vzdálenosti
 (ořez je otestovaný jen strukturálně) a vzhled při největší velikosti písma.
