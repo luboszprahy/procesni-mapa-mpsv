@@ -31,6 +31,13 @@ SCENAR = """
   const vidi = el => el && !el.classList.contains("hide");
   const kids = lvl => document.querySelector(".lvl-" + lvl + " > .kids");
 
+  /* Scénář zkouší STROM, ale výchozím zobrazením je od F21/F22 rozklad —
+     bez tohohle přepnutí je `#tree` prázdný a všechno níž padá na prázdném
+     DOM. Zobrazení se čte z aria-pressed, tak se tlačítko musí kliknout. */
+  out.vychoziZobrazeni = document.querySelector(
+      "#fZobrazeni button[aria-pressed=true]").dataset.zobrazeni;
+  document.querySelector("#fZobrazeni button[data-zobrazeni=strom]").click();
+
   out.vychoziKod       = !document.body.classList.contains("bez-kodu");
   out.vychoziUroven    = document.getElementById("fUroven").value;
   out.vychoziProcesy   = vidi(kids("a"));
@@ -83,8 +90,11 @@ SCENAR = """
   q.value = ""; q.dispatchEvent(new Event("input"));
   uroven.value = "4"; uroven.dispatchEvent(new Event("change"));
   const fStav = document.getElementById("fStav");
-  const aktivit = () => document.querySelectorAll(".lvl-k").length;
-  const vetvi   = () => document.querySelectorAll(".lvl-d").length;
+  /* Uvnitř #tree, ne globálně: rozklad kreslí karty s TÝMIŽ třídami
+     (`rz-uzel lvl-k`) a zůstává v DOM i po přepnutí na strom, takže
+     globální selektor sčítal obě zobrazení a "vše" vycházelo dvojnásobně. */
+  const aktivit = () => document.querySelectorAll("#tree .lvl-k").length;
+  const vetvi   = () => document.querySelectorAll("#tree .lvl-d").length;
   out.stavVolby   = [...fStav.options].map(o => o.value);
   out.stavVse     = aktivit();
   out.vetviVse    = vetvi();
@@ -110,6 +120,16 @@ SCENAR = """
 
   // 10) hlavička neuvádí jméno osoby
   out.meta = document.getElementById("meta").textContent;
+
+  /* Buňka s víc útvary („111; 113") se musí rozpadnout na jednotlivé kódy.
+     Do 08.09.2026 mapa dělila čárkou, takže dvojice zůstala v nabídce vcelku
+     a filtrovat podle jednoho z nich nešlo. V datech to vidět nebylo —
+     žádná aktivita víc útvarů nemá —, proto se to zkouší na hodnotě
+     dosazené sem, ne na tom, co je v rejstříku. */
+  out.utvarySeznam = (typeof utvarySeznam === "function")
+      ? utvarySeznam("111; 113") : ["<funkce chybí>"];
+  out.utvaryCarka  = (typeof utvarySeznam === "function")
+      ? utvarySeznam("111,113") : ["<funkce chybí>"];
 
   const pre = document.createElement("pre");
   pre.id = "vysledek-testu";
@@ -160,9 +180,13 @@ def main():
 
     overit(r["vychoziKod"] is True, "kódy nejsou ve výchozím stavu zapnuté")
     overit(r["pocetKodu"] > 0, "ve stromu nejsou žádné kódy")
-    overit(r["vychoziUroven"] == "2", f"výchozí stupeň rozbalení není 2 ({r['vychoziUroven']})")
-    overit(r["vychoziProcesy"] is True, "při stupni 2 nejsou vidět procesy")
-    overit(r["vychoziDilci"] is False, "při stupni 2 jsou vidět i dílčí procesy")
+    overit(r["vychoziZobrazeni"] == "rozkladH",
+           f"výchozím zobrazením není vodorovný rozklad ({r['vychoziZobrazeni']})")
+    overit(r["vychoziUroven"] == "4",
+           f"výchozí stupeň rozbalení není 4 ({r['vychoziUroven']})")
+    overit(r["vychoziProcesy"] is True, "při výchozím stupni nejsou vidět procesy")
+    overit(r["vychoziDilci"] is True,
+           "při výchozím stupni 4 nejsou vidět dílčí procesy")
     overit(r["u3Dilci"] is True, "stupeň 3 nerozbalil dílčí procesy")
     overit(r["u3Aktivity"] is False, "stupeň 3 rozbalil i aktivity")
     overit(r["u4Aktivity"] is True, "stupeň 4 nerozbalil aktivity")
@@ -182,6 +206,13 @@ def main():
 
     overit(len(r["detail"]) > 20 and "Klikni" not in r["detail"],
            f"klik na aktivitu nenaplnil detail: {r['detail'][:60]!r}")
+
+    overit(r["utvarySeznam"] == ["111", "113"],
+           f"buňka „111; 113\" se nerozdělila na jednotlivé útvary "
+           f"({r['utvarySeznam']}) — filtr útvaru by na ně nenašel nic")
+    overit(r["utvaryCarka"] == ["111", "113"],
+           f"čárkou oddělené útvary se nerozdělily ({r['utvaryCarka']}) — "
+           f"import je propustí, takže je mapa musí umět taky")
 
     overit(r["hledaniRozbalilo"] is True, "hledání nerozbalilo strom navzdory stupni 1")
     overit(r["hledaniNaslo"] > 0, "hledání nic nezvýraznilo")

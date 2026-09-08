@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-08 10:30**. Balík **1.0.0.104** — dvě věci z provozu:
+Aktualizováno: **2026-09-08 11:00**. Balík **1.0.0.105** — dvě věci z provozu:
 **F23** (kód jde při zakládání zvolit, osiřelé položky pod ním se dají převzít)
 a **F24** (číselník útvarů: nabídka v šabloně, kontrola v importu, skutečné
 útvary i v anonymní sadě). Balík 104 k tomu přidává **opravu chyby `Index`**
@@ -10,7 +10,7 @@ Předchozí stav: 1.0.0.101 — mapa (F20–F33), 1.0.0.100 — F15/F16/F17.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Otestuj balík 1.0.0.104 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
+1. **Otestuj balík 1.0.0.105 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
    postup krok za krokem v `deploy/ppf/README.md` (sedm kroků).
 
    - **`ImportFlow` po importu ručně zapni** — import stav zapnutí nemění
@@ -5027,3 +5027,36 @@ a v chipu *osiřelé* vidí jen `06-01` a `06-02`. To je správně: agenda 06 m�
 v rejstříku právě dva procesy a jejich dílčí procesy osiřelé nejsou — rodiče
 (06-01, 06-02) pořád existují. Čeká se na potvrzení, jestli je očekávání
 jiné, tedy že by chip měl ukazovat celou větev pod sirotkem.
+
+
+## 08.09.2026 — oddělovač útvarů v mapě a rozbitý běhový test
+
+**Víc útvarů v jedné buňce dělila mapa čárkou, všechno ostatní středníkem.**
+Nápověda v importní šabloně říká „Více oddělte '; '", appka rozděluje
+`Split(Substitute(v," ",""), ";")`, ale `mapa_template.html` měla u filtru
+útvaru i u stavby nabídky `.split(/,\s*/)`. Kdo napsal `111; 113`, dostal
+v mapě do nabídky jednu položku `111; 113` a na `111` ani `113` si nevyfiltroval
+nic. **V datech to vidět nebylo** — žádná aktivita zatím víc útvarů nemá (0
+výskytů středníku i čárky ve `vykonava`), takže to byla připravená past, ne
+projevená chyba. Oddělovač je teď na jednom místě (`utvarySeznam`) a bere
+středník i čárku.
+
+**Běhový test mapy byl od F21/F22 rozbitý a nikdo si toho nevšiml**, protože se
+nespouštěl. Doloženo: nad `viz/mapa_prototyp.html` z commitu 61e39b8 projde
+25/25, nad verzí po F21/F22 (9094280) padá 13 kontrol. Dvě příčiny, obě
+z toho, že přibyl rozklad:
+
+1. výchozím zobrazením se stal rozklad, takže `#tree` byl prázdný — scénář si
+   teď řádkové zobrazení nejdřív klikne;
+2. rozklad kreslí karty s **týmiž třídami** (`rz-uzel lvl-k`) a zůstává v DOM
+   i po přepnutí, takže `document.querySelectorAll(".lvl-k")` sčítal obě
+   zobrazení a „vše" vycházelo dvojnásobně (92 místo 46) — selektory jsou
+   omezené na `#tree`.
+
+Test má teď 28 kontrol včetně dvou na oddělovač; vrácení čárky ho shodí
+hláškou „buňka 111; 113 se nerozdělila".
+
+**Poučení, které stojí za víc než ten nález:** `check_mapa_beh.py` je jediná
+brána, která mapu opravdu klikne — statické kontroly (`check_mapa_html.py`,
+`test_rozklad.js`) byly celou dobu zelené. Po každé změně rozvržení mapy ho
+pusť, i když „jde jen o CSS".

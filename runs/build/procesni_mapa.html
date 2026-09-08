@@ -406,9 +406,18 @@ walk(TREE, n => {
    Jediné místo, kde se rozhoduje, co filtry propustí. Používá ho strom
    i rozkladový diagram; kdyby každý filtroval po svém, rozešly by se
    a čtenář by ve dvou zobrazeních téhož rejstříku viděl jiná čísla. */
+/* Buňka může nést víc útvarů. Oddělovačem je STŘEDNÍK — tak to říká nápověda
+   v importní šabloně a tak to rozděluje appka (`Split(Substitute(v," ",""),";")`).
+   Mapa do 08.09.2026 dělila ČÁRKOU, takže „111; 113" byl pro ni jeden útvar:
+   do nabídky se dostala celá dvojice a na `111` ani `113` se nedalo vyfiltrovat
+   nic. V datech to tehdy nebylo vidět — žádná aktivita víc útvarů neměla.
+   Čárka se přijímá dál, protože ji import propustí a starší zápisy ji mohou
+   nést; rozhodující je, že se rozdělí obojí. */
+const utvarySeznam = s => (s||"").split(/\s*[;,]\s*/).filter(Boolean);
+
 function filtruj(n, q, ut, stav, forced){
   const hit    = forced || !q || n.hay.includes(q);
-  const selfUt = n.lvl !== "k" || !ut || (n.utvar||"").split(/,\s*/).includes(ut);
+  const selfUt = n.lvl !== "k" || !ut || utvarySeznam(n.utvar).includes(ut);
   // shoda na uzlu zpristupni celou jeho podstrukturu
   const kids = n.kids
     .map(c => filtruj(c, q, ut, stav, forced || (!!q && n.hay.includes(q))))
@@ -892,13 +901,13 @@ function detail(n){
    natvrdo, takže by po rozšíření mimo sekci 3 lhal (auditní nález A-08). */
 /* Sekce se do podtitulku nepíše (07.09.2026): mapa nese celý rejstřík
    (7 agend, 46 procesů), takže „Sekce 3“ z ní dělala výsek, kterým není. */
-document.getElementById("meta").textContent = "vygenerováno 08.09.2026 10:23";
+document.getElementById("meta").textContent = "vygenerováno 08.09.2026 10:52";
 const c = document.getElementById("counts");
 [["agendy", DATA.agendy.length], ["procesy", DATA.procesy.length],
  ["dílčí procesy", DATA.dilci_procesy.length], ["aktivity", DATA.aktivity.length]]
  .forEach(([t,v]) => { const b = document.createElement("b"); b.textContent = v + " " + t; c.appendChild(b); });
 
-const utvary = [...new Set(DATA.aktivity.flatMap(a => (a.vykonava||"").split(/,\s*/)).filter(Boolean))].sort();
+const utvary = [...new Set(DATA.aktivity.flatMap(a => utvarySeznam(a.vykonava)))].sort();
 const sel = document.getElementById("fUtvar");
 utvary.forEach(u => { const o = document.createElement("option"); o.value = o.textContent = u; sel.appendChild(o); });
 
