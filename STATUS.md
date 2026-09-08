@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-08 12:20**. Balík **1.0.0.107** — dvě věci z provozu:
+Aktualizováno: **2026-09-08 12:35**. Balík **1.0.0.107** — dvě věci z provozu:
 **F23** (kód jde při zakládání zvolit, osiřelé položky pod ním se dají převzít)
 a **F24** (číselník útvarů: nabídka v šabloně, kontrola v importu, skutečné
 útvary i v anonymní sadě). Balík 104 k tomu přidává **opravu chyby `Index`**
@@ -5100,3 +5100,30 @@ zapisuje flow do balíku, který dostane, ale deklarace parametrů doplňuje až
 vyrobit vadnou verzi — a projeví se to až za běhu jako 502. Generátor teď na
 konci hlasitě upozorní, že jeho výstup je mezikrok; správný postup je
 **kopie vstupu → generátory flow → build_app**.
+
+
+## 08.09.2026 — úklid projektu a předávací balík pro MPSV
+
+**Úklid.** `runs/` spadlo ze 184 MB na 1 MB. Pryč je `runs/app_build/`
+(pracovní adresář buildu, 180 MB), `runs/mapa_beh/`, `src/__pycache__`
+a sedm `runs/vstup_*.zip` — všechno bylo v `.gitignore`, tedy mimo repo.
+Ze `runs/build/` zmizely balíky 100, 101, 103 a 104; historie je má.
+
+**Ponechané záměrně:** `runs/build/procesnimapa_1_0_0_107.zip` (slouží jako
+vstup pro příští build a jako porovnávací strana v `check_solution.py`),
+`runs/normalize/` a `runs/anonym/` (datová vrstva, ze které se generují obě
+nasazovací sady).
+
+Po úklidu proběhly všechny brány včetně běhového testu mapy v prohlížeči
+(28 kontrol) a obou Node testů — nic z toho na smazaném nezáviselo.
+
+**Předávací balík:** `procesni-mapa-MPSV-1.0.0.107.zip` v kořeni projektu,
+19 souborů, 418 kB, integrita ověřená `testzip()`. Je to obsah `deploy/mpsv/`
+sbalený do jednoho souboru k odeslání. Do repa nejde (`.gitignore`) —
+obsah je verzovaný jednotlivě a zip by při každém buildu dělal binární diff.
+Vyrobit ho znovu jde kdykoli ze `deploy/mpsv/`, které generuje
+`src/make_deploy_mpsv.py`.
+
+**Pozor při předání:** `02_import_dat.js` v té sadě nese **neanonymizovaná**
+data — jména útvarů, vnitřní předpisy a znění činností. Patří jen na tenant
+MPSV, ne do cizího vývojového prostředí.

@@ -13,3 +13,7 @@ runs/mapa_beh/
 runs/build_*/
 runs/vstup_*.zip
 runs/zk*.zip
+
+# Predavaci balik sady (generuje se ze deploy/mpsv, do repa nepatri —
+# obsah uz verzovany je a zip by pri kazdem buildu delal binarni diff)
+procesni-mapa-MPSV-*.zip
