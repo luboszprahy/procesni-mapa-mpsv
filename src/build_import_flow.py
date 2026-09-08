@@ -60,6 +60,13 @@ LIST_AGENDY = "Agendy"
 LIST_PROCESY = "Procesy"
 LIST_UTVARY = "Utvary"
 
+# Strop krátkého názvu. Bere se z `build_flow.py`, které staví
+# `AktualizaceKratkehoNazvu` a tutéž mez počítá přesně — dvě čísla by se
+# rozešla a import by zapisoval delší řez, než jaký flow vzápětí přepíše.
+#
+# NE ze schématu: `maxlen` sloupce je 255, což je kapacita textového pole
+# v SharePointu, ne cílová délka názvu. Ta je 150 a je jen v popisu sloupce.
+
 # Sloupce, jejichž hodnotou MUSÍ být kód útvaru z číselníku. `spolupracuje`
 # tu schválně NENÍ: v evidenčních kartách je to volný text („věcně příslušné
 # útvary MPSV", „podřízené služební úřady") a v datech z 08.09.2026 nemá ani
@@ -160,6 +167,12 @@ def sloupce_sablony(schema):
     systemove = {"Title", "nazev_kratky", "datum_aktualizace", "puvodni_kod"}
     return [c for c in list_ze_schematu(schema, LIST_AKTIVITY)["columns"]
             if c["name"] not in systemove]
+
+
+def _max_kratky():
+    """150 z `build_flow.py` — jediné místo, kde je ta mez spočítaná."""
+    from build_flow import MAXLEN
+    return MAXLEN
 
 
 def sloupce_vlastniku():
@@ -453,8 +466,15 @@ def akce(schema):
     # dosadilo dřív, přestaly by být prázdné řádky prázdné (`vsechny_prazdne`
     # by neplatilo) a šablona by při každém importu založila dvě stě sirotků
     # z prázdných řádků pod tabulkou.
+    # POZOR na `sloupce + sloupce_vlastniku()`: do 08.09.2026 se tu procházely
+    # jen `sloupce` (schéma listu Aktivity), takže `_vlastnik_*` z proudu
+    # vypadly. Všechno za touhle akcí — `S_vlastnikem_*`, `Klice_*`, zápis
+    # vlastníků — pak testovalo `not(empty(item()?['_vlastnik_agendy']))` na
+    # hodnotě, která už neexistovala: podmínka byla vždy nepravdivá a import
+    # NIKDY ŽÁDNÉHO VLASTNÍKA NEZAPSAL. Chyba je od F16, kdy ty sloupce
+    # přibyly; `Ocistene` je má, `Doplneny_rodic` je zahazoval.
     doplneny = {"radek": "@item()?['radek']"}
-    for sloupec in sloupce:
+    for sloupec in sloupce + sloupce_vlastniku():
         jmeno = sloupec["name"]
         if jmeno == KOD_RODICE_SLOUPEC:
             doplneny[jmeno] = (f"@if(empty(item()?['{jmeno}']), "
@@ -809,8 +829,26 @@ def zapisove_akce(sloupce, podle_jmena):
                                     f" {lit(VYCHOZI_STAV)}, {polozka}?['{jmeno}'])")
         else:
             telo_aktivity[jmeno] = f"@coalesce({polozka}?['{jmeno}'], '')"
-    # Razítko importu; nazev_kratky schválně chybí — dopočítá ho
-    # AktualizaceKratkehoNazvu, které visí na vzniku i změně položky.
+    # `nazev_kratky` se zapisuje HRUBĚ useknutý, ne přesně. Přesnou verzi —
+    # řez na hranici slova s výpustkou — počítá `AktualizaceKratkehoNazvu`
+    # v sedmi krocích a duplikovat ji sem by znamenalo dvě místa, která se
+    # při první opravě rozejdou.
+    #
+    # Zapisovat aspoň něco je ale nutné: flow visí na „item created or
+    # modified" s minutovým pollingem, takže mezi importem a jeho během má
+    # aktivita krátký název prázdný — a appka v Přehledu zobrazuje právě
+    # `nazev_kratky`, takže čerstvě naimportované řádky vypadají bez názvu
+    # (nález z provozu 08.09.2026; tooltip přitom název ukazoval, protože
+    # čte `nazev`). Kdo si data načte dřív, než flow doběhne, vidí prázdno
+    # do dalšího načtení.
+    #
+    # U názvů do 150 znaků — což je drtivá většina — vyjde hrubý ořez STEJNĚ
+    # jako přesný, takže `Lisi_se` v tom druhém flow neudělá nic. Přepíše jen
+    # ty dlouhé, a to během minuty.
+    telo_aktivity["nazev_kratky"] = (
+        f"@if(greater(length(coalesce({polozka}?['nazev'], '')), {_max_kratky()}),"
+        f" substring(coalesce({polozka}?['nazev'], ''), 0, {_max_kratky()}),"
+        f" coalesce({polozka}?['nazev'], ''))")
     telo_aktivity["datum_aktualizace"] = "@utcNow()"
 
     telo_vazby = {
@@ -1010,6 +1048,16 @@ def main():
     print(f"  čte: knihovna {KNIHOVNA}, tabulka {TABULKA}, {len(sloupce)} sloupců")
     print(f"  excelové spojení: {excel_logicky}")
     print(f"  zakládá do: {LIST_AKTIVITY} + {LIST_VAZBY}")
+    # Balík TEĎ NENÍ hotový: nové flow může používat parametr, pro který
+    # deklaraci doplňuje až build_app.py. Vyrobit takhle vadný mezikrok jde
+    # tiše — stalo se to 08.09.2026 a projevilo se to až za běhu jako
+    # 502 BadGateway z appky, protože runtime parametr nenajde.
+    print()
+    print("POZOR: tenhle balík je MEZIKROK, ne hotová sada.")
+    print("       Deklarace parametrů doplňuje až build_app.py — spusť ho nad")
+    print("       týmž souborem, jinak flow spadne na 'parameter is not found'.")
+    print("       Nikdy negeneruj do balíku v runs/build, který se už vydal;")
+    print("       postup je kopie vstupu -> generátory flow -> build_app.")
     return 0
 
 

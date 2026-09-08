@@ -186,7 +186,19 @@ Screens:
                       Set(varNahledOdpoved, varNahledVysledekO.prehled);
                       Set(varNahledHlaseni, varNahledVysledekO.hlaseni)
                   ),
-                  Notify("Kontrola selhala: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+                  // Hláška z Power Apps je u KAŽDÉ chyby flow stejná
+                  // (502 BadGateway / NoResponse), takže sama o sobě nepomůže.
+                  // Nejčastější příčina v provozu je přitom jediná a snadno
+                  // odstranitelná: sešit má citlivostní štítek, který ho
+                  // šifruje, a Excel Online ho přes Graph API neotevře
+                  // (403 OpenWorkbookAccessDenied). Stalo se to 02.09. i
+                  // 08.09.2026 a pokaždé se hledalo jinde, přestože to je
+                  // popsané v návodu — na návod se člověk podívá až potom.
+                  Notify(
+                      "Kontrola selhala: " & FirstError.Message &
+                      " · Spadlo-li to hned, bývá to citlivostní štítek sešitu — přeštítkuj ho na Interní a zkus znovu.",
+                      NotificationType.Error, varNotifyChybaMs
+                  )
               );
               Set(varNahledBezi, false);
               Select(btn_RozebratN)

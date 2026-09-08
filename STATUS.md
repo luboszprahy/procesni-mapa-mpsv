@@ -1,6 +1,6 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-08 11:00**. Balík **1.0.0.105** — dvě věci z provozu:
+Aktualizováno: **2026-09-08 12:20**. Balík **1.0.0.107** — dvě věci z provozu:
 **F23** (kód jde při zakládání zvolit, osiřelé položky pod ním se dají převzít)
 a **F24** (číselník útvarů: nabídka v šabloně, kontrola v importu, skutečné
 útvary i v anonymní sadě). Balík 104 k tomu přidává **opravu chyby `Index`**
@@ -10,7 +10,7 @@ Předchozí stav: 1.0.0.101 — mapa (F20–F33), 1.0.0.100 — F15/F16/F17.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Otestuj balík 1.0.0.105 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
+1. **Otestuj balík 1.0.0.107 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
    postup krok za krokem v `deploy/ppf/README.md` (sedm kroků).
 
    - **`ImportFlow` po importu ručně zapni** — import stav zapnutí nemění
@@ -5060,3 +5060,43 @@ hláškou „buňka 111; 113 se nerozdělila".
 brána, která mapu opravdu klikne — statické kontroly (`check_mapa_html.py`,
 `test_rozklad.js`) byly celou dobu zelené. Po každé změně rozvržení mapy ho
 pusť, i když „jde jen o CSS".
+
+
+## 08.09.2026 poledne — tři nálezy kolem importu (balík 107)
+
+Všechny tři vyšly najevo z jednoho testovacího importu na PPF DEV.
+
+**1. Naimportované aktivity vypadaly bez názvu.** Přehled zobrazuje
+`nazev_kratky`, ten ale import nezapisoval — dopočítávalo ho až
+`AktualizaceKratkehoNazvu` s **minutovým** pollingem. Kdo si data načetl dřív,
+viděl prázdno až do dalšího načtení; tooltip přitom název ukazoval, protože
+čte `nazev`. Import ho teď zapisuje **hrubě useknutý**; přesnou podobu (řez na
+hranici slova s výpustkou) počítá dál to druhé flow.
+
+Brána tomu bránila tvrzením, že by se ta dvě místa přepisovala. Neplatí:
+`Cil` se ve flow počítá výhradně z `nazev`, takže `Lisi_se` po jednom přepisu
+utichne, a u názvů do 150 znaků vyjde hrubý ořez rovnou stejně a nezapíše se
+vůbec nic. Mez se bere z `build_flow.MAXLEN`, ne ze `schema.json` — `maxlen`
+sloupce je 255, což je kapacita pole, ne cílová délka.
+
+**2. Import nikdy nezapsal vlastníky nadřazených úrovní.** `Doplneny_rodic`
+skládal záznam jen ze sloupců schématu `Aktivity`, takže `_vlastnik_*` z proudu
+vypadli; `S_vlastnikem_*` pak testovalo `not(empty(…))` na hodnotě, která už
+neexistovala. Chyba od **F16**, tedy odjakživa, co ty sloupce v šabloně jsou.
+
+**Brána to zabetonovala:** kontrola očekávala v `Doplneny_rodic` přesně
+`radek + sloupce`, tedy přesně to, co generátor dělal. Brána psaná podle
+chování kódu místo podle zadání neodhalí nic — ověřuje jen, že se kód
+nezměnil. Stojí za to projít i ostatní kontroly stejným pohledem.
+
+**3. Hláška o pádu flow v appce zmiňuje citlivostní štítek.** `Flow.Run failed:
+502 BadGateway` je stejné u každé chyby, a nejčastější příčina v provozu je
+jediná: sešit má štítek, který ho šifruje (02.09. i 08.09.2026, pokaždé se
+hledalo jinde).
+
+**Past v postupu buildu, do které jsem spadl třikrát:** `build_import_flow.py`
+zapisuje flow do balíku, který dostane, ale deklarace parametrů doplňuje až
+`build_app.py`. Generovat do balíku v `runs/build`, který se už vydal, znamená
+vyrobit vadnou verzi — a projeví se to až za běhu jako 502. Generátor teď na
+konci hlasitě upozorní, že jeho výstup je mezikrok; správný postup je
+**kopie vstupu → generátory flow → build_app**.

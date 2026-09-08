@@ -48,8 +48,16 @@ chyby = []
 kontrol = 0
 
 MAZACI = ("DeleteItem", "DeleteFile", "RecycleItem", "RecycleFile")
-# Sloupec, který si dopočítá AktualizaceKratkehoNazvu. Kdyby ho import psal
-# taky, přepisovali by se navzájem a v listu by chvíli stálo jedno, chvíli druhé.
+# Sloupec, jehož PŘESNOU podobu (řez na hranici slova s výpustkou) počítá
+# AktualizaceKratkehoNazvu. Import ho od 08.09.2026 zapisuje taky, ale jen
+# hrubě useknutý — jinak by mezi importem a během toho flow (polling po
+# minutě) měly čerstvé aktivity krátký název prázdný, a Přehled zobrazuje
+# právě jeho. Nález z provozu: naimportované řádky vypadaly bez názvu.
+#
+# Obava, že se ta dvě místa budou přepisovat, neplatí: `Cil` se ve flow
+# počítá výhradně z `nazev`, ne z `nazev_kratky`, takže výsledek je
+# deterministický a podmínka `Lisi_se` po jednom přepisu utichne. U názvů
+# do MAXLEN znaků vyjde hrubý ořez rovnou stejně a flow nezapíše vůbec nic.
 DOPOCITAVANE = "nazev_kratky"
 
 
@@ -270,9 +278,14 @@ def zkontroluj_rozklad(akce, sloupce):
     overit(po_cem == ["S_obsahem"],
            f"Doplneny_rodic běží po {po_cem}, musí po S_obsahem")
 
+    # Vlastníci PATŘÍ do výčtu. Do 08.09.2026 tu stálo jen `sloupce`, tedy
+    # přesně to, co generátor dělal — a brána tím vadu potvrzovala jako
+    # správný stav: `_vlastnik_*` z proudu vypadli a import od F16 nikdy
+    # žádného vlastníka nezapsal. Brána psaná podle chování kódu, ne podle
+    # zadání, chybu neodhalí; ověřuje leda to, že se kód nezměnil.
     vyber = (doplneny.get("select") or {})
     overit(isinstance(vyber, dict) and set(vyber) ==
-           {"radek"} | {c["name"] for c in sloupce},
+           {"radek"} | {c["name"] for c in sloupce + sloupce_vlastniku()},
            "dosazení rodiče nezachovává všechny sloupce řádku — co v Select "
            "chybí, to se ztratí i pro zápis")
     kod = str(vyber.get(KOD_RODICE_SLOUPEC, ""))
@@ -373,13 +386,21 @@ def zkontroluj_zapis(akce, sloupce):
 def zkontroluj_telo(vnitrek, sloupce):
     telo = (((vnitrek.get("Vloz_aktivitu") or {}).get("inputs") or {})
             .get("parameters") or {}).get("parameters/body") or {}
-    ocekavane = {"Title", "datum_aktualizace"} | {c["name"] for c in sloupce}
+    ocekavane = ({"Title", "datum_aktualizace", DOPOCITAVANE}
+                 | {c["name"] for c in sloupce})
     overit(set(telo) == ocekavane,
            f"tělo zakládané aktivity nesedí: navíc {sorted(set(telo) - ocekavane)}, "
            f"chybí {sorted(ocekavane - set(telo))}")
-    overit(DOPOCITAVANE not in telo,
-           f"import zapisuje {DOPOCITAVANE}, který dopočítává "
-           f"AktualizaceKratkehoNazvu — přepisovali by se navzájem")
+    # Hrubý ořez se musí odvozovat z `nazev` a smí ho jen zkrátit. Kdyby
+    # vznikal z něčeho jiného, přestal by být deterministický a `Lisi_se`
+    # v druhém flow by ho přepisovalo pořád dokola.
+    vyraz = str(telo.get(DOPOCITAVANE, ""))
+    overit("['nazev']" in vyraz,
+           f"{DOPOCITAVANE} se v importu neodvozuje z 'nazev' — jiný zdroj by "
+           f"AktualizaceKratkehoNazvu přepisovalo při každé změně dokola")
+    overit("substring" in vyraz and "length" in vyraz,
+           f"{DOPOCITAVANE} se v importu nezkracuje — dlouhý název by zápis "
+           f"shodil na délce sloupce")
     overit(telo.get("Title") == "@outputs('Novy_kod')",
            f"kód aktivity se nebere z přiděleného kódu: {telo.get('Title')!r}")
     overit("utcNow()" in str(telo.get("datum_aktualizace", "")),
