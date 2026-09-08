@@ -58,6 +58,20 @@ LIST_DILCI = "DilciProcesy"
 LIST_VAZBY = "AktivitaDilciProces"
 LIST_AGENDY = "Agendy"
 LIST_PROCESY = "Procesy"
+LIST_UTVARY = "Utvary"
+
+# Sloupce, jejichž hodnotou MUSÍ být kód útvaru z číselníku. `spolupracuje`
+# tu schválně NENÍ: v evidenčních kartách je to volný text („věcně příslušné
+# útvary MPSV", „podřízené služební úřady") a v datech z 08.09.2026 nemá ani
+# jedna z 22 neprázdných hodnot tvar kódu. Kontrola by tedy odmítla přesně to,
+# co karty legitimně obsahují. Rozbalovátko u něj v šabloně zůstává jako
+# pomůcka, ne jako zámek.
+#
+# Kontroluje se proto, že šablona kód útvaru nevynucuje: sloupce připouštějí
+# víc útvarů oddělených „; ", a seznamová validace Excelu takovou hodnotu
+# odmítne. Ochrana proti překlepu se tím přesunula sem — sešit ji nemá.
+SLOUPCE_UTVARU = ["vykonava", "_vlastnik_agendy", "_vlastnik_procesu",
+                  "_vlastnik_dilciho"]
 
 # Vlastníci nadřazených úrovní: sešit je nese u KAŽDÉ aktivity, protože jinou
 # cestu než appku sekce nemá. Kód rodiče se odvodí z kódu dílčího procesu na
@@ -156,6 +170,25 @@ def sloupce_vlastniku():
     """
     from make_sablona import VLASTNICI_NADRAZENYCH
     return VLASTNICI_NADRAZENYCH
+
+
+def utvary_v_ciselniku():
+    """Výraz: všechny kódy útvarů na řádku jsou v listu Útvary.
+
+    Hodnota může nést víc útvarů („71; 72"), takže se nejdřív normalizuje
+    (pryč mezery, čárka jako středník) a rozdělí. Porovnává se délka množiny
+    proti délce jejího průniku s číselníkem — `intersection` vrací unikátní
+    prvky, proto se i vstup dedupuje přes `union(x, x)`; bez toho by „71; 71"
+    propadlo jako vadné.
+    """
+    casti = []
+    for jmeno in SLOUPCE_UTVARU:
+        hodnota = (f"split(replace(replace(coalesce(item()?['{jmeno}'], ''),"
+                   " ' ', ''), ',', ';'), ';')")
+        unikatni = f"union({hodnota}, {hodnota})"
+        casti.append(f"equals(length({unikatni}),"
+                     f" length(intersection({unikatni}, body('Kody_utvaru'))))")
+    return "and(" + ", ".join(casti) + ")"
 
 
 def sp_akce(operace, parametry, po):
@@ -345,7 +378,8 @@ def akce(schema):
     }
 
     predchozi = "Ocistene"
-    for jmeno in (LIST_AGENDY, LIST_PROCESY, LIST_DILCI, LIST_AKTIVITY):
+    for jmeno in (LIST_AGENDY, LIST_PROCESY, LIST_DILCI, LIST_AKTIVITY,
+                  LIST_UTVARY):
         lst = list_ze_schematu(schema, jmeno)
         akce_jmeno = f"Nacti_{jmeno}"
         kroky[akce_jmeno] = sp_akce(
@@ -364,6 +398,16 @@ def akce(schema):
                    "select": "@item()?['Title']"},
         "runAfter": {predchozi: ["Succeeded"]},
     }
+    # Prázdný řetězec patří mezi platné hodnoty: nevyplněný útvar je legitimní
+    # (vlastník se pak nemění) a `split("", ";")` vrátí [""], takže bez něj by
+    # každý řádek s prázdným vlastníkem propadl jako vadný.
+    kroky["Kody_utvaru"] = {
+        "type": "Select",
+        "inputs": {"from": (f"@union(outputs('Nacti_{LIST_UTVARY}')?['body/value'],"
+                            " createArray(json('{\"Title\": \"\"}')))"),
+                   "select": "@item()?['Title']"},
+        "runAfter": {"Kody_dilcich": ["Succeeded"]},
+    }
     # Klíč duplicity: dílčí proces + název. Týž tvar se počítá i z sešitu.
     kroky["Klice_aktivit"] = {
         "type": "Select",
@@ -372,7 +416,7 @@ def akce(schema):
             "select": ("@concat(coalesce(item()?['dilci_proces_kod'], ''), "
                        + lit(SPOJKA_VAZBY) + ", trim(coalesce(item()?['nazev'], '')))"),
         },
-        "runAfter": {"Kody_dilcich": ["Succeeded"]},
+        "runAfter": {"Kody_utvaru": ["Succeeded"]},
     }
     kroky["Kody_aktivit"] = {
         "type": "Select",
@@ -425,15 +469,22 @@ def akce(schema):
 
     povinne = [c["name"] for c in sloupce if c.get("required")]
     ma_povinne = " ".join(f"not(empty(item()?['{n}']))," for n in povinne).rstrip(",")
+    ma_utvary = utvary_v_ciselniku()
+    # Vadný řádek = chybí povinný údaj NEBO je v něm útvar, který v číselníku
+    # není. Obojí je jedna skupina rozkladu schválně: `Chybne` znamená „řádek,
+    # který se nezaloží kvůli vadě v datech", a pořadí čísel v přehledu je
+    # kontrakt s obrazovkou náhledu (POCTY) — nová skupina by ho posunula.
+    # Rozlišuje se až v popisu chyby, aby správce věděl, co opravit.
     kroky["Chybne"] = {
         "type": "Query",
         "inputs": {"from": "@body('Doplneny_rodic')",
-                   "where": f"@not(and({ma_povinne}))"},
+                   "where": f"@not(and({ma_povinne}, {ma_utvary}))"},
         "runAfter": {"Doplneny_rodic": ["Succeeded"]},
     }
     kroky["Uplne"] = {
         "type": "Query",
-        "inputs": {"from": "@body('Doplneny_rodic')", "where": f"@and({ma_povinne})"},
+        "inputs": {"from": "@body('Doplneny_rodic')",
+                   "where": f"@and({ma_povinne}, {ma_utvary})"},
         "runAfter": {"Chybne": ["Succeeded"]},
     }
     kroky["Neznamy_dilci"] = {
@@ -572,16 +623,45 @@ def akce(schema):
     # Důvod se přiřazuje TAM, kde skupina vzniká, ne dodatečným zpětným
     # dohledáváním řádku v obou polích: `contains()` by porovnával celé objekty
     # a stačilo by, aby dva řádky sešitu byly shodné, a důvod by se přehodil.
+    # `Chybne` má dvě příčiny a správce potřebuje vědět kterou. Rozdělují se
+    # tady, ne v rozkladu — skupiny v POCTY jsou kontrakt s obrazovkou náhledu.
+    kroky["Chybne_povinne"] = {
+        "type": "Query",
+        "inputs": {"from": "@body('Chybne')", "where": f"@not(and({ma_povinne}))"},
+        "runAfter": {"Zapis": ["Succeeded"]},
+    }
+    kroky["Chybne_utvar"] = {
+        "type": "Query",
+        "inputs": {"from": "@body('Chybne')",
+                   "where": f"@and({ma_povinne}, not({ma_utvary}))"},
+        "runAfter": {"Chybne_povinne": ["Succeeded"]},
+    }
     kroky["Popis_chybne"] = {
         "type": "Select",
         "inputs": {
-            "from": "@body('Chybne')",
+            "from": "@body('Chybne_povinne')",
             "select": ("@concat(string(item()?['radek']), " + lit(ODD_POLE)
                        + ", item()?['nazev'], " + lit(ODD_POLE) + ", "
                        + lit("chybí povinný údaj (název nebo kód dílčího procesu)")
                        + ")"),
         },
-        "runAfter": {"Zapis": ["Succeeded"]},
+        "runAfter": {"Chybne_utvar": ["Succeeded"]},
+    }
+    # Který útvar to je, výraz neřekne — vypsat by ho šlo jen dalším rozkladem
+    # na jednotlivé kódy. Správce má číselník na listu Ciselniky vedle sešitu,
+    # takže mu stačí vědět, že jde o útvar, a na kterém řádku.
+    kroky["Popis_utvar"] = {
+        "type": "Select",
+        "inputs": {
+            "from": "@body('Chybne_utvar')",
+            "select": ("@concat(string(item()?['radek']), " + lit(ODD_POLE)
+                       + ", item()?['nazev'], " + lit(ODD_POLE) + ", "
+                       + lit("útvar v číselníku není — zkontroluj sloupce "
+                             "Vykonává útvar a Vlastník; nabídku máš na listu "
+                             "Ciselniky")
+                       + ")"),
+        },
+        "runAfter": {"Popis_chybne": ["Succeeded"]},
     }
     kroky["Popis_neznamy"] = {
         "type": "Select",
@@ -592,7 +672,7 @@ def akce(schema):
                        + ", 'dílčí proces ', item()?['dilci_proces_kod'],"
                        " ' v rejstříku není')"),
         },
-        "runAfter": {"Popis_chybne": ["Succeeded"]},
+        "runAfter": {"Popis_utvar": ["Succeeded"]},
     }
     # Rozpor ve vlastnících musí být VIDĚT. Bez tohohle by import vlastníka
     # té úrovně mlčky přeskočil a správce by se to dozvěděl až tím, že
@@ -620,7 +700,8 @@ def akce(schema):
         [f"body('Popis_rozpor_{u['klic']}')" for u in UROVNE_VLASTNIKU])
     kroky["Chybne_radky"] = {
         "type": "Compose",
-        "inputs": ("@join(union(body('Popis_chybne'), body('Popis_neznamy'), "
+        "inputs": ("@join(union(body('Popis_chybne'), body('Popis_utvar'), "
+                   "body('Popis_neznamy'), "
                    + vsechny_popisy + "), " + lit(ODD_RADKU) + ")"),
         "runAfter": {predchozi_popis: ["Succeeded"]},
     }

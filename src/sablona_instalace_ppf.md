@@ -17,6 +17,12 @@ https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa
 > generuje (`src/make_deploy_mpsv.py`) a je aktuální pro týž balík {{verze}};
 > liší se tím, že veze **neanonymizovaná** data a osmý krok navíc.
 
+> **Číselník útvarů je i v téhle sadě skutečný** (`O11`, `Sekce 3`, čísla
+> odborů) — od 08.09.2026 anonymizací neprochází. Do té doby měl anonymní kódy
+> (`91`, `911`), jenže importní šablona nabízela skutečné, takže kdo ji vyplnil
+> podle nabídky, zadal útvary, které v listu `Útvary` nebyly. Anonymní zůstává
+> název úřadu, osoby a vnitřní předpisy.
+
 ## Pořadí kroků 1 a 2 je závazné
 
 Balík 80 přidal proměnné `mpsv_listHistorieKodu` a `mpsv_listZalohy`. Průvodce

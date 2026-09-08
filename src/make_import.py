@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from anonymize import RE_PREDPIS, RE_SEKCE, RE_UTVAR, TOKENY, UTVARY  # noqa: E402
+from anonymize import RE_PREDPIS, TOKENY  # noqa: E402
 from check_schema import check, read_csv, zkratit  # noqa: E402
 
 # Identifikacni kody (07-11, 07-12-003) nejsou identifikujici udaj - jsou to
@@ -54,27 +54,26 @@ def neanonymizovane_tokeny(data, schema):
     ('anonym'), coz je pojistka jen naoko - staci realna data do takove slozky
     zkopirovat a projdou.
 
-    Kontroluji se vsechny tri kategorie, ktere anonymize.py anonymizuje:
-    nazvy (TOKENY), cisla utvaru a cisla vnitrnich predpisu. Kdyby se hlidaly
-    jen nazvy, prosla by data s realnym cislem utvaru - a prave utvary jsou to,
-    co o organizacni strukture prozradi nejvic. Vzory se importuji
-    z anonymize.py, aby se obe strany nemohly rozejit.
+    Kontroluji se obe kategorie, ktere anonymize.py jeste anonymizuje: nazvy
+    (TOKENY) a cisla vnitrnich predpisu. Vzory se importuji z anonymize.py,
+    aby se obe strany nemohly rozejit.
+
+    CISLA UTVARU se od 08.09.2026 NEHLIDAJI - do anonymni sady jdou skutecna
+    (rozhodl uzivatel; duvod je v hlavicce anonymize.py). Byla to nejsilnejsi
+    cast teto pojistky, takze stoji za to rict nahlas, co zbylo: sada projde
+    i s realnou organizacni strukturou MPSV, a chybu "poslal jsem do ciziho
+    tenantu ostra data" uz odhali jen nazev uradu nebo cislo predpisu. Kdyby
+    se rozhodnuti vratilo, vrat s nim i tuhle kontrolu - RE_UTVAR a RE_SEKCE
+    jsou v historii anonymize.py.
     """
     nalezy = []
     blob = json.dumps(data, ensure_ascii=False)
     nalezy += [p for p, _ in TOKENY if re.search(p, blob)]
 
-    utvary, predpisy = set(), set()
-    for klic, hodnota in _datova_pole(data, schema):
-        utvary |= set(RE_UTVAR.findall(hodnota))
-        utvary |= {m[2] for m in RE_SEKCE.findall(hodnota)}
+    predpisy = set()
+    for _klic, hodnota in _datova_pole(data, schema):
         predpisy |= {"%s %s/%s" % m for m in RE_PREDPIS.findall(hodnota)}
-        # sloupec sekce nese cislo sekce samo o sobe, bez slova "sekce"
-        if klic == "sekce" and hodnota in UTVARY:
-            utvary.add(hodnota)
 
-    if utvary:
-        nalezy.append("čísla útvarů: " + ", ".join(sorted(utvary)))
     if predpisy:
         nalezy.append("vnitřní předpisy: " + ", ".join(sorted(predpisy)[:5]))
     return nalezy

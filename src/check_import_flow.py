@@ -89,7 +89,8 @@ def zkontroluj_kostru(definice, spojeni):
                   "Disk_kandidati", "Disk", "Soubor", "Radky", "Ocistene",
                   "Rezim_seznam", "Prazdne", "S_obsahem", "Doplneny_rodic",
                   "Chybne", "Uplne", "Nezarazene",
-                  "Neznamy_dilci",
+                  "Neznamy_dilci", "Kody_utvaru",
+                  "Chybne_povinne", "Chybne_utvar", "Popis_utvar",
                   "Zarazene", "Duplicitni", "K_zalozeni", "Pouzite_kody",
                   "Zapis", "Chybne_radky", "Prehled", "Odpoved"):
         overit(jmeno in akce, f"chybí akce {jmeno}")
@@ -209,6 +210,44 @@ def zkontroluj_rozklad(akce, sloupce):
 
     chybne = str(((akce.get("Chybne") or {}).get("inputs") or {}).get("where", ""))
     uplne = str(((akce.get("Uplne") or {}).get("inputs") or {}).get("where", ""))
+
+    # Útvar mimo číselník nesmí projít. Šablona ho nezachytí: sloupce
+    # připouštějí víc útvarů oddělených „; " a seznamová validace Excelu by
+    # takovou hodnotu odmítla, takže rozbalovátko tam je jen nabídka.
+    # Kontrola je proto tady jediná — kdyby vypadla, překlep by se dostal
+    # do dat a poznal by se až v appce jako prázdný vlastník.
+    #
+    # `spolupracuje` se schválně nekontroluje: v evidenčních kartách je to
+    # volný text („věcně příslušné útvary MPSV"). Kdyby ho někdo do seznamu
+    # přidal, import by odmítl řádky, které jsou v pořádku.
+    for nazev in ("vykonava", "_vlastnik_agendy", "_vlastnik_procesu",
+                  "_vlastnik_dilciho"):
+        overit(f"item()?['{nazev}']" in chybne and "Kody_utvaru" in chybne,
+               f"vadné řádky se neptají, jestli je útvar ve sloupci {nazev} "
+               f"v číselníku — překlep by prošel až do dat")
+        overit(f"item()?['{nazev}']" in uplne and "Kody_utvaru" in uplne,
+               f"úplné řádky se neptají na útvar ve sloupci {nazev}")
+    overit("item()?['spolupracuje']" not in chybne,
+           "import kontroluje útvary ve 'spolupracuje', kde je ale legitimně "
+           "volný text — odmítal by řádky, které jsou v pořádku")
+
+    # Prázdný útvar je legitimní (vlastník se nemění) a split('') vrátí [''],
+    # takže bez prázdného řetězce v číselníku by propadl každý takový řádek.
+    kody = str(((akce.get("Kody_utvaru") or {}).get("inputs") or {}).get("from", ""))
+    overit('"Title": ""' in kody or "'Title': ''" in kody,
+           "mezi platné kódy útvarů se nepřidává prázdno — řádek s nevyplněným "
+           "vlastníkem by import odmítl jako vadný")
+
+    # Dvě příčiny vadného řádku se musí dát rozlišit v hlášce, jinak správce
+    # hledá chybějící název tam, kde je překlep v útvaru.
+    for skupina, zdroj in (("Chybne_povinne", "Chybne"), ("Chybne_utvar", "Chybne")):
+        odkud = str(((akce.get(skupina) or {}).get("inputs") or {}).get("from", ""))
+        overit(odkud == f"@body('{zdroj}')",
+               f"{skupina} se nepočítá z {zdroj}, ale z {odkud!r}")
+    radky = str(((akce.get("Chybne_radky") or {}).get("inputs") or ""))
+    overit("body('Popis_utvar')" in radky,
+           "hlášení chyb nezahrnuje řádky s neznámým útvarem — import je "
+           "odmítne, ale správce se to nedozví")
     for nazev in povinne:
         overit(f"empty(item()?['{nazev}'])" in chybne,
                f"chybné řádky se neptají na povinný sloupec {nazev}")

@@ -72,6 +72,13 @@ VLASTNICI_NADRAZENYCH = [
      "type": "Text", "pomocny": True, "uroven": "dilci_proces", "delka_kodu": 9},
 ]
 
+# Sloupce, jejichž hodnotou je KÓD ÚTVARU. Všechny dostanou nabídku z číselníku
+# útvarů a všechny připouštějí víc hodnot oddělených „; " — vlastník agendy
+# i procesu se do 06.09.2026 zadával ručně bez nabídky, což vedlo k překlepům,
+# které se poznaly až v appce jako prázdná buňka vlastníka.
+UTVAROVE = {"vykonava", "spolupracuje",
+            "_vlastnik_agendy", "_vlastnik_procesu", "_vlastnik_dilciho"}
+
 # Kolik řádků číselníkových tabulek se založí. Rozsah validace musí být stálý,
 # proto se nepočítá z dat, ale drží se na stropu — dokud se do něj číselník
 # vejde, může ho refresh přepisovat bez zásahu do šablony.
@@ -98,7 +105,11 @@ NAPOVEDA = {
                         "nezařazená a přiřadíte ji až v aplikaci. "
                         "Neexistující kód import odmítne.",
     "vykonava": "Oddělení, které činnost vykonává. Více útvarů oddělte '; '.",
-    "spolupracuje": "Útvary, které se na činnosti podílejí. Více útvarů oddělte '; '.",
+    "spolupracuje": "Útvary, které se na činnosti podílejí. Více oddělte "
+                    "'; '. Na rozdíl od sloupce vlevo tu smí být i volný "
+                    "popis ('věcně příslušné útvary', 'podřízené služební "
+                    "úřady') — import tenhle sloupec proti číselníku "
+                    "nekontroluje.",
     "vnitrni_predpis": "Předpis, ze kterého činnost plyne. Více předpisů oddělte '; '.",
     "text_pro_or": "Nepovinné. Znění pro organizační řád, pokud se liší od názvu; "
                    "jinak nechte prázdné a doplňte později v aplikaci.",
@@ -253,22 +264,27 @@ def zaloz_tabulku(sesit, sloupce):
             sloupec_procesu = pozice[POMOCNY_PROCES["name"]]
             vzorec = (f'=INDIRECT("P_"&SUBSTITUTE(LEFT(${sloupec_procesu}2,5),'
                       f'"-","_"))')
-        elif sloupec["name"] == "vykonava":
+        elif sloupec["name"] in UTVAROVE:
             vzorec = "=Cis_Utvary"
         if vzorec is None:
             continue
 
         # Rozsah sahá pod tabulku, aby platil i na řádky, které správce dopíše.
         pismeno = get_column_letter(index)
-        # showErrorMessage: bez něj je rozbalovátko jen ozdoba a překlep projde
-        # až k importu, kde ho správce uvidí jako odmítnutý řádek.
+        # showErrorMessage: u sloupce s JEDNOU hodnotou je tvrdé odmítnutí
+        # správně — bez něj je rozbalovátko jen ozdoba a překlep projde až
+        # k importu. U útvarových sloupců ale nápověda sama vyzývá k zápisu
+        # více hodnot oddělených „; ", a to seznamová validace odmítne: „71; 72"
+        # v seznamu není. Rozbalovátko tam tedy zůstává jako NABÍDKA a hlídání
+        # překlepu patří do importu, ne do sešitu.
         #
         # allow_blank platí i pro dílčí proces: aktivita nahraná BEZ zařazení
         # je legitimní vstup, import jí dosadí technický kód 00-00-000
         # a správce ji zařadí až v aplikaci.
+        tvrde = sloupec["name"] not in UTVAROVE
         kontrola = DataValidation(
             type="list", allow_blank=True, formula1=vzorec,
-            showErrorMessage=True, errorTitle="Neplatná hodnota",
+            showErrorMessage=tvrde, errorTitle="Neplatná hodnota",
             error="Vyberte jednu z nabízených hodnot, nebo nechte prázdné.")
         list_dat.add_data_validation(kontrola)
         kontrola.add(f"{pismeno}2:{pismeno}{POSLEDNI_RADEK_KONTROLY}")

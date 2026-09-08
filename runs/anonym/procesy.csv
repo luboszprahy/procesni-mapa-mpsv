@@ -1,9 +1,9 @@
 ﻿kod;nazev;agenda_kod;vlastnik;pocet_aktivit;zdroj
-01-01;Strategie a koncepce XÚ;01;"921; 922";6;rejstrik
-01-02;Operativní řízení útvarů XÚ a resortních organizací;01;922;1;rejstrik
+01-01;Strategie a koncepce XÚ;01;"11; 33";6;rejstrik
+01-02;Operativní řízení útvarů XÚ a resortních organizací;01;33;1;rejstrik
 01-03;Správa rozpočtové kapitoly;01;;0;rejstrik
 01-04;Programové financování XÚ a resortu;01;;0;rejstrik
-01-05;Boj proti korupci, oznamování;01;922;3;rejstrik
+01-05;Boj proti korupci, oznamování;01;33;3;rejstrik
 01-06;Výzkum a vývoj;01;;0;rejstrik
 01-07;Audit;01;;0;rejstrik
 01-08;Kontrola;01;;0;rejstrik
@@ -33,15 +33,15 @@
 05-03;Bezpečnost práce a pracovní prostředí;05;;0;rejstrik
 06-01;Řízení pomoci z fondů EU a EHF;06;;0;rejstrik
 06-02;Mezinárodní vztahy;06;;0;rejstrik
-07-01;Vnější komunikace;07;922;3;rejstrik
+07-01;Vnější komunikace;07;33;3;rejstrik
 07-02;Parlamentní agenda;07;;0;rejstrik
 07-03;Vládní agenda;07;;0;rejstrik
-07-04;Právní podpora;07;922;8;rejstrik
+07-04;Právní podpora;07;33;8;rejstrik
 07-05;Finance;07;;0;rejstrik
 07-06;Statistika;07;;0;rejstrik
 07-07;Správa majetku;07;;0;rejstrik
-07-08;Řízení lidských zdrojů;07;"921; 922";22;rejstrik
+07-08;Řízení lidských zdrojů;07;"11; 33";22;rejstrik
 07-09;Odborná podpora;07;;0;rejstrik
 07-10;Administrativní podpora;07;;0;rejstrik
-07-11;Náhrada škody;07;922;3;rejstrik
+07-11;Náhrada škody;07;33;3;rejstrik
 07-12;ICT a digitalizace;07;;0;rejstrik

@@ -1,41 +1,41 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-07 20:55**. Poslední práce byla celá na **mapě**
-(F20–F33): druhé a třetí zobrazení, nová paleta, úprava vzhledu. Balík appky
-se nezměnil — pořád platí **1.0.0.101**, jen `site_assets/` v obou sadách
-nesou novou mapu, takže se při nasazení musí nahrát znovu.
+Aktualizováno: **2026-09-08 09:45**. Balík **1.0.0.103** — dvě věci z provozu:
+**F23** (kód jde při zakládání zvolit, osiřelé položky pod ním se dají převzít)
+a **F24** (číselník útvarů: nabídka v šabloně, kontrola v importu, skutečné
+útvary i v anonymní sadě).
 
-Předchozí stav: balík **1.0.0.100** — F15 (číselník
-útvarů), F16 (víc vlastníků v appce **i v importním Excelu**), F17 (pruh
-voleb), tlačítko Přesun a čtyři opravy z auditu kola 7.
-Hotová **F14**: krátký název se zapisuje přes REST MERGE, ne `PatchItem` —
-z balíku zmizel poslední GUID listu natvrdo a **balík je pro každý tenant
-stejný**. Dvoubalíkový režim končí.
+Předchozí stav: 1.0.0.101 — mapa (F20–F33), 1.0.0.100 — F15/F16/F17.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Otestuj balík 1.0.0.101 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
+1. **Otestuj balík 1.0.0.103 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
    postup krok za krokem v `deploy/ppf/README.md` (sedm kroků).
 
-   - **`ImportFlow` po importu ručně zapni** — v balíku 100 nešlo zapnout
-     (zacyklený `runAfter`, opraveno v 101) a import stav zapnutí nemění.
-   - **Krok 1 spusť znovu i tam, kde už běžel** (`deploy/ppf/01_zaloz_listy.js`) —
-     balík 99 přidal list `Útvary`, bez něj se formulář číselníku neotevře.
-   - Číselník útvarů narostl ze 7 na 44 položek → přenes data znovu
-     (`deploy/ppf/02_import_dat.js`, anonymizovaná).
-   - Do Site Assets nahraj `deploy/ppf/site_assets/` — je tam i importní
-     šablona s 12 sloupci a **nová podoba mapy** (viz níže).
+   - **`ImportFlow` po importu ručně zapni** — import stav zapnutí nemění
+     a flow se v 103 změnilo (kontrola útvarů).
+   - **Krok 2 spusť znovu** (`deploy/ppf/02_import_dat.js`): číselník útvarů
+     už není anonymizovaný, takže v listu `Útvary` jsou teď `O11`, `Sekce 3`
+     a čísla odborů místo „Utvar 91 (odbor)". **Staré anonymní útvary
+     v listu zůstanou** — skript je idempotentní podle `Title`, ale nemaže;
+     smaž je ručně, jinak budou v nabídce obojí.
+   - Do Site Assets nahraj `deploy/ppf/site_assets/` — je tam i nová importní
+     šablona (nabídka útvarů u pěti sloupců).
 
-   **Mapa vypadá jinak než při posledním nasazení.** Má tři zobrazení
-   (`Rozklad vodorovně │ Rozklad svisle │ Řádkové zobrazení`, vodorovný je
-   výchozí), novou paletu `#86A2E3 #52729E #332F74 #60ACEF #5B5290` a volba
-   „Rozbalit" teď rozbaluje celou úroveň, ne jen vybranou větev. Prohlédnuté
-   v prohlížeči, brána 46 kontrol a `test_rozklad.js` 44 kontrol jsou zelené.
+   **Co zkusit u F23** (Editace → Agendy → Nová):
+   - pole *Kód* je předvyplněné návrhem a jde přepsat; vedle něj svítí stav
+     (volný / obsazený / N osiřelých);
+   - napiš `07` → dialog vypíše 12 osiřelých procesů a nabídne
+     *Převzít je pod novou agendu* / *Založit jako 08* / *Zrušit*;
+   - po „převzít" musí těch 12 procesů zmizet z chipu **osiřelé** hned,
+     bez zavření obrazovky.
 
-   Co je nového proti tomu, cos viděl naposledy: tlačítko **Přesun** v řádku
-   procesu (Editace → Procesy), sjednocený pruh voleb na úvodní obrazovce,
-   **víc vlastníků** u agendy, procesu i dílčího procesu, a `O33` je zařazený
-   pod `Sekce 3`.
+   **Co zkusit u F24** (šablona importu):
+   - sloupce *Spolupracuje*, *Vlastník agendy / procesu / dílčího procesu*
+     mají rozbalovátko útvarů; víc útvarů jde napsat ručně přes „; ";
+   - řádek s vymyšleným útvarem (třeba `999`) musí import **odmítnout**
+     a v hlášce říct „útvar v číselníku není".
+
 2. Ještě neodzkoušená v provozu je oprava `substring` z balíku 96 — plný přesun
    z aplikace, blok **I** testovacího scénáře. To je jediné, co u přesunu chybí.
 3. Až bude přístup na MPSV: import `deploy/mpsv/` a zapnout

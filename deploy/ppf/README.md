@@ -1,7 +1,7 @@
 <!-- GENEROVÁNO src/make_deploy_ppf.py — needituj ručně.
-     Zdroj textu: src/sablona_instalace_ppf.md, čísla z balíku procesnimapa_1_0_0_102.zip. -->
+     Zdroj textu: src/sablona_instalace_ppf.md, čísla z balíku procesnimapa_1_0_0_103.zip. -->
 
-# Instalace balíku `procesnimapa_1_0_0_102.zip`
+# Instalace balíku `procesnimapa_1_0_0_103.zip`
 
 Postup nasazení na **PPF DEV**. Sedm kroků, každý má vlastní ověření —
 dělej je v pořadí a další krok začni, až předchozí ověření projde.
@@ -13,8 +13,14 @@ https://ppfbanka.sharepoint.com/sites/DigiData_D/testovaci_subsajta/procesnimapa
 ```
 
 > **Pro MPSV platí `deploy/mpsv/README.md`**, ne tenhle soubor. Ta složka se
-> generuje (`src/make_deploy_mpsv.py`) a je aktuální pro týž balík 1.0.0.102;
+> generuje (`src/make_deploy_mpsv.py`) a je aktuální pro týž balík 1.0.0.103;
 > liší se tím, že veze **neanonymizovaná** data a osmý krok navíc.
+
+> **Číselník útvarů je i v téhle sadě skutečný** (`O11`, `Sekce 3`, čísla
+> odborů) — od 08.09.2026 anonymizací neprochází. Do té doby měl anonymní kódy
+> (`91`, `911`), jenže importní šablona nabízela skutečné, takže kdo ji vyplnil
+> podle nabídky, zadal útvary, které v listu `Útvary` nebyly. Anonymní zůstává
+> název úřadu, osoby a vnitřní předpisy.
 
 ## Pořadí kroků 1 a 2 je závazné
 
@@ -73,7 +79,7 @@ Struktura je popsaná v `sharepoint_schema.md`.
 
 ## 2. Naimportovat solution a VYPLNIT VŠECH DEVĚT PROMĚNNÝCH
 
-Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_102.zip`
+Power Apps → **Solutions → Import solution** → `procesnimapa_1_0_0_103.zip`
 (unmanaged, jako upgrade).
 
 Průvodce se zeptá na:

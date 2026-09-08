@@ -3052,3 +3052,43 @@ kódem / zrušit. Ochrana zůstává — nic se nepřilepí tiše.
 
 **Vědomě mimo rozsah:** algoritmus přidělování kódu zůstává max+1, takže kód
 `05` je dál nedostupný. Ruční zadání kódu při zakládání je samostatné zadání.
+
+## F24 — číselník útvarů: nabídka v šabloně, kontrola v importu (08.09.2026)
+
+Zadal uživatel nad snímkem šablony: sloupce *Vlastník agendy / procesu /
+dílčího procesu* nenabízely hodnoty z číselníku. Při rozboru vyšly najevo
+další dvě věci, obě opravené v témž kroku.
+
+1. [Nabídka útvarů] — co: `UTVAROVE` v `src/make_sablona.py` — validace
+     `=Cis_Utvary` i pro `spolupracuje` a tři sloupce vlastníků
+   verify: `check_sablona.py` (222 kontrol) + mutace „vypadlá nabídka
+     u Spolupracuje" → brána hlásí „má 0 rozbalovátek"
+   edge cases: sloupce připouštějí víc útvarů oddělených „; " → seznamová
+     validace by je odmítla, takže `showErrorMessage=False`
+   risk: sešit tím ztratil ochranu proti překlepu — řeší ji krok 3
+
+2. [Skutečné útvary v anonymní sadě] — co: `anonymize.py` — mapování útvarů
+     zrušeno, `utvary.csv` se opisuje 1:1; pojistka v `make_import.py`
+     útvary nehlídá
+   verify: `runs/anonym/utvary.csv` má `0;Ministr`, `12;O12`; PPF sada nese
+     `O11`, `Sekce 3` a **žádné** „MPSV"; `check_import.js` smoke test zelený
+   edge cases: `sekce` v aktivitách je holé číslo — dřív se mapovalo, teď ne
+   risk: pojistka proti odeslání ostrých dat do cizího tenantu tím zeslábla
+     na názvy úřadu a předpisy; napsáno u ní nahlas
+
+3. [Kontrola útvarů v ImportFlow] — co: `Kody_utvaru` z listu `Útvary`,
+     `utvary_v_ciselniku()`, rozšířené `Chybne`/`Uplne`, `Popis_utvar`
+   verify: `check_import_flow.py` (261 kontrol) + mutace „vykonava se
+     nekontroluje" → brána hlásí obě strany rozkladu
+   edge cases: prázdný útvar je legitimní → prázdný řetězec mezi platné kódy;
+     „71; 71" → vstup se dedupuje `union(x, x)`, jinak by průnik nesouhlasil;
+     `spolupracuje` se **nekontroluje** — v kartách je to volný text (0 z 22
+     neprázdných hodnot má tvar kódu)
+   risk: výraz neřekne, KTERÝ útvar je špatně — jen řádek a že jde o útvar;
+     vypsat konkrétní kód by chtělo další rozklad
+
+4. [Balík 1.0.0.103] — co: `build_import_flow.py --solution` a pak
+     `build_app.py --verze 1.0.0.103`, obě `make_deploy_*.py`
+   verify: `check_solution` OK, `check_app --solution` čistý,
+     `check_import_flow` 261 kontrol
+   risk: ověření v provozu je až importem na PPF DEV

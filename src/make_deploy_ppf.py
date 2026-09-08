@@ -189,7 +189,7 @@ def main():
             print(f"  {popis:34} {cesta.stat().st_size:>9} B")
     print(f"\nbalík appky: {balik.name} · {len(flow)} flow · {obrazovky} obrazovek "
           f"· {len(ep.DEFINICE)} proměnných")
-    print("data: ANONYMIZOVANÁ (runs/anonym) — pro cizí vývojový tenant")
+    print("data: ANONYMIZOVANÁ (runs/anonym) — pro cizí vývojový tenant;\n      ČÍSELNÍK ÚTVARŮ JE SKUTEČNÝ (O11, Sekce 3), viz anonymize.py")
     return 0
 
 

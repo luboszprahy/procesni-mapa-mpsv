@@ -1,45 +1,45 @@
 ﻿kod;nazev;uroven;nadrizeny_kod
-9;Utvar 9 (ministr);ministr;
-91;Utvar 91 (odbor);odbor;9
-911;Utvar 911 (oddělení);oddělení;91
-912;Utvar 912 (oddělení);oddělení;91
-92;Utvar 92 (sekce);sekce;9
-921;Utvar 921 (odbor);odbor;92
-9211;Utvar 9211 (oddělení);oddělení;921
-9212;Utvar 9212 (oddělení);oddělení;921
-922;Utvar 922 (odbor);odbor;92
-9221;Utvar 9221 (oddělení);oddělení;922
-9222;Utvar 9222 (oddělení);oddělení;922
-93;Utvar 93 (sekce);sekce;9
-931;Utvar 931 (oddělení);oddělení;93
-932;Utvar 932 (odbor);odbor;93
-9321;Utvar 9321 (oddělení);oddělení;932
-9322;Utvar 9322 (oddělení);oddělení;932
-9323;Utvar 9323 (odbor);odbor;932
-933;Utvar 933 (odbor);odbor;93
-9331;Utvar 9331 (oddělení);oddělení;933
-9332;Utvar 9332 (oddělení);oddělení;933
-934;Utvar 934 (odbor);odbor;93
-9341;Utvar 9341 (oddělení);oddělení;934
-9342;Utvar 9342 (oddělení);oddělení;934
-9343;Utvar 9343 (oddělení);oddělení;934
-94;Utvar 94 (sekce);sekce;9
-941;Utvar 941 (oddělení);oddělení;94
-942;Utvar 942 (odbor);odbor;94
-9421;Utvar 9421 (oddělení);oddělení;942
-9422;Utvar 9422 (oddělení);oddělení;942
-9423;Utvar 9423 (oddělení);oddělení;942
-943;Utvar 943 (odbor);odbor;94
-9431;Utvar 9431 (oddělení);oddělení;943
-9432;Utvar 9432 (oddělení);oddělení;943
-944;Utvar 944 (odbor);odbor;94
-9441;Utvar 9441 (oddělení);oddělení;944
-9442;Utvar 9442 (oddělení);oddělení;944
-9443;Utvar 9443 (oddělení);oddělení;944
-945;Utvar 945 (odbor);odbor;94
-9451;Utvar 9451 (oddělení);oddělení;945
-9452;Utvar 9452 (oddělení);oddělení;945
-946;Utvar 946 (odbor);odbor;94
-9461;Utvar 9461 (oddělení);oddělení;946
-9462;Utvar 9462 (oddělení);oddělení;946
-9463;Utvar 9463 (oddělení);oddělení;946
+0;Ministr;ministr;
+12;O12;odbor;0
+121;O121;oddělení;12
+122;O122;oddělení;12
+3;Sekce 3;sekce;0
+11;O11;odbor;3
+111;O111;oddělení;11
+113;O113;oddělení;11
+33;O33;odbor;3
+331;O331;oddělení;33
+332;O332;oddělení;33
+4;Sekce 4;sekce;0
+401;O401;oddělení;4
+42;O42;odbor;4
+422;O422;oddělení;42
+424;O424;oddělení;42
+425;O425;odbor;42
+44;O44;odbor;4
+443;O443;oddělení;44
+445;O445;oddělení;44
+45;O45;odbor;4
+451;O451;oddělení;45
+452;O452;oddělení;45
+453;O453;oddělení;45
+6;Sekce 6;sekce;0
+601;O601;oddělení;6
+32;O32;odbor;6
+322;O322;oddělení;32
+323;O323;oddělení;32
+325;O325;oddělení;32
+34;O34;odbor;6
+341;O341;oddělení;34
+342;O342;oddělení;34
+35;O35;odbor;6
+351;O351;oddělení;35
+356;O356;oddělení;35
+357;O357;oddělení;35
+61;O61;odbor;6
+611;O611;oddělení;61
+612;O612;oddělení;61
+62;O62;odbor;6
+621;O621;oddělení;62
+622;O622;oddělení;62
+623;O623;oddělení;62

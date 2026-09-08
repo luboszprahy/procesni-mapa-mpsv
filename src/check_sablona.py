@@ -51,7 +51,21 @@ CISELNIKOVE = {
     "_proces": "=Cis_Procesy",
     "dilci_proces_kod": '=INDIRECT("P_"&SUBSTITUTE(LEFT($B2,5),"-","_"))',
     "vykonava": "=Cis_Utvary",
+    "spolupracuje": "=Cis_Utvary",
+    "_vlastnik_agendy": "=Cis_Utvary",
+    "_vlastnik_procesu": "=Cis_Utvary",
+    "_vlastnik_dilciho": "=Cis_Utvary",
 }
+
+# Sloupce, kde je rozbalovátko NABÍDKA, ne zámek. Jejich nápověda vyzývá
+# k zápisu více útvarů oddělených „; " a seznamová validace by takovou hodnotu
+# odmítla — „71; 72" v seznamu není. Tvrdé odmítnutí by tedy zakázalo přesně
+# to, co dokumentace slibuje.
+#
+# Cena je, že překlep v útvaru sešit nechytí. Patří to do importu, ne sem;
+# dokud tam ta kontrola není, projde chybný kód až do dat.
+NABIDKA_BEZ_ZAMKU = {"vykonava", "spolupracuje",
+                     "_vlastnik_agendy", "_vlastnik_procesu", "_vlastnik_dilciho"}
 
 chyby = []
 kontrol = 0
@@ -183,9 +197,15 @@ def zkontroluj_rozbalovatka(list_dat, sloupce):
         kontrola = moje[0]
         overit(kontrola.type == "list",
                f"rozbalovátko u {sloupec['display']!r} je typu {kontrola.type!r}")
-        overit(bool(kontrola.showErrorMessage),
-               f"rozbalovátko u {sloupec['display']!r} nehlásí chybu — "
-               f"překlep by prošel až k importu")
+        if sloupec["name"] in NABIDKA_BEZ_ZAMKU:
+            overit(not kontrola.showErrorMessage,
+                   f"rozbalovátko u {sloupec['display']!r} odmítá cizí hodnotu, "
+                   f"ale sloupec připouští víc útvarů oddělených '; ' — "
+                   f"nápověda by slibovala něco, co sešit zakáže")
+        else:
+            overit(bool(kontrola.showErrorMessage),
+                   f"rozbalovátko u {sloupec['display']!r} nehlásí chybu — "
+                   f"překlep by prošel až k importu")
         # Prázdno musí projít u všech: aktivita bez zařazení je legitimní vstup
         # a nepovinné sloupce se nevyplňují vůbec.
         overit(bool(kontrola.allowBlank),
