@@ -213,10 +213,40 @@ položka, kdežto sirotek je smetí.
 
 **Úklid:** přepni chip, projdi seznam a buď položky smaž, nebo — chceš-li je
 zachovat — založ chybějící nadřazenou položku se **stejným kódem**, jaký měla
-smazaná. Sirotci se tím zase zařadí.
+smazaná. Sirotci se tím zase zařadí; vazba mezi úrovněmi je totiž jen prefix
+kódu, takže víc než ten kód není potřeba.
 
-Zakládání položky pod kódem, na kterém sirotci visí, aplikace **odmítne** —
-jinak by se pod nový název tiše přilepila cizí historie.
+### Kód se dá zvolit
+
+Pole *Kód* při zakládání je předvyplněné návrhem — nejbližší číslo nad dosud
+nejvyšším —, ale **přepsat ho jde na kterýkoli jiný**. Bez toho by kód po
+smazané položce zůstal navždy nedostupný: návrh se počítá jako max+1, takže
+díru v číselníku (třeba volné `05` mezi `04` a `06`) sám nikdy nenabídne.
+
+Vedle pole je stav zvoleného kódu:
+
+| stav | co znamená |
+|---|---|
+| **volný** | nikdo ho nemá a nic pod ním neleží |
+| **obsazený** | položka toho kódu existuje — uložení skončí hláškou |
+| **N osiřelých** | položka smazaná, ale N jejích potomků zůstalo (viz níže) |
+
+Stav se čte z dat načtených při spuštění aplikace, takže je to vodítko; při
+uložení se kód ověřuje znovu proti SharePointu.
+
+### Zakládání pod kódem, na kterém sirotci visí
+
+Aplikace se zeptá dřív, než zapíše — pod novou položku by se totiž ti sirotci
+zařadili jako její vlastní. Dialog vypíše, o které jde, a nabídne tři cesty:
+
+- **Převzít je pod novou položku** — právě tak se obnovuje omylem smazaná
+  agenda nebo proces. Sirotci se zařadí zpátky a přestanou být sirotky.
+- **Založit jako <další volný kód>** — sirotky nechá být a vezme nejbližší
+  vyšší kód, pod kterým nic neleží.
+- **Zrušit.**
+
+Zakládáš-li **něco jiného** než to, co bylo smazané, nikdy nevol „převzít" —
+pod nový název by se přilepila cizí historie a nikde by to nebylo vidět.
 
 ### Nezařazené aktivity — jiná věc než osiřelé
 
@@ -370,10 +400,15 @@ Ať se nehledá chyba tam, kde je vědomé rozhodnutí:
   zakládající tutéž úroveň ve stejnou vteřinu můžou dostat týž kód. Aplikace to
   pozná a řekne „zkus uložit znovu"; při jednotkách změn měsíčně je to
   přijatelné.
-- **Kód se nikdy nemění a nikdy nerecykluje.** Přesun pod jiného rodiče proto
-  není přepis kódu, ale zánik a vznik (§8): starý kód se uzavře v historii,
-  nový vznikne pod novým rodičem. Ruční přečíslování by rozbilo odkazy
-  v evidenčních kartách i v OŘ.
+- **Kód se nikdy nemění.** Přesun pod jiného rodiče proto není přepis kódu,
+  ale zánik a vznik (§8): starý kód se uzavře v historii, nový vznikne pod
+  novým rodičem. Ruční přečíslování by rozbilo odkazy v evidenčních kartách
+  i v OŘ.
+- **Recyklaci kódu po smazané položce aplikace nebrání.** Kód jde při zakládání
+  přepsat (§6), takže po smazané agendě `07` se dá `07` použít znovu. Je to
+  vědomé: bez toho by nešlo opravit omylem smazanou položku. Zakládáš-li ale
+  pod recyklovaným kódem **něco jiného**, ztratí kód svůj jediný smysl — že
+  navždy znamená jednu věc. Rozhoduje o tom správce, ne aplikace.
 - **Text pro OŘ se zatím nikde negeneruje.** Sloupec existuje a dá se plnit,
   ale generování organizačního řádu je fáze 2 (po 06/2028).
 - **Historii změn nedrží aplikace, ale SharePoint.** Kdo a kdy záznam změnil,

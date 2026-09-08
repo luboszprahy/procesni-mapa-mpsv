@@ -2980,3 +2980,75 @@ sloupcová zůstává, uživatel si vybere. Přepínač má tedy tři volby.
      nepodařilo spustit build a testovala se stará stránka — mutační skript
      proto na neúspěšný build padá, místo aby ho přešel
    risk: zelený test nad zeleným kódem nedokazuje nic
+
+## F23 — kolize kódu se sirotky: volba místo odmítnutí (zadáno 08.09.2026)
+
+Zadal uživatel po nálezu v provozu: agenda 07 byla smazaná, jejích 12 procesů
+zůstalo jako sirotci a novou agendu 07 už nejde založit. Přidělovaný kód je
+max+1 (= 07) a ten je blokovaný, takže **nejde založit žádná nová agenda**.
+Návod přitom na ř. 214 doporučuje přesně ten postup, který appka na ř. 218
+odmítá — rozpor v dokumentaci je součástí nálezu.
+
+Tvrdé odmítnutí nahradí dialog: převzít sirotky / založit pod dalším volným
+kódem / zrušit. Ochrana zůstává — nic se nepřilepí tiše.
+
+1. [Zápis do sdíleného tlačítka] — co: nový skrytý `btn_ZapisC`
+     v `scr_Ciselnik.pa.yaml`; přesunout do něj `IfError(If(varUrovenTyp …
+     Patch(…)))` z `btn_ZalozitC` (ř. 1427-1527)
+   verify: `check_app.py` zelený + diff — zapisovaný blok bajtově týž
+   edge cases: čte `txt_NazevC` / `drp_AgendaC` / `drp_ProcesC` — musí zůstat
+     na téže obrazovce
+   risk: `Select()` na `Visible:=false` — vzor už běží (`btn_RozebratN`,
+     `scr_Nahled.pa.yaml:264`)
+
+2. [Rozhodovací větev] — co: `btn_ZalozitC.OnSelect` — kolize → Notify jako
+     dosud; sirotci → `Set(varSirotciModalC, true)`; jinak `Select(btn_ZapisC)`
+   verify: mutace „smazaná větev sirotci" shodí bránu
+   edge cases: kolize i sirotci zároveň → kolize má přednost
+   risk: sirotci se dál počítají nad zdrojem, ne nad kolekcí
+
+3. [Náhradní kód] — co: `varNahradniKodC` = první kód neobsazený ANI se
+     sirotky; `Sequence(99)` agenda/proces, `Sequence(999)` dílčí
+   verify: test nad reálnými daty — obsazeno 00-04,06 + sirotci pod 05 a 07
+     → musí vyjít `08`
+   edge cases: vše obsazené → prázdno, tlačítko se schová; kandidáta mezitím
+     někdo zabral → kontrola nad zdrojem těsně před zápisem
+   risk: `Sequence` ve `Filter` s `As` — PA1001 se pozná až ve Studiu
+
+4. [Modál] — co: `rec_SirotciStinC/KartaC/PruhC`, nadpis, text, galerie
+     `gal_SirotciC` s výpisem, tři tlačítka; pruh `stylPozor`
+   verify: `check_app.py` proti `control_templates.json`
+   edge cases: 12 sirotků se nevejde → galerie roluje, text nese celkový počet
+   risk: geometrie bez Studia neověřitelná — držím rozměry modálu mazání
+
+5. [Převzít] — co: zavřít modál, `Select(btn_ZapisC)`,
+     `UpdateIf(colCiselnik, rodic = varNovyKodC, { uklid: false })`
+   verify: sirotci zmizí z přepínače bez znovuotevření obrazovky
+   edge cases: nová agenda má dnes natvrdo `uklid: true` — s převzatými
+     procesy musí být `false`
+   risk: opomenutí se projeví jako „uklidil jsem a pořád tam jsou"
+
+6. [Založit pod dalším volným] — co: ověřit nad zdrojem,
+     `Set(varNovyKodC, varNahradniKodC)`, `Select(btn_ZapisC)`
+   verify: popisek tlačítka nese konkrétní kód, ne obecné „jiný kód"
+   edge cases: prázdný náhradní kód → `Visible: false`
+   risk: uživatel čeká 07 a dostane 08 — proto to musí být vidět předem
+
+7. [Návod] — co: `docs/navod_sprava.md` §6 ř. 214-219, odstranit rozpor
+   verify: grep na obě věty, přečíst odstavec
+   edge cases: propisuje se do `deploy/ppf` i `deploy/mpsv`
+   risk: starý text = uživatel dál dělá to, co appka nepustí
+
+8. [Brána] — co: kontroly v `check_app.py` — `btn_ZapisC` existuje a je volaný
+     ze tří míst, `btn_ZalozitC` neobsahuje `Patch`, modál má tři tlačítka
+   verify: 4 mutace (smazaný `Select`, `Patch` zpět v `btn_ZalozitC`, chybějící
+     `UpdateIf uklid`, náhradní kód ignorující sirotky) — každá z jiného důvodu
+   risk: zelená brána nad zeleným kódem nedokazuje nic
+
+9. [Build 1.0.0.102] — co: `build_app.py --solution input/procesnimapa_1_0_0_94.zip
+     --verze 1.0.0.102`, pak obě `make_deploy_*.py`
+   verify: `check_app.py --solution` nad hotovým zipem, `check_solution.py`
+   risk: reálné ověření až importem na PPF DEV
+
+**Vědomě mimo rozsah:** algoritmus přidělování kódu zůstává max+1, takže kód
+`05` je dál nedostupný. Ruční zadání kódu při zakládání je samostatné zadání.

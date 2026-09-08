@@ -137,6 +137,7 @@ Screens:
         Reset(drp_AgendaC);
         Reset(drp_ProcesC);
         Reset(txt_NazevC);
+        Reset(txt_KodC);
         Reset(drp_VlastnikC);
         Set(varVlastniciC, "");
         Reset(txt_VlastniciC)
@@ -282,6 +283,7 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
+              Reset(txt_KodC);
               Reset(drp_VlastnikC);
               Set(varVlastniciC, "");
               Reset(txt_VlastniciC)
@@ -315,6 +317,7 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
+              Reset(txt_KodC);
               Reset(drp_VlastnikC);
               Set(varVlastniciC, "");
               Reset(txt_VlastniciC)
@@ -348,6 +351,7 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
+              Reset(txt_KodC);
               Reset(drp_VlastnikC);
               Set(varVlastniciC, "");
               Reset(txt_VlastniciC)
@@ -385,6 +389,7 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
+              Reset(txt_KodC);
               Reset(drp_VlastnikC);
               Set(varVlastniciC, "");
               Reset(txt_VlastniciC)
@@ -791,6 +796,7 @@ Screens:
                     Reset(drp_AgendaC);
                     Reset(drp_ProcesC);
                     Reset(txt_NazevC);
+                    Reset(txt_KodC);
                     Reset(drp_VlastnikC);
                     Set(
                         varVlastniciC,
@@ -899,7 +905,9 @@ Screens:
                   HoverColor: =stylNebezpeci
                   HoverFill: =stylRadekVybrany
                   Icon: =Icon.Trash
-                  OnSelect: =Set(varSmazatC, ThisItem)
+                  OnSelect: |-
+                    =Set(varSirotciModalC, false);
+                    Set(varSmazatC, ThisItem)
                   PaddingBottom: =8
                   PaddingLeft: =8
                   PaddingRight: =8
@@ -1016,7 +1024,9 @@ Screens:
             HoverBorderColor: =stylAkce
             Items: |-
               =Distinct(Filter(colAgendy, Title <> "00"), Title & " · " & nazev)
-            OnChange: =Reset(drp_ProcesC)
+            OnChange: |-
+              =Reset(drp_ProcesC);
+              Reset(txt_KodC)
             Size: =11 + varFs
             Tooltip: '="Agenda, pod kterou nová položka patří. U procesu určuje první dvojčíslí kódu, u dílčího procesu navíc omezuje nabídku procesů. Když agendu změníš, výběr procesu se vynuluje — kombinace z různých agend neexistuje. Při úpravě je pole zamčené: přesun pod jiného rodiče by znamenal jiný kód, a ten se nikdy nemění."'
             Visible: |-
@@ -1221,7 +1231,7 @@ Screens:
             Height: =20
             Size: =10 + varFs
             Text: |-
-              =If(varCiselnikNova, "Kód, který se přidělí", "Kód — nemění se")
+              =If(varCiselnikNova, "Kód — návrh jde přepsat", "Kód — nemění se")
             Visible: =varUrovenTyp <> "aktivita"
             Width: =280
             X: =724
@@ -1230,15 +1240,20 @@ Screens:
       # každém překreslení by obrazovku zbytečně brzdil. Skutečný kód se při
       # uložení počítá znovu nad zdrojem, takže náhled je odhad, ne slib;
       # říká to i popisek pod tlačítkem.
-      - lbl_NahledKodC:
-          Control: Label@2.5.1
+      # Návrh kódu se počítá nad kolekcemi z App.OnStart — dotaz na SharePoint
+      # při každém překreslení by obrazovku zbytečně brzdil. Uložení si kód
+      # bere z tohohle pole a ověřuje ho nad zdrojem, takže návrh je nabídka,
+      # ne slib; říká to i popisek pod tlačítkem.
+      #
+      # POLE, ne popisek: návrh je max+1, takže kód, který zbyl po smazané
+      # položce, by se sám nenabídl nikdy. Kdo obnovuje smazanou agendu, musí
+      # si o její kód umět říct.
+      - txt_KodC:
+          Control: Classic/TextInput@2.3.2
           Properties:
+            BorderColor: =stylOkraj
             Color: =stylAkce
-            Font: =Font.'Open Sans'
-            FontWeight: =FontWeight.Semibold
-            Height: =36
-            Size: =16 + varFs
-            Text: |-
+            Default: |-
               =If(
                   !varCiselnikNova,
                   varCiselnikKod,
@@ -1293,11 +1308,81 @@ Screens:
                       )
                   )
               )
-            Tooltip: '="Kód se skládá z nadřazeného kódu a prvního volného čísla v něm. Přiděluje se stejným způsobem jako u aktivit a jednou přidělený se už nemění, ani při přejmenování položky. Vlastník součástí kódu není — eviduje se zvlášť, protože při organizační změně se mění vlastník, ne kód."'
+            DisplayMode: =If(varCiselnikNova, DisplayMode.Edit, DisplayMode.View)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =32
+            Size: =16 + varFs
+            Tooltip: |-
+              ="Kód se skládá z nadřazeného kódu a čísla v něm. Návrh je nejbližší číslo nad dosud nejvyšším; přepsat ho jde na kterýkoli jiný, a leží-li pod ním osiřelé položky, appka se nejdřív zeptá, co s nimi. Jednou uložený kód se už nemění, ani při přejmenování položky. Vlastník součástí kódu není — eviduje se zvlášť, protože při organizační změně se mění vlastník, ne kód."
+            Visible: =varUrovenTyp <> "aktivita"
+            Width: =150
+            X: =724
+            Y: =518
+      # Stav se čte z kolekcí, tedy může být o session starý. Uložení kód
+      # ověřuje znovu nad zdrojem — tenhle popisek je vodítko, ne rozhodnutí.
+      # Barva se odvozuje ze `Self.Text`, aby se dlouhý výpočet nepsal dvakrát.
+      - lbl_StavKoduC:
+          Control: Label@2.5.1
+          Properties:
+            Color: |-
+              =Switch(
+                  Self.Text,
+                  "volný", stylUspech,
+                  "obsazený", stylNebezpeci,
+                  stylPozor
+              )
+            Font: =Font.'Open Sans'
+            Height: =32
+            Size: =10 + varFs
+            Text: |-
+              =If(
+                  !varCiselnikNova,
+                  "",
+                  With(
+                      { k: With(
+                              { c: Split(txt_KodC.Text, "-") },
+                              Switch(
+                                  varUrovenTyp,
+                                  "agenda",
+                                  Right("0" & Index(c, 1).Value, 2),
+                                  "proces",
+                                  Right("0" & Index(c, 1).Value, 2) & "-" & Right("0" & Index(c, 2).Value, 2),
+                                  Right("0" & Index(c, 1).Value, 2) & "-" & Right("0" & Index(c, 2).Value, 2) &
+                                  "-" & Right("00" & Index(c, 3).Value, 3)
+                              )
+                          ) },
+                      Switch(
+                          varUrovenTyp,
+                          "agenda",
+                          If(
+                              !IsBlank(LookUp(colAgendy, Title = k)), "obsazený",
+                              CountRows(Filter(colProcesy, StartsWith(Title, k & "-"))) > 0,
+                              CountRows(Filter(colProcesy, StartsWith(Title, k & "-"))) & " osiřelých",
+                              "volný"
+                          ),
+                          "proces",
+                          If(
+                              !IsBlank(LookUp(colProcesy, Title = k)), "obsazený",
+                              CountRows(Filter(colDilci, StartsWith(Title, k & "-"))) > 0,
+                              CountRows(Filter(colDilci, StartsWith(Title, k & "-"))) & " osiřelých",
+                              "volný"
+                          ),
+                          If(
+                              !IsBlank(LookUp(colDilci, Title = k)), "obsazený",
+                              CountRows(Filter(colAkt, StartsWith(Title, k & "-"))) > 0,
+                              CountRows(Filter(colAkt, StartsWith(Title, k & "-"))) & " osiřelých",
+                              "volný"
+                          )
+                      )
+                  )
+              )
             VerticalAlign: =VerticalAlign.Middle
             Visible: =varUrovenTyp <> "aktivita"
-            Width: =280
-            X: =724
+            Width: =122
+            X: =882
             Y: =518
       - lbl_ChybaC:
           Control: Label@2.5.1
@@ -1335,6 +1420,40 @@ Screens:
                   Set(varChybaC, "Vyber nadřazený proces.")
               );
               If(IsBlank(txt_NazevC.Text), Set(varChybaC, "Vyplň název."));
+              // Kód jde přepsat, takže jeho tvar musí hlídat appka. Bez těchhle
+              // tří kontrol projde „7--x“ a založí se položka s kódem `07-0-0`,
+              // která nikam nepatří a nejde smazat jinak než ze SharePointu.
+              If(
+                  varCiselnikNova && varUrovenTyp <> "aktivita" &&
+                  With(
+                      { c: Split(txt_KodC.Text, "-") },
+                      CountRows(c) <> Switch(varUrovenTyp, "agenda", 1, "proces", 2, 3)
+                      || !IsEmpty(Filter(c, IsBlank(Value) || !IsNumeric(Value)))
+                  ),
+                  Set(
+                      varChybaC,
+                      "Kód musí být " &
+                      Switch(
+                          varUrovenTyp,
+                          "agenda", "dvojčíslí, třeba 07",
+                          "proces", "dvě dvojčíslí oddělená pomlčkou, třeba 07-05",
+                          "dvě dvojčíslí a trojčíslí, třeba 07-05-003"
+                      ) & "."
+                  )
+              );
+              If(
+                  varCiselnikNova && varUrovenTyp = "proces" && IsBlank(varChybaC) &&
+                  Right("0" & Index(Split(txt_KodC.Text, "-"), 1).Value, 2) <> Left(drp_AgendaC.Selected.Value, 2),
+                  Set(varChybaC, "Kód procesu musí začínat kódem vybrané agendy (" & Left(drp_AgendaC.Selected.Value, 2) & ").")
+              );
+              If(
+                  varCiselnikNova && varUrovenTyp = "dilci" && IsBlank(varChybaC) &&
+                  With(
+                      { c: Split(txt_KodC.Text, "-") },
+                      Right("0" & Index(c, 1).Value, 2) & "-" & Right("0" & Index(c, 2).Value, 2)
+                  ) <> Left(drp_ProcesC.Selected.Value, 5),
+                  Set(varChybaC, "Kód dílčího procesu musí začínat kódem vybraného procesu (" & Left(drp_ProcesC.Selected.Value, 5) & ").")
+              );
               If(
                   !IsBlank(varChybaC),
                   Notify(varChybaC, NotificationType.Warning, varNotifyMs),
@@ -1351,48 +1470,26 @@ Screens:
                   );
                   If(
                       varCiselnikNova,
+                      // Kód přichází z pole, ne z výpočtu — pole je předvyplněné
+                      // návrhem (max+1), ale přepsat se dá. Bez toho nešlo sáhnout
+                      // po kódu, který zbyl po smazané položce: návrh díry
+                      // přeskakuje, takže `05` by se nenabídlo nikdy.
+                      //
+                      // Normalizuje se tady, ne v poli: „7-5“ je legitimní zápis
+                      // a uživatel nemá důvod psát vedoucí nuly, do rejstříku ale
+                      // patří `07-05`.
                       Set(
                           varNovyKodC,
-                          Switch(
-                              varUrovenTyp,
-                              "agenda",
-                              Right("0" & (Value(First(Sort(Agendy, Title, SortOrder.Descending)).Title) + 1), 2),
-                              "proces",
-                              Left(drp_AgendaC.Selected.Value, 2) & "-" &
-                              Right(
-                                  "0" & (
-                                      Value(
-                                          Right(
-                                              First(
-                                                  Sort(
-                                                      Filter(Procesy, StartsWith(Title, Left(drp_AgendaC.Selected.Value, 2) & "-")),
-                                                      Title,
-                                                      SortOrder.Descending
-                                                  )
-                                              ).Title,
-                                              2
-                                          )
-                                      ) + 1
-                                  ),
-                                  2
-                              ),
-                              Left(drp_ProcesC.Selected.Value, 5) & "-" &
-                              Right(
-                                  "00" & (
-                                      Value(
-                                          Right(
-                                              First(
-                                                  Sort(
-                                                      Filter('Dílčí procesy', StartsWith(Title, Left(drp_ProcesC.Selected.Value, 5) & "-")),
-                                                      Title,
-                                                      SortOrder.Descending
-                                                  )
-                                              ).Title,
-                                              3
-                                          )
-                                      ) + 1
-                                  ),
-                                  3
+                          With(
+                              { c: Split(txt_KodC.Text, "-") },
+                              Switch(
+                                  varUrovenTyp,
+                                  "agenda",
+                                  Right("0" & Index(c, 1).Value, 2),
+                                  "proces",
+                                  Right("0" & Index(c, 1).Value, 2) & "-" & Right("0" & Index(c, 2).Value, 2),
+                                  Right("0" & Index(c, 1).Value, 2) & "-" & Right("0" & Index(c, 2).Value, 2) &
+                                  "-" & Right("00" & Index(c, 3).Value, 3)
                               )
                           )
                       );
@@ -1415,120 +1512,85 @@ Screens:
                           )
                       );
                       If(
-                          varKolizeC || varSirotciC,
+                          varKolizeC,
                           Notify(
-                              If(
-                                  varKolizeC,
-                                  "Kód " & varNovyKodC & " mezitím někdo zabral, zkus uložit znovu.",
-                                  "Kód " & varNovyKodC & " je volný jen zdánlivě — leží pod ním osiřelé položky po dřívější položce se stejným kódem. Ukliď je nejdřív přepínačem osiřelých, jinak by se pod novou položkou objevily jako její vlastní."
-                              ),
+                              "Kód " & varNovyKodC & " mezitím někdo zabral, zkus uložit znovu.",
                               NotificationType.Warning, varNotifyMs
                           ),
-                          IfError(
-                              If(
-                                  varUrovenTyp = "agenda",
-                                  Patch(
-                                      Agendy,
-                                      Defaults(Agendy),
+                          varSirotciC,
+                          // Kód je volný jen zdánlivě — leží pod ním položky
+                          // po dřívější položce téhož kódu. Dřív tady byla
+                          // hláška a konec, jenže kód se přiděluje jako max+1:
+                          // zablokovaný kód tedy znamenal, že nejde založit
+                          // VŮBEC NIC, dokud se sirotci neuklidí. Návod přitom
+                          // radil pravý opak (§6: založ položku se stejným
+                          // kódem). Proto dialog se třemi cestami.
+                          //
+                          // Náhradní kód se hledá od toho přiděleného NAHORU,
+                          // ne od jedničky: má to být nejbližší vyšší volný,
+                          // ne první díra v číselníku. Padesát kandidátů stačí
+                          // a je to padesát průchodů kolekcí, ne tisíc.
+                          Set(
+                              varNahradniKodC,
+                              Switch(
+                                  varUrovenTyp,
+                                  "agenda",
+                                  With(
                                       {
-                                          Title: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          vlastnik: varVlastnikC,
-                                          zdroj: { Value: "karta" }
-                                      }
-                                  );
-                                  Collect(
-                                      colAgendy,
-                                      { Title: varNovyKodC, nazev: txt_NazevC.Text, vlastnik: varVlastnikC }
-                                  );
-                                  Collect(
-                                      colCiselnik,
-                                      {
-                                          kod: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          vlastnik: varVlastnikC,
-                                          uroven: "agenda",
-                                          rodic: "",
-                                          uklid: true
-                                      }
+                                          n: First(
+                                              Filter(
+                                                  Sequence(50, Value(varNovyKodC)) As s,
+                                                  IsBlank(LookUp(colAgendy, Title = Right("0" & s.Value, 2))) &&
+                                                  IsBlank(LookUp(colProcesy, StartsWith(Title, Right("0" & s.Value, 2) & "-")))
+                                              )
+                                          ).Value
+                                      },
+                                      If(IsBlank(n) || n > 99, "", Right("0" & n, 2))
                                   ),
-                                  varUrovenTyp = "proces",
-                                  Patch(
-                                      Procesy,
-                                      Defaults(Procesy),
-                                      {
-                                          Title: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          agenda_kod: Left(drp_AgendaC.Selected.Value, 2),
-                                          vlastnik: varVlastnikC,
-                                          zdroj: { Value: "karta" }
-                                      }
-                                  );
-                                  Collect(
-                                      colProcesy,
-                                      {
-                                          Title: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          agenda_kod: Left(drp_AgendaC.Selected.Value, 2),
-                                          vlastnik: varVlastnikC
-                                      }
-                                  );
-                                  Collect(
-                                      colCiselnik,
-                                      {
-                                          kod: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          vlastnik: varVlastnikC,
-                                          uroven: "proces",
-                                          rodic: Left(drp_AgendaC.Selected.Value, 2),
-                                          uklid: false
-                                      }
-                                  );
-                                  UpdateIf(
-                                      colCiselnik,
-                                      uroven = "agenda" && kod = Left(drp_AgendaC.Selected.Value, 2),
-                                      { uklid: false }
+                                  "proces",
+                                  With(
+                                      { p: Left(varNovyKodC, 2) },
+                                      With(
+                                          {
+                                              n: First(
+                                                  Filter(
+                                                      Sequence(50, Value(Right(varNovyKodC, 2))) As s,
+                                                      IsBlank(LookUp(colProcesy, Title = p & "-" & Right("0" & s.Value, 2))) &&
+                                                      IsBlank(LookUp(colDilci, StartsWith(Title, p & "-" & Right("0" & s.Value, 2) & "-")))
+                                                  )
+                                              ).Value
+                                          },
+                                          If(IsBlank(n) || n > 99, "", p & "-" & Right("0" & n, 2))
+                                      )
                                   ),
-                                  Patch(
-                                      'Dílčí procesy',
-                                      Defaults('Dílčí procesy'),
-                                      {
-                                          Title: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          proces_kod: Left(drp_ProcesC.Selected.Value, 5),
-                                          vlastnik: varVlastnikC,
-                                          zdroj: { Value: "karta" }
-                                      }
-                                  );
-                                  Collect(
-                                      colDilci,
-                                      {
-                                          Title: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          proces_kod: Left(drp_ProcesC.Selected.Value, 5),
-                                          vlastnik: varVlastnikC
-                                      }
-                                  );
-                                  Collect(
-                                      colCiselnik,
-                                      {
-                                          kod: varNovyKodC,
-                                          nazev: txt_NazevC.Text,
-                                          vlastnik: varVlastnikC,
-                                          uroven: "dilci",
-                                          rodic: Left(drp_ProcesC.Selected.Value, 5),
-                                          uklid: false
-                                      }
+                                  With(
+                                      { p: Left(varNovyKodC, 5) },
+                                      With(
+                                          {
+                                              n: First(
+                                                  Filter(
+                                                      Sequence(50, Value(Right(varNovyKodC, 3))) As s,
+                                                      IsBlank(LookUp(colDilci, Title = p & "-" & Right("00" & s.Value, 3))) &&
+                                                      IsBlank(LookUp(colAkt, StartsWith(Title, p & "-" & Right("00" & s.Value, 3) & "-")))
+                                                  )
+                                              ).Value
+                                          },
+                                          If(IsBlank(n) || n > 999, "", p & "-" & Right("00" & n, 3))
+                                      )
                                   )
-                              );
-                              Set(varAktStale, true);
-                              Notify("Založeno jako " & varNovyKodC & ".", NotificationType.Success, varNotifyMs);
-                              Reset(txt_NazevC);
-                              Reset(drp_VlastnikC);
-                              Set(varVlastniciC, "");
-                              Reset(txt_VlastniciC),
-                              Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
-                          )
+                              )
+                          );
+                          ClearCollect(
+                              colSirotciC,
+                              Filter(
+                                  colCiselnik,
+                                  uroven = Switch(varUrovenTyp, "agenda", "proces", "proces", "dilci", "aktivita"),
+                                  StartsWith(kod, varNovyKodC & "-")
+                              )
+                          );
+                          Set(varSmazatC, Blank());
+                          Set(varSirotciModalC, true),
+                          Select(btn_ZapisC)
                       ),
                       IfError(
                           If(
@@ -1592,6 +1654,148 @@ Screens:
             Width: =200
             X: =724
             Y: =572
+      # Zápis nové položky. Sedí ve VLASTNÍM tlačítku, protože ho spouštějí tři
+      # místa: „Založit" bez kolize, „Převzít" a „Založit jako <další volný>"
+      # z dialogu o sirotcích. Kdyby zůstal v btn_UlozitC, musel by být třikrát
+      # opsaný — a tři kopie Patch bloku se rozejdou při první opravě.
+      # Vstupem je varNovyKodC; volající ho musí mít ověřený proti zdroji.
+      - btn_ZapisC:
+          Control: Classic/Button@2.2.0
+          Properties:
+            OnSelect: |-
+              =IfError(
+                  If(
+                      varUrovenTyp = "agenda",
+                      Patch(
+                          Agendy,
+                          Defaults(Agendy),
+                          {
+                              Title: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              vlastnik: varVlastnikC,
+                              zdroj: { Value: "karta" }
+                          }
+                      );
+                      Collect(
+                          colAgendy,
+                          { Title: varNovyKodC, nazev: txt_NazevC.Text, vlastnik: varVlastnikC }
+                      );
+                      Collect(
+                          colCiselnik,
+                          {
+                              kod: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              vlastnik: varVlastnikC,
+                              uroven: "agenda",
+                              rodic: "",
+                              // Prázdná jen tehdy, když si pod sebe nevzala žádné
+                              // sirotky. Natvrdo `true` by agendu s dvanácti
+                              // převzatými procesy označilo za prázdnou.
+                              uklid: IsEmpty(Filter(colProcesy, StartsWith(Title, varNovyKodC & "-")))
+                          }
+                      );
+                      // Převzatí sirotci přestali být sirotky. colCiselnik se za
+                      // běhu nepřepočítává, takže bez tohohle by v přepínači
+                      // osiřelých viseli až do znovuotevření obrazovky — a to
+                      // vypadá jako že převzetí neproběhlo.
+                      UpdateIf(
+                          colCiselnik,
+                          uroven = "proces" && StartsWith(kod, varNovyKodC & "-"),
+                          { uklid: false }
+                      ),
+                      varUrovenTyp = "proces",
+                      Patch(
+                          Procesy,
+                          Defaults(Procesy),
+                          {
+                              Title: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              agenda_kod: Left(drp_AgendaC.Selected.Value, 2),
+                              vlastnik: varVlastnikC,
+                              zdroj: { Value: "karta" }
+                          }
+                      );
+                      Collect(
+                          colProcesy,
+                          {
+                              Title: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              agenda_kod: Left(drp_AgendaC.Selected.Value, 2),
+                              vlastnik: varVlastnikC
+                          }
+                      );
+                      Collect(
+                          colCiselnik,
+                          {
+                              kod: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              vlastnik: varVlastnikC,
+                              uroven: "proces",
+                              rodic: Left(drp_AgendaC.Selected.Value, 2),
+                              uklid: false
+                          }
+                      );
+                      UpdateIf(
+                          colCiselnik,
+                          uroven = "agenda" && kod = Left(drp_AgendaC.Selected.Value, 2),
+                          { uklid: false }
+                      );
+                      UpdateIf(
+                          colCiselnik,
+                          uroven = "dilci" && StartsWith(kod, varNovyKodC & "-"),
+                          { uklid: false }
+                      ),
+                      Patch(
+                          'Dílčí procesy',
+                          Defaults('Dílčí procesy'),
+                          {
+                              Title: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              proces_kod: Left(drp_ProcesC.Selected.Value, 5),
+                              vlastnik: varVlastnikC,
+                              zdroj: { Value: "karta" }
+                          }
+                      );
+                      Collect(
+                          colDilci,
+                          {
+                              Title: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              proces_kod: Left(drp_ProcesC.Selected.Value, 5),
+                              vlastnik: varVlastnikC
+                          }
+                      );
+                      Collect(
+                          colCiselnik,
+                          {
+                              kod: varNovyKodC,
+                              nazev: txt_NazevC.Text,
+                              vlastnik: varVlastnikC,
+                              uroven: "dilci",
+                              rodic: Left(drp_ProcesC.Selected.Value, 5),
+                              uklid: false
+                          }
+                      );
+                      UpdateIf(
+                          colCiselnik,
+                          uroven = "aktivita" && StartsWith(kod, varNovyKodC & "-"),
+                          { uklid: false }
+                      )
+                  );
+                  Set(varAktStale, true);
+                  Notify("Založeno jako " & varNovyKodC & ".", NotificationType.Success, varNotifyMs);
+                  Reset(txt_NazevC);
+                  Reset(txt_KodC);
+                  Reset(drp_VlastnikC);
+                  Set(varVlastniciC, "");
+                  Reset(txt_VlastniciC),
+                  Notify("Uložení selhalo: " & FirstError.Message, NotificationType.Error, varNotifyChybaMs)
+              )
+            Text: =""
+            Visible: =false
+            Width: =1
+            X: =1300
+            Y: =740
       - btn_NovaC:
           Control: Classic/Button@2.2.0
           Properties:
@@ -1618,6 +1822,7 @@ Screens:
               Reset(drp_AgendaC);
               Reset(drp_ProcesC);
               Reset(txt_NazevC);
+              Reset(txt_KodC);
               Reset(drp_VlastnikC);
               Set(varVlastniciC, "");
               Reset(txt_VlastniciC);
@@ -1834,6 +2039,7 @@ Screens:
                       Set(varCiselnikNova, true);
                       Set(varCiselnikKod, "");
                       Reset(txt_NazevC);
+                      Reset(txt_KodC);
                       Reset(drp_VlastnikC);
               Set(varVlastniciC, "");
               Reset(txt_VlastniciC)
@@ -1857,3 +2063,211 @@ Screens:
             Width: =160
             X: =Parent.Width / 2 + 128
             Y: =Parent.Height / 2 + 108
+      # ---------- dialog: kód je obsazený sirotky ----------
+      # Vrstva nad obrazovkou, stejný tvar jako dialog mazání. Pruh je
+      # `stylPozor`, ne `stylNebezpeci` — žádná z cest tady nic nemaže.
+      # Existuje proto, že samotná hláška byla slepá ulička: kód se přiděluje
+      # jako max+1, takže jediný zablokovaný kód zastavil zakládání úplně.
+      - rec_ModalSirotciStinC:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.35)
+            Height: =Parent.Height
+            OnSelect: =Set(varSirotciModalC, false)
+            Visible: =varSirotciModalC
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - rec_ModalSirotciKartaC:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylKarta
+            Height: =432
+            Visible: =varSirotciModalC
+            Width: =680
+            X: =Parent.Width / 2 - 340
+            Y: =Parent.Height / 2 - 216
+      - rec_ModalSirotciPruhC:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =stylPozor
+            Height: =4
+            Visible: =varSirotciModalC
+            Width: =680
+            X: =Parent.Width / 2 - 340
+            Y: =Parent.Height / 2 - 216
+      - lbl_ModalSirotciNadpisC:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylText
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =28
+            Size: =15
+            Text: ="Pod kódem " & varNovyKodC & " leží osiřelé položky"
+            Visible: =varSirotciModalC
+            Width: =616
+            X: =Parent.Width / 2 - 308
+            Y: =Parent.Height / 2 - 184
+      - lbl_ModalSirotciTextC:
+          Control: Label@2.5.1
+          Properties:
+            Color: =stylTextSlaby
+            Font: =Font.'Open Sans'
+            Height: =84
+            Size: =11
+            Text: |-
+              =CountRows(colSirotciC) & " " &
+              Switch(varUrovenTyp, "agenda", "procesů", "proces", "dílčích procesů", "aktivit") &
+              " má kód začínající na " & varNovyKodC & "-, ale nadřazená položka toho kódu v číselníku není; někdo ji smazal.
+
+              Založíš-li novou položku pod kódem " & varNovyKodC & ", tyhle se pod ni zařadí jako její vlastní. Tak se obnovuje smazaná položka. Zakládáš-li něco jiného, vezmi si další volný kód."
+            Visible: =varSirotciModalC
+            Width: =616
+            X: =Parent.Width / 2 - 308
+            Y: =Parent.Height / 2 - 152
+      # Výpis, ne jen počet: dvanáct procesů cizí agendy vypadá jinak než
+      # dvanáct procesů té, kterou uživatel právě obnovuje, a rozhodnout se
+      # dá jedině podle názvů.
+      - gal_ModalSirotciC:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+          Properties:
+            Height: =160
+            Items: =Sort(colSirotciC, kod, SortOrder.Ascending)
+            TemplatePadding: =0
+            TemplateSize: =28
+            Visible: =varSirotciModalC
+            Width: =616
+            X: =Parent.Width / 2 - 308
+            Y: =Parent.Height / 2 - 62
+          Children:
+            - lbl_ModalSirotekKodC:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylTextSlaby
+                  Font: =Font.'Open Sans'
+                  Height: =28
+                  Size: =10
+                  Text: =ThisItem.kod
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =120
+                  X: =0
+                  Y: =0
+            - lbl_ModalSirotekNazevC:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =stylText
+                  Font: =Font.'Open Sans'
+                  Height: =28
+                  Size: =10
+                  Text: =ThisItem.nazev
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =488
+                  X: =128
+                  Y: =0
+      # Převzetí = prostý zápis pod původním kódem. Vazba mezi úrovněmi je jen
+      # prefix kódu, takže sirotci se zařadí sami; dopočítat je potřeba jen
+      # příznak `uklid` v colCiselnik, což dělá btn_ZapisC.
+      - btn_ModalSirotciPrevzitC:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Fill: =stylAkce
+            FocusedBorderColor: =stylPrimarni
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylAkceHover
+            OnSelect: |-
+              =Set(varSirotciModalC, false);
+              Select(btn_ZapisC)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkceStisk
+            Size: =11
+            Text: |-
+              ="Převzít je pod novou " &
+              Switch(varUrovenTyp, "agenda", "agendu", "proces", "proces", "dílčí proces")
+            Tooltip: |-
+              ="Založí položku pod kódem " & varNovyKodC & " a těch " & CountRows(colSirotciC) &
+              " položek se pod ni zařadí. Dělej to, když obnovuješ právě to, co bylo smazané."
+            Visible: =varSirotciModalC
+            Width: =240
+            X: =Parent.Width / 2 - 308
+            Y: =Parent.Height / 2 + 122
+      # Náhradní kód se před zápisem ověřuje ZNOVU a nad zdrojem: spočítal se
+      # nad kolekcemi, které můžou být staré o celou session, a tichý zápis
+      # pod cizí kód je horší než hláška „zkus znovu".
+      - btn_ModalSirotciJinyKodC:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylAkce
+            Fill: =RGBA(255, 255, 255, 1)
+            FocusedBorderColor: =stylAkce
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =stylAkce
+            OnSelect: |-
+              =Set(
+                  varKolizeC,
+                  Switch(
+                      varUrovenTyp,
+                      "agenda", !IsBlank(LookUp(Agendy, Title = varNahradniKodC)),
+                      "proces", !IsBlank(LookUp(Procesy, Title = varNahradniKodC)),
+                      !IsBlank(LookUp('Dílčí procesy', Title = varNahradniKodC))
+                  )
+              );
+              Set(
+                  varSirotciC,
+                  Switch(
+                      varUrovenTyp,
+                      "agenda", !IsBlank(LookUp(Procesy, StartsWith(Title, varNahradniKodC & "-"))),
+                      "proces", !IsBlank(LookUp('Dílčí procesy', StartsWith(Title, varNahradniKodC & "-"))),
+                      !IsBlank(LookUp(Aktivity, StartsWith(Title, varNahradniKodC & "-")))
+                  )
+              );
+              If(
+                  varKolizeC || varSirotciC,
+                  Notify(
+                      "Kód " & varNahradniKodC & " mezitím někdo zabral, zkus uložit znovu.",
+                      NotificationType.Warning, varNotifyMs
+                  ),
+                  Set(varNovyKodC, varNahradniKodC);
+                  Set(varSirotciModalC, false);
+                  Select(btn_ZapisC)
+              )
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =stylAkce
+            Size: =11
+            Text: ="Založit jako " & varNahradniKodC
+            Tooltip: ="Nechá sirotky být a založí položku pod nejbližším vyšším kódem, pod kterým nic neleží."
+            Visible: =varSirotciModalC && !IsBlank(varNahradniKodC)
+            Width: =200
+            X: =Parent.Width / 2 - 52
+            Y: =Parent.Height / 2 + 122
+      - btn_ModalSirotciZrusitC:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =stylOkraj
+            BorderThickness: =1
+            Color: =stylText
+            Fill: =RGBA(255, 255, 255, 1)
+            FocusedBorderColor: =stylOkraj
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =32
+            HoverColor: =stylText
+            HoverFill: =stylRadekHover
+            OnSelect: =Set(varSirotciModalC, false)
+            PressedColor: =stylText
+            PressedFill: =stylRadekVybrany
+            Size: =11
+            Text: ="Zrušit"
+            Visible: =varSirotciModalC
+            Width: =140
+            X: =Parent.Width / 2 + 168
+            Y: =Parent.Height / 2 + 122

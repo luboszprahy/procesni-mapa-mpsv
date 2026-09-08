@@ -827,6 +827,65 @@ def _zavira(normalizovane, a, b):
     return bool(otevirajici) and all(f"Set({b},false)" in t for t in otevirajici)
 
 
+def ridici_promenna(viditelnost):
+    """První proměnná ve `Visible` — pozná, ke kterému dialogu prvek patří.
+
+    `=varSirotciModalC` i `=varSirotciModalC && !IsBlank(varNahradniKodC)`
+    vrátí totéž: tlačítko schované navíc podle druhé podmínky je pořád část
+    téhož dialogu a proti sourozencům se kontrolovat má.
+    """
+    nalez = re.search(r"var[A-Za-z0-9_]*", str(viditelnost))
+    return nalez.group(0) if nalez else ""
+
+
+def _zavira_dialog(normalizovane, a, b):
+    """Otevření dialogu `a` zavírá dialog `b`.
+
+    Dialog se otevírá `Set(var…, true)`, nebo `Set(var…, ThisItem)`, když
+    nese rovnou položku, které se týká; zavírá se `false`, respektive
+    `Blank()`. Obojí musí brána znát, jinak by dvojici tiše pustila.
+    """
+    otevirajici = [text for text in normalizovane
+                   if f"Set({a},true)" in text or f"Set({a},ThisItem)" in text]
+    return bool(otevirajici) and all(
+        f"Set({b},false)" in text or f"Set({b},Blank())" in text
+        for text in otevirajici)
+
+
+def kontrola_dialogu(soubory, vzorce):
+    """Dialogy jedné obrazovky se musí navzájem zavírat.
+
+    Kontrola překryvů dvojici různých dialogů přeskakuje, protože leží přes
+    sebe schválně. To ale platí jen tehdy, když otevření jednoho opravdu
+    zavře druhý — jinak by se dvě vycentrované karty zobrazily přes sebe
+    a brána by tu změť mlčky pustila.
+
+    Vzniklo z F23 (08.09.2026): k dialogu mazání přibyl dialog o osiřelých
+    položkách a obě karty sedí na středu téže obrazovky.
+    """
+    normalizovane = [re.sub(r"\s+", "", bez_retezcu(text)) for _, _, text in vzorce]
+    for cesta in soubory:
+        dokument = nacti_yaml(cesta)
+        for jmeno_obrazovky, telo in ((dokument or {}).get("Screens") or {}).items():
+            promenne = set()
+            for polozka in telo.get("Children") or []:
+                for jmeno, definice in polozka.items():
+                    if "Modal" not in jmeno:
+                        continue
+                    promenna = ridici_promenna(
+                        (definice.get("Properties") or {}).get("Visible", ""))
+                    if promenna:
+                        promenne.add(promenna)
+            for a in sorted(promenne):
+                for b in sorted(promenne):
+                    if a == b or _zavira_dialog(normalizovane, a, b):
+                        continue
+                    chyby.append(
+                        f"{jmeno_obrazovky}: dialog '{a}' se otevírá, aniž by "
+                        f"zavřel '{b}' — obě karty jsou vycentrované, takže by "
+                        f"se zobrazily přes sebe")
+
+
 def vylucne_nabidky(vzorce):
     """Dvojice nabídkových proměnných, z nichž je otevřená vždy nanejvýš jedna.
 
@@ -1007,6 +1066,14 @@ def porovnej(jmeno_obrazovky, obdelniky, vylucne):
             # schválně a má vlastní podklad. Porovnávat ho s tím, co překrývá,
             # nemá smysl; mezi sebou se modální prvky kontrolují dál.
             if ("Modal" in jmeno_a) != ("Modal" in jmeno_b):
+                continue
+            # Dva RŮZNÉ dialogy jedné obrazovky leží přes sebe taky schválně:
+            # obě karty jsou vycentrované, takže se minout nemůžou, a otevřený
+            # je vždycky nanejvýš jeden. Že to platí, hlídá kontrola_dialogu —
+            # bez ní by tahle výjimka byla jen domněnka. Uvnitř JEDNOHO dialogu
+            # (stejná řídicí proměnná) se prvky porovnávají dál.
+            if ("Modal" in jmeno_a and "Modal" in jmeno_b
+                    and ridici_promenna(va) != ridici_promenna(vb)):
                 continue
             if je_nabidka(va):
                 dvojice = tuple(sorted((nabidkova_promenna(va),
@@ -1835,6 +1902,7 @@ def main():
     kontrola_stareho_result(vzorce)
     kontrola_varianty(soubory)
     kontrola_prekryvu(soubory, vylucne_nabidky(vzorce))
+    kontrola_dialogu(soubory, vzorce)
     kontrola_nezarazenych(vzorce)
     kontrola_prirazeni_sirotka(vzorce)
     kontrola_zapisu_v_forall(vzorce)
