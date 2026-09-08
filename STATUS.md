@@ -1,15 +1,16 @@
 # STATUS — Procesní mapa MPSV
 
-Aktualizováno: **2026-09-08 09:45**. Balík **1.0.0.103** — dvě věci z provozu:
+Aktualizováno: **2026-09-08 10:30**. Balík **1.0.0.104** — dvě věci z provozu:
 **F23** (kód jde při zakládání zvolit, osiřelé položky pod ním se dají převzít)
 a **F24** (číselník útvarů: nabídka v šabloně, kontrola v importu, skutečné
-útvary i v anonymní sadě).
+útvary i v anonymní sadě). Balík 104 k tomu přidává **opravu chyby `Index`**
+z provozu a **HTML mapu výchozím stavem rozbalenou až na aktivity**.
 
 Předchozí stav: 1.0.0.101 — mapa (F20–F33), 1.0.0.100 — F15/F16/F17.
 
 ## CO JE NA TOBĚ — v tomhle pořadí
 
-1. **Otestuj balík 1.0.0.103 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
+1. **Otestuj balík 1.0.0.104 na PPF DEV.** Celá sada je v **`deploy/ppf/`**,
    postup krok za krokem v `deploy/ppf/README.md` (sedm kroků).
 
    - **`ImportFlow` po importu ručně zapni** — import stav zapnutí nemění
@@ -4993,3 +4994,36 @@ SharePointu ještě neběželo nic. Zbývá brána `/audit`, pak první ostrý b
 Nic rozpracovaného.
 
 Rozdělení práce je nahoře v sekcích „CO JE NA TOBĚ" a „CO DĚLÁM JÁ".
+
+
+## 08.09.2026 dopoledne — dvě věci z provozu k balíku 104
+
+**Chyba `Index` na obrazovce Aktivity.** Hlásilo se
+
+```
+The second argument to the 'Index' function must be between 1 and 1,
+the lower and upper bounds of the table.
+```
+
+Byla to vada F23. Kód se skládá z `Index(c, 2)` a `Index(c, 3)` nad
+`Split(kód, "-")`, jenže agenda má rozdělený kód jednoprvkový a pro úroveň
+*aktivita* vrací návrh dokonce `—`, protože rodič není vybraný. Že ty větve
+`Switch` nevybere, nestačilo: **chyba z nevybrané větve v Power Fx probublá
+stejně**, a `Text` popisku stavu se počítá i tehdy, když je popisek schovaný.
+
+Oprava je dvojí a obojí je potřeba: rozdělovaný text se doplní o `"--"`, takže
+pole má vždy aspoň tři prvky, a stav kódu se pro aktivitu nepočítá vůbec.
+Tvar kódu se přitom měří dál na **původním** textu — na doplněném by kontrola
+pustila cokoli. Hlídá to `kontrola_indexu` v `check_app.py`; nad vráceným
+stavem vypíše čtyři nálezy.
+
+**HTML mapa se otevírá rozbalená až na aktivity** (zadal uživatel). Do teď
+byla výchozí volba „+ procesy", takže mapa vypadala, že aktivity nemá.
+V rozkladu to znamená čtyři sloupce/pásy místo dvou. Hlídá brána
+(`check_mapa_html.py`, 48 kontrol).
+
+**Otevřené — osiřelé pod smazanou agendou 06.** Uživatel smazal agendu `06`
+a v chipu *osiřelé* vidí jen `06-01` a `06-02`. To je správně: agenda 06 má
+v rejstříku právě dva procesy a jejich dílčí procesy osiřelé nejsou — rodiče
+(06-01, 06-02) pořád existují. Čeká se na potvrzení, jestli je očekávání
+jiné, tedy že by chip měl ukazovat celou větev pod sirotkem.

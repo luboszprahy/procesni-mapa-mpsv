@@ -122,6 +122,13 @@ def main():
            "chybí zatržítko kódu nebo třída bez-kodu")
     overit('body.bez-kodu .kod{display:none}' in tpl,
            "vypnuté zatržítko kód neskryje — chybí CSS pravidlo")
+    # Výchozí je nejhlubší úroveň — mapa se otevírá rozbalená až na aktivity.
+    # Kdyby se `selected` posunulo výš, vypadalo by to, že rejstřík aktivity
+    # nemá, a nikdo by nepoznal, že jde jen o výchozí volbu.
+    overit('<option value="4" selected>' in tpl,
+           "volba Rozbalit není výchozí na nejhlubší úrovni")
+    overit(tpl.count('selected>Rozbalit') == 1,
+           "volba Rozbalit má víc než jednu výchozí hodnotu")
     overit(tpl.count('id="fUroven"') == 1 and tpl.count("<option") >= 7,
            "chybí přepínač stupně rozbalení")
     overit(len(re.findall(r'data-fs="(\d+)"', tpl)) >= 3,

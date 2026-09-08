@@ -852,6 +852,40 @@ def _zavira_dialog(normalizovane, a, b):
         for text in otevirajici)
 
 
+def kontrola_indexu(vzorce):
+    """`Index(Split(...), n)` s n >= 2 musí mít délku zaručenou doplněním.
+
+    Nález z provozu 08.09.2026: skládání kódu z `Index(c, 2)` a `Index(c, 3)`
+    nad `Split(kód, "-")` shodilo obrazovku Aktivity hláškou
+
+        The second argument to the 'Index' function must be between 1 and 1
+
+    Pro agendu má rozdělený kód jediný prvek a pro aktivitu vrací návrh „—".
+    Že ty větve `Switch` nevybere, nestačí — chyba z nevybrané větve v Power Fx
+    probublá stejně, a `Text` popisku se počítá i tehdy, když je schovaný.
+
+    Zaručit délku jde jediným způsobem, který je vidět na první pohled:
+    rozdělovaný text se doplní o oddělovače (`text & "--"`). Brána proto
+    hlídá, že Split, ze kterého se indexuje výš než na první prvek, tohle
+    doplnění má — jinak by chyba čekala na první kód s chybějící složkou.
+    """
+    for control, vlastnost, text in vzorce:
+        cisty = re.sub(r"\s+", "", bez_retezcu(text))
+        if "Index(" not in cisty:
+            continue
+        # jméno proměnné z `With({ x: Split(...) }, …)`, aby se dal spárovat
+        # `Index(x, 2)` se svým zdrojem
+        for jmeno, zdroj in re.findall(r"\{(\w+):(Split\([^}]*?\))\},", cisty):
+            vyssi = re.findall(r"Index\(" + re.escape(jmeno) + r",(\d+)\)", cisty)
+            if not any(int(n) >= 2 for n in vyssi):
+                continue
+            if '&"' not in zdroj:
+                chyby.append(
+                    f"{control}.{vlastnost}: Index({jmeno}, 2+) nad "
+                    f"{zdroj[:40]}… — rozdělovaný text nemá doplněné oddělovače, "
+                    f"takže u kratšího kódu sáhne Index za konec tabulky")
+
+
 def kontrola_dialogu(soubory, vzorce):
     """Dialogy jedné obrazovky se musí navzájem zavírat.
 
@@ -1903,6 +1937,7 @@ def main():
     kontrola_varianty(soubory)
     kontrola_prekryvu(soubory, vylucne_nabidky(vzorce))
     kontrola_dialogu(soubory, vzorce)
+    kontrola_indexu(vzorce)
     kontrola_nezarazenych(vzorce)
     kontrola_prirazeni_sirotka(vzorce)
     kontrola_zapisu_v_forall(vzorce)

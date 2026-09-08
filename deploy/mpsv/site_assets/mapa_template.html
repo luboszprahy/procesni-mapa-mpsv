@@ -288,9 +288,12 @@
   </select>
   <select id="fUroven" title="Ve stromu: do které vrstvy se rozbalí. V rozkladu: kolik sloupců je vidět.">
     <option value="1">Rozbalit: jen agendy</option>
-    <option value="2" selected>Rozbalit: + procesy</option>
+    <option value="2">Rozbalit: + procesy</option>
     <option value="3">Rozbalit: + dílčí procesy</option>
-    <option value="4">Rozbalit: vše až po aktivity</option>
+    <!-- Výchozí je nejhlubší úroveň (rozhodl uživatel 08.09.2026): mapa má
+         ukázat rejstřík celý a teprve kdo chce přehled, si ho zúží. Předtím
+         se otevírala na procesech a vypadala, že aktivity nemá. -->
+    <option value="4" selected>Rozbalit: vše až po aktivity</option>
   </select>
   <label title="Skryje identifikační kódy ve stromu. Hledat podle kódu jde dál."><input type="checkbox" id="cKod" checked> Zobrazit kód</label>
   <label title="Nechá ve stromu jen položky, kterým chybí nadřazená úroveň rejstříku — visí pod uzlem Nezařazené. Jinde je nenajdeš, protože strom ukazuje jen to, co má nad sebou předka."><input type="checkbox" id="cOsirele"> Jen osiřelé</label>

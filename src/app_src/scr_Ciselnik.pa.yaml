@@ -1339,11 +1339,13 @@ Screens:
             Size: =10 + varFs
             Text: |-
               =If(
-                  !varCiselnikNova,
+                  // Aktivita kód nezadává (přiděluje se z dílčího procesu),
+                  // takže by se stav počítal z návrhu „—“ a jen plodil chyby.
+                  !varCiselnikNova || varUrovenTyp = "aktivita",
                   "",
                   With(
                       { k: With(
-                              { c: Split(txt_KodC.Text, "-") },
+                              { c: Split(txt_KodC.Text & "--", "-") },
                               Switch(
                                   varUrovenTyp,
                                   "agenda",
@@ -1426,9 +1428,18 @@ Screens:
               If(
                   varCiselnikNova && varUrovenTyp <> "aktivita" &&
                   With(
-                      { c: Split(txt_KodC.Text, "-") },
-                      CountRows(c) <> Switch(varUrovenTyp, "agenda", 1, "proces", 2, 3)
-                      || !IsEmpty(Filter(c, IsBlank(Value) || !IsNumeric(Value)))
+                      { c: Split(txt_KodC.Text & "--", "-") },
+                      // POZOR: `c` je doplněné o prázdné složky, aby Index nesáhl
+                      // za konec — tvar se proto měří na PŮVODNÍM textu, jinak
+                      // by kontrola pustila cokoli.
+                      CountRows(Split(txt_KodC.Text, "-")) <>
+                          Switch(varUrovenTyp, "agenda", 1, "proces", 2, 3)
+                      || !IsEmpty(
+                          Filter(
+                              Split(txt_KodC.Text, "-"),
+                              IsBlank(Value) || !IsNumeric(Value)
+                          )
+                      )
                   ),
                   Set(
                       varChybaC,
@@ -1443,13 +1454,13 @@ Screens:
               );
               If(
                   varCiselnikNova && varUrovenTyp = "proces" && IsBlank(varChybaC) &&
-                  Right("0" & Index(Split(txt_KodC.Text, "-"), 1).Value, 2) <> Left(drp_AgendaC.Selected.Value, 2),
+                  Right("0" & Index(Split(txt_KodC.Text & "--", "-"), 1).Value, 2) <> Left(drp_AgendaC.Selected.Value, 2),
                   Set(varChybaC, "Kód procesu musí začínat kódem vybrané agendy (" & Left(drp_AgendaC.Selected.Value, 2) & ").")
               );
               If(
                   varCiselnikNova && varUrovenTyp = "dilci" && IsBlank(varChybaC) &&
                   With(
-                      { c: Split(txt_KodC.Text, "-") },
+                      { c: Split(txt_KodC.Text & "--", "-") },
                       Right("0" & Index(c, 1).Value, 2) & "-" & Right("0" & Index(c, 2).Value, 2)
                   ) <> Left(drp_ProcesC.Selected.Value, 5),
                   Set(varChybaC, "Kód dílčího procesu musí začínat kódem vybraného procesu (" & Left(drp_ProcesC.Selected.Value, 5) & ").")
@@ -1481,7 +1492,7 @@ Screens:
                       Set(
                           varNovyKodC,
                           With(
-                              { c: Split(txt_KodC.Text, "-") },
+                              { c: Split(txt_KodC.Text & "--", "-") },
                               Switch(
                                   varUrovenTyp,
                                   "agenda",
